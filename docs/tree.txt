@@ -1,0 +1,100 @@
+Folder PATH listing
+Volume serial number is 0E01-1562
+C:.
+|   doclist.txt
+|   tree.txt
+|   
++---aesthetics
+|       2015-06-18-tmnh.markdown
+|       2015-11-28-a-short-note-on-gondola.markdown
+|       2017-12-03-kandinsky-and-loss.markdown
+|       2017-12-15-platform-content-design.markdown
+|       2018-02-05-the-interpretation-of-memes.markdown
+|       2018-03-27-memes-jokes-and-visual-puns.markdown
+|       2018-09-11-structure-and-content-in-drake-style-templates.markdown
+|       2019-12-23-gondola-shrine.markdown
+|       aesthetics.md
+|       
++---dialogues
+|       dialogues.md
+|       
++---game studies
+|       2015-11-29-undertale-review.markdown
+|       2015-12-01-hotline-miami-and-player-complicity.markdown
+|       2016-10-26-twitch-plays-pokemon.markdown
+|       2017-09-10-memes-are-not-jokes-they-are-diagram-games.markdown
+|       2019-04-05-the-memetic-bottleneck.markdown
+|       2021-05-16-gamergate-as-metagaming.markdown
+|       game-studies.md
+|       
++---gondola
++---history
+|       2015-08-19_misattributed-plato-quote.markdown
+|       2015-11-02-a-golden-age-of-meme-pages-and-the-microcosm-of-art-history.markdown
+|       2016-03-02-death-of-a-meme-or-how-leo-learned-to-stop-worrying-and-love-the-bear.markdown
+|       2016-03-22-long-boys-never-grow-up.markdown
+|       2016-10-13-what-we-talk-about-harambe.markdown
+|       2017-03-26-facebook-groups.markdown
+|       2017-09-09-the-meta-ironic-era.markdown
+|       2017-12-04-kym-magibon.markdown
+|       2020-01-04-2010-decade-review-part-1.markdown
+|       2020-01-07-concept-jjalbang.markdown
+|       2020-10-09-2010-decade-review-part-2.markdown
+|       2021-06-14-jeremy-cahill-metamer-dismissed-for-serious-misconduct.markdown
+|       2022-04-06_wittgensteins-most-beloved-quote-was-fake-but-its-real-now.markdown
+|       history.md
+|       
++---irony
+|       2015-11-02-the-quadrant-system-for-the-categorization-of-internet-memes.markdown
+|       2015-11-25-bane-loss-and-phylogeny.markdown
+|       2015-12-17-the-ironic-normie.markdown
+|       2016-01-18-the-quadrant-model.markdown
+|       2016-01-18-the-revised-quadrant-model.markdown
+|       2017-03-09-post-irony-against-meta-irony.markdown
+|       2017-03-27-defining-normie-casual-ironist-and-autist-in-internet-subcultures.markdown
+|       2017-11-13-when-you-drink-water.markdown
+|       irony.md
+|       
++---memeculture
+|       2015-09-14-a-short-note-on-the-death-of-pepe.markdown
+|       2016-05-12-newfriends-and-the-generation-gap.markdown
+|       2017-02-15-early-trash-dove.markdown
+|       2017-11-23-moe-to-memes-otaku-to-autist.markdown
+|       2019-01-03-the-new-years-memes.markdown
+|       2019-10-12-all-memes-are-from-the-future.markdown
+|       2021-02-02-gme-frenzy-hints-at-the-new-stage-of-memecultures.markdown
+|       2022-04-04-homesteading-the-memeosphere.markdown
+|       memeculture.md
+|       
++---metamemetics
+|       2016-01-18-glossary-1-dot-0.markdown
+|       2016-11-15-internetmemetics.markdown
+|       2018-11-15-the-memeticists-challenge-remains-open.markdown
+|       2021-11-30-what-is-a-meme.markdown
+|       2021-12-30-vulliamy-response.markdown
+|       metamemetics.md
+|       
++---notes
+|       about.md
+|       notes.md
+|       textDialogue.md
+|       
++---philosophy
+|       2016-05-13-an-internet-koan.markdown
+|       2017-03-27-a-school-of-internet-philosophy.markdown
+|       2019-06-30-how-to-digitally-coauthor-articles-in-philosophy-class.markdown
+|       2020-07-05-postnaturalism.markdown
+|       philosophy.md
+|       
+\---politics
+        2016-01-29-the-post-pepe-manifesto.markdown
+        2016-04-08-see-the-problem.markdown
+        2016-04-14-social-media-freedom.markdown
+        2016-10-26-on-vectoralism-and-the-meme-alliance.markdown
+        2016-11-02-president-parks-corruption-cult.markdown
+        2017-06-13-the-structure-of-hyperspatial-politics.markdown
+        2020-03-16-a-tale-of-two-healthcare-narratives.markdown
+        2021-12-18-on-circlejerk-part-1.markdown
+        2022-04-20-joshua-citarella-astroturfing.markdown
+        politics.md
+        
