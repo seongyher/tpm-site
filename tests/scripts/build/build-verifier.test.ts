@@ -934,6 +934,40 @@ describe("build verifier helpers", () => {
       ]);
     }));
 
+  test("accepts article JSON-LD image metadata from a graph node", async () =>
+    withTempRoot(async (root) => {
+      const socialImage =
+        "https://thephilosophersmeme.com/_astro/social-preview.jpg";
+
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(
+        root,
+        "src/content/articles/history/published.md",
+        "---\ntitle: Published\nauthor: Test Author\n---\n",
+      );
+      await writeRequiredDistShell(root);
+      await writeText(
+        root,
+        "dist/articles/published/index.html",
+        articleHtmlFixture("published", { authors: ["Test Author"] }).replace(
+          `<script type="application/ld+json">{"@type":"BlogPosting","image":"${socialImage}"}</script>`,
+          `<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","image":"${socialImage}"},{"@type":"Review","name":"Extra semantic node"}]}</script>`,
+        ),
+      );
+      await writeArticlePdf(root, "published", {
+        authors: ["Test Author"],
+      });
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+      });
+
+      expect(result.issues.missingArticleJsonLd).toEqual([]);
+      expect(result.issues.socialImageIssues).toEqual([]);
+    }));
+
   test("reports oversized generated social preview image files", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");

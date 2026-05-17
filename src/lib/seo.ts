@@ -11,10 +11,12 @@ import { siteConfig } from "./site-config";
 
 /** Optional normalized metadata for article JSON-LD output. */
 interface ArticleBlogPostingJsonLdOptions {
+  about?: ReadonlyArray<Record<"@id", string>> | undefined;
   image?: string | undefined;
 }
 
 interface PublishableBlogPostingJsonLdOptions {
+  about?: ReadonlyArray<Record<"@id", string>> | undefined;
   authors?: readonly AuthorSummary[] | undefined;
   canonicalPath: string;
   fallbackAuthorName: string;
@@ -69,6 +71,7 @@ export function articleBlogPostingJsonLd(
   options: ArticleBlogPostingJsonLdOptions = {},
 ): Record<string, unknown> {
   return publishableBlogPostingJsonLd(article, site, {
+    about: options.about,
     authors,
     canonicalPath: articleUrl(article.id),
     fallbackAuthorName: authorName(article),
@@ -99,6 +102,10 @@ export function publishableBlogPostingJsonLd(
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "@id": `${canonicalUrl}#article`,
+    about:
+      options.about === undefined || options.about.length === 0
+        ? undefined
+        : options.about,
     articleSection: options.section,
     author:
       options.authors !== undefined && options.authors.length > 0

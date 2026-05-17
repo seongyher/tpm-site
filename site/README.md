@@ -130,6 +130,7 @@ folder becomes the category.
 | `draft`       | Set `draft: true` to keep an entry unpublished.                        |
 | `pdf`         | Articles default to PDF export. Set `pdf: false` only for exceptions.  |
 | `visibility`  | Optional controls for where a published entry appears. See below.      |
+| `semantic`    | Optional special metadata for reviews, events, media, datasets, etc.   |
 
 Tags should be lowercase, trimmed, and unique. Do not use `/` in tags.
 
@@ -182,6 +183,97 @@ What each option means:
 
 You can set only the values you need. Omitted values use the defaults from
 `config/site.json`.
+
+## Special Semantic Metadata
+
+Most articles and announcements do not need this section.
+
+Use `semantic` only when the page is clearly a special kind of content, such as
+a review, event, video, audio work, book, dataset, software project, or FAQ.
+The site uses this information in two ways:
+
+- it shows a small visible details block on the page;
+- it adds machine-readable metadata for search engines, social tools, and other
+  software.
+
+Only add facts that are also true and visible to readers. Do not use
+`semantic` just to add hidden search keywords.
+
+### Review Example
+
+```yaml
+semantic:
+  kind: review
+  item:
+    type: book
+    name: "Example Book"
+    author: "Example Author"
+    url: "https://example.com/book"
+  rating:
+    value: 4
+    best: 5
+  summary: "A short visible summary of what is being reviewed."
+```
+
+The reviewed item `type` can be:
+
+- `article`
+- `audio`
+- `book`
+- `creative-work`
+- `dataset`
+- `event`
+- `software`
+- `video`
+
+The rating is optional. If there is no clear rating, leave it out.
+
+### Event Example
+
+```yaml
+semantic:
+  kind: event
+  name: "TPM Reading Group"
+  startDate: 2026-06-01T19:00:00-04:00
+  attendance: online
+  location:
+    type: online
+    url: "https://example.com/live"
+```
+
+Use events only for real events with a clear date or time. If the page only
+mentions an event in passing, do not add event metadata.
+
+### Media, Book, Dataset, Software, And FAQ Examples
+
+```yaml
+semantic:
+  kind: video
+  name: "Interview Title"
+  url: "https://example.com/video"
+  embedUrl: "https://example.com/embed/video"
+  uploadDate: 2026-06-01
+```
+
+```yaml
+semantic:
+  kind: dataset
+  name: "Example Meme Dataset"
+  description: "A short description of the dataset."
+  url: "https://example.com/dataset"
+  license: "https://creativecommons.org/licenses/by/4.0/"
+```
+
+```yaml
+semantic:
+  kind: faq
+  items:
+    - question: "Who is this for?"
+      answer: "Readers who want a concise answer visible on the page."
+```
+
+Ask a maintainer before using `semantic` if you are unsure. It is better to
+omit this metadata than to publish inaccurate structured data.
 
 ## Write The Article Body
 

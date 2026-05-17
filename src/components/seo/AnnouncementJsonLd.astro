@@ -1,6 +1,8 @@
 ---
 import type { AnnouncementEntry } from "../../lib/routes";
 import { announcementUrl } from "../../lib/routes";
+import { jsonLdGraph } from "../../lib/metadata";
+import { semanticMetadataJsonLd } from "../../lib/semantic-metadata";
 import { publishableBlogPostingJsonLd, safeJsonLd } from "../../lib/seo";
 import type { SocialPreviewImage } from "../../lib/social-images";
 
@@ -10,13 +12,31 @@ interface Props {
 }
 
 const { announcement, image } = Astro.props;
-const jsonLd = safeJsonLd(
-  publishableBlogPostingJsonLd(announcement, Astro.site, {
+const canonicalPath = announcementUrl(announcement.id);
+const semanticJsonLd = semanticMetadataJsonLd(announcement.data.semantic, {
+  authorName: announcement.data.author,
+  canonicalPath,
+  datePublished: announcement.data.date,
+  site: Astro.site,
+});
+const announcementJsonLd = publishableBlogPostingJsonLd(
+  announcement,
+  Astro.site,
+  {
+    about: semanticJsonLd.references,
     canonicalPath: announcementUrl(announcement.id),
     fallbackAuthorName: announcement.data.author,
     image: image?.src,
     section: "Announcements",
-  }),
+  },
+);
+const announcementJsonLdWithoutContext = Object.fromEntries(
+  Object.entries(announcementJsonLd).filter(([key]) => key !== "@context"),
+);
+const jsonLd = safeJsonLd(
+  semanticJsonLd.nodes.length === 0
+    ? announcementJsonLd
+    : jsonLdGraph([announcementJsonLdWithoutContext, ...semanticJsonLd.nodes]),
 );
 ---
 

@@ -702,13 +702,18 @@ Add validation that covers source models and built output:
 Some articles may benefit from extra schema. This is now a planned platform
 capability, but it must be opt-in, typed, validated, and truthful.
 
-Potential frontmatter shape:
+This is a platform feature, not a TPM-only SEO enhancement. The author-facing
+interface should help different site owners describe richer page intent without
+learning JSON-LD or Schema.org internals, while keeping invalid and misleading
+metadata hard to publish.
+
+Target frontmatter shape:
 
 ```yaml
-schema:
+semantic:
   kind: review
   item:
-    type: VideoGame
+    type: video
     name: Undertale
     url: https://undertale.com/
   rating:
@@ -716,15 +721,87 @@ schema:
     best: 10
 ```
 
-Other future kinds:
+Design principles:
 
-- `video` for pages centered on a video.
-- `audio` for podcast/music/audio pages.
-- `book` for book reviews or book announcements.
-- `event` for real events.
-- `dataset` for published data.
-- `software` for software/project writeups.
+- Keep base route identity separate from the semantic profile. An article page
+  remains `BlogPosting`/`Article`; a review, event, dataset, video, or software
+  profile adds a related `Review`, `Event`, `Dataset`, `VideoObject`, or
+  `SoftwareApplication` node rather than pretending the page itself is that
+  object.
+- Use the same normalized semantic data for visible page details and JSON-LD.
+  This keeps structured data aligned with what readers can see.
+- Model semantic frontmatter as a discriminated union. Do not expose arbitrary
+  JSON-LD as the normal authoring interface.
+- Prefer a complete, tested subset of each kind over a broad, loose field bag.
+- Allow platform users with different editorial goals to use the feature
+  without TPM-specific assumptions.
+
+Initial supported kinds should cover the common platform cases:
+
+- `review` for qualitative or rated reviews of a book, article, video, audio,
+  software project, dataset, event, or other creative work.
+- `event` for pages or announcements centered on a real event with visible
+  date/time and location/online attendance data.
+- `video` for pages centered on a visible video.
+- `audio` for pages centered on a visible audio work or embed.
+- `book` for pages centered on a book, especially book announcements or
+  reviewable works.
+- `dataset` for published datasets, corpora, downloadable research material,
+  or data-driven project pages.
+- `software` for software/project release pages.
 - `faq` only for pages with visible question/answer content.
+
+First implementation scope:
+
+- Add the `semantic` field to article-like publishable content.
+- Add strict Zod schemas and TypeScript types for the supported profile kinds.
+- Add pure normalization and JSON-LD builder helpers.
+- Add a compact visible details component that renders only useful facts.
+- Integrate article and announcement JSON-LD with optional semantic nodes.
+- Document the authoring rules in `site/README.md`.
+
+Non-goals for the first implementation:
+
+- Do not add raw arbitrary JSON-LD frontmatter.
+- Do not add schema kinds without a typed contract and tests.
+- Do not infer semantic profiles from prose, embeds, filenames, or categories.
+- Do not emit hidden structured data that is not represented in visible page
+  content.
+- Do not chase every Google rich-result property on day one; use complete
+  enough Schema.org nodes and document which extra fields improve eligibility.
+
+Validation expectations:
+
+- Content schema tests for valid and invalid profile frontmatter.
+- Helper tests for normalized details and JSON-LD output.
+- Component tests proving visible details render useful facts and omit empty
+  fields.
+- Article and announcement JSON-LD tests proving semantic nodes are included
+  only when frontmatter opts in.
+- Release validation continues to parse emitted JSON-LD.
+
+Implemented platform shape:
+
+- `src/lib/semantic-metadata.ts` owns the typed `semantic` schema, visible
+  details view model, and JSON-LD node builder.
+- `src/lib/content-schemas.ts` exposes `semantic` on article-like publishable
+  entries while preserving strict frontmatter validation.
+- `ArticleJsonLd` and `AnnouncementJsonLd` keep normal `BlogPosting` output for
+  ordinary entries and switch to a graph only when semantic nodes are present.
+- `SemanticDetails` renders the reader-visible facts in the article opening so
+  optional structured data does not become hidden metadata.
+- The first implementation supports `review`, `event`, `video`, `audio`,
+  `book`, `dataset`, `software`, and `faq` profiles.
+- Build verification recognizes `BlogPosting` nodes inside JSON-LD graphs, so
+  social-image and article-metadata checks continue to cover semantic pages.
+
+Future expansion opportunities:
+
+- More item subtypes for reviews.
+- More rich-result fields where there is real visible source data.
+- Site-config defaults for labels and profile availability.
+- Advanced raw JSON-LD escape hatch only after typed profiles are stable and
+  only for technical maintainers, not as the primary authoring model.
 
 Do not add generic freeform JSON-LD frontmatter as the primary interface. It is
 too easy for non-technical authors to create invalid or misleading data. Prefer

@@ -45,4 +45,44 @@ describe("ArticleJsonLd", () => {
     );
     expect(view).toContain('"url":"https://thephilosophersmeme.com/authors/');
   });
+
+  test("renders semantic profile JSON-LD when article frontmatter opts in", async () => {
+    const article = articleEntry({
+      data: {
+        author: "Seong-Young Her",
+        semantic: {
+          item: {
+            name: "Example Book",
+            type: "book",
+            url: "https://example.com/book",
+          },
+          kind: "review",
+          rating: {
+            best: 5,
+            value: 4,
+          },
+          summary: "Visible review summary.",
+        },
+        title: "Article Title",
+      },
+      id: "article-title",
+    });
+    const container = await createAstroTestContainer();
+    const view = await container.renderToString(ArticleJsonLd, {
+      props: {
+        article,
+        category: categorySummary({ articles: [article] }),
+      },
+    });
+
+    expect(view).toContain('"@graph"');
+    expect(view).toContain('"@type":"BlogPosting"');
+    expect(view).toContain(
+      '"about":[{"@id":"https://thephilosophersmeme.com/articles/article-title/#semantic-review"}]',
+    );
+    expect(view).toContain('"@type":"Review"');
+    expect(view).toContain('"reviewBody":"Visible review summary."');
+    expect(view).toContain('"ratingValue":4');
+    expect(view).toContain('"itemReviewed":{"@type":"Book"');
+  });
 });

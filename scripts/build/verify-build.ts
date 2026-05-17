@@ -971,40 +971,68 @@ function metaContentValuesByAttribute(
 
 function articleJsonLdImageValues(html: string): string[] {
   const values: string[] = [];
-  const scriptPattern = /<script(?<attributes>[^>]*)>([\s\S]*?)<\/script>/giu;
-  let match: null | RegExpExecArray;
 
-  while ((match = scriptPattern.exec(html)) !== null) {
-    const attributes = match.groups?.["attributes"];
-    if (
-      attributes === undefined ||
-      htmlAttributeValue(`<script${attributes}>`, "type") !==
-        "application/ld+json"
-    ) {
-      continue;
+  for (const node of articleJsonLdNodes(html)) {
+    const image = node["image"];
+    if (typeof image === "string") {
+      values.push(image);
     }
+  }
 
-    const text = match[2]?.trim();
-    if (text === undefined || text === "") {
+  return values;
+}
+
+function articleJsonLdNodes(html: string): Array<Record<string, unknown>> {
+  return jsonLdNodesByType(html, "BlogPosting");
+}
+
+function jsonLdNodesByType(
+  html: string,
+  type: string,
+): Array<Record<string, unknown>> {
+  const nodes: Array<Record<string, unknown>> = [];
+
+  for (const script of htmlScriptTextsByType(html, "application/ld+json")) {
+    const text = script.trim();
+    if (text === "") {
       continue;
     }
 
     try {
       const parsed = JSON.parse(text) as unknown;
-      if (!isRecord(parsed) || parsed["@type"] !== "BlogPosting") {
-        continue;
-      }
-
-      const image = parsed["image"];
-      if (typeof image === "string") {
-        values.push(image);
+      for (const node of jsonLdNodeCandidates(parsed)) {
+        if (jsonLdTypeIncludes(node["@type"], type)) {
+          nodes.push(node);
+        }
       }
     } catch {
-      // Invalid JSON-LD is reported by the missing/mismatched image checks.
+      // Invalid JSON-LD is reported by the generic metadata verifier.
     }
   }
 
-  return values;
+  return nodes;
+}
+
+function jsonLdNodeCandidates(value: unknown): Array<Record<string, unknown>> {
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  const candidates = [value];
+  const graph = value["@graph"];
+  if (Array.isArray(graph)) {
+    candidates.push(...graph.filter(isRecord));
+  }
+
+  return candidates;
+}
+
+function jsonLdTypeIncludes(value: unknown, type: string): boolean {
+  return (
+    value === type ||
+    (Array.isArray(value) &&
+      value.some((entry) => typeof entry === "string" && entry === type))
+  );
 }
 
 function localGeneratedSocialImagePath(
@@ -1282,7 +1310,7 @@ async function inspectHtmlFile(
 
   if (
     isArticleHtmlPath(relativeHtmlPath) &&
-    !text.includes('"@type":"BlogPosting"')
+    articleJsonLdNodes(text).length === 0
   ) {
     issues.missingArticleJsonLd.push(relativeHtmlPath);
   }

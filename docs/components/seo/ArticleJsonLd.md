@@ -9,6 +9,10 @@ Source: `src/components/seo/ArticleJsonLd.astro`
 It should reflect the same canonical URL, title, dates, category, images, and
 authors that visible article surfaces use.
 
+If an article opts into validated `semantic` frontmatter, the component emits a
+JSON-LD graph containing the base `BlogPosting` plus the semantic profile node.
+The base article links to semantic nodes through `about`.
+
 ## Public Contract
 
 - `article: ArticleEntry`
@@ -27,6 +31,7 @@ ArticleLayout / SEO head boundary
   ArticleJsonLd
     route helpers
     SEO helpers
+    semantic metadata helpers
 ```
 
 This component should consume normalized article and author summaries from the
@@ -75,8 +80,12 @@ visible, and CTAs distinguishable from neutral actions.
 - emits structured `Person` or `Organization` author objects only when author
   metadata supports that interpretation.
 - falls back conservatively while legacy `author` strings still exist.
+- emits optional semantic profile nodes only from validated frontmatter, never
+  from prose inference or arbitrary JSON-LD.
 
 ## Follow-Up Notes
 
 - Do not infer personal websites, social profiles, avatars, or real identities
   in JSON-LD. Public author metadata requires explicit content-owner approval.
+- Keep semantic JSON-LD paired with visible `SemanticDetails` output so hidden
+  machine-only facts do not drift away from the reader-facing page.

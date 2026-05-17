@@ -280,9 +280,17 @@ Notes:
 - `image` and `imageAlt` are optional, but recommended when the article has a
   preview image.
 - Add `draft: true` if the article should not publish yet.
+- `semantic` is optional special metadata for pages that are clearly reviews,
+  events, videos, audio works, books, datasets, software projects, or FAQs. Most
+  articles do not need it.
 
 Do not add `slug`, `category`, or `topic` frontmatter. The slug comes from the
 filename. The category comes from the folder.
+
+If you use `semantic`, only include facts that are true and visible to readers.
+The site turns this into a small visible details block and machine-readable
+metadata. See `site/README.md` for examples, and ask a maintainer if you are
+unsure.
 
 If this is a new author, ask a maintainer before submitting. The maintainer may
 add a new file in `site/content/authors/<author-slug>.md` with the author's

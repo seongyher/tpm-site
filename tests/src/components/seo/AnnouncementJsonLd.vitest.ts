@@ -37,4 +37,37 @@ describe("AnnouncementJsonLd", () => {
       '"url":"https://thephilosophersmeme.com/announcements/announcement-title/"',
     );
   });
+
+  test("renders semantic event JSON-LD for announcement frontmatter", async () => {
+    const announcement = announcementEntry({
+      data: {
+        author: "The Philosopher's Meme",
+        semantic: {
+          kind: "event",
+          location: {
+            type: "online",
+            url: "https://example.com/live",
+          },
+          name: "Launch Event",
+          startDate: new Date("2026-06-01T19:00:00.000Z"),
+          status: "scheduled",
+        },
+        title: "Launch Announcement",
+      },
+      id: "launch-announcement",
+    });
+    const container = await createAstroTestContainer();
+    const view = await container.renderToString(AnnouncementJsonLd, {
+      props: { announcement },
+    });
+
+    expect(view).toContain('"@graph"');
+    expect(view).toContain('"@type":"BlogPosting"');
+    expect(view).toContain('"@type":"Event"');
+    expect(view).toContain('"name":"Launch Event"');
+    expect(view).toContain('"@type":"VirtualLocation"');
+    expect(view).toContain(
+      '"about":[{"@id":"https://thephilosophersmeme.com/announcements/launch-announcement/#semantic-event"}]',
+    );
+  });
 });

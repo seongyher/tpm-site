@@ -40,6 +40,17 @@ describe("content schemas", () => {
       date: "2022-04-06",
       description: "Description",
       image: { format: "jpg", height: 640, src: "/article.jpg", width: 960 },
+      semantic: {
+        item: {
+          name: "Example Book",
+          type: "book",
+        },
+        kind: "review",
+        rating: {
+          best: 5,
+          value: 4,
+        },
+      },
       tags: ["meme history", "c++"],
       title: "Article Title",
       updated: "2022-05-01",
@@ -100,6 +111,35 @@ describe("content schemas", () => {
         date: "2022-04-06",
         description: "Description",
         tags: ["/pol/"],
+        title: "Article Title",
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        author: "Author",
+        date: "2022-04-06",
+        description: "Description",
+        semantic: {
+          item: {
+            name: "Example Book",
+            type: "not-supported",
+          },
+          kind: "review",
+        },
+        title: "Article Title",
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        author: "Author",
+        date: "2022-04-06",
+        description: "Description",
+        semantic: {
+          endDate: "2026-05-01",
+          kind: "event",
+          name: "Backwards Event",
+          startDate: "2026-05-02",
+        },
         title: "Article Title",
       }).success,
     ).toBe(false);

@@ -89,3 +89,26 @@ compatibility becomes a repeated blocker.
 - [ ] Replace the Chrome-based generator only after the new pipeline passes the
       release gates and produces better scholarly PDFs for the representative
       article set.
+
+## AI-Friendly Content Surfaces
+
+Reason deferred: public machine-readable indexes, route/entity manifests, and
+possible `llms.txt` support are valuable platform work, but they should wait
+until the typed metadata, structured-data, and route identity model is stable
+enough to expose as a durable public contract.
+
+Resume trigger: resume when admin UI work, public content APIs, agent/tool
+integrations, `llms.txt`, or external machine-readable content indexing becomes
+an active platform goal.
+
+- [ ] Define stable entity `@id` policy for site, publisher, authors, articles,
+      announcements, collections, categories, tags, and bibliography sources.
+- [ ] Add a public content index endpoint for route discovery and article
+      metadata, generated from canonical content data and route helpers.
+- [ ] Add a route/entity manifest for platform tooling and future admin UI
+      work.
+- [ ] Decide whether to add `llms.txt`, including what it promises and how it
+      remains current.
+- [ ] Add endpoint schema tests, built-output checks for stable IDs and
+      canonical URLs, and visibility/robots leak checks before publishing
+      machine-readable indexes.

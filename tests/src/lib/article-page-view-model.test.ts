@@ -41,6 +41,13 @@ describe("articlePageViewModel", () => {
         author: "Known Author",
         description: "Current article description.",
         image: articleImage,
+        semantic: {
+          item: {
+            name: "Example Book",
+            type: "book",
+          },
+          kind: "review",
+        },
         tags: ["memes"],
         title: "Current Article",
       },
@@ -117,6 +124,13 @@ describe("articlePageViewModel", () => {
       label: "View Site Bibliography",
     });
     expect(page.searchable).toBe(true);
+    expect(page.semanticDetails).toMatchObject({
+      heading: "Review details",
+      items: [
+        { label: "Reviewed", value: "Example Book" },
+        { label: "Type", value: "Book" },
+      ],
+    });
     expect(page.tagsVisible).toBe(true);
     expect(page.profileLinksEnabled).toBe(true);
     expect(page.support.enabled).toBe(true);

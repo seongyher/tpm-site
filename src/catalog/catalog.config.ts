@@ -98,6 +98,12 @@ export const componentCatalogIgnoreList = [
   },
   {
     lifecycle: "route-only",
+    path: "src/components/articles/SemanticDetails.astro",
+    reason:
+      "Internal article-header semantic metadata surface covered by SemanticDetails and ArticleHeader tests.",
+  },
+  {
+    lifecycle: "route-only",
     path: "src/components/articles/ArticleShareActionRow.astro",
     reason:
       "Internal article-share row renderer covered by ArticleShareMenu examples and component tests.",

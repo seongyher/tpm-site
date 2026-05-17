@@ -6,10 +6,12 @@ import ArticleHeaderActionLink from "./ArticleHeaderActionLink.astro";
 import ArticleHeaderActionRow from "./ArticleHeaderActionRow.astro";
 import ArticleMeta from "./ArticleMeta.astro";
 import ArticleShareMenu from "./ArticleShareMenu.astro";
+import SemanticDetails from "./SemanticDetails.astro";
 import TextLink from "../ui/TextLink.astro";
 import type { AuthorSummary } from "../../lib/authors";
 import type { ArticlePdfViewModel } from "../../lib/article-pdf";
 import type { ArticleCitationMenuViewModel } from "../../lib/citations/article-citation";
+import type { SemanticDetailsViewModel } from "../../lib/semantic-metadata";
 import type { ArticleShareMenuViewModel } from "../../lib/share-targets";
 
 interface ArticleCategory {
@@ -27,6 +29,7 @@ interface Props {
   formattedDate?: string | undefined;
   pdf?: ArticlePdfViewModel | undefined;
   profileLinksEnabled?: boolean | undefined;
+  semanticDetails?: SemanticDetailsViewModel | undefined;
   share?: ArticleShareMenuViewModel | undefined;
   title: string;
 }
@@ -41,6 +44,7 @@ const {
   formattedDate,
   pdf,
   profileLinksEnabled = true,
+  semanticDetails,
   share,
   title,
 } = Astro.props;
@@ -116,6 +120,7 @@ const hasKickerRow = category !== undefined || hasHeaderActions;
       </p>
     )
   }
+  <SemanticDetails details={semanticDetails} />
   {
     pdf && (
       <>

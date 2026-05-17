@@ -1,6 +1,7 @@
 import type { ImageMetadata } from "astro";
 import { z } from "astro/zod";
 
+import { semanticMetadataSchema } from "./semantic-metadata";
 import { tagDiagnostics } from "./tags";
 
 const publishableVisibilityDefaults = {
@@ -144,6 +145,7 @@ function createArticleSchema(
     imageAlt: z.string().optional(),
     legacyBanner: z.string().optional(),
     legacyPermalink: z.string().optional(),
+    semantic: semanticMetadataSchema,
     tags: tagListSchema(),
     title: z.string().min(1),
     updated: z.coerce.date().optional(),

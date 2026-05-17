@@ -42,6 +42,10 @@ import {
   type CategorySummary,
   categoryUrl,
 } from "./routes";
+import {
+  type SemanticDetailsViewModel,
+  semanticDetailsViewModel,
+} from "./semantic-metadata";
 import { absoluteUrl } from "./seo";
 import {
   type ArticleShareMenuViewModel,
@@ -79,6 +83,7 @@ export interface ArticlePageViewModel {
   readingNavigationLinks: Array<{ href: string; label: string }>;
   scholarMeta: ArticleScholarMetaViewModel;
   searchable: boolean;
+  semanticDetails?: SemanticDetailsViewModel | undefined;
   share: ArticleShareMenuViewModel;
   showTableOfContents: boolean;
   socialPreviewImage: SocialPreviewImage;
@@ -207,6 +212,7 @@ export async function articlePageViewModel({
         article.data.visibility,
         config.contentDefaults.articles.visibility,
       ).search,
+    semanticDetails: semanticDetailsViewModel(article.data.semantic),
     share: articleShareMenuViewModel({
       articleUrl: canonicalUrl,
       description: articleView.description,

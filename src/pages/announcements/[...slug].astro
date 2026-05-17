@@ -20,6 +20,7 @@ import {
   type AnnouncementEntry,
 } from "../../lib/routes";
 import { siteConfig } from "../../lib/site-config";
+import { semanticDetailsViewModel } from "../../lib/semantic-metadata";
 import { socialPreviewImageViewModel } from "../../lib/social-images";
 import { announcementStaticPaths } from "../../lib/static-paths";
 
@@ -42,6 +43,7 @@ const title = announcement.data.title;
 const description = announcement.data.description;
 const searchable =
   siteConfig.features.search && announcement.data.visibility.search;
+const semanticDetails = semanticDetailsViewModel(announcement.data.semantic);
 const fallbackSocialPreviewImage = await getSiteSocialFallbackImage();
 const socialPreviewImage = await socialPreviewImageViewModel({
   alt: announcement.data.imageAlt ?? title,
@@ -94,6 +96,7 @@ const socialPreviewImage = await socialPreviewImageViewModel({
         date={announcement.data.date}
         description={description}
         formattedDate={formatDate(announcement.data.date)}
+        semanticDetails={semanticDetails}
         title={title}
       />
       <ArticleProse data-article-prose>

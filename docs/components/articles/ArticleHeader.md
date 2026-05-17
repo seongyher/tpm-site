@@ -9,6 +9,10 @@ title, description, date/author metadata, and quiet article utilities such as
 the visible `Cite`, `Share`, and `PDF` actions. Their accessible names remain
 `Cite this article`, `Share this article`, and `Save PDF`.
 
+When article-like frontmatter includes validated `semantic` metadata, the header
+also renders a compact visible details surface so structured metadata is
+represented in reader-visible page content.
+
 ## Public Contract
 
 - `author?: string | undefined`
@@ -20,6 +24,7 @@ the visible `Cite`, `Share`, and `PDF` actions. Their accessible names remain
 - `title: string`
 - `citation?: ArticleCitationMenuViewModel | undefined`
 - `pdf?: ArticlePdfViewModel | undefined`
+- `semanticDetails?: SemanticDetailsViewModel | undefined`
 - `share?: ArticleShareMenuViewModel | undefined`
 
 Public props should remain narrow and semantic. Do not add broad configuration
@@ -36,6 +41,7 @@ ArticleLayout
       AuthorByline
     ArticleCitationMenu
     ArticleShareMenu
+    SemanticDetails
     PDF TextLink
 ```
 
@@ -57,6 +63,10 @@ title, description, or byline into overlap. The action cluster is aligned to the
 inline end of the article width, while popovers and generated PDF output must
 not reserve article space. The header should remain readable when any utility is
 absent.
+
+Semantic details should stay compact and subordinate. They may add a small
+visible details block under the description, but must not become a card inside
+the article header or push action popovers into the document flow.
 
 ## Layering And Scrolling
 
@@ -99,6 +109,8 @@ visible, and CTAs distinguishable from neutral actions.
 - keeps the visible `PDF` action subordinate in the category/action row,
   accessible as `Save PDF`, pointed at the generated same-directory PDF, and
   excluded from print/PDF output when PDF metadata is available.
+- renders semantic details only when normalized semantic metadata has visible
+  facts, and keeps those facts in a real description list.
 - opens the citation popover without increasing article header height or
   changing the title, metadata, or description positions.
 - does not create an awkward header-to-body gap when no hero image is rendered.
