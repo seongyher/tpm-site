@@ -15,11 +15,15 @@ interface Props extends HTMLAttributes<"a"> {
   href: string;
   image?: PublishableImage | undefined;
   imageClass?: string | undefined;
+  imageWidths?: number[] | undefined;
   label: string;
+  fetchpriority?: "auto" | "high" | "low" | undefined;
   loading?: "eager" | "lazy" | undefined;
   prefetch?: PrefetchValue | undefined;
+  quality?: "low" | "mid" | "high" | "max" | number | undefined;
   renderHeight: number;
   renderWidth: number;
+  sizes?: string | undefined;
 }
 
 const {
@@ -27,17 +31,27 @@ const {
   href,
   image,
   imageClass = "h-full w-full object-cover",
+  imageWidths,
   label,
+  fetchpriority,
   loading = "lazy",
   prefetch,
+  quality,
   renderHeight,
   renderWidth,
+  sizes,
   class: className,
   "aria-label": ariaLabel,
   ...attrs
 } = Astro.props;
 const prefetchAttrs =
   prefetch === undefined ? {} : { "data-astro-prefetch": prefetch };
+const imageRenderAttrs = {
+  ...(imageWidths === undefined ? {} : { widths: imageWidths }),
+  ...(sizes === undefined ? {} : { sizes }),
+  ...(quality === undefined ? {} : { quality }),
+  ...(fetchpriority === undefined ? {} : { fetchpriority }),
+};
 ---
 
 <a
@@ -59,6 +73,7 @@ const prefetchAttrs =
         alt={image.alt}
         width={renderWidth}
         height={renderHeight}
+        {...imageRenderAttrs}
         loading={loading}
         class:list={[imageClass]}
       />
@@ -66,6 +81,7 @@ const prefetchAttrs =
       <span
         class="flex h-full w-full items-center justify-center p-4 text-center text-4xl leading-none font-bold tracking-normal uppercase"
         data-publishable-media-fallback
+        aria-hidden="true"
       >
         <span class="line-clamp-2 break-words">{fallbackLabel ?? label}</span>
       </span>

@@ -11,6 +11,8 @@ interface Props extends HTMLAttributes<"a"> {
   label: string;
   logo: ImageMetadata;
   logoClass?: string | undefined;
+  logoHeight?: number | undefined;
+  logoWidth?: number | undefined;
 }
 
 const {
@@ -19,6 +21,8 @@ const {
   href,
   label,
   logo,
+  logoHeight = 16,
+  logoWidth = 106,
   logoClass = "h-4 w-auto max-w-full",
   target,
   rel,
@@ -49,6 +53,8 @@ const safeRel = target === "_blank" && rel === undefined ? "noreferrer" : rel;
     aria-hidden="true"
     role="presentation"
     layout="fixed"
+    width={logoWidth}
+    height={logoHeight}
     loading="eager"
     class:list={[logoClass]}
   />

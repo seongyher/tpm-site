@@ -720,3 +720,138 @@ they are useful context. Explicitly deferred work belongs in
       Verified with `bun test tests/config/static-public-files.test.ts --reporter=dots`,
       `bun --silent run test:config`, `bun run check:release`, `git diff --check`,
       and direct inspection of `dist/_headers`.
+
+### Milestone 164: Unlighthouse Full-Site Audit Report
+
+- [x] Parse the exported Unlighthouse/Lighthouse JSON reports into route-level
+      score summaries and audit-id issue groups.
+- [x] Classify each issue as actionable, noise/monitoring, or unclear, with
+      component-level recommendations where possible.
+- [x] Compare the `74c2` production rescan against the first export and update
+      persistent/noise classifications for cache warnings, render-blocking CSS,
+      dependency chains, image sizing, CLS, and table accessibility.
+- [x] Write the audit report under `docs/performance/` and verify touched docs.
+      Verified with `bunx prettier --check CHECKLIST.md docs/performance/unlighthouse-audit-2026-05-17.md --log-level warn`
+      and `bunx markdownlint-cli2 CHECKLIST.md docs/performance/unlighthouse-audit-2026-05-17.md`.
+
+### Milestone 165: Lighthouse Investigation Refinement
+
+- [x] Investigate the homepage Speed Index outlier with filmstrip and metric
+      evidence rather than changing layout blindly.
+- [x] Investigate current CLS outliers and determine whether the older
+      support-button CLS finding is stale.
+- [x] Trace homepage critical request-chain ownership for CSS, Astro prefetch,
+      and anchored-positioning scripts.
+- [x] Investigate article-list image sizing/LCP behavior, semantic table
+      accessibility, and production analytics/CSP ownership.
+- [x] Refine the audit report into developer-ready investigation findings with
+      conclusions, implementation targets, risks, and test plans.
+      The updated report identifies homepage carousel autoplay as the Speed
+      Index outlier, confirms `BrandButton` logo sizing still causes current
+      article CLS, corrects the current semantic-table and CSP routes from the
+      `74c2` scan, separates Cloudflare analytics noise from first-party work,
+      and breaks follow-up work into implementation passes.
+
+### Milestone 166: Manual Homepage Featured Carousel
+
+- [x] Make the homepage featured carousel manual by default so above-the-fold
+      content does not auto-rotate during initial page load or Lighthouse
+      visual capture.
+- [x] Preserve arrows, dots, keyboard access, focus states, and current
+      no-JavaScript fallback behavior.
+- [x] Remove or revise automatic `aria-live` behavior so carousel changes are
+      not announced unless caused by user interaction.
+- [x] Add focused tests proving the carousel does not auto-advance by default
+      and that manual controls still switch slides correctly.
+- [x] Verify homepage UX and performance expectations with focused component,
+      browser, and Lighthouse checks before marking complete.
+      Verified with focused carousel script/component tests, full production
+      build output inspection, and `bun run check:release`.
+
+### Milestone 167: Lighthouse Follow-Up Design Lock
+
+- [x] Convert the Unlighthouse audit passes into concrete implementation
+      invariants, acceptance criteria, source ownership, and test plans.
+- [x] Review the design for accessibility, SEO, machine readability, Core Web
+      Vitals, responsive behavior, progressive enhancement, and maintainability.
+- [x] Confirm which findings are implementation tasks, which are bounded
+      experiments, and which are documented policy/no-op decisions before code
+      changes begin.
+      Verified by adding the Milestone 167-172 implementation map to
+      `docs/performance/unlighthouse-audit-2026-05-17.md`.
+
+### Milestone 168: Lighthouse Accessibility And Semantics Fixes
+
+- [x] Fix homepage carousel dot hit targets without changing the visible dot
+      design more than necessary.
+- [x] Fix TOC summary accessible names so visible labels and accessible names
+      match.
+- [x] Fix homepage fallback media accessible names and heading-order issues on
+      the homepage and bibliography pages.
+- [x] Fix the Wittgenstein table with explicit row/column header semantics and
+      document the table authoring rule.
+- [x] Verify with focused component/rendered-output tests and the accessibility
+      test suite.
+      Verified with `bunx astro sync --force`,
+      `bun scripts/testing/sync-astro-test-store.ts`, focused Vitest coverage
+      for the TOC toggle, publishable media fallback, homepage carousel,
+      bibliography entry headings, and the rendered Wittgenstein article table,
+      plus `bun --silent run build:raw` and direct built-output inspection of
+      the article table semantics.
+
+### Milestone 169: Lighthouse Carousel Stability, CLS, And LCP Priority
+
+- [x] Complete the manual carousel behavior from Milestone 166 and revise live
+      region behavior so only user-driven changes announce.
+- [x] Stabilize brand button logo dimensions to eliminate article support-block
+      CLS.
+- [x] Add `fetchpriority` support to publishable media and mark only the active
+      first homepage featured image high priority.
+- [x] Verify with focused tests, browser checks, and relevant Lighthouse/perf
+      checks.
+      Verified with focused `HomeFeaturedCarousel`, `HomeFeaturedSlide`,
+      `BrandButton`, and `PublishableMediaFrame` tests, built-output checks for
+      `fetchpriority="high"`, and `bun run check:release`.
+
+### Milestone 170: Lighthouse Article List Image Payload Tuning
+
+- [x] Add context-specific image sizing options to publishable media.
+- [x] Update article cards to use thumbnail-specific dimensions, `sizes`, and
+      any safe list-thumbnail-only quality tuning.
+- [x] Recheck article, author, category, tag, and archive list routes for
+      reduced image-delivery waste without visible quality regressions.
+      Verified with `PublishableMediaFrame` and `ArticleCard` component tests,
+      built-output inspection on article, author, category, and tag routes, and
+      `bun run check:release`.
+
+### Milestone 171: Lighthouse Hosting And Analytics Policy
+
+- [x] Inspect repository-owned Cloudflare/static configuration and document
+      which Lighthouse analytics/cache/CSP findings are first-party versus
+      Cloudflare/dashboard policy.
+- [x] Add or update project docs with the caching, analytics, CSP, and
+      production-measurement decision so future maintainers do not treat
+      third-party scanner noise as app-code regressions.
+- [x] Verify no first-party caching or metadata regressions were introduced.
+      Documented in `docs/performance/unlighthouse-audit-2026-05-17.md` and
+      `docs/CLOUDFLARE_WORKERS_MIGRATION.md`; verified with
+      `bun run check:release`.
+
+### Milestone 172: Lighthouse Bounded Performance Experiments
+
+- [x] Try lazy-but-opportunistic anchored positioning with first-intent loading,
+      idle warmup, and a shared one-time module install.
+- [x] Browser-test header dropdowns, citation/share popovers, hover cards, and
+      reference previews from a cold page.
+- [x] Run an automated critical-CSS experiment on a build copy, record measured
+      tradeoffs, and keep it only if it improves cold-load metrics without
+      brittle style drift, dark-mode flash, or payload regressions.
+- [x] Optionally compare current Astro prefetch behavior against a narrower
+      policy if time and evidence justify it.
+- [x] Run release checks and update the audit report with implemented outcomes,
+      rejected experiments, and follow-up recommendations.
+      Verified with anchored-positioning loader tests, anchored/hover/article
+      action browser coverage in `bun run check:release`, the reproducible
+      `bun run payload:critical-css:experiment` report, and the documented
+      decision not to adopt critical CSS or prefetch policy changes in this
+      pass.

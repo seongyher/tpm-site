@@ -20,6 +20,11 @@ describe("ArticleCard", () => {
     expect(view).toContain('data-article-card-has-image="true"');
     expect(view).toContain("data-article-card-kicker");
     expect(view).toContain('alt="Article preview image"');
+    expect(view).toContain('width="288"');
+    expect(view).toContain('height="176"');
+    expect(view).toContain(
+      'sizes="(min-width: 64rem) 18rem, (min-width: 48rem) 15rem, (min-width: 40rem) 6rem, 5rem"',
+    );
     expect(view).toContain("grid-cols-[minmax(0,1fr)_5rem]");
     expect(view).toContain("md:h-40");
     expect(view).toContain("lg:w-72");

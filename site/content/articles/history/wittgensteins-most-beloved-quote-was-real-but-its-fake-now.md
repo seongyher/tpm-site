@@ -43,10 +43,27 @@ So, did Rosenblatt create a different Wittgenstein? After all, the quote is hard
 
 Yet, something is amiss. Not only does the fictionally-presented _Dribble-Wittgenstein_ phrasing vastly outnumber the _Malcolm-Wittgenstein_ phrasing generally (over 7730 to 78 results on Google), it also outnumbers it slightly in academic writing too (49 to 41 in a Google Scholar search as of now).
 
-|                               | Google search results | Google Scholar search results |
-| ----------------------------- | --------------------- | ----------------------------- |
-| Dribble-Wittgenstein Phrasing | 7,730                 | 49                            |
-| Malcolm-Wittgenstein Phrasing | 78                    | 41                            |
+<table>
+  <thead>
+    <tr>
+      <th scope="col">Phrasing</th>
+      <th scope="col">Google search results</th>
+      <th scope="col">Google Scholar search results</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">Dribble-Wittgenstein Phrasing</th>
+      <td>7,730</td>
+      <td>49</td>
+    </tr>
+    <tr>
+      <th scope="row">Malcolm-Wittgenstein Phrasing</th>
+      <td>78</td>
+      <td>41</td>
+    </tr>
+  </tbody>
+</table>
 
 This pattern of usage strongly suggests that the two quotes represent two _concepts_ of Wittgenstein. Not because they have two distinct _references_, but because they each have a distinct _sense_.
 

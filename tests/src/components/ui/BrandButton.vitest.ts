@@ -24,6 +24,8 @@ describe("BrandButton", () => {
     expect(view).toContain("bg-[#5865F2]");
     expect(view).toContain("hover:bg-[#4752C4]");
     expect(view).toContain("h-9 w-32");
+    expect(view).toContain('width="106"');
+    expect(view).toContain('height="16"');
     expect(view).toContain("discord-logo-white.svg");
   });
 });

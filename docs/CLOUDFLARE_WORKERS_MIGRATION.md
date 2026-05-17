@@ -219,6 +219,18 @@ sitemaps, PDFs, Pagefind files, root icons, and other non-fingerprinted static
 files should keep Cloudflare's default revalidation behavior or receive a
 separate, shorter policy after measurement.
 
+Lighthouse cache warnings for `/cdn-cgi/zaraz/*`,
+`static.cloudflareinsights.com/*`, or other Cloudflare/dashboard-injected
+analytics scripts are not first-party Astro asset regressions. Treat those as
+analytics policy findings: either accept them as production telemetry overhead
+or change the Cloudflare dashboard/analytics configuration intentionally. Do
+not add app-code workarounds for those warnings.
+
+If a Content Security Policy is added later, version it in repository-owned
+deployment configuration or in a documented Cloudflare setting. The policy must
+explicitly name intended analytics/RUM origins so scanner findings are not
+confused with accidental app-code behavior.
+
 `/.well-known/traffic-advice` is served from
 `site/public/.well-known/traffic-advice` and currently allows private prefetch
 proxy traffic:

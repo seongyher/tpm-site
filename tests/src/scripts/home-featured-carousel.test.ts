@@ -40,8 +40,8 @@ describe("home featured carousel browser script", () => {
     expect(second.hasAttribute("inert")).toBe(false);
   });
 
-  test("does not start auto-rotation for reduced-motion users", () => {
-    const window = carouselWindow({ reducedMotion: true });
+  test("does not start auto-rotation by default", () => {
+    const window = carouselWindow();
     const document = window.document;
     const intervals: TimerHandler[] = [];
 
@@ -56,23 +56,28 @@ describe("home featured carousel browser script", () => {
     expect(intervals).toEqual([]);
   });
 
-  test("pauses rotation when the carousel receives focus", () => {
+  test("switches slides with indicators", () => {
     const window = carouselWindow();
     const document = window.document;
-    let clearedInterval: number | undefined;
 
-    Reflect.set(window, "setInterval", () => 7);
-    Reflect.set(window, "clearInterval", (id: number) => {
-      clearedInterval = id;
-    });
     appendCarouselFixture(browserDocument(document));
     installHomeFeaturedCarousels(browserDocument(document));
 
-    requiredElement(
-      document.querySelector("[data-home-featured-carousel]"),
-    ).dispatchEvent(new window.Event("focusin"));
+    const first = requiredHtmlElement(
+      document.querySelectorAll("[data-home-featured-slide]").item(0),
+    );
+    const second = requiredHtmlElement(
+      document.querySelectorAll("[data-home-featured-slide]").item(1),
+    );
+    const secondIndicator = requiredElement(
+      document.querySelectorAll("[data-home-featured-indicator]").item(1),
+    );
 
-    expect(clearedInterval).toBe(7);
+    secondIndicator.dispatchEvent(new window.Event("click"));
+
+    expect(first.getAttribute("aria-hidden")).toBe("true");
+    expect(second.getAttribute("aria-hidden")).toBe("false");
+    expect(secondIndicator.getAttribute("aria-current")).toBe("true");
   });
 });
 
@@ -126,17 +131,13 @@ function appendCarouselFixture(document: Document): void {
   document.body.replaceChildren(section);
 }
 
-function carouselWindow({
-  reducedMotion = false,
-}: {
-  reducedMotion?: boolean;
-} = {}): Window {
+function carouselWindow(): Window {
   const window = new Window();
 
   Reflect.set(window, "SyntaxError", SyntaxError);
   Reflect.set(window, "matchMedia", () => ({
     addEventListener: () => undefined,
-    matches: reducedMotion,
+    matches: false,
   }));
 
   return window;

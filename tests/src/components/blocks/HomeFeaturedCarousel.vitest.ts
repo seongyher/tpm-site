@@ -1,3 +1,4 @@
+import type { ImageMetadata } from "astro";
 import { describe, expect, test } from "vitest";
 
 import HomeFeaturedCarousel from "../../../../src/components/blocks/HomeFeaturedCarousel.astro";
@@ -24,6 +25,7 @@ describe("HomeFeaturedCarousel", () => {
     expect(view).toContain("lg:grid-rows-[minmax(0,1fr)_auto]");
     expect(view).toContain("min-h-80");
     expect(view).toContain("content-start");
+    expect(view).toContain('aria-live="off"');
     expect(view).not.toContain("content-center");
     expect(view).not.toContain("data-home-featured-next");
   });
@@ -47,6 +49,8 @@ describe("HomeFeaturedCarousel", () => {
       view.indexOf("data-home-featured-next"),
     );
     expect(view).toContain("data-home-featured-indicator");
+    expect(view).toContain("size-6");
+    expect(view).toContain("size-2");
     expect(view).toContain("home-featured-carousel");
   });
 });
@@ -62,6 +66,10 @@ describe("HomeFeaturedSlide", () => {
           date: "May 5, 2026",
           description: "Inherited article description.",
           href: "/articles/what-is-a-meme/",
+          image: {
+            alt: "Example feature image",
+            src: imageMetadata("/feature.png"),
+          },
           kind: "article",
           note: "Optional editorial copy.",
           title: "What Is a Meme?",
@@ -77,6 +85,9 @@ describe("HomeFeaturedSlide", () => {
     expect(view).toContain("data-[home-featured-active=false]:invisible");
     expect(view).toContain("data-home-featured-meta");
     expect(view).toContain("data-home-featured-title");
+    expect(view).toContain('fetchpriority="high"');
+    expect(view).toContain("<h2");
+    expect(view).not.toContain("<h3");
     expect(view).not.toContain("Join Discord");
   });
 
@@ -109,5 +120,14 @@ function featuredItem(
     slug: "feature",
     title: "Feature",
     ...overrides,
+  };
+}
+
+function imageMetadata(src: string): ImageMetadata {
+  return {
+    format: "png",
+    height: 360,
+    src,
+    width: 480,
   };
 }

@@ -28,12 +28,14 @@ const { itemCount } = Astro.props;
       Array.from({ length: itemCount }, (_, index) => (
         <button
           type="button"
-          class="bg-muted text-muted-foreground focus-visible:outline-ring aria-current:bg-primary size-2 rounded-full border-0 p-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+          class="text-muted-foreground focus-visible:outline-ring [&[aria-current=true]>span]:bg-primary inline-flex size-6 items-center justify-center rounded-full border-0 bg-transparent p-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
           aria-label={`Show featured item ${index + 1}`}
           aria-current={index === 0 ? "true" : undefined}
           data-home-featured-indicator
           data-home-featured-index={String(index)}
-        />
+        >
+          <span class="bg-muted block size-2 rounded-full transition-colors" />
+        </button>
       ))
     }
   </div>

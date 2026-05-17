@@ -11,7 +11,7 @@ describe("TableOfContentsToggle", () => {
     });
 
     expect(view).toContain("<summary");
-    expect(view).toContain('aria-label="Essay contents"');
+    expect(view).not.toContain('aria-label="Essay contents"');
     expect(view).not.toContain(">Essay contents<");
     expect(view).toContain("Hide");
     expect(view).toContain("Show Contents");
@@ -23,7 +23,7 @@ describe("TableOfContentsToggle", () => {
       props: { label: "Essay contents", placement: "inline" },
     });
 
-    expect(view).toContain('aria-label="Essay contents"');
+    expect(view).not.toContain('aria-label="Essay contents"');
     expect(view).toContain("data-toc-inline-heading");
     expect(view).toContain("Contents");
     expect(view).toContain("data-toc-inline-closed-label");
