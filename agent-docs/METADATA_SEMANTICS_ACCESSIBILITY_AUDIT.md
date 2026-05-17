@@ -143,19 +143,19 @@ using the shared metadata contract.
 
 ### Route Metadata Matrix
 
-| Route family | Robots | Social image | Structured data | Notes |
-| --- | --- | --- | --- | --- |
-| Home | `index,follow` | Site default or configured home image | `WebPage`, site `WebSite`, publisher, visible `ItemList` blocks where practical | Main first impression; complete social object is required. |
-| Article | `index,follow` unless content visibility says otherwise | Generated article social JPG with fallback | `BlogPosting` or `Article`, `WebPage`, publisher, optional citation metadata | Scholar meta and PDF link stay article-specific. |
-| Announcement | `index,follow` unless visibility says otherwise | Announcement image or default social image | `BlogPosting` or `Article`, `WebPage`, publisher | No Scholar metadata by default. |
-| Articles/archive | `index,follow` | Default social image | `CollectionPage`, `ItemList`, breadcrumbs where useful | Emit visible entries, not necessarily every historical item if paginated later. |
-| Category/tag/collection page | `index,follow` | Default social image | `CollectionPage`, `ItemList`, breadcrumbs | ItemList should match visible article list. |
-| Author index | `index,follow` | Default social image | `CollectionPage`, `ItemList` | List authors or author pages represented visibly. |
-| Author detail | `index,follow` | Author image or default social image | `ProfilePage`, `Person` or `Organization`, article `ItemList` | Anonymous/collective authors need explicit type handling. |
-| Bibliography | `index,follow` | Default social image | `CollectionPage`, `ItemList`, conservative source entries | Use `CreativeWork` only until source typing improves. |
-| Search | `noindex,follow` by default | Default social image | Plain `WebPage` only | Static search landing page is useful to users, but not a search-result page. |
-| 404 | `noindex,follow` | Default social image optional | Plain `WebPage` only | Keep accessible navigation, no fake structured data. |
-| Legacy redirect | `noindex,follow` | None required | None required | Canonical + meta refresh + fallback link are the contract. |
+| Route family                 | Robots                                                  | Social image                               | Structured data                                                                 | Notes                                                                           |
+| ---------------------------- | ------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Home                         | `index,follow`                                          | Site default or configured home image      | `WebPage`, site `WebSite`, publisher, visible `ItemList` blocks where practical | Main first impression; complete social object is required.                      |
+| Article                      | `index,follow` unless content visibility says otherwise | Generated article social JPG with fallback | `BlogPosting` or `Article`, `WebPage`, publisher, optional citation metadata    | Scholar meta and PDF link stay article-specific.                                |
+| Announcement                 | `index,follow` unless visibility says otherwise         | Announcement image or default social image | `BlogPosting` or `Article`, `WebPage`, publisher                                | No Scholar metadata by default.                                                 |
+| Articles/archive             | `index,follow`                                          | Default social image                       | `CollectionPage`, `ItemList`, breadcrumbs where useful                          | Emit visible entries, not necessarily every historical item if paginated later. |
+| Category/tag/collection page | `index,follow`                                          | Default social image                       | `CollectionPage`, `ItemList`, breadcrumbs                                       | ItemList should match visible article list.                                     |
+| Author index                 | `index,follow`                                          | Default social image                       | `CollectionPage`, `ItemList`                                                    | List authors or author pages represented visibly.                               |
+| Author detail                | `index,follow`                                          | Author image or default social image       | `ProfilePage`, `Person` or `Organization`, article `ItemList`                   | Anonymous/collective authors need explicit type handling.                       |
+| Bibliography                 | `index,follow`                                          | Default social image                       | `CollectionPage`, `ItemList`, conservative source entries                       | Use `CreativeWork` only until source typing improves.                           |
+| Search                       | `noindex,follow` by default                             | Default social image                       | Plain `WebPage` only                                                            | Static search landing page is useful to users, but not a search-result page.    |
+| 404                          | `noindex,follow`                                        | Default social image optional              | Plain `WebPage` only                                                            | Keep accessible navigation, no fake structured data.                            |
+| Legacy redirect              | `noindex,follow`                                        | None required                              | None required                                                                   | Canonical + meta refresh + fallback link are the contract.                      |
 
 ### Stable Entity ID Policy
 
