@@ -128,15 +128,17 @@ Current state:
 
 Cloudflare target:
 
-- Keep content `legacyPermalink` metadata as the source of truth.
+- Keep content `legacyPermalink` metadata as the source of truth for
+  article/announcement permalink redirects.
+- Keep hand-written compatibility redirects in `site/config/redirects.json`.
 - Generate a Cloudflare-compatible `_redirects` file into the deployed static
-  assets.
+  assets from both sources.
 - Do not ask authors to edit `_redirects` manually.
 
 Recommended generated format:
 
 ```text
-# Generated from article legacyPermalink metadata. Do not edit by hand.
+# Generated from site redirects and article legacyPermalink metadata. Do not edit by hand.
 /2021/11/30/what-is-a-meme/ /articles/what-is-a-meme/ 301
 ```
 
@@ -145,7 +147,8 @@ Why generate instead of hand-authoring:
 - Avoids drift between article metadata, Astro config, local verification, and
   Cloudflare deploys.
 - Keeps the site-instance authoring surface JSON-based and GUI-friendly.
-- Lets tests assert a single redirect source of truth.
+- Lets tests assert redirect parity while still allowing explicit
+  hand-written compatibility redirects.
 
 Implementation options:
 
@@ -296,8 +299,11 @@ Focused tests:
   - appends status code `301`;
   - rejects malformed metadata and duplicate sources;
   - writes into the configured output directory.
-- Legacy redirect parity test:
-  - Cloudflare redirects match content-derived legacy permalink redirects.
+- Legacy redirect parity tests:
+  - Cloudflare redirects include content-derived legacy permalink redirects;
+  - Cloudflare redirects include site-owned compatibility redirects;
+  - duplicate matching redirects collapse to one output line;
+  - conflicting redirect destinations fail generation.
 - CI workflow test:
   - deploy job uses `cloudflare/wrangler-action@v3`;
   - deploy job consumes `verified-dist`;
@@ -333,7 +339,8 @@ Cloudflare is now the production host. The cleanup state is:
 
 2. **Redirect generation**
    Add `build:cloudflare` to generate `dist/_redirects` from content
-   `legacyPermalink` metadata, then verify it in tests and build checks.
+   `legacyPermalink` metadata and `site/config/redirects.json`, then verify it
+   in tests and build checks.
 
 3. **CI preview deploy**
    Add a Cloudflare deploy job that consumes `verified-dist` and deploys only
@@ -354,8 +361,9 @@ Cloudflare is now the production host. The cleanup state is:
   behavior.
 
 - **Redirect drift.**
-  Generate `_redirects` from content `legacyPermalink` metadata and test the
-  output.
+  Generate `_redirects` from content `legacyPermalink` metadata plus
+  site-owned redirects, deduplicate matching entries, fail conflicting entries,
+  and test the output.
 
 - **Different 404 behavior from GitHub Pages.**
   Use `not_found_handling = "404-page"` and smoke test the status code.

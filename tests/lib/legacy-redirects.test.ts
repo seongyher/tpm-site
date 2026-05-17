@@ -6,6 +6,7 @@ import { describe, expect, test } from "bun:test";
 import matter from "gray-matter";
 
 import {
+  collectCloudflareRedirectRules,
   collectLegacyRedirectRules,
   defaultLegacyRedirectSources,
 } from "../../scripts/build/generate-cloudflare-redirects";
@@ -22,6 +23,16 @@ const publishableSources = [
   },
 ] as const;
 const publishablePattern = /\.mdx?$/i;
+const rootCategoryRedirects = {
+  "/aesthetics/": "/categories/aesthetics/",
+  "/game-studies/": "/categories/game-studies/",
+  "/history/": "/categories/history/",
+  "/irony/": "/categories/irony/",
+  "/memeculture/": "/categories/memeculture/",
+  "/metamemetics/": "/categories/metamemetics/",
+  "/philosophy/": "/categories/philosophy/",
+  "/politics/": "/categories/politics/",
+} as const;
 
 async function configRedirects() {
   // eslint-disable-next-line no-unsanitized/method -- Fixed local config path, not user-controlled input.
@@ -140,13 +151,16 @@ function withTrailingSlash(value: string) {
 }
 
 describe("legacy redirects", () => {
-  test("Astro redirects match publishable legacy permalink frontmatter", async () => {
-    expect(await configRedirects()).toEqual(
+  test("Astro redirects include publishable legacy permalink frontmatter and root categories", async () => {
+    const redirects = await configRedirects();
+
+    expect(redirects).toMatchObject(
       await expectedRedirectsFromPublishableFrontmatter(),
     );
+    expect(redirects).toMatchObject(rootCategoryRedirects);
   });
 
-  test("Cloudflare redirects match publishable legacy permalink frontmatter", async () => {
+  test("content-derived Cloudflare redirects match publishable legacy permalink frontmatter", async () => {
     expect(
       Object.fromEntries(
         (await collectLegacyRedirectRules(defaultLegacyRedirectSources())).map(
@@ -154,5 +168,15 @@ describe("legacy redirects", () => {
         ),
       ),
     ).toEqual(await expectedRedirectsFromPublishableFrontmatter());
+  });
+
+  test("Cloudflare redirects include site-owned root category redirects", async () => {
+    expect(
+      Object.fromEntries(
+        (
+          await collectCloudflareRedirectRules(defaultLegacyRedirectSources())
+        ).map((rule) => [rule.source, rule.destination]),
+      ),
+    ).toMatchObject(rootCategoryRedirects);
   });
 });

@@ -1761,10 +1761,6 @@ function isAstroRedirectFallbackPage(
   html: string,
   relativeHtmlPath: string,
 ): boolean {
-  if (!isDatedHtmlPage(relativeHtmlPath)) {
-    return false;
-  }
-
   return (
     /<title>Redirecting to: [^<]+<\/title>/i.test(html) &&
     /<meta\s+http-equiv=["']refresh["']\s+content=["']0;url=[^"']+["']>/i.test(

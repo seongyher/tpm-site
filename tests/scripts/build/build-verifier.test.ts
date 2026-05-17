@@ -1411,6 +1411,66 @@ describe("build verifier helpers", () => {
       expect(result.issues.unexpectedDatedPages).toEqual([]);
     }));
 
+  test("allows Astro generated root redirect fallback pages", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(
+        root,
+        "src/content/articles/history/published.md",
+        "---\ntitle: Published\n---\n",
+      );
+
+      await writeText(root, "dist/index.html", "");
+      await writeText(root, "dist/404.html", "");
+      await writeText(root, "dist/about/index.html", "");
+      await writeText(root, "dist/announcements/index.html", "");
+      await writeText(root, "dist/authors/index.html", "");
+      await writeText(root, "dist/articles/index.html", "");
+      await writeText(root, "dist/articles/all/index.html", "");
+      await writeText(root, "dist/bibliography/index.html", "");
+      await writeText(
+        root,
+        "dist/articles/published/index.html",
+        articleHtmlFixture("published"),
+      );
+      await writeArticlePdf(root, "published");
+      await writeText(root, "dist/categories/index.html", "");
+      await writeText(root, "dist/collections/index.html", "");
+      await writeText(root, "dist/tags/index.html", "");
+      await writeText(root, "dist/search/index.html", "");
+      await writeText(root, "dist/categories/history/index.html", "");
+      await writeText(root, "dist/feed.xml", "<feed>published</feed>");
+      await writeText(root, "dist/sitemap-index.xml", "<sitemap />");
+      await writeText(root, "dist/pagefind/pagefind.js", "");
+      await writeText(
+        root,
+        "dist/_astro/social-preview.jpg",
+        "small social jpg",
+      );
+      await writeText(
+        root,
+        "dist/memeculture/index.html",
+        '<!doctype html><title>Redirecting to: /categories/memeculture/</title><meta http-equiv="refresh" content="0;url=/categories/memeculture/"><meta name="robots" content="noindex"><link rel="canonical" href="https://thephilosophersmeme.com/categories/memeculture/"><body><a href="/categories/memeculture/">Redirecting from <code>/memeculture/</code> to <code>/categories/memeculture/</code></a></body>',
+      );
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+        expectedRedirects: {
+          "/memeculture/": "/categories/memeculture/",
+        },
+      });
+
+      expect(result.issues.invalidLegacyRedirects).toEqual([]);
+      expect(result.issues.metadataIssues).not.toContain(
+        "memeculture/index.html: missing meta description",
+      );
+      expect(result.issues.metadataIssues).not.toContain(
+        "memeculture/index.html: missing JSON-LD",
+      );
+    }));
+
   test("rejects dated pages that are not Astro redirect fallbacks", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
