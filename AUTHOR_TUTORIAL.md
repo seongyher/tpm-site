@@ -485,7 +485,22 @@ Do not put article images in `site/public/`, root-level folders, `uploads/`, or
 Alt text should describe the image for a reader who cannot see it. Keep it
 plain and specific.
 
-## 11. Check The Site Locally
+## 11. Add Tables
+
+Simple Markdown tables are fine when every column has a normal header:
+
+```md
+| Term | Count |
+| ---- | ----: |
+| Meme |    10 |
+```
+
+If the first column labels each row, or if the table has complicated header
+relationships, ask a maintainer for help using an HTML or MDX table with
+explicit row and column headers. Screen readers need those header relationships
+to understand the table correctly.
+
+## 12. Check The Site Locally
 
 If you can use the terminal, install dependencies once:
 
@@ -535,7 +550,7 @@ bun run preview:fresh
 
 Then open the local preview URL shown in the terminal.
 
-## 12. Common Problems
+## 13. Common Problems
 
 If the check says the filename is not URL-safe, rename the article so it uses
 only lowercase letters, numbers, and hyphens.

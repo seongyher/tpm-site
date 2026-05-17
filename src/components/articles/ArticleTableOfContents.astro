@@ -78,7 +78,7 @@ const headingsWithSectionLabels = headings.reduce<{
       class:list={[placementClasses[placement]]}
     >
       <details class:list={[detailsClasses[placement]]} open={initiallyOpen}>
-        <TableOfContentsToggle label={label} placement={placement} />
+        <TableOfContentsToggle placement={placement} />
         <ol class:list={[listClasses[placement]]} data-article-toc-list>
           {headingsWithSectionLabels.map(({ heading, sectionLabel }) => (
             <li>

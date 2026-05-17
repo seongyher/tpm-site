@@ -60,16 +60,15 @@ async function getHomePage(): Promise<PageEntry | undefined> {
 /**
  * Loads the active site instance's default social preview image.
  *
- * @returns The homepage hero light image used as the site-level social fallback.
+ * @returns The homepage hero dark image used as the site-level social fallback.
  */
 export async function getSiteSocialFallbackImage(): Promise<ImageMetadata> {
   const home = await getHomePage();
-  const fallbackImage = home?.data.hero?.lightImage;
+  const fallbackImage =
+    home?.data.hero?.darkImage ?? home?.data.hero?.lightImage;
 
   if (fallbackImage === undefined) {
-    throw new Error(
-      "Missing homepage hero light image for site social previews.",
-    );
+    throw new Error("Missing homepage hero image for site social previews.");
   }
 
   return fallbackImage;

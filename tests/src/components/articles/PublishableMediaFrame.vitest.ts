@@ -15,9 +15,13 @@ describe("PublishableMediaFrame", () => {
           src: imageMetadata("/example.png"),
         },
         label: "Read Example",
+        fetchpriority: "high",
+        imageWidths: [320, 640],
         prefetch: "hover",
+        quality: 72,
         renderHeight: 360,
         renderWidth: 640,
+        sizes: "(min-width: 48rem) 40rem, 100vw",
       },
     });
 
@@ -26,6 +30,8 @@ describe("PublishableMediaFrame", () => {
     expect(view).toContain('href="/articles/example/"');
     expect(view).toContain('aria-label="Read Example"');
     expect(view).toContain('data-astro-prefetch="hover"');
+    expect(view).toContain('fetchpriority="high"');
+    expect(view).toContain('sizes="(min-width: 48rem) 40rem, 100vw"');
     expect(view).toContain('alt="Example image"');
   });
 
@@ -43,6 +49,7 @@ describe("PublishableMediaFrame", () => {
 
     expect(view).toContain('data-publishable-media-has-image="false"');
     expect(view).toContain("data-publishable-media-fallback");
+    expect(view).toContain('aria-hidden="true"');
     expect(view).toContain("TPM");
   });
 });

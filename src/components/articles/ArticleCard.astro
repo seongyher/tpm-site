@@ -41,6 +41,8 @@ const hasImage = image !== undefined;
 const rowGridClasses = hasImage
   ? "grid-cols-[minmax(0,1fr)_5rem] sm:grid-cols-[minmax(0,1fr)_6rem] md:grid-cols-[minmax(0,1fr)_15rem] lg:grid-cols-[minmax(0,1fr)_18rem]"
   : "grid-cols-1";
+const thumbnailSizes =
+  "(min-width: 64rem) 18rem, (min-width: 48rem) 15rem, (min-width: 40rem) 6rem, 5rem";
 ---
 
 <article
@@ -57,8 +59,11 @@ const rowGridClasses = hasImage
         href={href}
         label={`Read ${title}`}
         image={image}
-        renderWidth={640}
-        renderHeight={360}
+        renderWidth={288}
+        renderHeight={176}
+        imageWidths={[80, 96, 240, 288, 480, 576]}
+        sizes={thumbnailSizes}
+        quality={72}
         prefetch="hover"
         data-article-card-image-link
         class="bg-muted focus-visible:outline-ring order-last size-20 justify-self-end transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 sm:size-24 md:h-40 md:w-60 lg:h-44 lg:w-72"

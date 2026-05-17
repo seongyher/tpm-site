@@ -73,6 +73,38 @@ export function installAnchoredPositioning(runtime = browserRuntime()): void {
   );
 }
 
+/**
+ * Repositions the anchored root nearest a browser event target.
+ *
+ * This keeps lazy loaders robust: if the positioning module is loaded because
+ * of a first pointer/focus/click intent, the root that caused the load is
+ * positioned immediately after installation instead of waiting for a second
+ * user interaction.
+ *
+ * @param target Event target that triggered anchored positioning.
+ * @param runtime Browser runtime dependencies.
+ */
+export function scheduleAnchoredRootFromTarget(
+  target: EventTarget | null,
+  runtime = browserRuntime(),
+): void {
+  if (runtime === null) {
+    return;
+  }
+
+  if (!(target instanceof runtime.classes.Element)) {
+    return;
+  }
+
+  const root = target.closest<HTMLElement>(rootSelectorClosest);
+
+  if (root === null) {
+    return;
+  }
+
+  scheduleRoot(runtime, root);
+}
+
 function initializeRoots(runtime: AnchoredPositioningRuntime): void {
   cleanupDisconnectedRoots();
   runtime.document

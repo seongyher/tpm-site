@@ -1,6 +1,5 @@
 const activeAttribute = "data-home-featured-active";
 const currentAttribute = "aria-current";
-const rotationIntervalMs = 9000;
 
 /**
  * Installs progressive carousel behavior for homepage featured items.
@@ -18,9 +17,7 @@ export function installHomeFeaturedCarousels(
 }
 
 function bindCarousel(carousel: HTMLElement, rootDocument: Document): void {
-  const rootWindow = rootDocument.defaultView;
-
-  if (rootWindow === null) {
+  if (rootDocument.defaultView === null) {
     return;
   }
 
@@ -49,34 +46,12 @@ function bindCarousel(carousel: HTMLElement, rootDocument: Document): void {
     ),
   );
   let activeIndex = activeSlideIndex(slides);
-  let timer: number | undefined;
-  let manualPause = false;
-  const reducedMotion = rootWindow.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  );
 
   showChrome(controls);
   showChrome(indicatorsRoot);
   showSlide(slides, indicators, activeIndex);
 
-  const pause = (): void => {
-    if (timer !== undefined) {
-      rootWindow.clearInterval(timer);
-      timer = undefined;
-    }
-  };
-  const start = (): void => {
-    if (manualPause || reducedMotion.matches || timer !== undefined) {
-      return;
-    }
-    timer = rootWindow.setInterval(() => {
-      activeIndex = nextIndex(activeIndex, slides.length, 1);
-      showSlide(slides, indicators, activeIndex);
-    }, rotationIntervalMs);
-  };
   const manualShow = (index: number): void => {
-    manualPause = true;
-    pause();
     activeIndex = index;
     showSlide(slides, indicators, activeIndex);
   };
@@ -92,18 +67,6 @@ function bindCarousel(carousel: HTMLElement, rootDocument: Document): void {
       manualShow(index);
     });
   });
-  carousel.addEventListener("focusin", pause);
-  carousel.addEventListener("pointerdown", () => {
-    manualPause = true;
-    pause();
-  });
-  carousel.addEventListener("mouseenter", pause);
-  carousel.addEventListener("mouseleave", start);
-  reducedMotion.addEventListener("change", () => {
-    pause();
-    start();
-  });
-  start();
 }
 
 function activeSlideIndex(slides: readonly HTMLElement[]): number {

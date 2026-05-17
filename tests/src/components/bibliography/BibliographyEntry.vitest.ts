@@ -19,6 +19,7 @@ describe("BibliographyEntry", () => {
     expect(view).toContain(">Source</a>");
     expect(view).toContain("https://example.com/source-with-a-very-long-path");
     expect(view).toContain("Cited by articles");
+    expect(view).not.toContain("<h3");
     expect(view).not.toContain("first:pt-0");
     expect(view).not.toContain("last:pb-0");
     expect(view).not.toContain("@book");

@@ -40,7 +40,7 @@ const mediaClasses = [
       class="min-h-4 leading-4 font-semibold uppercase"
       data-home-featured-meta
     />
-    <h3
+    <h2
       class="text-foreground m-0 line-clamp-2 min-w-0 text-2xl leading-tight font-semibold tracking-normal"
       data-home-featured-title
     >
@@ -52,7 +52,7 @@ const mediaClasses = [
       >
         {item.title}
       </TextLink>
-    </h3>
+    </h2>
     {
       item.description && (
         <p class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6">
@@ -82,6 +82,7 @@ const mediaClasses = [
     fallbackLabel={fallbackLabel}
     renderWidth={480}
     renderHeight={360}
+    fetchpriority={isActive ? "high" : undefined}
     loading={isActive ? "eager" : "lazy"}
     prefetch={linkPrefetch}
     class:list={[mediaClasses]}

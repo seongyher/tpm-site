@@ -81,4 +81,27 @@ describe("article page", () => {
       expect(view).not.toContain("[@");
     }
   });
+
+  test("preserves explicit semantic table headers in article content", async () => {
+    const article = (await getArticles()).find(
+      (entry) =>
+        entry.id ===
+        "wittgensteins-most-beloved-quote-was-real-but-its-fake-now",
+    );
+
+    if (article === undefined) {
+      throw new Error("Expected the Wittgenstein article fixture.");
+    }
+
+    const container = await createAstroTestContainer();
+    const view = await container.renderToString(ArticlePage, {
+      props: { article },
+      request: new Request(`${testSiteUrl}/articles/${articleSlug(article)}/`),
+    });
+
+    expect(view).toContain('<th scope="col">Phrasing</th>');
+    expect(view).toContain(
+      '<th scope="row">Dribble-Wittgenstein Phrasing</th>',
+    );
+  });
 });
