@@ -138,6 +138,12 @@ await mock.module("astro:content", () => ({
         data: {
           description: "Home page",
           hero: {
+            darkImage: {
+              format: "png",
+              height: 630,
+              src: "/home-dark.png",
+              width: 1200,
+            },
             lightImage: {
               format: "png",
               height: 630,
@@ -174,11 +180,11 @@ describe("content helpers", () => {
     ]);
   });
 
-  test("loads the active homepage hero as the site social fallback", async () => {
+  test("loads the active homepage dark hero as the site social fallback", async () => {
     const fallback = await getSiteSocialFallbackImage();
 
     expect(fallback).toMatchObject({
-      src: "/home.png",
+      src: "/home-dark.png",
     });
   });
 

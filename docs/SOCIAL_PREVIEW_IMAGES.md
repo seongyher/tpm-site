@@ -68,7 +68,9 @@ optimized asset in the generated static site.
 If a publishable page has no frontmatter image, the pipeline may use a site
 default image. The fallback should be a source asset that can be processed into
 the same `1200 x 630` JPG contract. It should not require authors to provide a
-placeholder image just to make metadata valid.
+placeholder image just to make metadata valid. The default site fallback uses
+the homepage hero dark image when configured, with the light image only as a
+compatibility fallback.
 
 ## Non-Goals
 
