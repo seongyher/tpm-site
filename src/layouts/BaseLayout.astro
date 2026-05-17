@@ -3,17 +3,32 @@ import "../styles/global.css";
 import "@site/theme.css";
 import "../styles/print.css";
 
+import { getImage } from "astro:assets";
+
 import SiteShell from "../components/layout/SiteShell.astro";
 import SiteHead from "../components/seo/SiteHead.astro";
+import { getSiteSocialFallbackImage } from "../lib/content";
+import {
+  normalizeRouteMetadata,
+  type RobotsPolicy,
+  type RouteMetadataKind,
+  type JsonLdNode,
+} from "../lib/metadata";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../lib/routes";
 import { siteConfig } from "../lib/site-config";
-import type { SocialPreviewImage } from "../lib/social-images";
+import {
+  type SocialPreviewImage,
+  socialPreviewImageViewModel,
+} from "../lib/social-images";
 
 interface Props {
   title?: string;
   description?: string;
   canonicalPath?: string;
   image?: SocialPreviewImage | undefined;
+  kind?: RouteMetadataKind;
+  robots?: RobotsPolicy | undefined;
+  structuredData?: readonly (JsonLdNode | undefined)[] | undefined;
   type?: "website" | "article";
 }
 
@@ -22,8 +37,27 @@ const {
   description = SITE_DESCRIPTION,
   canonicalPath = Astro.url.pathname,
   image,
+  kind = "page",
+  robots,
+  structuredData = [],
   type = "website",
 } = Astro.props;
+const metadata = normalizeRouteMetadata({
+  canonicalPath,
+  description,
+  kind,
+  robots,
+  title,
+});
+const socialPreviewImage =
+  image ??
+  (metadata.robots === "index,follow"
+    ? await socialPreviewImageViewModel({
+        alt: siteConfig.identity.title,
+        fallback: await getSiteSocialFallbackImage(),
+        optimize: getImage,
+      })
+    : undefined);
 ---
 
 <!doctype html>
@@ -35,10 +69,9 @@ const {
     <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <SiteHead
-      canonicalPath={canonicalPath}
-      description={description}
-      image={image}
-      title={title}
+      image={socialPreviewImage}
+      metadata={metadata}
+      structuredData={structuredData}
       type={type}
     />
     <slot name="head" />

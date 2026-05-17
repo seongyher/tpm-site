@@ -108,6 +108,10 @@ Only `title`, `description`, `date`, and `author` are required for a normal
 article. Tags and images are strongly recommended when they help readers find
 or understand the article.
 
+Use `updated` only when a published article has a meaningful revision that
+readers and search engines should know about. Do not change it for typo fixes,
+formatting-only edits, or build/tooling changes.
+
 Do not add `slug` or `category` fields. The filename becomes the slug. The
 folder becomes the category.
 
@@ -118,6 +122,7 @@ folder becomes the category.
 | `title`       | The article title shown on the page.                                   |
 | `description` | A short summary used in previews, search, RSS, and metadata.           |
 | `date`        | Publication date. Use `YYYY-MM-DD` unless a maintainer asks otherwise. |
+| `updated`     | Optional meaningful update date. Use only for substantive revisions.   |
 | `author`      | Must match an author name or alias in `content/authors/`.              |
 | `tags`        | Optional grouping labels. They become clickable tag pages.             |
 | `image`       | Optional preview image for article lists and social previews.          |
@@ -276,6 +281,7 @@ title: "Forum Update"
 description: "A short summary of the announcement."
 date: 2026-05-01
 author: "The Philosopher's Meme"
+updated: 2026-05-02
 tags: []
 ---
 
@@ -284,6 +290,9 @@ Announcement body starts here.
 
 Announcements appear on the announcements page, can appear in RSS, and the
 newest homepage-visible announcements appear on the homepage.
+
+The optional `updated` field works the same way as article `updated`: use it
+only for substantive changes to a published announcement.
 
 Use `visibility` if an announcement should have a direct link but stay out of
 homepage, RSS, search, or directory lists:
@@ -454,12 +463,18 @@ site/config/site.json
 Common things a webmaster might change there:
 
 - site title and description;
+- site identity metadata such as language, locale, publisher type, logo,
+  theme color, and official social profiles;
 - primary and footer navigation links;
 - homepage labels, discovery links, empty-state text, and list limits;
 - support links;
 - share-menu targets and social handles;
 - feature switches;
 - default visibility and PDF behavior.
+
+The `identity.sameAs` list should contain only official public profiles for
+the site or publication. These links are used for machine-readable publisher
+metadata and social/SEO context, not as ordinary footer links.
 
 Most omitted optional fields have safe defaults. For example, articles and
 announcements are visible in directories, search, RSS, and homepage surfaces by

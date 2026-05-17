@@ -560,3 +560,93 @@ they are useful context. Explicitly deferred work belongs in
 - [x] Update site-owner/author-facing docs where the refactor changed how
       homepage labels, discovery links, support/social/share settings, or
       content defaults should be understood.
+
+### Milestone 150: Metadata, Semantics, And Accessibility Audit
+
+- [x] Research authoritative metadata, structured-data, semantic HTML,
+      accessibility, social-preview, SEO, and machine-readability guidance for
+      the platform.
+- [x] Audit current source and built output across major route types for
+      missing or weak metadata, semantics, accessibility affordances, social
+      previews, SEO signals, and machine-readable data.
+- [x] Run a broad full-site axe sweep against the built preview, record the
+      difference between first-party template findings and third-party embed
+      iframe findings, and fold the results into the audit.
+- [x] Iterate the audit into a developer-ready handoff with implementation
+      order, non-goals, route metadata matrix, stable ID policy, acceptance
+      criteria, risks, and validation expectations.
+- [x] Write an actionable report with current-state findings, high-value
+      immediate fixes, forward-looking platform metadata opportunities,
+      frontmatter/config authoring recommendations, validation strategy, and
+      implementation milestones.
+      Documented in
+      `agent-docs/METADATA_SEMANTICS_ACCESSIBILITY_AUDIT.md`.
+
+### Milestone 151: Metadata Platform A-F Design Lock
+
+- [x] Re-read the metadata/semantics/accessibility audit and inspect current
+      SEO, site config, route, feed, sitemap, bibliography, and validation code.
+- [x] Finalize the implementation design for milestones A-F, including shared
+      metadata contracts, route policy, site identity, route structured data,
+      article/announcement enrichment, Scholar/bibliography metadata, and
+      validation tooling.
+- [x] Check the design for blockers, missing tests, route policy ambiguity,
+      visibility leaks, authoring complexity, and migration risk before
+      implementation begins.
+      Design lock: route policy and stable IDs live in a typed metadata helper;
+      `BaseLayout`/`SiteHead` render normalized head metadata and shared
+      site identity; page routes supply only route-specific kind/data and
+      structured-data nodes; article/announcement enrichment shares the
+      publishable-entry path where possible; build verification becomes the
+      blocking rendered-output guard.
+
+### Milestone 152: A - Metadata Contract
+
+- [x] Add the shared metadata domain, route metadata model, stable ID helpers,
+      robots policy, social image fallback policy, and sitemap/feed/content
+      index inclusion policy.
+- [x] Add focused tests for metadata normalization, route policy, visibility
+      behavior, and stable entity IDs.
+
+### Milestone 153: B - Site Identity And Head Metadata
+
+- [x] Extend site identity config/schema/docs for publisher identity, locale,
+      social handles, same-as links, theme color, and default social image.
+- [x] Update `SiteHead` to render complete route/social metadata and sitewide
+      `WebSite`/publisher JSON-LD from normalized metadata.
+- [x] Verify article and non-article social/head metadata output.
+
+### Milestone 154: C - Route Structured Data
+
+- [x] Add JSON-LD helpers for breadcrumbs, collection pages, item lists,
+      profile pages, and conservative bibliography/list metadata.
+- [x] Integrate route-family structured data across home, archives, authors,
+      categories, tags, collections, announcements, bibliography, and articles.
+- [x] Verify route JSON-LD parsing and visible-content alignment.
+
+### Milestone 155: D - Article And Announcement Enrichment
+
+- [x] Add article/announcement metadata enrichment including article Open Graph
+      tags, `inLanguage`, `isPartOf`, publisher references, tags/section, and
+      `mainEntityOfPage`.
+- [x] Add the explicit author-facing `updated` policy and emit modified-date
+      metadata only when present.
+- [x] Verify article and announcement output, including existing PDF/social
+      behavior.
+
+### Milestone 156: E - Scholar And Bibliography Metadata
+
+- [x] Add low-risk Scholar metadata fields and deterministic
+      `citation_reference` output where reliable.
+- [x] Add conservative bibliography structured data and fallback behavior for
+      articles with no references or malformed citation data.
+- [x] Verify Scholar and bibliography metadata tests.
+
+### Milestone 157: F - Metadata Validation Tooling
+
+- [x] Add built-output validation for route metadata, JSON-LD parsing, social
+      image coverage, robots/sitemap/feed/content-index alignment, and
+      parser-based image alt behavior.
+- [x] Add or update a first-party full-site accessibility scan with third-party
+      iframe reporting separated from blocking first-party failures.
+- [x] Update scripts/docs/package references as needed and run release checks.

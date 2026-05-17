@@ -38,7 +38,11 @@ export function createOverrideConfigs(): readonly ConfigWithExtends[] {
       },
     },
     {
-      files: ["src/components/seo/ArticleJsonLd.astro"],
+      files: [
+        "src/components/seo/AnnouncementJsonLd.astro",
+        "src/components/seo/ArticleJsonLd.astro",
+        "src/components/seo/SiteHead.astro",
+      ],
       rules: {
         "astro/no-set-html-directive": "off",
       },

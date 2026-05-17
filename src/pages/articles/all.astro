@@ -6,6 +6,7 @@ import { articleListItemsFromArchive } from "../../lib/article-list";
 import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getArticles, getCategories } from "../../lib/content";
+import { itemListJsonLd } from "../../lib/metadata";
 import { articlesArchiveUrl, SITE_TITLE } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 
@@ -22,6 +23,10 @@ const articleItems = articleListItemsFromArchive(archiveItems);
   title={titleWithSite("All Articles")}
   description={`Complete chronological article archive for ${SITE_TITLE}.`}
   canonicalPath={articlesArchiveUrl()}
+  kind="articles-archive"
+  structuredData={[
+    itemListJsonLd(articlesArchiveUrl(), articleItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <ArchiveListBlock

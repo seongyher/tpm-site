@@ -195,8 +195,20 @@ export const siteConfigSchema = z
       .object({
         description: z.string().min(1),
         language: z.string().min(2),
+        locale: z.string().min(2).default("en_US"),
+        logo: pathOrUrlSchema.optional(),
         publisherName: z.string().min(1).optional(),
+        publisherType: z
+          .enum(["organization", "person"])
+          .default("organization"),
+        sameAs: z.array(z.string().url()).default([]),
         shortTitle: z.string().min(1).optional(),
+        themeColor: z
+          .string()
+          .regex(/^#[\da-f]{6}$/iu, {
+            message: "Expected a 6-digit hex color such as #b65a35.",
+          })
+          .optional(),
         timezone: z.string().min(1).optional(),
         title: z.string().min(1),
         url: z.string().url(),

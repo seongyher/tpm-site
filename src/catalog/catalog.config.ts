@@ -167,6 +167,18 @@ export const componentCatalogIgnoreList = [
   },
   {
     lifecycle: "route-only",
+    path: "src/components/seo/AnnouncementJsonLd.astro",
+    reason:
+      "Non-visual announcement metadata component covered by SEO component and page render tests.",
+  },
+  {
+    lifecycle: "route-only",
+    path: "src/components/seo/PublishableOpenGraphMeta.astro",
+    reason:
+      "Non-visual Open Graph metadata component covered by SEO component and article render tests.",
+  },
+  {
+    lifecycle: "route-only",
     path: "src/components/seo/SiteHead.astro",
     reason: "Non-visual SEO component covered by SEO and page render tests.",
   },

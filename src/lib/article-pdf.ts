@@ -1,3 +1,4 @@
+import type { ArticleReferenceData } from "./article-references/model";
 import type { AuthorSummary } from "./authors";
 import {
   type ArticleEntry,
@@ -12,10 +13,14 @@ import { type SiteConfig, siteConfig } from "./site-config";
 
 /** Display-ready Scholar metadata for one article page. */
 export interface ArticleScholarMetaViewModel {
+  abstract: string;
   authors: readonly string[];
+  keywords: readonly string[];
+  language: string;
   pdf?: ArticlePdfViewModel | undefined;
   publicationDate: Date;
   publicationDateForScholar: string;
+  references: readonly string[];
   title: string;
 }
 
@@ -33,8 +38,11 @@ export interface ArticlePdfViewModel {
 
 interface ArticlePdfViewModelInput {
   article: ArticleEntry;
+  articleReferences?: ArticleReferenceData | undefined;
   authors?: readonly AuthorSummary[];
-  config?: Pick<SiteConfig, "contentDefaults" | "features"> | undefined;
+  config?:
+    | Pick<SiteConfig, "contentDefaults" | "features" | "identity">
+    | undefined;
   site?: string | undefined | URL;
 }
 
@@ -43,6 +51,7 @@ interface ArticlePdfViewModelInput {
  *
  * @param input Article entry, resolved authors, and optional site origin.
  * @param input.article Article content entry.
+ * @param input.articleReferences Parsed article note and citation data.
  * @param input.authors Resolved structured author summaries.
  * @param input.config Optional site config override for feature/default policy.
  * @param input.site Optional site origin for absolute Scholar URLs.
@@ -50,6 +59,7 @@ interface ArticlePdfViewModelInput {
  */
 export function articleScholarMetaViewModel({
   article,
+  articleReferences,
   authors = [],
   config = siteConfig,
   site,
@@ -61,7 +71,10 @@ export function articleScholarMetaViewModel({
   const title = entryTitle(article);
 
   return {
+    abstract: article.data.description,
     authors: authorNames,
+    keywords: article.data.tags,
+    language: config.identity.language,
     pdf: articlePdfEnabled(article, config)
       ? {
           articleUrl: absoluteUrl(articleUrl(slug), site),
@@ -76,6 +89,7 @@ export function articleScholarMetaViewModel({
       : undefined,
     publicationDate,
     publicationDateForScholar,
+    references: scholarCitationReferences(articleReferences),
     title,
   };
 }
@@ -159,4 +173,25 @@ function articlePdfAuthorNames(
   }
 
   return [authorName(article)];
+}
+
+function scholarCitationReferences(
+  articleReferences: ArticleReferenceData | undefined,
+): string[] {
+  if (articleReferences === undefined) {
+    return [];
+  }
+
+  return articleReferences.citations
+    .map((citation) =>
+      citation.definition.children
+        .map((block) => block.text)
+        .join(" ")
+        .replace(/\s+/gu, " ")
+        .trim(),
+    )
+    .filter((reference) => reference.length > 0)
+    .filter(
+      (reference, index, references) => references.indexOf(reference) === index,
+    );
 }

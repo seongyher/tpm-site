@@ -46,6 +46,8 @@ const safeRel = target === "_blank" && rel === undefined ? "noreferrer" : rel;
   <Image
     src={logo}
     alt=""
+    aria-hidden="true"
+    role="presentation"
     layout="fixed"
     loading="eager"
     class:list={[logoClass]}

@@ -272,6 +272,8 @@ Notes:
 - `title` is the article title shown on the page.
 - `description` should be brief and useful.
 - `date` should use `YYYY-MM-DD`.
+- `updated` is optional. Use it only for substantive revisions after
+  publication, not typo fixes or formatting-only edits.
 - `author` should match an existing author display name or alias in
   `site/content/authors/`.
 - `tags` are optional, but useful.
@@ -671,6 +673,7 @@ Before asking for review:
 - New categories, if any, have a matching folder and JSON metadata file.
 - The filename slug is URL-safe.
 - The frontmatter has `title`, `description`, `date`, and `author`.
+- `updated`, if present, marks a real post-publication revision.
 - The `author` value matches an existing author profile or a maintainer has
   added the new author metadata.
 - Images live under `site/assets/`.

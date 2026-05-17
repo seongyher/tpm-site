@@ -126,6 +126,8 @@ describe("build verifier", () => {
           catalogLeaks: [],
           draftLeaks: [],
           invalidLegacyRedirects: [],
+          imageAltIssues: [],
+          metadataIssues: [],
           missingArticleJsonLd: [],
           missingLegacyRedirects: [],
           missingRequired: [],

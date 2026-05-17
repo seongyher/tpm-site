@@ -1,0 +1,21 @@
+---
+interface Props {
+  author: string;
+  publishedAt: Date;
+  section?: string | undefined;
+  tags?: readonly string[] | undefined;
+  updatedAt?: Date | undefined;
+}
+
+const { author, publishedAt, section, tags = [], updatedAt } = Astro.props;
+---
+
+<meta property="article:published_time" content={publishedAt.toISOString()} />
+{
+  updatedAt && (
+    <meta property="article:modified_time" content={updatedAt.toISOString()} />
+  )
+}
+{section && <meta property="article:section" content={section} />}
+<meta property="article:author" content={author} />
+{tags.map((tag) => <meta property="article:tag" content={tag} />)}

@@ -14,10 +14,12 @@ import ReadingBody from "../components/layout/ReadingBody.astro";
 import ReadingNavigationLinks from "../components/navigation/ReadingNavigationLinks.astro";
 import ArticleJsonLd from "../components/seo/ArticleJsonLd.astro";
 import ArticleScholarMeta from "../components/seo/ArticleScholarMeta.astro";
+import PublishableOpenGraphMeta from "../components/seo/PublishableOpenGraphMeta.astro";
 import type { ArticleReferenceData } from "../lib/article-references/model";
 import type { ArticleTableOfContentsHeading } from "../lib/article-toc";
 import { articlePageViewModel } from "../lib/article-page-view-model";
-import type { ArticleEntry } from "../lib/routes";
+import { breadcrumbListJsonLd } from "../lib/metadata";
+import { articlesIndexUrl, type ArticleEntry } from "../lib/routes";
 import BaseLayout from "./BaseLayout.astro";
 
 interface Props {
@@ -40,6 +42,7 @@ const {
 } = Astro.props;
 const page = await articlePageViewModel({
   article,
+  articleReferences,
   optimizeImage: getImage,
   origin: Astro.url.origin,
   site: Astro.site,
@@ -52,6 +55,21 @@ const page = await articlePageViewModel({
   description={page.article.description}
   canonicalPath={page.article.canonicalPath}
   image={page.socialPreviewImage}
+  kind="article"
+  structuredData={[
+    breadcrumbListJsonLd(
+      page.article.canonicalPath,
+      [
+        { href: "/", title: "Home" },
+        { href: articlesIndexUrl(), title: "Articles" },
+        ...(page.categoryHref && page.category
+          ? [{ href: page.categoryHref, title: page.category.title }]
+          : []),
+        { href: page.article.canonicalPath, title: page.article.title },
+      ],
+      Astro.site,
+    ),
+  ]}
   type="article"
 >
   <ArticleJsonLd
@@ -62,6 +80,14 @@ const page = await articlePageViewModel({
     image={page.socialPreviewImage}
   />
   <ArticleScholarMeta slot="head" metadata={page.scholarMeta} />
+  <PublishableOpenGraphMeta
+    slot="head"
+    author={page.article.author}
+    publishedAt={page.article.date}
+    section={page.category?.title}
+    tags={article.data.tags}
+    updatedAt={article.data.updated}
+  />
   <ReadingBody>
     {
       page.showTableOfContents && (

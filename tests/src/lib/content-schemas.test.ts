@@ -42,11 +42,13 @@ describe("content schemas", () => {
       image: { format: "jpg", height: 640, src: "/article.jpg", width: 960 },
       tags: ["meme history", "c++"],
       title: "Article Title",
+      updated: "2022-05-01",
     });
 
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect("pdf" in parsed.data && parsed.data.pdf).toBe(true);
+      expect(parsed.data.updated).toEqual(new Date("2022-05-01"));
     }
     expect(
       schema.safeParse({

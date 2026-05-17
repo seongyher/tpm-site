@@ -3,6 +3,7 @@ import TermOverviewBlock from "../../components/blocks/TermOverviewBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getTags } from "../../lib/content";
+import { itemListJsonLd } from "../../lib/metadata";
 import { tagsIndexUrl } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 
@@ -17,6 +18,8 @@ const tagItems = (await getTags()).map((tag) => ({
   title={titleWithSite("Tags")}
   description="Browse articles by tag."
   canonicalPath={tagsIndexUrl()}
+  kind="tag-index"
+  structuredData={[itemListJsonLd(tagsIndexUrl(), tagItems, Astro.site)]}
 >
   <BrowsingBody>
     <TermOverviewBlock

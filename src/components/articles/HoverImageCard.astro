@@ -74,6 +74,8 @@ function aspectRatioOrFallback(image: ImageMetadata): number {
       <Image
         src={image}
         alt={alt}
+        aria-hidden={alt === "" ? "true" : undefined}
+        role={alt === "" ? "presentation" : undefined}
         format="webp"
         widths={previewWidths.length > 0 ? previewWidths : [optimizedWidth]}
         sizes={`${displayWidthRem.toFixed(3)}rem`}

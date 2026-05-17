@@ -11,6 +11,7 @@ import {
   scholarPublicationDate,
 } from "../../src/lib/article-pdf";
 import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
+import { sitemapIncludesPath } from "../../src/lib/metadata";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import {
@@ -62,7 +63,9 @@ export interface BuildVerificationIssues {
   brokenLinks: string[];
   catalogLeaks: string[];
   draftLeaks: string[];
+  imageAltIssues: string[];
   invalidLegacyRedirects: string[];
+  metadataIssues: string[];
   missingArticleJsonLd: string[];
   missingLegacyRedirects: string[];
   missingRequired: string[];
@@ -239,74 +242,38 @@ export function formatBuildVerificationReport(
   }
 
   const lines = ["Build verification failed."];
+  const sections: Array<[string, readonly string[], number?]> = [
+    ["Article PDF issues", result.issues.articlePdfIssues, 50],
+    ["Missing", result.issues.missingRequired],
+    ["Missing legacy redirects", result.issues.missingLegacyRedirects, 50],
+    ["Invalid legacy redirects", result.issues.invalidLegacyRedirects, 50],
+    ["Metadata issues", result.issues.metadataIssues, 50],
+    ["Image alt issues", result.issues.imageAltIssues, 50],
+    ["Broken links", result.issues.brokenLinks, 50],
+    ["Unexpected component catalog output", result.issues.catalogLeaks],
+    ["Article count mismatch", result.issues.articleCountIssues],
+    [
+      "Unexpected static-page client scripts",
+      result.issues.unexpectedClientScripts,
+    ],
+    ["Unexpected generated dated pages", result.issues.unexpectedDatedPages],
+    ["Draft content leaked into generated metadata", result.issues.draftLeaks],
+    ["Missing article JSON-LD", result.issues.missingArticleJsonLd, 50],
+    ["Unexpected source maps", result.issues.sourceMaps, 50],
+    ["Social preview image issues", result.issues.socialImageIssues, 50],
+    [
+      "Unexpected hydration boundaries",
+      result.issues.unexpectedHydrationBoundaries,
+      50,
+    ],
+  ];
 
-  if (result.issues.articlePdfIssues.length > 0) {
-    lines.push(
-      `Article PDF issues: ${JSON.stringify(result.issues.articlePdfIssues.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.missingRequired.length > 0) {
-    lines.push(`Missing: ${JSON.stringify(result.issues.missingRequired)}`);
-  }
-  if (result.issues.missingLegacyRedirects.length > 0) {
-    lines.push(
-      `Missing legacy redirects: ${JSON.stringify(result.issues.missingLegacyRedirects.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.invalidLegacyRedirects.length > 0) {
-    lines.push(
-      `Invalid legacy redirects: ${JSON.stringify(result.issues.invalidLegacyRedirects.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.brokenLinks.length > 0) {
-    lines.push(
-      `Broken links: ${JSON.stringify(result.issues.brokenLinks.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.catalogLeaks.length > 0) {
-    lines.push(
-      `Unexpected component catalog output: ${JSON.stringify(result.issues.catalogLeaks)}`,
-    );
-  }
-  if (result.issues.articleCountIssues.length > 0) {
-    lines.push(
-      `Article count mismatch: ${JSON.stringify(result.issues.articleCountIssues)}`,
-    );
-  }
-  if (result.issues.unexpectedClientScripts.length > 0) {
-    lines.push(
-      `Unexpected static-page client scripts: ${JSON.stringify(result.issues.unexpectedClientScripts)}`,
-    );
-  }
-  if (result.issues.unexpectedDatedPages.length > 0) {
-    lines.push(
-      `Unexpected generated dated pages: ${JSON.stringify(result.issues.unexpectedDatedPages)}`,
-    );
-  }
-  if (result.issues.draftLeaks.length > 0) {
-    lines.push(
-      `Draft content leaked into generated metadata: ${JSON.stringify(result.issues.draftLeaks)}`,
-    );
-  }
-  if (result.issues.missingArticleJsonLd.length > 0) {
-    lines.push(
-      `Missing article JSON-LD: ${JSON.stringify(result.issues.missingArticleJsonLd.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.sourceMaps.length > 0) {
-    lines.push(
-      `Unexpected source maps: ${JSON.stringify(result.issues.sourceMaps.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.socialImageIssues.length > 0) {
-    lines.push(
-      `Social preview image issues: ${JSON.stringify(result.issues.socialImageIssues.slice(0, 50))}`,
-    );
-  }
-  if (result.issues.unexpectedHydrationBoundaries.length > 0) {
-    lines.push(
-      `Unexpected hydration boundaries: ${JSON.stringify(result.issues.unexpectedHydrationBoundaries.slice(0, 50))}`,
-    );
+  for (const [label, values, limit] of sections) {
+    if (values.length > 0) {
+      lines.push(
+        `${label}: ${JSON.stringify(limit === undefined ? values : values.slice(0, limit))}`,
+      );
+    }
   }
 
   return lines.join("\n");
@@ -654,6 +621,10 @@ export async function verifyBuild({
       await inspectFeedEnclosures(distDir, file, issues);
     }
 
+    if (/\/?sitemap-\d+\.xml$/u.test(toPosix(path.relative(distDir, file)))) {
+      await inspectSitemapPolicy(distDir, file, issues);
+    }
+
     await inspectDraftLeaks(distDir, file, draftSlugs, issues);
   }
 
@@ -772,6 +743,8 @@ function emptyIssues(): BuildVerificationIssues {
     catalogLeaks: [],
     draftLeaks: [],
     invalidLegacyRedirects: [],
+    imageAltIssues: [],
+    metadataIssues: [],
     missingArticleJsonLd: [],
     missingLegacyRedirects: [],
     missingRequired: [],
@@ -825,6 +798,8 @@ function hasIssues(issues: BuildVerificationIssues): boolean {
     issues.catalogLeaks.length > 0 ||
     issues.draftLeaks.length > 0 ||
     issues.invalidLegacyRedirects.length > 0 ||
+    issues.imageAltIssues.length > 0 ||
+    issues.metadataIssues.length > 0 ||
     issues.missingArticleJsonLd.length > 0 ||
     issues.missingLegacyRedirects.length > 0 ||
     issues.missingRequired.length > 0 ||
@@ -932,6 +907,35 @@ async function inspectFeedEnclosures(
   }
 }
 
+async function inspectSitemapPolicy(
+  distDir: string,
+  file: string,
+  issues: BuildVerificationIssues,
+): Promise<void> {
+  const xml = await readFile(file, "utf8");
+  const relativePath = toPosix(path.relative(distDir, file));
+  const locPattern = /<loc>([^<]+)<\/loc>/giu;
+  let match: null | RegExpExecArray;
+
+  while ((match = locPattern.exec(xml)) !== null) {
+    const loc = match[1];
+    if (loc === undefined) {
+      continue;
+    }
+
+    const pathname = absoluteUrlPathname(loc);
+    if (pathname === undefined) {
+      issues.metadataIssues.push(
+        `${relativePath}: sitemap contains invalid URL ${loc}`,
+      );
+    } else if (!sitemapIncludesPath(pathname)) {
+      issues.metadataIssues.push(
+        `${relativePath}: sitemap includes noindex route ${pathname}`,
+      );
+    }
+  }
+}
+
 function metaContentValues(html: string, metaName: string): string[] {
   return metaContentValuesByAttribute(html, "name", metaName);
 }
@@ -1019,11 +1023,35 @@ function localGeneratedSocialImagePath(
   return path.join(distDir, decodeURIComponent(pathname.slice(1)));
 }
 
+/**
+ * Extracts an absolute URL pathname without constructing a mutable URL object.
+ *
+ * @param value Absolute URL string.
+ * @returns URL pathname, or `undefined` for non-absolute input.
+ */
 function absoluteUrlPathname(value: string): string | undefined {
-  const match = /^[a-z][a-z\d+.-]*:\/\/[^/?#]+(?<pathname>\/[^?#]*)/iu.exec(
-    value,
+  const authoritySeparator = value.indexOf("://");
+  if (authoritySeparator <= 0) {
+    return undefined;
+  }
+
+  const pathStart = value.indexOf("/", authoritySeparator + 3);
+  if (pathStart === -1) {
+    return "/";
+  }
+
+  const queryStart = value.indexOf("?", pathStart);
+  const hashStart = value.indexOf("#", pathStart);
+  const pathEndCandidates = [queryStart, hashStart].filter(
+    (index) => index >= 0,
   );
-  return match?.groups?.["pathname"];
+  const pathEnd =
+    pathEndCandidates.length === 0
+      ? value.length
+      : Math.min(...pathEndCandidates);
+
+  const pathname = value.slice(pathStart, pathEnd);
+  return pathname === "" ? "/" : pathname;
 }
 
 function htmlAttributeValue(
@@ -1077,6 +1105,141 @@ function scholarPdfMetaMatches(value: string, pdfHref: string): boolean {
   return pathname === pdfHref;
 }
 
+function inspectHtmlMetadata(
+  html: string,
+  relativeHtmlPath: string,
+  issues: BuildVerificationIssues,
+): void {
+  const title = htmlTitleText(html);
+  const canonicalLinks = htmlTags(html, "link").filter(
+    (tag) => htmlAttributeValue(tag, "rel") === "canonical",
+  );
+  const description = metaContentValues(html, "description")[0];
+  const robots = metaContentValues(html, "robots")[0];
+  const jsonLdScripts = htmlScriptTextsByType(html, "application/ld+json");
+
+  if (title === "") {
+    issues.metadataIssues.push(`${relativeHtmlPath}: missing document title`);
+  }
+
+  if (canonicalLinks.length !== 1) {
+    issues.metadataIssues.push(
+      `${relativeHtmlPath}: expected exactly one canonical link, found ${canonicalLinks.length}`,
+    );
+  } else if (
+    htmlAttributeValue(canonicalLinks[0] ?? "", "href")?.trim() === ""
+  ) {
+    issues.metadataIssues.push(`${relativeHtmlPath}: canonical link is empty`);
+  }
+
+  if (description === undefined || description.trim() === "") {
+    issues.metadataIssues.push(`${relativeHtmlPath}: missing meta description`);
+  }
+
+  if (robots === undefined || robots.trim() === "") {
+    issues.metadataIssues.push(`${relativeHtmlPath}: missing robots policy`);
+  }
+
+  if (jsonLdScripts.length === 0) {
+    issues.metadataIssues.push(`${relativeHtmlPath}: missing JSON-LD`);
+  }
+
+  for (const script of jsonLdScripts) {
+    try {
+      JSON.parse(script.trim());
+    } catch {
+      issues.metadataIssues.push(`${relativeHtmlPath}: invalid JSON-LD script`);
+    }
+  }
+
+  inspectHtmlImageAlt(html, relativeHtmlPath, issues);
+
+  if (robots !== undefined && !robots.includes("noindex")) {
+    inspectShareableHtmlMetadata(html, relativeHtmlPath, issues);
+  }
+}
+
+function inspectHtmlImageAlt(
+  html: string,
+  relativeHtmlPath: string,
+  issues: BuildVerificationIssues,
+): void {
+  htmlTags(html, "img").forEach((image, index) => {
+    const role = htmlAttributeValue(image, "role");
+    const isDecorative =
+      htmlAttributeValue(image, "aria-hidden") === "true" ||
+      role === "presentation" ||
+      role === "none";
+
+    if (!isDecorative && htmlAttributeValue(image, "alt") === undefined) {
+      const src = htmlAttributeValue(image, "src") ?? `image ${index + 1}`;
+      issues.imageAltIssues.push(`${relativeHtmlPath}: ${src} is missing alt`);
+    }
+  });
+}
+
+function inspectShareableHtmlMetadata(
+  html: string,
+  relativeHtmlPath: string,
+  issues: BuildVerificationIssues,
+): void {
+  const requiredMeta = [
+    ["property", "og:site_name"],
+    ["property", "og:locale"],
+    ["property", "og:type"],
+    ["property", "og:title"],
+    ["property", "og:description"],
+    ["property", "og:url"],
+    ["property", "og:image"],
+    ["name", "twitter:card"],
+    ["name", "twitter:title"],
+    ["name", "twitter:description"],
+    ["name", "twitter:image"],
+  ] as const;
+
+  for (const [attributeName, attributeValue] of requiredMeta) {
+    const value =
+      attributeName === "name"
+        ? metaContentValues(html, attributeValue)[0]
+        : metaPropertyContentValues(html, attributeValue)[0];
+    if (value === undefined || value.trim() === "") {
+      issues.metadataIssues.push(
+        `${relativeHtmlPath}: missing ${attributeName}="${attributeValue}" metadata`,
+      );
+    }
+  }
+}
+
+function htmlScriptTextsByType(html: string, type: string): string[] {
+  const texts: string[] = [];
+  const scriptPattern = /<script(?<attributes>[^>]*)>([\s\S]*?)<\/script>/giu;
+  let match: null | RegExpExecArray;
+
+  while ((match = scriptPattern.exec(html)) !== null) {
+    const attributes = match.groups?.["attributes"];
+    if (
+      attributes !== undefined &&
+      htmlAttributeValue(`<script${attributes}>`, "type") === type
+    ) {
+      texts.push(match[2] ?? "");
+    }
+  }
+
+  return texts;
+}
+
+function htmlTags(html: string, tagName: "img" | "link"): string[] {
+  const tagPattern = tagName === "img" ? /<img\b[^>]*>/giu : /<link\b[^>]*>/giu;
+
+  return Array.from(html.matchAll(tagPattern), (match) => match[0]);
+}
+
+function htmlTitleText(html: string): string {
+  const titleMatch = /<title\b[^>]*>([\s\S]*?)<\/title>/iu.exec(html);
+
+  return decodeHtmlAttributeValue(titleMatch?.[1]?.trim() ?? "");
+}
+
 async function inspectHtmlFile(
   distDir: string,
   file: string,
@@ -1114,6 +1277,8 @@ async function inspectHtmlFile(
 
     return;
   }
+
+  inspectHtmlMetadata(text, relativeHtmlPath, issues);
 
   if (
     isArticleHtmlPath(relativeHtmlPath) &&

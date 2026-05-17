@@ -6,6 +6,7 @@ import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { bibliographyEntriesFromArticleReferences } from "../lib/bibliography";
 import { getArticles } from "../lib/content";
+import { itemListJsonLd } from "../lib/metadata";
 import { bibliographyUrl, SITE_TITLE } from "../lib/routes";
 import { titleWithSite } from "../lib/site-config";
 import { articleReferencesFromFrontmatter } from "../remark-plugins/articleReferences";
@@ -22,12 +23,21 @@ const articleReferences = await Promise.all(
   }),
 );
 const entries = bibliographyEntriesFromArticleReferences(articleReferences);
+const bibliographyItems = entries.map((entry) => ({
+  description: entry.display.authors,
+  href: `${bibliographyUrl()}#${entry.id}`,
+  title: entry.display.title ?? entry.sourceText,
+}));
 ---
 
 <BaseLayout
   title={titleWithSite("Bibliography")}
   description={`Sources cited by articles in ${SITE_TITLE}.`}
   canonicalPath={bibliographyUrl()}
+  kind="bibliography"
+  structuredData={[
+    itemListJsonLd(bibliographyUrl(), bibliographyItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <BibliographyPage entries={entries} />

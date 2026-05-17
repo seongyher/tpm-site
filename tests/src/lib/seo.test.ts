@@ -35,12 +35,32 @@ describe("SEO helpers", () => {
   });
 
   test("omits image and category metadata when unavailable", () => {
-    expect(
-      articleBlogPostingJsonLd(article(), undefined, undefined),
-    ).toMatchObject({
-      articleSection: undefined,
-      image: undefined,
+    const jsonLd = articleBlogPostingJsonLd(article(), undefined, undefined);
+
+    expect(jsonLd).toMatchObject({
+      "@id": "https://thephilosophersmeme.com/articles/title/#article",
+      inLanguage: "en",
+      isPartOf: { "@id": "https://thephilosophersmeme.com/#website" },
+      mainEntityOfPage: {
+        "@id": "https://thephilosophersmeme.com/articles/title/#webpage",
+      },
+      publisher: { "@id": "https://thephilosophersmeme.com/#publisher" },
       url: "https://thephilosophersmeme.com/articles/title/",
+    });
+    expect("articleSection" in jsonLd).toBe(false);
+    expect("dateModified" in jsonLd).toBe(false);
+    expect("image" in jsonLd).toBe(false);
+  });
+
+  test("emits modified dates only when article frontmatter provides them", () => {
+    expect(
+      articleBlogPostingJsonLd(
+        article({ updated: new Date("2022-02-01T00:00:00Z") }),
+        undefined,
+        "https://example.com",
+      ),
+    ).toMatchObject({
+      dateModified: "2022-02-01T00:00:00.000Z",
     });
   });
 

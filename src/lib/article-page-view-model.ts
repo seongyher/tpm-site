@@ -15,6 +15,7 @@ import {
   type ArticleScholarMetaViewModel,
   articleScholarMetaViewModel,
 } from "./article-pdf";
+import type { ArticleReferenceData } from "./article-references/model";
 import {
   type ArticleTableOfContentsHeading,
   hasUsefulTableOfContents,
@@ -87,6 +88,7 @@ export interface ArticlePageViewModel {
 
 interface ArticlePageViewModelInput {
   article: ArticleEntry;
+  articleReferences?: ArticleReferenceData | undefined;
   config?: SiteConfig | undefined;
   content?: Partial<ArticlePageContentInput> | undefined;
   optimizeImage: SocialPreviewImageOptimizer;
@@ -107,6 +109,7 @@ interface ArticlePageContentInput {
  *
  * @param input Article, site URL data, optimizer adapter, and optional fixtures.
  * @param input.article Article content entry.
+ * @param input.articleReferences Parsed article note and citation data.
  * @param input.config Optional site configuration override.
  * @param input.content Optional content fixture override.
  * @param input.optimizeImage Astro image optimizer adapter.
@@ -117,6 +120,7 @@ interface ArticlePageContentInput {
  */
 export async function articlePageViewModel({
   article,
+  articleReferences,
   config = siteConfig,
   content,
   optimizeImage,
@@ -149,6 +153,7 @@ export async function articlePageViewModel({
       : undefined;
   const scholarMeta = articleScholarMetaViewModel({
     article,
+    articleReferences,
     authors,
     config,
     site,

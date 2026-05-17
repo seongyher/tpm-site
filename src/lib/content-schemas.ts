@@ -146,6 +146,7 @@ function createArticleSchema(
     legacyPermalink: z.string().optional(),
     tags: tagListSchema(),
     title: z.string().min(1),
+    updated: z.coerce.date().optional(),
     visibility: publishableVisibilitySchema(defaults.visibility),
   };
 

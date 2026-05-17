@@ -1,0 +1,23 @@
+---
+import type { AnnouncementEntry } from "../../lib/routes";
+import { announcementUrl } from "../../lib/routes";
+import { publishableBlogPostingJsonLd, safeJsonLd } from "../../lib/seo";
+import type { SocialPreviewImage } from "../../lib/social-images";
+
+interface Props {
+  announcement: AnnouncementEntry;
+  image?: SocialPreviewImage | undefined;
+}
+
+const { announcement, image } = Astro.props;
+const jsonLd = safeJsonLd(
+  publishableBlogPostingJsonLd(announcement, Astro.site, {
+    canonicalPath: announcementUrl(announcement.id),
+    fallbackAuthorName: announcement.data.author,
+    image: image?.src,
+    section: "Announcements",
+  }),
+);
+---
+
+<script is:inline type="application/ld+json" set:html={jsonLd} />

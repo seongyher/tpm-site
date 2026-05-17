@@ -6,7 +6,8 @@ import { articleListItemsFromArchive } from "../../lib/article-list";
 import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getCategories } from "../../lib/content";
-import { categoryUrl } from "../../lib/routes";
+import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
+import { categoriesIndexUrl, categoryUrl } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 import { categoryStaticPaths } from "../../lib/static-paths";
 
@@ -31,6 +32,19 @@ const categoryItems = articleListItemsFromArchive(
   description={category.description ??
     `Articles filed under ${category.title}.`}
   canonicalPath={categoryUrl(category.slug)}
+  kind="category-detail"
+  structuredData={[
+    breadcrumbListJsonLd(
+      categoryUrl(category.slug),
+      [
+        { href: "/", title: "Home" },
+        { href: categoriesIndexUrl(), title: "Categories" },
+        { href: categoryUrl(category.slug), title: category.title },
+      ],
+      Astro.site,
+    ),
+    itemListJsonLd(categoryUrl(category.slug), categoryItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <ArchiveListBlock
