@@ -695,3 +695,28 @@ they are useful context. Explicitly deferred work belongs in
       remaining profile expansion opportunities, and validation expectations.
 - [x] Run focused metadata/schema/component tests and release checks, fix any
       issues, and record verification before marking G complete.
+
+### Milestone 162: Traffic Advice Static Policy
+
+- [x] Add `/.well-known/traffic-advice` as a Cloudflare-served static asset
+      that explicitly allows private prefetch proxy traffic for the public
+      static site.
+- [x] Add the required static asset headers so Cloudflare serves the endpoint
+      with the traffic-advice JSON MIME type.
+- [x] Verify the file is copied into the release build, the headers file is
+      present, and the release checks still pass.
+      Verified with `bun test tests/config/static-public-files.test.ts --reporter=dots`,
+      `bun --silent run test:config`, `bun run check:release`, and direct
+      inspection of `dist/.well-known/traffic-advice` and `dist/_headers`.
+
+### Milestone 163: Cloudflare Immutable Astro Asset Cache Policy
+
+- [x] Add a Cloudflare `_headers` rule that applies long-lived immutable
+      caching only to Astro fingerprinted `/_astro/*` assets.
+- [x] Verify the cache rule is covered by config tests and copied into the
+      release build.
+- [x] Update Cloudflare/static author docs to explain why `_astro` gets
+      immutable caching and why non-fingerprinted outputs stay revalidated.
+      Verified with `bun test tests/config/static-public-files.test.ts --reporter=dots`,
+      `bun --silent run test:config`, `bun run check:release`, `git diff --check`,
+      and direct inspection of `dist/_headers`.

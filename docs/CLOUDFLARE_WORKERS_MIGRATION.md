@@ -197,24 +197,39 @@ Open question:
 
 ## Headers
 
-Cloudflare Static Assets supports `_headers` in the asset directory. We do not
-need `_headers` to migrate, but it is worth considering after the deploy is
-stable.
+Cloudflare Static Assets supports `_headers` in the asset directory. The active
+site uses `_headers` for extensionless compatibility endpoints that need a
+specific MIME type and for long-lived caching of Astro fingerprinted assets.
 
-Potential future headers:
+Current headers:
 
 ```text
 /_astro/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=31556952, immutable
+
+/.well-known/traffic-advice
+  Content-Type: application/trafficadvice+json; charset=utf-8
+  X-Content-Type-Options: nosniff
 ```
 
-Reasons to defer:
+`/_astro/*` is intentionally the only immutable cache rule. Astro emits source
+assets such as optimized images, CSS, and JavaScript into `_astro` with
+fingerprinted filenames, so a changed asset receives a changed URL. HTML, RSS,
+sitemaps, PDFs, Pagefind files, root icons, and other non-fingerprinted static
+files should keep Cloudflare's default revalidation behavior or receive a
+separate, shorter policy after measurement.
 
-- Cloudflare already applies default `Cache-Control`, `ETag`, and content-type
-  headers to static assets.
-- We should measure the deployed behavior before adding cache policy.
-- The current Astro fingerprinted asset names make immutable caching plausible,
-  but HTML and feeds must remain revalidated.
+`/.well-known/traffic-advice` is served from
+`site/public/.well-known/traffic-advice` and currently allows private prefetch
+proxy traffic:
+
+```json
+[{ "user_agent": "prefetch-proxy", "fraction": 1 }]
+```
+
+This is intentional for TPM because the site is static, public, and safe to
+prefetch. If future analytics, traffic-cost, or abuse concerns appear, reduce
+the fraction or switch the endpoint to `disallow`.
 
 ## CI Changes
 

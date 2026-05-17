@@ -23,7 +23,10 @@ For a slower step-by-step article walkthrough, see
   share settings, feature switches, and defaults.
 - `theme.css`: site colors, fonts, radius, and visual theme tokens.
 - `public/`: files copied directly to the site root, such as favicons,
-  `robots.txt`, and `CNAME`.
+  `robots.txt`, `CNAME`, `_headers`, and well-known compatibility files.
+  `_headers` is a Cloudflare deployment file; it should stay scoped to static
+  platform concerns such as immutable caching for hashed `_astro` assets and
+  MIME types for well-known files.
 - `unused-assets/`: old assets kept for reference. Do not link to files from
   this folder in new content.
 
