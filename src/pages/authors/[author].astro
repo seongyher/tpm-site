@@ -8,7 +8,12 @@ import { articleListItemsFromArchive } from "../../lib/article-list";
 import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries, getAuthorProfiles } from "../../lib/authors";
 import { getCategories } from "../../lib/content";
-import { SITE_TITLE } from "../../lib/routes";
+import {
+  breadcrumbListJsonLd,
+  itemListJsonLd,
+  profileEntityJsonLd,
+} from "../../lib/metadata";
+import { authorsIndexUrl, SITE_TITLE } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 
 /**
@@ -41,6 +46,32 @@ const description =
   title={titleWithSite(profile.displayName)}
   description={description}
   canonicalPath={profile.href}
+  kind="author-profile"
+  structuredData={[
+    breadcrumbListJsonLd(
+      profile.href,
+      [
+        { href: "/", title: "Home" },
+        { href: authorsIndexUrl(), title: "Authors" },
+        { href: profile.href, title: profile.displayName },
+      ],
+      Astro.site,
+    ),
+    profileEntityJsonLd(
+      {
+        description: profile.shortBio,
+        href: profile.href,
+        name: profile.displayName,
+        sameAs: [
+          ...(profile.website === undefined ? [] : [profile.website]),
+          ...profile.socials.map((social) => social.href),
+        ],
+        type: profile.type,
+      },
+      Astro.site,
+    ),
+    itemListJsonLd(profile.href, articleItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <AuthorPage

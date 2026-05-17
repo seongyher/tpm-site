@@ -16,9 +16,10 @@ incidental TPM implementation details.
   `feed`, `home`, `publishable`, and `tags`.
 - Routes and features
   Owns URL construction, static path helpers, optional feature routes,
-  navigation, SEO, social previews, share targets, support CTAs, site config,
-  site instance paths, and redirects. Current modules: `feature-routes`,
-  `navigation`, `routes`, `seo`, `share-targets`, `site-config`,
+  navigation, metadata contracts, SEO, social previews, share targets, support
+  CTAs, site config, site instance paths, and redirects. Current modules:
+  `feature-routes`, `metadata`, `navigation`, `routes`, `semantic-metadata`,
+  `seo`, `share-targets`, `site-config`,
   `site-config-defaults`, `site-instance`, `site-redirects`, `social-images`,
   `static-paths`, and `support`.
 - Article rendering

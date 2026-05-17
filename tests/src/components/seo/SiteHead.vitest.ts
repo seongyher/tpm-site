@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import SiteHead from "../../../../src/components/seo/SiteHead.astro";
+import { normalizeRouteMetadata } from "../../../../src/lib/metadata";
 import { createAstroTestContainer } from "../../../helpers/astro-container";
 
 describe("SiteHead", () => {
@@ -8,8 +9,6 @@ describe("SiteHead", () => {
     const container = await createAstroTestContainer();
     const view = await container.renderToString(SiteHead, {
       props: {
-        canonicalPath: "/articles/example/",
-        description: "Example description.",
         image: {
           alt: "Example image",
           height: 630,
@@ -17,12 +16,21 @@ describe("SiteHead", () => {
           type: "image/jpeg",
           width: 1200,
         },
-        title: "Example Article",
+        metadata: normalizeRouteMetadata({
+          canonicalPath: "/articles/example/",
+          description: "Example description.",
+          kind: "article",
+          title: "Example Article",
+        }),
         type: "article",
       },
     });
 
     expect(view).toContain("<title>Example Article</title>");
+    expect(view).toContain('name="robots" content="index,follow"');
+    expect(view).toContain('property="og:locale" content="en_US"');
+    expect(view).toContain('name="twitter:site" content="@philo_meme"');
+    expect(view).toContain('name="theme-color" content="#b65a35"');
     expect(view).toContain(
       'href="https://thephilosophersmeme.com/articles/example/"',
     );
@@ -35,5 +43,9 @@ describe("SiteHead", () => {
     expect(view).toContain('property="og:image:height" content="630"');
     expect(view).toContain('property="og:image:type" content="image/jpeg"');
     expect(view).toContain('name="twitter:image:alt" content="Example image"');
+    expect(view).toContain('"@type":"WebSite"');
+    expect(view).toContain(
+      '"@id":"https://thephilosophersmeme.com/#publisher"',
+    );
   });
 });

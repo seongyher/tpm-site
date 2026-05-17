@@ -5,17 +5,22 @@ import { render } from "astro:content";
 import ArticleHeader from "../../components/articles/ArticleHeader.astro";
 import ArticleProse from "../../components/articles/ArticleProse.astro";
 import ReadingBody from "../../components/layout/ReadingBody.astro";
+import AnnouncementJsonLd from "../../components/seo/AnnouncementJsonLd.astro";
+import PublishableOpenGraphMeta from "../../components/seo/PublishableOpenGraphMeta.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   getAnnouncements,
   getSiteSocialFallbackImage,
 } from "../../lib/content";
+import { breadcrumbListJsonLd } from "../../lib/metadata";
 import {
+  announcementsIndexUrl,
   announcementUrl,
   formatDate,
   type AnnouncementEntry,
 } from "../../lib/routes";
 import { siteConfig } from "../../lib/site-config";
+import { semanticDetailsViewModel } from "../../lib/semantic-metadata";
 import { socialPreviewImageViewModel } from "../../lib/social-images";
 import { announcementStaticPaths } from "../../lib/static-paths";
 
@@ -38,6 +43,7 @@ const title = announcement.data.title;
 const description = announcement.data.description;
 const searchable =
   siteConfig.features.search && announcement.data.visibility.search;
+const semanticDetails = semanticDetailsViewModel(announcement.data.semantic);
 const fallbackSocialPreviewImage = await getSiteSocialFallbackImage();
 const socialPreviewImage = await socialPreviewImageViewModel({
   alt: announcement.data.imageAlt ?? title,
@@ -52,8 +58,33 @@ const socialPreviewImage = await socialPreviewImageViewModel({
   description={description}
   canonicalPath={announcementUrl(announcement.id)}
   image={socialPreviewImage}
+  kind="announcement"
+  structuredData={[
+    breadcrumbListJsonLd(
+      announcementUrl(announcement.id),
+      [
+        { href: "/", title: siteConfig.identity.title },
+        { href: announcementsIndexUrl(), title: "Announcements" },
+        { href: announcementUrl(announcement.id), title },
+      ],
+      Astro.site,
+    ),
+  ]}
   type="article"
 >
+  <AnnouncementJsonLd
+    slot="head"
+    announcement={announcement}
+    image={socialPreviewImage}
+  />
+  <PublishableOpenGraphMeta
+    slot="head"
+    author={announcement.data.author}
+    publishedAt={announcement.data.date}
+    section="Announcements"
+    tags={announcement.data.tags}
+    updatedAt={announcement.data.updated}
+  />
   <ReadingBody>
     <article
       class="grid w-full min-w-0 gap-8"
@@ -65,6 +96,7 @@ const socialPreviewImage = await socialPreviewImageViewModel({
         date={announcement.data.date}
         description={description}
         formattedDate={formatDate(announcement.data.date)}
+        semanticDetails={semanticDetails}
         title={title}
       />
       <ArticleProse data-article-prose>

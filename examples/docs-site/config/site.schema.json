@@ -417,13 +417,39 @@
           "type": "string",
           "minLength": 2
         },
+        "locale": {
+          "default": "en_US",
+          "type": "string",
+          "minLength": 2
+        },
+        "logo": {
+          "type": "string",
+          "minLength": 1
+        },
         "publisherName": {
           "type": "string",
           "minLength": 1
         },
+        "publisherType": {
+          "default": "organization",
+          "type": "string",
+          "enum": ["organization", "person"]
+        },
+        "sameAs": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
         "shortTitle": {
           "type": "string",
           "minLength": 1
+        },
+        "themeColor": {
+          "type": "string",
+          "pattern": "^#[\\da-f]{6}$"
         },
         "timezone": {
           "type": "string",

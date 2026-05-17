@@ -1,21 +1,33 @@
 import type { AuthorSummary } from "./authors";
 import {
+  type AnnouncementEntry,
   type ArticleEntry,
   articleUrl,
   authorName,
   type CategorySummary,
-  entryDate,
-  entryTitle,
-  excerpt,
-  SITE_TITLE,
   SITE_URL,
 } from "./routes";
 import { siteConfig } from "./site-config";
 
 /** Optional normalized metadata for article JSON-LD output. */
 interface ArticleBlogPostingJsonLdOptions {
+  about?: ReadonlyArray<Record<"@id", string>> | undefined;
   image?: string | undefined;
 }
+
+interface PublishableBlogPostingJsonLdOptions {
+  about?: ReadonlyArray<Record<"@id", string>> | undefined;
+  authors?: readonly AuthorSummary[] | undefined;
+  canonicalPath: string;
+  fallbackAuthorName: string;
+  image?: string | undefined;
+  section?: string | undefined;
+}
+
+type PublishableBlogPostingEntry = Pick<
+  AnnouncementEntry | ArticleEntry,
+  "data" | "id"
+>;
 
 /**
  * Resolves a site-relative or absolute URL against the configured site origin.
@@ -58,33 +70,62 @@ export function articleBlogPostingJsonLd(
   authors: readonly AuthorSummary[] = [],
   options: ArticleBlogPostingJsonLdOptions = {},
 ): Record<string, unknown> {
-  const canonicalUrl = absoluteUrl(articleUrl(article.id), site);
+  return publishableBlogPostingJsonLd(article, site, {
+    about: options.about,
+    authors,
+    canonicalPath: articleUrl(article.id),
+    fallbackAuthorName: authorName(article),
+    image: options.image,
+    section: category?.title ?? category?.slug,
+  });
+}
+
+/**
+ * Builds BlogPosting JSON-LD for article-like publishable entries.
+ *
+ * @param entry Article or announcement content entry.
+ * @param site Astro site origin when available.
+ * @param options Normalized route, author, image, and section metadata.
+ * @returns Schema.org BlogPosting object ready for serialization.
+ */
+export function publishableBlogPostingJsonLd(
+  entry: PublishableBlogPostingEntry,
+  site: string | undefined | URL,
+  options: PublishableBlogPostingJsonLdOptions,
+): Record<string, unknown> {
+  const canonicalUrl = absoluteUrl(options.canonicalPath, site);
   const absoluteImage =
     options.image === undefined ? undefined : absoluteUrl(options.image, site);
+  const siteRoot = absoluteUrl("/", site).replace(/\/+$/u, "/");
 
-  return {
+  return compactJsonLd({
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    articleSection: category?.title ?? category?.slug,
+    "@id": `${canonicalUrl}#article`,
+    about:
+      options.about === undefined || options.about.length === 0
+        ? undefined
+        : options.about,
+    articleSection: options.section,
     author:
-      authors.length > 0
-        ? authors.map((author) => authorJsonLd(author, site))
+      options.authors !== undefined && options.authors.length > 0
+        ? options.authors.map((author) => authorJsonLd(author, site))
         : {
             "@type": "Person",
-            name: authorName(article),
+            name: options.fallbackAuthorName,
           },
-    datePublished: entryDate(article).toISOString(),
-    description: excerpt(article),
-    headline: entryTitle(article),
+    dateModified: entry.data.updated?.toISOString(),
+    datePublished: entry.data.date.toISOString(),
+    description: entry.data.description,
+    headline: entry.data.title,
     image: absoluteImage,
-    keywords: article.data.tags,
-    mainEntityOfPage: canonicalUrl,
-    publisher: {
-      "@type": "Organization",
-      name: siteConfig.identity.publisherName ?? SITE_TITLE,
-    },
+    inLanguage: siteConfig.identity.language,
+    isPartOf: { "@id": `${siteRoot}#website` },
+    keywords: entry.data.tags,
+    mainEntityOfPage: { "@id": `${canonicalUrl}#webpage` },
+    publisher: { "@id": `${siteRoot}#publisher` },
     url: canonicalUrl,
-  };
+  });
 }
 
 /**
@@ -145,4 +186,12 @@ function authorJsonLd(
     name: author.displayName,
     url: absoluteUrl(author.href, site),
   };
+}
+
+function compactJsonLd(
+  value: Record<string, unknown>,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, item]) => item !== undefined),
+  );
 }

@@ -104,8 +104,10 @@ const libDomainFiles = {
   ],
   "routes-and-features": [
     "feature-routes.ts",
+    "metadata.ts",
     "navigation.ts",
     "routes.ts",
+    "semantic-metadata.ts",
     "seo.ts",
     "share-targets.ts",
     "site-config-defaults.ts",

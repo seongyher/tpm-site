@@ -80,8 +80,20 @@
   "identity": {
     "description": "The philosophy of memes, cyberculture, and the Internet.",
     "language": "en",
+    "locale": "en_US",
+    "logo": "/favicon.svg?v=2",
     "publisherName": "The Philosopher's Meme",
+    "publisherType": "organization",
+    "sameAs": [
+      "https://x.com/philo_meme",
+      "https://www.instagram.com/the_philosophers_meme",
+      "https://www.facebook.com/thephilosophersmeme",
+      "https://www.tiktok.com/@thephilosophersmeme",
+      "https://www.threads.com/@the_philosophers_meme",
+      "https://www.youtube.com/thephilosophersmeme"
+    ],
     "shortTitle": "TPM",
+    "themeColor": "#b65a35",
     "timezone": "America/New_York",
     "title": "The Philosopher's Meme",
     "url": "https://thephilosophersmeme.com"

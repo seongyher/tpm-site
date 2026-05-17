@@ -98,6 +98,12 @@ export const componentCatalogIgnoreList = [
   },
   {
     lifecycle: "route-only",
+    path: "src/components/articles/SemanticDetails.astro",
+    reason:
+      "Internal article-header semantic metadata surface covered by SemanticDetails and ArticleHeader tests.",
+  },
+  {
+    lifecycle: "route-only",
     path: "src/components/articles/ArticleShareActionRow.astro",
     reason:
       "Internal article-share row renderer covered by ArticleShareMenu examples and component tests.",
@@ -164,6 +170,18 @@ export const componentCatalogIgnoreList = [
     path: "src/components/seo/ArticleScholarMeta.astro",
     reason:
       "Non-visual Scholar metadata component covered by PDF SEO and article render tests.",
+  },
+  {
+    lifecycle: "route-only",
+    path: "src/components/seo/AnnouncementJsonLd.astro",
+    reason:
+      "Non-visual announcement metadata component covered by SEO component and page render tests.",
+  },
+  {
+    lifecycle: "route-only",
+    path: "src/components/seo/PublishableOpenGraphMeta.astro",
+    reason:
+      "Non-visual Open Graph metadata component covered by SEO component and article render tests.",
   },
   {
     lifecycle: "route-only",

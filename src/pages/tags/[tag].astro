@@ -6,6 +6,8 @@ import { articleListItemsFromArchive } from "../../lib/article-list";
 import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getCategories, getTags } from "../../lib/content";
+import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
+import { tagsIndexUrl } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 import { tagStaticPaths } from "../../lib/static-paths";
 
@@ -31,6 +33,19 @@ const description = `Articles tagged ${tag.label}.`;
   title={titleWithSite(`${tag.label} | Tags`)}
   description={description}
   canonicalPath={tag.href}
+  kind="tag-detail"
+  structuredData={[
+    breadcrumbListJsonLd(
+      tag.href,
+      [
+        { href: "/", title: "Home" },
+        { href: tagsIndexUrl(), title: "Tags" },
+        { href: tag.href, title: tag.label },
+      ],
+      Astro.site,
+    ),
+    itemListJsonLd(tag.href, tagItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <ArchiveListBlock

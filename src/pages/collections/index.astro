@@ -8,6 +8,7 @@ import {
   collectionUrl,
   SITE_TITLE,
 } from "../../lib/routes";
+import { itemListJsonLd } from "../../lib/metadata";
 import { titleWithSite } from "../../lib/site-config";
 
 const collectionItems = (await getEditorialCollections()).map((collection) => ({
@@ -22,6 +23,10 @@ const collectionItems = (await getEditorialCollections()).map((collection) => ({
   title={titleWithSite("Collections")}
   description={`Curated article and announcement collections from ${SITE_TITLE}.`}
   canonicalPath={collectionsIndexUrl()}
+  kind="collection-index"
+  structuredData={[
+    itemListJsonLd(collectionsIndexUrl(), collectionItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <TermOverviewBlock

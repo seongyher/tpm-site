@@ -1,4 +1,12 @@
 {
+  "/aesthetics/": "/categories/aesthetics/",
+  "/game-studies/": "/categories/game-studies/",
+  "/history/": "/categories/history/",
+  "/irony/": "/categories/irony/",
+  "/memeculture/": "/categories/memeculture/",
+  "/metamemetics/": "/categories/metamemetics/",
+  "/philosophy/": "/categories/philosophy/",
+  "/politics/": "/categories/politics/",
   "/2015/06/18/tmnh/": "/articles/tmnh/",
   "/2015/08/19/misattributed-plato-quote-is-real-now/": "/articles/misattributed-plato-quote-is-real-now/",
   "/2015/09/14/a-short-note-on-the-death-of-pepe/": "/articles/a-short-note-on-the-death-of-pepe/",

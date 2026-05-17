@@ -1,40 +1,68 @@
 ---
 import type { SocialPreviewImage } from "../../lib/social-images";
-import { absoluteUrl } from "../../lib/seo";
+import { absoluteUrl, safeJsonLd } from "../../lib/seo";
 import { feedUrl, SITE_TITLE } from "../../lib/routes";
+import { siteConfig } from "../../lib/site-config";
+import {
+  jsonLdGraph,
+  siteIdentityJsonLd,
+  type JsonLdNode,
+  type RouteMetadata,
+  webPageJsonLd,
+} from "../../lib/metadata";
 
 interface Props {
-  canonicalPath: string;
-  description: string;
   image?: SocialPreviewImage | undefined;
-  title: string;
+  metadata: RouteMetadata;
+  structuredData?: readonly (JsonLdNode | undefined)[] | undefined;
   type?: "website" | "article";
 }
 
-const {
-  canonicalPath,
-  description,
-  image,
-  title,
-  type = "website",
-} = Astro.props;
-const canonicalUrl = absoluteUrl(canonicalPath, Astro.site);
+const { image, metadata, structuredData = [], type = "website" } = Astro.props;
+const canonicalUrl = absoluteUrl(metadata.canonicalPath, Astro.site);
 const absoluteImageUrl =
   image === undefined ? undefined : absoluteUrl(image.src, Astro.site);
+const twitterSite =
+  siteConfig.share.xViaHandle === undefined
+    ? undefined
+    : `@${siteConfig.share.xViaHandle.replace(/^@/u, "")}`;
+const metadataGraph = jsonLdGraph([
+  ...siteIdentityJsonLd(Astro.site),
+  webPageJsonLd(metadata, Astro.site),
+  ...structuredData.filter((node): node is JsonLdNode => node !== undefined),
+]);
+const metadataJsonLd =
+  metadataGraph === undefined ? undefined : safeJsonLd(metadataGraph);
 ---
 
-<meta name="description" content={description} />
-<link rel="canonical" href={canonicalUrl} />
-<link
-  rel="alternate"
-  type="application/rss+xml"
-  title={`${SITE_TITLE} RSS`}
-  href={feedUrl()}
+<meta name="description" content={metadata.description} />
+<meta name="robots" content={metadata.robots} />
+<meta
+  name="application-name"
+  content={siteConfig.identity.shortTitle ?? SITE_TITLE}
 />
+<meta name="color-scheme" content="light dark" />
+{
+  siteConfig.identity.themeColor && (
+    <meta name="theme-color" content={siteConfig.identity.themeColor} />
+  )
+}
+<link rel="canonical" href={canonicalUrl} />
+{
+  siteConfig.features.feed && (
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${SITE_TITLE} RSS`}
+      href={feedUrl()}
+    />
+  )
+}
 <meta property="og:site_name" content={SITE_TITLE} />
+<meta property="og:locale" content={siteConfig.identity.locale} />
 <meta property="og:type" content={type} />
-<meta property="og:title" content={title} />
-<meta property="og:description" content={description} />
+<meta property="og:title" content={metadata.title} />
+<meta property="og:description" content={metadata.description} />
 <meta property="og:url" content={canonicalUrl} />
 {absoluteImageUrl && <meta property="og:image" content={absoluteImageUrl} />}
 {image && <meta property="og:image:width" content={image.width.toString()} />}
@@ -45,8 +73,14 @@ const absoluteImageUrl =
   name="twitter:card"
   content={absoluteImageUrl ? "summary_large_image" : "summary"}
 />
-<meta name="twitter:title" content={title} />
-<meta name="twitter:description" content={description} />
+{twitterSite && <meta name="twitter:site" content={twitterSite} />}
+<meta name="twitter:title" content={metadata.title} />
+<meta name="twitter:description" content={metadata.description} />
 {absoluteImageUrl && <meta name="twitter:image" content={absoluteImageUrl} />}
 {image?.alt && <meta name="twitter:image:alt" content={image.alt} />}
-<title>{title}</title>
+<title>{metadata.title}</title>
+{
+  metadataJsonLd && (
+    <script is:inline type="application/ld+json" set:html={metadataJsonLd} />
+  )
+}

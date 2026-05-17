@@ -10,6 +10,7 @@ import { articleListItemsFromArchive } from "../../lib/article-list";
 import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getArticles, getCategories } from "../../lib/content";
+import { itemListJsonLd } from "../../lib/metadata";
 import { sectionNavigationItems } from "../../lib/navigation";
 import {
   articlesArchiveUrl,
@@ -30,6 +31,8 @@ const categoryItems = sectionNavigationItems(categories, articlesIndexUrl());
   title={titleWithSite("Articles")}
   description={`Browse ${SITE_TITLE} by category, recent writing, and full archive.`}
   canonicalPath={articlesIndexUrl()}
+  kind="articles-index"
+  structuredData={[itemListJsonLd(articlesIndexUrl(), latestItems, Astro.site)]}
 >
   <BrowsingBody>
     <section class="grid gap-4">

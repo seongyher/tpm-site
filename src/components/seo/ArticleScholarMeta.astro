@@ -9,15 +9,27 @@ const { metadata } = Astro.props;
 ---
 
 <meta name="citation_title" content={metadata.title} />
+<meta name="citation_language" content={metadata.language} />
+<meta name="citation_abstract" content={metadata.abstract} />
 {
   metadata.authors.map((author) => (
     <meta name="citation_author" content={author} />
   ))
 }
+{
+  metadata.keywords.length > 0 && (
+    <meta name="citation_keywords" content={metadata.keywords.join("; ")} />
+  )
+}
 <meta
   name="citation_publication_date"
   content={metadata.publicationDateForScholar}
 />
+{
+  metadata.references.map((reference) => (
+    <meta name="citation_reference" content={reference} />
+  ))
+}
 {
   metadata.pdf && (
     <meta name="citation_pdf_url" content={metadata.pdf.citationPdfUrl} />

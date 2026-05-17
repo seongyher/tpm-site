@@ -97,21 +97,115 @@ async function writeArticlePdf(
   }
 }
 
+function pageHtmlFixture(
+  relativePath: string,
+  body = "",
+  { includeShareMeta = true, noindex = false, title = "Test Page" } = {},
+) {
+  const pathWithLeadingSlash = `/${relativePath}`
+    .replace(/\/index\.html$/, "/")
+    .replace(/\/404\.html$/, "/404/");
+  const canonical = `https://thephilosophersmeme.com${pathWithLeadingSlash}`;
+  const socialImage =
+    "https://thephilosophersmeme.com/_astro/social-preview.jpg";
+  const robots = noindex ? "noindex, follow" : "index, follow";
+
+  const shareMeta = includeShareMeta
+    ? [
+        '<meta property="og:site_name" content="The Philosopher\'s Meme">',
+        '<meta property="og:locale" content="en_US">',
+        '<meta property="og:type" content="website">',
+        `<meta property="og:title" content="${title}">`,
+        '<meta property="og:description" content="Test description">',
+        `<meta property="og:url" content="${canonical}">`,
+        `<meta property="og:image" content="${socialImage}">`,
+        '<meta name="twitter:card" content="summary_large_image">',
+        `<meta name="twitter:title" content="${title}">`,
+        '<meta name="twitter:description" content="Test description">',
+        `<meta name="twitter:image" content="${socialImage}">`,
+      ]
+    : [];
+
+  return [
+    "<!doctype html><html><head>",
+    `<title>${title}</title>`,
+    `<link rel="canonical" href="${canonical}">`,
+    '<meta name="description" content="Test description">',
+    `<meta name="robots" content="${robots}">`,
+    ...shareMeta,
+    '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage"}</script>',
+    "</head><body>",
+    body,
+    "</body></html>",
+  ].join("");
+}
+
 async function writeRequiredDistShell(root: string) {
   await writeText(root, "dist/_astro/social-preview.jpg", "small social jpg");
-  await writeText(root, "dist/index.html", "");
-  await writeText(root, "dist/404.html", "");
-  await writeText(root, "dist/about/index.html", "");
-  await writeText(root, "dist/announcements/index.html", "");
-  await writeText(root, "dist/authors/index.html", "");
-  await writeText(root, "dist/articles/index.html", "");
-  await writeText(root, "dist/articles/all/index.html", "");
-  await writeText(root, "dist/bibliography/index.html", "");
-  await writeText(root, "dist/categories/index.html", "");
-  await writeText(root, "dist/collections/index.html", "");
-  await writeText(root, "dist/tags/index.html", "");
-  await writeText(root, "dist/search/index.html", "");
-  await writeText(root, "dist/categories/history/index.html", "");
+  await writeText(root, "dist/index.html", pageHtmlFixture("index.html"));
+  await writeText(
+    root,
+    "dist/404.html",
+    pageHtmlFixture("404.html", "", { noindex: true, title: "Not Found" }),
+  );
+  await writeText(
+    root,
+    "dist/about/index.html",
+    pageHtmlFixture("about/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/announcements/index.html",
+    pageHtmlFixture("announcements/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/authors/index.html",
+    pageHtmlFixture("authors/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/articles/index.html",
+    pageHtmlFixture("articles/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/articles/all/index.html",
+    pageHtmlFixture("articles/all/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/bibliography/index.html",
+    pageHtmlFixture("bibliography/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/categories/index.html",
+    pageHtmlFixture("categories/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/collections/index.html",
+    pageHtmlFixture("collections/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/tags/index.html",
+    pageHtmlFixture("tags/index.html"),
+  );
+  await writeText(
+    root,
+    "dist/search/index.html",
+    pageHtmlFixture("search/index.html", "", {
+      noindex: true,
+      title: "Search",
+    }),
+  );
+  await writeText(
+    root,
+    "dist/categories/history/index.html",
+    pageHtmlFixture("categories/history/index.html"),
+  );
   await writeText(root, "dist/feed.xml", "<feed>published</feed>");
   await writeText(root, "dist/sitemap-index.xml", "<sitemap />");
   await writeText(root, "dist/pagefind/pagefind.js", "");
@@ -134,27 +228,40 @@ function articleHtmlFixture(
   const socialImage =
     "https://thephilosophersmeme.com/_astro/social-preview.jpg";
 
-  return [
-    `<script type="application/ld+json">{"@type":"BlogPosting","image":"${socialImage}"}</script>`,
-    `<meta property="og:image" content="${socialImage}">`,
-    '<meta property="og:image:width" content="1200">',
-    '<meta property="og:image:height" content="630">',
-    '<meta property="og:image:type" content="image/jpeg">',
-    `<meta name="twitter:image" content="${socialImage}">`,
-    `<meta name="citation_title" content="${title}">`,
-    ...authors.map(
-      (author) => `<meta name="citation_author" content="${author}">`,
-    ),
-    date === undefined
-      ? ""
-      : `<meta name="citation_publication_date" content="${date}">`,
-    includePdf
-      ? `<meta name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/${slug}/${slug}.pdf">`
-      : "",
-    includePdf
-      ? `<a href="/articles/${slug}/${slug}.pdf" data-article-pdf-link>Save PDF</a>`
-      : "",
-  ].join("");
+  return pageHtmlFixture(
+    `articles/${slug}/index.html`,
+    [
+      `<script type="application/ld+json">{"@type":"BlogPosting","image":"${socialImage}"}</script>`,
+      '<meta property="og:site_name" content="The Philosopher\'s Meme">',
+      '<meta property="og:locale" content="en_US">',
+      '<meta property="og:type" content="article">',
+      `<meta property="og:title" content="${title}">`,
+      '<meta property="og:description" content="Test description">',
+      `<meta property="og:url" content="https://thephilosophersmeme.com/articles/${slug}/">`,
+      `<meta property="og:image" content="${socialImage}">`,
+      '<meta property="og:image:width" content="1200">',
+      '<meta property="og:image:height" content="630">',
+      '<meta property="og:image:type" content="image/jpeg">',
+      '<meta name="twitter:card" content="summary_large_image">',
+      `<meta name="twitter:title" content="${title}">`,
+      '<meta name="twitter:description" content="Test description">',
+      `<meta name="twitter:image" content="${socialImage}">`,
+      `<meta name="citation_title" content="${title}">`,
+      ...authors.map(
+        (author) => `<meta name="citation_author" content="${author}">`,
+      ),
+      date === undefined
+        ? ""
+        : `<meta name="citation_publication_date" content="${date}">`,
+      includePdf
+        ? `<meta name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/${slug}/${slug}.pdf">`
+        : "",
+      includePdf
+        ? `<a href="/articles/${slug}/${slug}.pdf" data-article-pdf-link>Save PDF</a>`
+        : "",
+    ].join(""),
+    { includeShareMeta: false, title },
+  );
 }
 
 const astroPrefetchRuntimeFixture =
@@ -473,6 +580,8 @@ describe("build verifier helpers", () => {
           catalogLeaks: [],
           draftLeaks: [],
           invalidLegacyRedirects: [],
+          imageAltIssues: [],
+          metadataIssues: [],
           missingArticleJsonLd: [],
           missingLegacyRedirects: [],
           missingRequired: ["articles/example/index.html"],
@@ -499,6 +608,10 @@ describe("build verifier helpers", () => {
         catalogLeaks: ["catalog/"],
         draftLeaks: ["feed.xml -> draft-post"],
         invalidLegacyRedirects: ["2022/01/01/post/index.html: invalid"],
+        imageAltIssues: [
+          "articles/post/index.html: /image.webp is missing alt",
+        ],
+        metadataIssues: ["index.html: missing meta description"],
         missingArticleJsonLd: ["articles/post/index.html"],
         missingLegacyRedirects: ["/2022/01/01/post/ -> /articles/post/"],
         missingRequired: ["feed.xml"],
@@ -514,6 +627,8 @@ describe("build verifier helpers", () => {
     expect(report).toContain("Article PDF issues:");
     expect(report).toContain("Missing legacy redirects:");
     expect(report).toContain("Invalid legacy redirects:");
+    expect(report).toContain("Metadata issues:");
+    expect(report).toContain("Image alt issues:");
     expect(report).toContain("Broken links:");
     expect(report).toContain("Unexpected component catalog output:");
     expect(report).toContain("Article count mismatch:");
@@ -543,15 +658,46 @@ describe("build verifier helpers", () => {
       await writeText(
         root,
         "dist/index.html",
-        '<a href="/articles/published/">Published</a>',
+        pageHtmlFixture(
+          "index.html",
+          '<a href="/articles/published/">Published</a>',
+        ),
       );
-      await writeText(root, "dist/404.html", "");
-      await writeText(root, "dist/about/index.html", "");
-      await writeText(root, "dist/announcements/index.html", "");
-      await writeText(root, "dist/authors/index.html", "");
-      await writeText(root, "dist/articles/index.html", "");
-      await writeText(root, "dist/articles/all/index.html", "");
-      await writeText(root, "dist/bibliography/index.html", "");
+      await writeText(
+        root,
+        "dist/404.html",
+        pageHtmlFixture("404.html", "", { noindex: true, title: "Not Found" }),
+      );
+      await writeText(
+        root,
+        "dist/about/index.html",
+        pageHtmlFixture("about/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/announcements/index.html",
+        pageHtmlFixture("announcements/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/authors/index.html",
+        pageHtmlFixture("authors/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/articles/index.html",
+        pageHtmlFixture("articles/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/articles/all/index.html",
+        pageHtmlFixture("articles/all/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/bibliography/index.html",
+        pageHtmlFixture("bibliography/index.html"),
+      );
       await writeText(
         root,
         "dist/articles/published/index.html",
@@ -563,11 +709,34 @@ describe("build verifier helpers", () => {
         "small social jpg",
       );
       await writeArticlePdf(root, "published");
-      await writeText(root, "dist/categories/index.html", "");
-      await writeText(root, "dist/collections/index.html", "");
-      await writeText(root, "dist/tags/index.html", "");
-      await writeText(root, "dist/search/index.html", "");
-      await writeText(root, "dist/categories/history/index.html", "");
+      await writeText(
+        root,
+        "dist/categories/index.html",
+        pageHtmlFixture("categories/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/collections/index.html",
+        pageHtmlFixture("collections/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/tags/index.html",
+        pageHtmlFixture("tags/index.html"),
+      );
+      await writeText(
+        root,
+        "dist/search/index.html",
+        pageHtmlFixture("search/index.html", "", {
+          noindex: true,
+          title: "Search",
+        }),
+      );
+      await writeText(
+        root,
+        "dist/categories/history/index.html",
+        pageHtmlFixture("categories/history/index.html"),
+      );
       await writeText(root, "dist/feed.xml", "<feed>published</feed>");
       await writeText(root, "dist/sitemap-index.xml", "<sitemap />");
       await writeText(root, "dist/pagefind/pagefind.js", "");
@@ -765,6 +934,40 @@ describe("build verifier helpers", () => {
       ]);
     }));
 
+  test("accepts article JSON-LD image metadata from a graph node", async () =>
+    withTempRoot(async (root) => {
+      const socialImage =
+        "https://thephilosophersmeme.com/_astro/social-preview.jpg";
+
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(
+        root,
+        "src/content/articles/history/published.md",
+        "---\ntitle: Published\nauthor: Test Author\n---\n",
+      );
+      await writeRequiredDistShell(root);
+      await writeText(
+        root,
+        "dist/articles/published/index.html",
+        articleHtmlFixture("published", { authors: ["Test Author"] }).replace(
+          `<script type="application/ld+json">{"@type":"BlogPosting","image":"${socialImage}"}</script>`,
+          `<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","image":"${socialImage}"},{"@type":"Review","name":"Extra semantic node"}]}</script>`,
+        ),
+      );
+      await writeArticlePdf(root, "published", {
+        authors: ["Test Author"],
+      });
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+      });
+
+      expect(result.issues.missingArticleJsonLd).toEqual([]);
+      expect(result.issues.socialImageIssues).toEqual([]);
+    }));
+
   test("reports oversized generated social preview image files", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
@@ -894,33 +1097,13 @@ describe("build verifier helpers", () => {
             "---\ntitle: Published\n---\n",
           );
 
-          await writeText(root, "dist/index.html", "");
-          await writeText(root, "dist/404.html", "");
-          await writeText(root, "dist/about/index.html", "");
-          await writeText(root, "dist/announcements/index.html", "");
-          await writeText(root, "dist/authors/index.html", "");
-          await writeText(root, "dist/articles/index.html", "");
-          await writeText(root, "dist/articles/all/index.html", "");
-          await writeText(root, "dist/bibliography/index.html", "");
+          await writeRequiredDistShell(root);
           await writeText(
             root,
             "dist/articles/published/index.html",
             articleHtmlFixture("published"),
           );
           await writeArticlePdf(root, "published");
-          await writeText(root, "dist/categories/index.html", "");
-          await writeText(root, "dist/collections/index.html", "");
-          await writeText(root, "dist/tags/index.html", "");
-          await writeText(root, "dist/search/index.html", "");
-          await writeText(root, "dist/categories/history/index.html", "");
-          await writeText(root, "dist/feed.xml", "<feed>published</feed>");
-          await writeText(root, "dist/sitemap-index.xml", "<sitemap />");
-          await writeText(root, "dist/pagefind/pagefind.js", "");
-          await writeText(
-            root,
-            "dist/_astro/social-preview.jpg",
-            "small social jpg",
-          );
 
           const exitCode = await runBuildVerificationCli(["--quiet"], root);
 
@@ -1226,6 +1409,66 @@ describe("build verifier helpers", () => {
 
       expect(result.issues.brokenLinks).toEqual([]);
       expect(result.issues.unexpectedDatedPages).toEqual([]);
+    }));
+
+  test("allows Astro generated root redirect fallback pages", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(
+        root,
+        "src/content/articles/history/published.md",
+        "---\ntitle: Published\n---\n",
+      );
+
+      await writeText(root, "dist/index.html", "");
+      await writeText(root, "dist/404.html", "");
+      await writeText(root, "dist/about/index.html", "");
+      await writeText(root, "dist/announcements/index.html", "");
+      await writeText(root, "dist/authors/index.html", "");
+      await writeText(root, "dist/articles/index.html", "");
+      await writeText(root, "dist/articles/all/index.html", "");
+      await writeText(root, "dist/bibliography/index.html", "");
+      await writeText(
+        root,
+        "dist/articles/published/index.html",
+        articleHtmlFixture("published"),
+      );
+      await writeArticlePdf(root, "published");
+      await writeText(root, "dist/categories/index.html", "");
+      await writeText(root, "dist/collections/index.html", "");
+      await writeText(root, "dist/tags/index.html", "");
+      await writeText(root, "dist/search/index.html", "");
+      await writeText(root, "dist/categories/history/index.html", "");
+      await writeText(root, "dist/feed.xml", "<feed>published</feed>");
+      await writeText(root, "dist/sitemap-index.xml", "<sitemap />");
+      await writeText(root, "dist/pagefind/pagefind.js", "");
+      await writeText(
+        root,
+        "dist/_astro/social-preview.jpg",
+        "small social jpg",
+      );
+      await writeText(
+        root,
+        "dist/memeculture/index.html",
+        '<!doctype html><title>Redirecting to: /categories/memeculture/</title><meta http-equiv="refresh" content="0;url=/categories/memeculture/"><meta name="robots" content="noindex"><link rel="canonical" href="https://thephilosophersmeme.com/categories/memeculture/"><body><a href="/categories/memeculture/">Redirecting from <code>/memeculture/</code> to <code>/categories/memeculture/</code></a></body>',
+      );
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+        expectedRedirects: {
+          "/memeculture/": "/categories/memeculture/",
+        },
+      });
+
+      expect(result.issues.invalidLegacyRedirects).toEqual([]);
+      expect(result.issues.metadataIssues).not.toContain(
+        "memeculture/index.html: missing meta description",
+      );
+      expect(result.issues.metadataIssues).not.toContain(
+        "memeculture/index.html: missing JSON-LD",
+      );
     }));
 
   test("rejects dated pages that are not Astro redirect fallbacks", async () =>

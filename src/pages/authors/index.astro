@@ -3,16 +3,24 @@ import AuthorsIndexPage from "../../components/authors/AuthorsIndexPage.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getAuthorProfiles } from "../../lib/authors";
+import { itemListJsonLd } from "../../lib/metadata";
 import { authorsIndexUrl, SITE_TITLE } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 
 const profiles = await getAuthorProfiles();
+const profileItems = profiles.map((profile) => ({
+  description: profile.shortBio,
+  href: profile.href,
+  title: profile.displayName,
+}));
 ---
 
 <BaseLayout
   title={titleWithSite("Authors")}
   description={`Browse contributors and collectives in ${SITE_TITLE} archive.`}
   canonicalPath={authorsIndexUrl()}
+  kind="author-index"
+  structuredData={[itemListJsonLd(authorsIndexUrl(), profileItems, Astro.site)]}
 >
   <BrowsingBody>
     <AuthorsIndexPage profiles={profiles} />

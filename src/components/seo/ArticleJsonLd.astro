@@ -1,6 +1,9 @@
 ---
 import type { ArticleEntry, CategorySummary } from "../../lib/routes";
+import { articleUrl, authorName } from "../../lib/routes";
 import type { AuthorSummary } from "../../lib/authors";
+import { jsonLdGraph } from "../../lib/metadata";
+import { semanticMetadataJsonLd } from "../../lib/semantic-metadata";
 import { articleBlogPostingJsonLd, safeJsonLd } from "../../lib/seo";
 import type { SocialPreviewImage } from "../../lib/social-images";
 
@@ -12,10 +15,29 @@ interface Props {
 }
 
 const { article, authors = [], category, image } = Astro.props;
-const jsonLd = safeJsonLd(
-  articleBlogPostingJsonLd(article, category, Astro.site, authors, {
+const semanticJsonLd = semanticMetadataJsonLd(article.data.semantic, {
+  authorName: authorName(article),
+  canonicalPath: articleUrl(article.id),
+  datePublished: article.data.date,
+  site: Astro.site,
+});
+const articleJsonLd = articleBlogPostingJsonLd(
+  article,
+  category,
+  Astro.site,
+  authors,
+  {
+    about: semanticJsonLd.references,
     image: image?.src,
-  }),
+  },
+);
+const articleJsonLdWithoutContext = Object.fromEntries(
+  Object.entries(articleJsonLd).filter(([key]) => key !== "@context"),
+);
+const jsonLd = safeJsonLd(
+  semanticJsonLd.nodes.length === 0
+    ? articleJsonLd
+    : jsonLdGraph([articleJsonLdWithoutContext, ...semanticJsonLd.nodes]),
 );
 ---
 

@@ -39,6 +39,10 @@ describe("ArticleHeader", () => {
           publicationDateForScholar: "2022/04/06",
           title: "Article Title",
         },
+        semanticDetails: {
+          heading: "Review details",
+          items: [{ label: "Reviewed", value: "Example Book" }],
+        },
         share: {
           actions: [
             {
@@ -85,6 +89,9 @@ describe("ArticleHeader", () => {
     );
     expect(view).toContain("static export of the canonical web article");
     expect(view).toContain("Article description.");
+    expect(view).toContain("data-semantic-details");
+    expect(view).toContain("Review details");
+    expect(view).toContain("Example Book");
     expect(view).not.toContain("Article tags");
   });
 

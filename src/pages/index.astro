@@ -19,6 +19,7 @@ import {
   getEditorialCollections,
 } from "../lib/content";
 import { homePageRouteViewModel } from "../lib/home";
+import { itemListJsonLd } from "../lib/metadata";
 import { sectionNavigationItems } from "../lib/navigation";
 import { siteConfig } from "../lib/site-config";
 
@@ -52,6 +53,10 @@ const homeView = homePageRouteViewModel({
   title={homeView.title}
   description={homeView.description}
   canonicalPath={homeView.canonicalPath}
+  kind="home"
+  structuredData={[
+    itemListJsonLd(homeView.canonicalPath, homeView.recent.items, Astro.site),
+  ]}
 >
   <BrowsingBody width="wide" padding="snug">
     <div class="grid min-w-0 gap-1" data-home-read-lead-group>

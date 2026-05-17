@@ -186,6 +186,10 @@ The public Astro URL will be:
 Use `draft: true` to keep an article unpublished. Draft articles are excluded
 from generated article routes, archives, categories, RSS, sitemap, and search.
 
+Use `updated: YYYY-MM-DD` only for substantive revisions that should appear in
+machine-readable article metadata. Do not change it for typo-only or
+formatting-only edits.
+
 If an article introduces a new author, add or request a matching author profile
 under `site/content/authors/<author-slug>.md`. Keep author metadata factual:
 display name, type, aliases, and explicitly approved public links only.
@@ -195,6 +199,11 @@ from the filename. The category comes from the source folder.
 
 `legacyPermalink` and `legacyBanner` may exist on older articles as inert
 historical metadata. They do not control routing, publishing, or rendering.
+
+Sitewide identity metadata lives in `site/config/site.json`. The identity block
+owns language, locale, publisher type, logo, theme color, and official social
+profiles used by Open Graph, Twitter cards, Schema.org JSON-LD, and sitemap
+verification.
 
 ## Category Folders
 

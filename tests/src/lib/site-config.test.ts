@@ -59,6 +59,11 @@ describe("site config", () => {
   test("loads the current TPM site config from the site directory", () => {
     expect(siteConfig.identity.title).toBe("The Philosopher's Meme");
     expect(siteConfig.identity.url).toBe("https://thephilosophersmeme.com");
+    expect(siteConfig.identity.locale).toBe("en_US");
+    expect(siteConfig.identity.publisherType).toBe("organization");
+    expect(siteConfig.identity.logo).toBe("/favicon.svg?v=2");
+    expect(siteConfig.identity.themeColor).toBe("#b65a35");
+    expect(siteConfig.identity.sameAs).toContain("https://x.com/philo_meme");
     expect(siteConfig.navigation.primary).toEqual([
       { href: "/articles/", label: "Articles" },
       { href: "/about/", label: "About" },
@@ -107,6 +112,9 @@ describe("site config", () => {
     const parsed: SiteConfig = parseSiteConfig(validConfig);
 
     expect(parsed.identity.title).toBe("Example Blog");
+    expect(parsed.identity.locale).toBe("en_US");
+    expect(parsed.identity.publisherType).toBe("organization");
+    expect(parsed.identity.sameAs).toEqual([]);
     expect(parsed.share).toEqual({ targets: Array.from(siteShareTargetIds) });
     expect(parsed.features.search).toBe(true);
     expect(parsed.homepage.discoveryLinks).toEqual([

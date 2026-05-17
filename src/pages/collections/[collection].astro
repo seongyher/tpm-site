@@ -19,7 +19,8 @@ import {
   publishableFromArticleArchive,
   publishableIndex,
 } from "../../lib/publishable";
-import { collectionUrl } from "../../lib/routes";
+import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
+import { collectionsIndexUrl, collectionUrl } from "../../lib/routes";
 import { siteConfig, titleWithSite } from "../../lib/site-config";
 import { collectionStaticPaths } from "../../lib/static-paths";
 
@@ -61,6 +62,19 @@ const description =
   title={titleWithSite(`${title} | Collections`)}
   description={description}
   canonicalPath={collectionUrl(collection.id)}
+  kind="collection-detail"
+  structuredData={[
+    breadcrumbListJsonLd(
+      collectionUrl(collection.id),
+      [
+        { href: "/", title: "Home" },
+        { href: collectionsIndexUrl(), title: "Collections" },
+        { href: collectionUrl(collection.id), title },
+      ],
+      Astro.site,
+    ),
+    itemListJsonLd(collectionUrl(collection.id), collectionItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <ArchiveListBlock

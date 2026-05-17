@@ -46,9 +46,18 @@ describe("SEO helpers", () => {
         name: "Seong-Young Her",
       },
       description: "A short article description.",
+      inLanguage: "en",
+      isPartOf: {
+        "@id": "https://example.com/#website",
+      },
       headline: "Example Article",
       keywords: ["philosophy", "quotes"],
-      mainEntityOfPage: "https://example.com/articles/example-article/",
+      mainEntityOfPage: {
+        "@id": "https://example.com/articles/example-article/#webpage",
+      },
+      publisher: {
+        "@id": "https://example.com/#publisher",
+      },
       url: "https://example.com/articles/example-article/",
     });
   });

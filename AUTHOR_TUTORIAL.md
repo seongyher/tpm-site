@@ -272,15 +272,25 @@ Notes:
 - `title` is the article title shown on the page.
 - `description` should be brief and useful.
 - `date` should use `YYYY-MM-DD`.
+- `updated` is optional. Use it only for substantive revisions after
+  publication, not typo fixes or formatting-only edits.
 - `author` should match an existing author display name or alias in
   `site/content/authors/`.
 - `tags` are optional, but useful.
 - `image` and `imageAlt` are optional, but recommended when the article has a
   preview image.
 - Add `draft: true` if the article should not publish yet.
+- `semantic` is optional special metadata for pages that are clearly reviews,
+  events, videos, audio works, books, datasets, software projects, or FAQs. Most
+  articles do not need it.
 
 Do not add `slug`, `category`, or `topic` frontmatter. The slug comes from the
 filename. The category comes from the folder.
+
+If you use `semantic`, only include facts that are true and visible to readers.
+The site turns this into a small visible details block and machine-readable
+metadata. See `site/README.md` for examples, and ask a maintainer if you are
+unsure.
 
 If this is a new author, ask a maintainer before submitting. The maintainer may
 add a new file in `site/content/authors/<author-slug>.md` with the author's
@@ -671,6 +681,7 @@ Before asking for review:
 - New categories, if any, have a matching folder and JSON metadata file.
 - The filename slug is URL-safe.
 - The frontmatter has `title`, `description`, `date`, and `author`.
+- `updated`, if present, marks a real post-publication revision.
 - The `author` value matches an existing author profile or a maintainer has
   added the new author metadata.
 - Images live under `site/assets/`.

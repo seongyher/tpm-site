@@ -4,22 +4,28 @@ import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { announcementDirectoryListItems } from "../../lib/announcements";
 import { getAnnouncements } from "../../lib/content";
+import { itemListJsonLd } from "../../lib/metadata";
 import { announcementsIndexUrl, SITE_TITLE } from "../../lib/routes";
 import { titleWithSite } from "../../lib/site-config";
 
 const announcements = await getAnnouncements();
+const announcementItems = announcementDirectoryListItems(announcements);
 ---
 
 <BaseLayout
   title={titleWithSite("Announcements")}
   description={`Updates from ${SITE_TITLE}.`}
   canonicalPath={announcementsIndexUrl()}
+  kind="announcements-index"
+  structuredData={[
+    itemListJsonLd(announcementsIndexUrl(), announcementItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <ArchiveListBlock
       title="Announcements"
       description={`Updates from ${SITE_TITLE}.`}
-      items={announcementDirectoryListItems(announcements)}
+      items={announcementItems}
     />
   </BrowsingBody>
 </BaseLayout>

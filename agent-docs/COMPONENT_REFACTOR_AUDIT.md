@@ -1367,8 +1367,8 @@ components that are intentionally global.
   split out of the monolithic catalog component.
 - Milestone L is implemented for this pass: default config values have moved
   into `site-config-defaults`, preserving the public parser/export API. The
-  remaining release requirement is documentation and generated-schema
-  verification.
+  documentation, schema-related checks, platform-boundary checks, and release
+  verification have been completed for this pass.
 - Milestone M is implemented for this pass with code-backed decisions: TOC and
   header already have stable child boundaries, article images gained
   `ArticleImageFrame`, carousel controls gained a dedicated child component,
@@ -1825,14 +1825,29 @@ These are not blockers, but the next developer should keep them visible:
   components. Avoid making every primitive read `siteConfig`; that would reduce
   immediate prop plumbing but make future platform extraction harder.
 
-## Recommended Next Step
+## Completion State For This Refactor Pass
 
-Finish with documentation and verification:
+The active refactor pass is complete:
 
-1. Audit developer and site-owner docs for drift from the new primitives,
-   catalog lifecycle metadata, route view models, and config-default boundary.
-2. Regenerate/check the site config schema.
-3. Run the release gate.
-4. Treat additional catalog section splits and risky-system subcomponent
-   extraction as future incremental maintenance unless a concrete product or
-   test gap appears.
+- The second-pass milestones G-M have all been implemented or explicitly
+  scoped as incremental future maintenance.
+- Developer-facing and site-owner/author-facing documentation has been audited
+  and updated for the new primitives, config-default boundary, and catalog
+  lifecycle metadata.
+- `bun run check:release` passes after the refactor fixes discovered during
+  the release gate.
+
+Remaining items are not blockers for this refactor pass. They are future
+platformization opportunities or intentionally deferred feature work:
+
+- continue splitting the catalog into smaller sections when touching those
+  areas;
+- add a separate fixture-site configuration if/when platform reuse work needs
+  stronger proof;
+- evolve the homepage recipe from typed view model to configurable block recipe
+  only after the current explicit composition stops being enough;
+- revisit deferred PDF pipeline, citation locator, visible appendix, and asset
+  inlining work when their resume triggers fire.
+- treat additional catalog section splits and risky-system subcomponent
+  extraction as future incremental maintenance unless a concrete product or
+  test gap appears.

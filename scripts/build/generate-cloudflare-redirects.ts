@@ -4,12 +4,13 @@ import path from "node:path";
 import matter from "gray-matter";
 
 import { siteInstance } from "../../src/lib/site-instance";
+import { siteRedirects as currentSiteRedirects } from "../../src/lib/site-redirects";
 
 const CLOUDFLARE_STATIC_REDIRECT_LIMIT = 2_000;
 const CLOUDFLARE_REDIRECT_LINE_LIMIT = 1_000;
 const LEGACY_CONTENT_PATTERN = /\.mdx?$/iu;
 const GENERATED_HEADER =
-  "# Generated from article legacyPermalink metadata. Do not edit by hand.";
+  "# Generated from site redirects and article legacyPermalink metadata. Do not edit by hand.";
 const REDIRECT_STATUS = 301;
 
 /** Content directory and current public route prefix for legacy redirects. */
@@ -24,9 +25,12 @@ export interface CloudflareRedirectRule {
   readonly source: string;
 }
 
+type SiteRedirectMap = Readonly<Record<string, string>>;
+
 interface GenerateCloudflareRedirectsOptions {
   readonly outputDir?: string | undefined;
   readonly quiet?: boolean | undefined;
+  readonly siteRedirects?: SiteRedirectMap | undefined;
   readonly sources?: readonly LegacyRedirectSource[] | undefined;
 }
 
@@ -53,8 +57,8 @@ export function defaultLegacyRedirectSources(): LegacyRedirectSource[] {
 }
 
 /**
- * Generates Cloudflare's static `_redirects` file from legacy permalink
- * frontmatter.
+ * Generates Cloudflare's static `_redirects` file from site-owned redirects
+ * and legacy permalink frontmatter.
  *
  * @param options Optional output and content source overrides.
  * @returns The generated redirect file path and redirect count.
@@ -64,8 +68,9 @@ export async function generateCloudflareRedirects(
 ): Promise<{ count: number; path: string }> {
   const outputDir = options.outputDir ?? siteInstance.output.dist;
   const outputPath = path.join(outputDir, "_redirects");
-  const rules = await collectLegacyRedirectRules(
+  const rules = await collectCloudflareRedirectRules(
     options.sources ?? defaultLegacyRedirectSources(),
+    options.siteRedirects ?? currentSiteRedirects,
   );
   const output = formatCloudflareRedirects(rules);
 
@@ -79,6 +84,24 @@ export async function generateCloudflareRedirects(
   }
 
   return { count: rules.length, path: outputPath };
+}
+
+/**
+ * Reads generated content redirects and merges them with site-owned redirect
+ * config.
+ *
+ * @param sources Content directories and their current public route prefixes.
+ * @param configuredRedirects Hand-written site redirects.
+ * @returns Sorted Cloudflare redirect rules.
+ */
+export async function collectCloudflareRedirectRules(
+  sources: readonly LegacyRedirectSource[],
+  configuredRedirects: SiteRedirectMap = currentSiteRedirects,
+): Promise<CloudflareRedirectRule[]> {
+  return mergeCloudflareRedirectRules(
+    await collectLegacyRedirectRules(sources),
+    redirectRulesFromSiteRedirects(configuredRedirects),
+  );
 }
 
 /**
@@ -137,7 +160,7 @@ export async function collectLegacyRedirectRules(
 /**
  * Formats redirect rules for Cloudflare Workers Static Assets.
  *
- * @param rules Redirect rules derived from legacy permalink metadata.
+ * @param rules Redirect rules derived from site config and legacy permalink metadata.
  * @returns `_redirects` file content.
  */
 export function formatCloudflareRedirects(
@@ -187,6 +210,43 @@ function assertCloudflareRedirectLimits(
       `Cloudflare redirect line exceeds ${CLOUDFLARE_REDIRECT_LINE_LIMIT} characters for ${oversizedRule.source}.`,
     );
   }
+}
+
+function mergeCloudflareRedirectRules(
+  ...ruleSets: ReadonlyArray<readonly CloudflareRedirectRule[]>
+): CloudflareRedirectRule[] {
+  const redirects = new Map<string, CloudflareRedirectRule>();
+
+  for (const rules of ruleSets) {
+    for (const rule of rules) {
+      const previous = redirects.get(rule.source);
+
+      if (previous !== undefined && previous.destination !== rule.destination) {
+        throw new Error(
+          `Conflicting redirect destinations for ${rule.source}: ${previous.destination} and ${rule.destination}.`,
+        );
+      }
+
+      redirects.set(rule.source, rule);
+    }
+  }
+
+  const mergedRules = Array.from(redirects.values()).sort((left, right) =>
+    left.source.localeCompare(right.source),
+  );
+
+  assertCloudflareRedirectLimits(mergedRules);
+
+  return mergedRules;
+}
+
+function redirectRulesFromSiteRedirects(
+  redirects: SiteRedirectMap,
+): CloudflareRedirectRule[] {
+  return Object.entries(redirects).map(([source, destination]) => ({
+    destination: destination.trim(),
+    source: normalizeLegacyPermalink(source),
+  }));
 }
 
 function currentContentUrl(routePrefix: string, file: string): string {

@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 import { articleImagePolicyCacheKey } from "./src/lib/article-image-policy";
+import { sitemapIncludesPath } from "./src/lib/metadata";
 import { siteConfig } from "./src/lib/site-config";
 import { projectRelativePath, siteInstance } from "./src/lib/site-instance";
 import { siteRedirects } from "./src/lib/site-redirects";
@@ -13,6 +14,12 @@ import {
 } from "./src/rehype-plugins/articleImages";
 import { remarkArticleReferences } from "./src/remark-plugins/articleReferences";
 
+function sitemapPagePathname(page: string): string {
+  return (
+    page.replace(/^[a-z][a-z\d+\-.]*:\/\/[^/]+/iu, "").split(/[?#]/u)[0] ?? "/"
+  );
+}
+
 export default defineConfig({
   compressHTML: true,
   image: {
@@ -21,7 +28,12 @@ export default defineConfig({
     layout: "constrained",
     responsiveStyles: false,
   },
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    sitemap({
+      filter: (page) => sitemapIncludesPath(sitemapPagePathname(page)),
+    }),
+  ],
   markdown: {
     rehypePlugins: [
       [rehypeArticleImages, { policyCacheKey: articleImagePolicyCacheKey }],

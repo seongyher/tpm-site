@@ -23,7 +23,10 @@ For a slower step-by-step article walkthrough, see
   share settings, feature switches, and defaults.
 - `theme.css`: site colors, fonts, radius, and visual theme tokens.
 - `public/`: files copied directly to the site root, such as favicons,
-  `robots.txt`, and `CNAME`.
+  `robots.txt`, `CNAME`, `_headers`, and well-known compatibility files.
+  `_headers` is a Cloudflare deployment file; it should stay scoped to static
+  platform concerns such as immutable caching for hashed `_astro` assets and
+  MIME types for well-known files.
 - `unused-assets/`: old assets kept for reference. Do not link to files from
   this folder in new content.
 
@@ -108,6 +111,10 @@ Only `title`, `description`, `date`, and `author` are required for a normal
 article. Tags and images are strongly recommended when they help readers find
 or understand the article.
 
+Use `updated` only when a published article has a meaningful revision that
+readers and search engines should know about. Do not change it for typo fixes,
+formatting-only edits, or build/tooling changes.
+
 Do not add `slug` or `category` fields. The filename becomes the slug. The
 folder becomes the category.
 
@@ -118,6 +125,7 @@ folder becomes the category.
 | `title`       | The article title shown on the page.                                   |
 | `description` | A short summary used in previews, search, RSS, and metadata.           |
 | `date`        | Publication date. Use `YYYY-MM-DD` unless a maintainer asks otherwise. |
+| `updated`     | Optional meaningful update date. Use only for substantive revisions.   |
 | `author`      | Must match an author name or alias in `content/authors/`.              |
 | `tags`        | Optional grouping labels. They become clickable tag pages.             |
 | `image`       | Optional preview image for article lists and social previews.          |
@@ -125,6 +133,7 @@ folder becomes the category.
 | `draft`       | Set `draft: true` to keep an entry unpublished.                        |
 | `pdf`         | Articles default to PDF export. Set `pdf: false` only for exceptions.  |
 | `visibility`  | Optional controls for where a published entry appears. See below.      |
+| `semantic`    | Optional special metadata for reviews, events, media, datasets, etc.   |
 
 Tags should be lowercase, trimmed, and unique. Do not use `/` in tags.
 
@@ -177,6 +186,97 @@ What each option means:
 
 You can set only the values you need. Omitted values use the defaults from
 `config/site.json`.
+
+## Special Semantic Metadata
+
+Most articles and announcements do not need this section.
+
+Use `semantic` only when the page is clearly a special kind of content, such as
+a review, event, video, audio work, book, dataset, software project, or FAQ.
+The site uses this information in two ways:
+
+- it shows a small visible details block on the page;
+- it adds machine-readable metadata for search engines, social tools, and other
+  software.
+
+Only add facts that are also true and visible to readers. Do not use
+`semantic` just to add hidden search keywords.
+
+### Review Example
+
+```yaml
+semantic:
+  kind: review
+  item:
+    type: book
+    name: "Example Book"
+    author: "Example Author"
+    url: "https://example.com/book"
+  rating:
+    value: 4
+    best: 5
+  summary: "A short visible summary of what is being reviewed."
+```
+
+The reviewed item `type` can be:
+
+- `article`
+- `audio`
+- `book`
+- `creative-work`
+- `dataset`
+- `event`
+- `software`
+- `video`
+
+The rating is optional. If there is no clear rating, leave it out.
+
+### Event Example
+
+```yaml
+semantic:
+  kind: event
+  name: "TPM Reading Group"
+  startDate: 2026-06-01T19:00:00-04:00
+  attendance: online
+  location:
+    type: online
+    url: "https://example.com/live"
+```
+
+Use events only for real events with a clear date or time. If the page only
+mentions an event in passing, do not add event metadata.
+
+### Media, Book, Dataset, Software, And FAQ Examples
+
+```yaml
+semantic:
+  kind: video
+  name: "Interview Title"
+  url: "https://example.com/video"
+  embedUrl: "https://example.com/embed/video"
+  uploadDate: 2026-06-01
+```
+
+```yaml
+semantic:
+  kind: dataset
+  name: "Example Meme Dataset"
+  description: "A short description of the dataset."
+  url: "https://example.com/dataset"
+  license: "https://creativecommons.org/licenses/by/4.0/"
+```
+
+```yaml
+semantic:
+  kind: faq
+  items:
+    - question: "Who is this for?"
+      answer: "Readers who want a concise answer visible on the page."
+```
+
+Ask a maintainer before using `semantic` if you are unsure. It is better to
+omit this metadata than to publish inaccurate structured data.
 
 ## Write The Article Body
 
@@ -276,6 +376,7 @@ title: "Forum Update"
 description: "A short summary of the announcement."
 date: 2026-05-01
 author: "The Philosopher's Meme"
+updated: 2026-05-02
 tags: []
 ---
 
@@ -284,6 +385,9 @@ Announcement body starts here.
 
 Announcements appear on the announcements page, can appear in RSS, and the
 newest homepage-visible announcements appear on the homepage.
+
+The optional `updated` field works the same way as article `updated`: use it
+only for substantive changes to a published announcement.
 
 Use `visibility` if an announcement should have a direct link but stay out of
 homepage, RSS, search, or directory lists:
@@ -454,12 +558,18 @@ site/config/site.json
 Common things a webmaster might change there:
 
 - site title and description;
+- site identity metadata such as language, locale, publisher type, logo,
+  theme color, and official social profiles;
 - primary and footer navigation links;
 - homepage labels, discovery links, empty-state text, and list limits;
 - support links;
 - share-menu targets and social handles;
 - feature switches;
 - default visibility and PDF behavior.
+
+The `identity.sameAs` list should contain only official public profiles for
+the site or publication. These links are used for machine-readable publisher
+metadata and social/SEO context, not as ordinary footer links.
 
 Most omitted optional fields have safe defaults. For example, articles and
 announcements are visible in directories, search, RSS, and homepage surfaces by
