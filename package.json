@@ -173,7 +173,7 @@
     "globals": "^17.6.0",
     "gray-matter": "^4.0.3",
     "happy-dom": "^20.9.0",
-    "html-validate": "^10.17.0",
+    "html-validate": "^11.2.0",
     "ignore": "^7.0.5",
     "knip": "^6.13.1",
     "lightningcss": "^1.32.0",
