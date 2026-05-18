@@ -29,7 +29,9 @@ I think that this inversion of the nobody-to-meme-celebrity process into a celeb
 @online{magibon-study-2011,
   citation = {Study of Magibon. (2011). Video. Available at: https://www.youtube.com/watch?v=E7ye0O3wlws},
   title = {Study of Magibon},
+  organization = {YouTube},
   year = {2011},
-  url = {https://www.youtube.com/watch?v=E7ye0O3wlws}
+  url = {https://www.youtube.com/watch?v=E7ye0O3wlws},
+  urldate = {2026-05-18},
 }
 ```

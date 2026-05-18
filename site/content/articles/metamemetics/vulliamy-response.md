@@ -31,11 +31,16 @@ The second scenario to be considered is one in which the very meme trend itself 
 _About the author: Simon Evnine is a professor of philosophy at the University of Miami. He is currently at work on a book, [A Certain Gesture: Evnine’s Batman Meme Project and Its Parerga!](https://simonevnine.com/the-batman-meme-project/), that includes over 100 Batman Slapping Robin memes (or anti-memes!) along with commentaries on each that deal with philosophy, psychoanalysis, language, and self-writing._
 
 ```tpm-bibtex
-@misc{evnine-s-2018-the-anonymity-of-a-murmur,
+@article{evnine-s-2018-the-anonymity-of-a-murmur,
   citation = {Evnine, S. (2018). The Anonymity of a Murmur: Internet (and Other) Memes. Available at: https://simonevnine.files.wordpress.com/2018/12/ayy021.pdf},
-  author = {Evnine, S.},
+  author = {Evnine, Simon J.},
   title = {The Anonymity of a Murmur: Internet (and Other) Memes},
+  journal = {The British Journal of Aesthetics},
+  volume = {58},
+  number = {3},
+  pages = {303--318},
   year = {2018},
+  doi = {10.1093/aesthj/ayy021},
   url = {https://simonevnine.files.wordpress.com/2018/12/ayy021.pdf},
 }
 ```

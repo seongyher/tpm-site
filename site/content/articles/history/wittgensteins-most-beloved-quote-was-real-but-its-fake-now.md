@@ -82,25 +82,30 @@ The early Wittgenstein probably would have supported the notion too. Insofar as 
 Contemporary trends in Wittgenstein scholarship seem to be blurring the line between these two Wittgensteins in their own way, interpreting him as having been more sympathetic to metaphysics than was previously thought. That's just as well. For most of us, the line between historical individuals and their folkloric counterparts is _always_ blurred. This is necessarily the case with historical figures from another time, and frequently so even with those whom we are close. It can even happen with our memory of past events, or with our self-identity. The quintessential difference between the early and later Wittgenstein is his shift from viewing meaning as _representation_ to viewing meaning as _use_. How we live changes over time, and so does the meaning of our lives. The Wittgenstein I knew before discovering the genealogy of his most popular quote was not the same Wittgenstein as I know now; I can no longer use the quote to refer to the Wittgenstein that I knew before.
 
 ```tpm-bibtex
-@misc{malcolm-n-1958-ludwig-wittgenstein-a-memoir,
+@book{malcolm-n-1958-ludwig-wittgenstein-a-memoir,
   citation = {Malcolm, N. (1958). Ludwig Wittgenstein: A Memoir.},
-  author = {Malcolm, N.},
+  author = {Malcolm, Norman},
   title = {Ludwig Wittgenstein: A Memoir},
+  publisher = {Oxford University Press},
+  location = {London and New York},
   year = {1958},
 }
 
-@misc{dribble-h-2004-philosophical-investigations,
+@online{dribble-h-2004-philosophical-investigations,
   citation = {Dribble, H. (2004). Philosophical Investigations from The Sanctity of the Press.},
-  author = {Dribble, H.},
-  title = {Philosophical Investigations from The Sanctity of the Press},
+  author = {Dribble, Harry},
+  title = {Philosophical Investigations},
+  organization = {The Sanctity of the Press},
   year = {2004},
 }
 
-@misc{hanson-c-2004-armchair-philosopher-pens-two-books,
+@online{hanson-c-2004-armchair-philosopher-pens-two-books,
   citation = {Hanson, C. (2004). Armchair philosopher pens two books. Mercer Island Reporter. Available at: https://www.mi-reporter.com/life/armchair-philosopher-pens-two-books/},
-  author = {Hanson, C.},
-  title = {Armchair philosopher pens two books},
-  year = {2004},
+  author = {Hanson, Connie},
+  title = {Armchair Philosopher Pens Two Books},
+  organization = {Mercer Island Reporter},
+  date = {2004-07-14},
   url = {https://www.mi-reporter.com/life/armchair-philosopher-pens-two-books/},
+  urldate = {2026-05-18},
 }
 ```

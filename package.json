@@ -66,6 +66,7 @@
     "quality": "bun scripts/quality/run-quality.ts",
     "quality:release": "bun scripts/quality/run-quality.ts --release",
     "references:audit": "bun scripts/content/audit-article-references.ts",
+    "references:bibtex:audit": "bun scripts/content/audit-bibtex-citations.ts",
     "references:catalog": "bun scripts/content/catalog-article-references.ts",
     "references:migrate:mechanical": "bun scripts/content/migrate-mechanical-article-references.ts",
     "review:assets": "bun --silent run assets:duplicates -- --review --quiet && bun --silent run assets:unused -- --review --quiet",

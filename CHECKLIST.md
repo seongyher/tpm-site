@@ -855,3 +855,171 @@ they are useful context. Explicitly deferred work belongs in
       `bun run payload:critical-css:experiment` report, and the documented
       decision not to adopt critical CSS or prefetch policy changes in this
       pass.
+
+### Milestone 173: Citation BibTeX Audit
+
+- [x] Inventory every article `[^cite-*]` marker and every hidden
+      `tpm-bibtex` entry with a reproducible script so the audit can prove
+      complete coverage.
+- [x] Write a developer-ready citation audit report that identifies malformed,
+      under-structured, duplicated, and externally unverifiable migrated
+      citations before manual cleanup begins.
+- [x] Add focused tests for the audit script and update package-script docs so
+      future citation cleanup can rerun the same checks.
+      Verified with `bun test tests/scripts/content/audit-bibtex-citations.test.ts --reporter=dots`,
+      `bun --silent run typecheck:tools`,
+      `bun --silent run lint -- scripts/content/audit-bibtex-citations.ts tests/scripts/content/audit-bibtex-citations.test.ts`,
+      `bun --silent run lint:packages`,
+      `bunx prettier --check scripts/content/audit-bibtex-citations.ts tests/scripts/content/audit-bibtex-citations.test.ts package.json PACKAGE_SCRIPTS.md CHECKLIST.md docs/CITATION_BIBTEX_AUDIT.md --log-level warn`,
+      `bunx markdownlint-cli2 CHECKLIST.md PACKAGE_SCRIPTS.md docs/CITATION_BIBTEX_AUDIT.md`,
+      and `bun run references:bibtex:audit -- --write --quiet`.
+
+### Milestone 174: Manual Citation BibTeX Inspection
+
+- [x] Use the full 246-entry BibTeX inventory from Milestone 173 as the
+      no-skips checklist for a human review pass.
+- [x] Manually inspect every parsed citation entry article by article, record
+      concrete visible mistakes, and distinguish structural cleanup from
+      source-canonical verification work.
+- [x] Write the manual inspection report with coverage proof, prioritized issue
+      classes, and exact follow-up actions for citation cleanup.
+- [x] Verify the report and checklist with formatting, markdown, and diff
+      checks before handoff.
+      Documented in `docs/CITATION_BIBTEX_MANUAL_INSPECTION.md`; verified with
+      `bunx prettier --check docs/CITATION_BIBTEX_MANUAL_INSPECTION.md docs/CITATION_BIBTEX_AUDIT.md CHECKLIST.md --log-level warn`,
+      `bunx markdownlint-cli2 docs/CITATION_BIBTEX_MANUAL_INSPECTION.md docs/CITATION_BIBTEX_AUDIT.md CHECKLIST.md`,
+      and `git diff --check`.
+
+### Milestone 175: Citation Verification Rules And Ledger Design
+
+- [x] Define the target BibTeX/BibLaTeX-like conventions for TPM citations,
+      including allowed entry types, required/recommended fields, web/video/social
+      source rules, archive handling, locator policy, and unresolved-source
+      notation.
+- [x] Replace the earlier triage framing with an explicit canonical
+      verification workflow: every citation must be syntactically sane,
+      manually checked against online source evidence, and reviewed against the
+      article author's likely intent.
+- [x] Produce a per-entry verification ledger shape that records source lookup
+      evidence, confidence, corrections needed, and unresolved questions for
+      all 246 entries.
+      Documented in `docs/CITATION_CANONICAL_VERIFICATION.md` with the 246-row
+      no-skips ledger initialized in
+      `docs/CITATION_CANONICAL_VERIFICATION_LEDGER.md`.
+
+### Milestone 176: Citation Canonical Verification Pass
+
+- [x] Manually verify every BibTeX entry in the 246-entry inventory against
+      online evidence, using the Milestone 175 ledger as a no-skips checklist.
+- [x] Record per-entry findings for syntax/field quality, literal citation
+      correctness, source identity, duplicate identity, and author-intent
+      sanity.
+- [x] Mark entries as corrected-ready, ambiguous, unrecoverable, or requiring
+      editorial review before changing article source.
+- [x] Complete the first high-risk source lookup batches for
+      `what-is-a-meme.md` and `postnaturalism.md`, recording verified,
+      ambiguous, duplicate-ready, and editorial-review rows in the canonical
+      ledger.
+- [x] Complete the first `internetmemetics.md` source lookup batch for rows
+      45-60, recording structured DOI/book/chapter/web evidence and duplicate
+      identities in the canonical ledger.
+- [x] Complete the `internetmemetics.md` source lookup batch for rows 61-80,
+      recording structured chapter/book/article/web evidence, duplicate
+      identities, and edition/archive ambiguities in the canonical ledger.
+- [x] Complete the `internetmemetics.md` source lookup batch for rows 81-100,
+      recording DOI2BIB/Crossref article evidence, SEP/KYM/web source shapes,
+      and ambiguity/editorial-review notes for dynamic, conference, and
+      preprint-like sources in the canonical ledger.
+- [x] Complete the remaining `internetmemetics.md` source lookup batch for
+      rows 101-119, recording DOI2BIB/Crossref article evidence,
+      book/web/SEP evidence, duplicate-ready Shifman/Segev source identities,
+      and residual Sober edition ambiguity in the canonical ledger.
+- [x] Complete `the-memeticists-challenge-remains-open.md` source lookup
+      batches for rows 120-161, explicitly reconciling duplicates with
+      `internetmemetics.md`, including OUP edited-volume ambiguities,
+      Journal of Memetics source shapes, DOI-backed article records, and
+      duplicate-ready Shifman/Segev/Lynch/Edmonds source identities.
+- [x] Complete the remaining article lookup batches for rows 162-246, covering
+      Vulliamy, philosophy/classroom sources, politics sources, and
+      bibliography-only edge cases.
+
+### Milestone 177: Citation Source Correction Batches
+
+- [x] Correct citation entries article by article, starting with visibly broken
+      mechanical migrations such as `what-is-a-meme.md` and placeholder
+      records in `postnaturalism.md`.
+- [ ] Normalize duplicates only after source identity is verified, preserving
+      author intent and article-specific locator needs.
+- [x] Re-run the structural audit after each batch to prove citation coverage,
+      parser diagnostics, and sitewide bibliography aggregation do not regress.
+      Final verification used `bun run references:bibtex:audit -- --write --quiet`.
+- [x] Correct the severe mechanical field splits in `what-is-a-meme.md`,
+      including scholarly DOI-backed sources, Know Your Meme web pages, and
+      ambiguous social/video/classical cases.
+- [x] Correct the highest-risk `postnaturalism.md` placeholders and source
+      shapes, including DOI-backed article/chapter records, web/encyclopedia
+      source types, and duplicate-ready Tipton book records.
+- [x] Correct the duplicated Zannettou/Caulfield origins-of-memes source in
+      both decade-review articles, including the author list, proceedings
+      fields, DOI, and duplicate-merge ledger status.
+- [x] Correct the aesthetics source batch in
+      `we-can-have-retrieval-inference-synthesis.md`, including structured
+      book, article, and in-book records for Baxandall, Haack, Hull, Lewens,
+      and Wollheim sources.
+- [x] Correct the GamerGate source batch, including publisher identifiers,
+      journal DOI metadata, and the Overland web article source shape.
+- [x] Correct the memetic-bottleneck source batch, including the Eisner book,
+      Sperber chapter DOI, Shifman duplicate-ready web source, and GDC talk
+      metadata.
+- [x] Correct the first history source batch, including conservative cleanup
+      for the memetic-history video, Benjamin source, jjalbang sources, and
+      the Magibon video placeholder.
+- [x] Correct the Harambe source batch, including article dates, source
+      organizations, social-post metadata, and explicit ambiguity notes for the
+      dead Vine and Facebook sources.
+- [x] Correct the Wittgenstein quote source batch, including Malcolm book
+      metadata, Hanson article metadata, and an explicit ambiguous note for the
+      Dribble source.
+- [x] Correct the Chapman/Raymond/Putnam/Godwin and generation-gap source
+      batch, including web source dates and ISBN metadata where recoverable.
+- [x] Correct `internetmemetics.md` rows 45-60, including DOI-backed article
+      records, Aunger/Bloch/Boyd/Richerson/Conte chapter and volume metadata,
+      duplicate-ready book records, and web sources with explicit ambiguity
+      where canonical metadata is limited.
+- [x] Correct `internetmemetics.md` rows 61-80 after canonical lookup,
+      including Dawkins book/chapter records, Cullen/Davison/Dennett source
+      shapes, Journal of Memetics web-journal entries, and archived wiki
+      sources with explicit ambiguity notes.
+- [x] Correct `internetmemetics.md` rows 81-100 after canonical lookup,
+      including DOI-backed article records, SEP/KYM/web source normalization,
+      the Milner dissertation correction, and explicit ambiguity/editorial
+      review notes for weakly recoverable sources.
+- [x] Correct `internetmemetics.md` rows 101-119 after canonical lookup,
+      including DOI-backed article records, Bloomsbury/MIT Press book
+      metadata, Spreadable/Wired/Urban Dictionary web sources, SEP archive
+      metadata, and duplicate-ready Shifman/Segev source records.
+- [x] Correct `the-memeticists-challenge-remains-open.md` rows 120-161 after
+      canonical lookup and duplicate reconciliation, converting generic
+      `@misc` records into structured article/book/chapter/online entries
+      while leaving unresolved edited-volume page/date questions explicit in
+      the ledger.
+- [x] Correct the remaining rows 162-246 after canonical lookup, leaving only
+      explicit ambiguity/editorial-review notes where public source metadata or
+      project citation policy is insufficient.
+
+### Milestone 178: Citation Release Verification
+
+- [x] Inspect affected article bibliographies and the sitewide bibliography for
+      corrected rendering, clickable source URLs, duplicate collapse, and
+      stable backlink behavior.
+      Spot-checked affected built article bibliography output and
+      `/bibliography/` for hidden raw BibTeX leakage, source URLs, and backlink
+      anchors after the release build.
+- [x] Run citation audit, formatting, markdown, content verification, build, and
+      release checks before handoff.
+      Verified with `bun run references:bibtex:audit -- --write --quiet`,
+      `git diff --check`, and `bun run check:release`.
+- [x] Update author-facing citation docs with the final source-authoring rules
+      and unresolved-source guidance.
+      Updated `docs/ARTICLE_REFERENCE_AUTHORING.md` with source-type, field,
+      and uncertainty guidance.

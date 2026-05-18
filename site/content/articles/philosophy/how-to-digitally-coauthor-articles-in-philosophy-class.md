@@ -139,20 +139,25 @@ The most important benefit of the collaborative method introduced in the activit
 The model of digital philosophy founded on equating arguments with functions in a code library is epistemologically and ideologically biased towards the analytic tradition. It would naturally select for arguments that can be expressed in the standardised form of premises leading up to a conclusion, and skew the practice towards more readily digitised thought. Digital humanities as a whole is open to the same types of critique. Whether such criticisms make sense is an empirical and philosophical question, perfectly suited for digital philosophy to handle through mass collaboration.
 
 ```tpm-bibtex
-@incollection{alfano-2018,
+@inbook{alfano-2018,
   author = {Alfano, Mark},
   title = {Digital Humanities for History of Philosophy: A Case Study on Nietzsche},
   booktitle = {Research Methods for the Digital Humanities},
   editor = {Levenberg, Lewis and Neilson, Tai and Rheams, David},
-  publisher = {Palgrave Macmillan},
-  year = {2018}
+  publisher = {Springer International Publishing},
+  pages = {85--101},
+  year = {2018},
+  doi = {10.1007/978-3-319-96713-4_6},
+  isbn = {9783319967134}
 }
 
 @book{jockers-2013,
-  author = {Jockers, Matthew},
+  author = {Jockers, Matthew L.},
   title = {Macroanalysis: Digital Methods and Literary History},
   publisher = {University of Illinois Press},
-  year = {2013}
+  year = {2013},
+  doi = {10.5406/illinois/9780252037528.001.0001},
+  isbn = {9780252037528}
 }
 
 @article{knobe-2015,
@@ -160,8 +165,9 @@ The model of digital philosophy founded on equating arguments with functions in 
   title = {Philosophers are doing something different now: Quantitative data},
   journal = {Cognition},
   volume = {135},
-  pages = {36-38},
-  year = {2015}
+  pages = {36--38},
+  year = {2015},
+  doi = {10.1016/j.cognition.2014.11.011}
 }
 
 @article{laal-ghodsi-2011,
@@ -169,14 +175,15 @@ The model of digital philosophy founded on equating arguments with functions in 
   title = {Benefits of collaborative learning},
   journal = {Procedia - Social and Behavioral Sciences},
   volume = {31},
-  pages = {486-490},
-  year = {2011}
+  pages = {486--490},
+  year = {2012},
+  doi = {10.1016/j.sbspro.2011.12.091}
 }
 
-@misc{weatherson-2013,
+@online{weatherson-2013,
   author = {Weatherson, Brian},
   title = {Most Cited Articles from Philosophy Journals},
-  year = {2013},
+  date = {2013-06-26},
   url = {http://tar.weatherson.org/2013/06/26/most-cited-articles-from-philosophy-journals/}
 }
 ```

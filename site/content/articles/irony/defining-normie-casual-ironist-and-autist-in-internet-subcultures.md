@@ -68,6 +68,9 @@ It is most important to consider users online in the same light. The general tre
   citation = {Chapman, D. Geeks, MOPs, and sociopaths in subculture evolution. Meaningness. Available at: https://meaningness.com/geeks-mops-sociopaths},
   author = {Chapman, David},
   title = {Geeks, MOPs, and Sociopaths in Subculture Evolution},
-  url = {https://meaningness.com/geeks-mops-sociopaths}
+  organization = {Meaningness},
+  date = {2015-06-03},
+  url = {https://meaningness.com/geeks-mops-sociopaths},
+  urldate = {2026-05-18},
 }
 ```

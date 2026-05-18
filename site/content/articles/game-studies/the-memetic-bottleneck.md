@@ -114,40 +114,57 @@ This dynamic is one reason why it makes sense to refer to both the single instan
 Like a panel in a highly networked version of the Infinite Canvas, every meme is both a potential bottleneck and a possible choice. Since the sense that every meme has a preceding meme is essential to the appreciation of memes, the memetic bottleneck works in the inverse direction of the narrative bottleneck, generating potential pasts. To choose a meme to post is to choose which game to play with the audience. More significantly, it is to choose which save file to load up: it's scenario editing of history, conditioned on current mood.
 
 ```tpm-bibtex
-@misc{eisner-w-comics-and-sequential-art,
+@book{eisner-w-comics-and-sequential-art,
   citation = {Eisner, W. Comics and Sequential Art. Author site available at: http://www.willeisner.com/},
-  author = {Eisner, W.},
+  author = {Eisner, Will},
   title = {Comics and Sequential Art},
-  url = {http://www.willeisner.com/},
+  publisher = {Poorhouse Press},
+  location = {Tamarac, FL and Guerneville, CA},
+  year = {1985},
+  isbn = {0961472804},
 }
 
-@misc{mccloud-s-infinite-canvas,
+@online{mccloud-s-infinite-canvas,
   citation = {McCloud, S. The Infinite Canvas. Available at: http://www.scottmccloud.com/4-inventions/canvas/index.html},
-  author = {McCloud, S.},
+  author = {McCloud, Scott},
   title = {The Infinite Canvas},
   url = {http://www.scottmccloud.com/4-inventions/canvas/index.html},
+  urldate = {2026-05-18},
 }
 
-@misc{shifman-l-2015-memeology-festival-05,
+@online{shifman-l-2015-memeology-festival-05,
   citation = {Shifman, L. (2015). Memeology Festival 05. Memes as Ritual, Virals as Transmission? In Praise of Blurry Boundaries. Culture Digitally. Available at: http://culturedigitally.org/2015/11/memeology-festival-05-memes-as-ritual-virals-as-transmission-in-praise-of-blurry-boundaries/},
-  author = {Shifman, L.},
+  author = {Shifman, Limor},
   title = {Memeology Festival 05. Memes as Ritual, Virals as Transmission? In Praise of Blurry Boundaries},
-  year = {2015},
-  url = {http://culturedigitally.org/2015/11/memeology-festival-05-memes-as-ritual-virals-as-transmission-in-praise-of-blurry-boundaries/},
+  organization = {Culture Digitally},
+  date = {2015-11-10},
+  url = {https://culturedigitally.org/2015/11/memeology-festival-05-memes-as-ritual-virals-as-transmission-in-praise-of-blurry-boundaries/},
+  urldate = {2026-05-18},
 }
 
-@misc{sperber-d-2000-an-objection-to-the-memetic-approach,
+@inbook{sperber-d-2000-an-objection-to-the-memetic-approach,
   citation = {Sperber, D. (2000). An objection to the memetic approach to culture. Available at: http://www.dan.sperber.fr/wp-content/uploads/2000_an-objection-to-the-memetic-approach-to-culture.pdf},
-  author = {Sperber, D.},
-  title = {An objection to the memetic approach to culture},
-  year = {2000},
+  author = {Sperber, Dan},
+  title = {An Objection to the Memetic Approach to Culture},
+  booktitle = {Darwinizing Culture: The Status of Memetics as a Science},
+  editor = {Aunger, Robert},
+  publisher = {Oxford University Press},
+  location = {Oxford},
+  pages = {163--173},
+  year = {2001},
+  doi = {10.1093/acprof:oso/9780192632449.003.0008},
   url = {http://www.dan.sperber.fr/wp-content/uploads/2000_an-objection-to-the-memetic-approach-to-culture.pdf},
 }
 
-@misc{claussen-a-unpopular-opinion-all-narrative-is-linear,
+@online{claussen-a-unpopular-opinion-all-narrative-is-linear,
   citation = {Claussen, A. Unpopular Opinion: All Narrative is Linear. GDC talk. Available at: https://www.youtube.com/watch?v=GWmEu7Yqrb0},
-  author = {Claussen, A.},
+  author = {Claussen, Amy},
   title = {Unpopular Opinion: All Narrative is Linear},
+  organization = {GDC Vault},
+  year = {2017},
+  type = {Conference talk},
+  note = {Game Narrative Summit, GDC 2017},
   url = {https://www.youtube.com/watch?v=GWmEu7Yqrb0},
+  urldate = {2026-05-18},
 }
 ```
