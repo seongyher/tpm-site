@@ -102,6 +102,7 @@
     "verify:content": "bun scripts/content/verify-content.ts"
   },
   "overrides": {
+    "brace-expansion": "^5.0.6",
     "debug": "^4.4.3",
     "devalue": "^5.8.1",
     "fast-uri": "^3.1.2",
@@ -110,6 +111,7 @@
     "sugarss": "^5.0.1",
     "tmp": "^0.2.5",
     "uuid": "^14.0.0",
+    "ws": "^8.20.1",
     "yaml": "^2.8.3"
   },
   "dependencies": {

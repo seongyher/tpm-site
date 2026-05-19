@@ -82,17 +82,17 @@ Check the article context, not just the bibliography block:
 
 Use the most specific type that fits the verified source.
 
-| Source shape | Preferred type | Required fields | Recommended fields |
-| --- | --- | --- | --- |
-| Journal article | `@article` | `author`, `title`, `journal`, `year` or `date` | `volume`, `number`, `pages`, `doi`, `url` |
-| Book or monograph | `@book` | `author` or `editor`, `title`, `year` or `date` | `publisher`, `location`, `isbn`, `edition`, `url` |
-| Chapter or essay in edited volume | `@incollection` | `author`, `title`, `booktitle`, `year` or `date` | `editor`, `publisher`, `location`, `pages`, `doi`, `url` |
-| Conference paper | `@inproceedings` | `author`, `title`, `booktitle`, `year` or `date` | `editor`, `publisher`, `pages`, `doi`, `url` |
-| Web article or page | `@online` | `title`, `url` | `author` or `organization`, `date`, `urldate`, `archiveurl`, `archivedate` |
-| Video, podcast, or platform media | `@online` | `title`, `url` | `author` or `organization`, `date`, `type`, `urldate`, `archiveurl` |
-| Social post | `@online` | `author` or `organization`, `title`, `url` | `date`, `urldate`, `archiveurl`, platform in `organization` or `note` |
-| Court/legal document | `@misc` or `@online` | `title`, `year` or `date` | `institution`, `number`, `url`, `urldate` |
-| Classical or historical text | `@book` or `@incollection` | work title, edition/translator/source decision | `translator`, `editor`, `publisher`, `location`, `year`, locator in prose |
+| Source shape                      | Preferred type             | Required fields                                  | Recommended fields                                                         |
+| --------------------------------- | -------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------- |
+| Journal article                   | `@article`                 | `author`, `title`, `journal`, `year` or `date`   | `volume`, `number`, `pages`, `doi`, `url`                                  |
+| Book or monograph                 | `@book`                    | `author` or `editor`, `title`, `year` or `date`  | `publisher`, `location`, `isbn`, `edition`, `url`                          |
+| Chapter or essay in edited volume | `@incollection`            | `author`, `title`, `booktitle`, `year` or `date` | `editor`, `publisher`, `location`, `pages`, `doi`, `url`                   |
+| Conference paper                  | `@inproceedings`           | `author`, `title`, `booktitle`, `year` or `date` | `editor`, `publisher`, `pages`, `doi`, `url`                               |
+| Web article or page               | `@online`                  | `title`, `url`                                   | `author` or `organization`, `date`, `urldate`, `archiveurl`, `archivedate` |
+| Video, podcast, or platform media | `@online`                  | `title`, `url`                                   | `author` or `organization`, `date`, `type`, `urldate`, `archiveurl`        |
+| Social post                       | `@online`                  | `author` or `organization`, `title`, `url`       | `date`, `urldate`, `archiveurl`, platform in `organization` or `note`      |
+| Court/legal document              | `@misc` or `@online`       | `title`, `year` or `date`                        | `institution`, `number`, `url`, `urldate`                                  |
+| Classical or historical text      | `@book` or `@incollection` | work title, edition/translator/source decision   | `translator`, `editor`, `publisher`, `location`, `year`, locator in prose  |
 
 `@misc` is allowed only when no better source shape exists or when the source is
 temporarily unresolved. It should not be the default for known books, articles,
