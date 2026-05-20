@@ -9,7 +9,8 @@ should be able to understand the target architecture, sequencing, risks, and
 verification strategy from this document alone.
 
 The repo should mature from a high-quality TPM Astro site into a typed static
-publishing platform. Authors should write ordinary content. Site owners should
+publishing platform, and ultimately into the foundation for a comprehensive
+static blog studio. Authors should write ordinary content. Site owners should
 configure a publication. Developers should extend clear platform domains. The
 platform should compile those inputs into fast, accessible, durable,
 machine-readable static output.
@@ -41,6 +42,35 @@ The ideal developer path is similarly safe:
    examples, generated-output verifiers, and browser checks.
 4. Treat every recurring bug as a hint that a schema, type, policy, layout
    recipe, or verifier should make that bug impossible or difficult to express.
+
+The far-end product is a static blog CMS/studio: a single GUI application where
+non-technical users can write Markdown or MDX, edit metadata, manage media,
+configure the site, preview changes, receive repairable diagnostics, and publish
+static output with a button. Git hosts, deploy providers, build logs, API keys,
+OAuth flows, branches, previews, and cache invalidation should eventually feel
+like implementation details behind clear product actions such as “Save draft,”
+“Preview,” “Submit for review,” “Publish,” and “Rollback.”
+
+That product must not become a separate CMS model. The studio should consume the
+same site directory, schemas, compiler artifacts, route registry, diagnostics,
+media policies, metadata profiles, deployment adapters, and generated-output
+contracts as the CLI and CI. The platform compiler is the source of truth; the
+GUI is the humane interface over it.
+
+The end-state user paths are:
+
+1. **Author path:** open the studio, create or edit an article, use a real-time
+   Markdown/MDX editor, see author-language diagnostics, preview the page and
+   generated artifacts, and submit or publish without learning Git.
+2. **Site-owner path:** configure identity, theme, navigation, support links,
+   social links, homepage surfaces, redirects, metadata, collections, and deploy
+   providers through validated forms with sensible defaults.
+3. **Developer path:** extend schemas, compiler domains, view models,
+   diagnostics, components, and adapters so the studio automatically gains new
+   safe authoring capabilities.
+4. **Operator path:** connect provider accounts or credentials once, then let
+   the platform manage previews, builds, deploys, rollbacks, cache policy, and
+   release reports through explicit deployment adapters.
 
 ## Current Foundation
 
@@ -95,6 +125,10 @@ Current architectural risks:
 - Several subdomains are extractable in spirit but still need internal
   package-quality boundaries before becoming reusable libraries or Astro
   integrations.
+- The future studio product is implied by schemas and diagnostics, but the
+  roadmap must keep it explicit so earlier contracts are designed for real-time
+  preview, GUI forms, publish workflows, provider connectors, and non-technical
+  repair paths.
 
 ## Platform Qualities
 
@@ -113,8 +147,14 @@ regressing the others.
   keyboard behavior, and reduced-motion behavior are explicit where needed.
 - **Performance:** payloads, caching, images, hydration, critical resources,
   layout stability, and perceived load time are measured and budgeted.
+- **Tooling discipline:** local scripts, CI jobs, linters, compilers, test
+  scopes, ignore files, and generated artifacts are fast, intentional,
+  documented, and reproducible.
 - **Configurability:** publication-specific choices live in site config,
   content, theme, or explicit adapters rather than hard-coded platform logic.
+- **Studio readiness:** schemas, diagnostics, route previews, media policy,
+  deployment actions, and documentation are structured enough for future GUI
+  forms and real-time authoring workflows.
 - **Developer velocity:** abstractions should make intentional changes easy and
   make accidental invalid states hard to express.
 - **Extractability:** mature subdomains should have portable boundaries so they
@@ -153,6 +193,7 @@ static editorial publishing platform
     -> import/export and migration portability
     -> localization and inclusive defaults
     -> starter templates and distribution
+    -> studio/editor product, real-time preview, and publish orchestration
 ```
 
 The target architecture should let a developer say “add a semantic metadata
@@ -176,23 +217,132 @@ The platform should be excellent at:
 - reusable editorial UI primitives that make reading, browsing, citing,
   sharing, and supporting the publication feel coherent;
 - generated-output validation that treats public HTML, routes, redirects,
-  metadata, feeds, PDFs, search indexes, and assets as API contracts.
+  metadata, feeds, PDFs, search indexes, and assets as API contracts;
+- schema-driven editing, preview, diagnostics, media management, and deployment
+  orchestration for a future static blog studio.
 
 The platform should not try to become:
 
-- a general drag-and-drop page builder;
+- a general drag-and-drop page builder detached from the static publishing
+  model;
 - a runtime CMS that requires server state;
 - a SPA framework;
 - a theme marketplace at the expense of author simplicity;
 - a generic component library detached from the editorial publishing domain.
 
+The eventual GUI product can be comprehensive without violating these
+boundaries. It should be comprehensive inside the static editorial publishing
+domain: content editing, MDX-aware fallbacks, media, metadata, redirects,
+collections, homepage surfaces, previews, diagnostics, releases, deploys, and
+rollbacks. It should not broaden into arbitrary website construction unless the
+core platform deliberately expands beyond static blog publishing.
+
 TPM should remain the production proving ground. Generality should be proven
 through the docs site, fixture sites, starter templates, and future second
 consumers, not by weakening TPM's concrete editorial design.
 
+## Portability Model
+
+Not every domain should have the same portability target. Some code should stay
+TPM-specific. Some should become site-agnostic platform behavior. Some domains
+may be valuable far beyond Astro, this repo, or even websites.
+
+Use this portability gradient when designing a domain:
+
+1. **Site-specific:** valid only for the TPM publication instance. Examples:
+   TPM content, branding, copy, support/social accounts, theme overrides, and
+   editorial homepage choices.
+2. **Platform-specific:** reusable across site instances built by this
+   publishing platform, but still tied to its opinionated editorial model.
+   Examples: publishable entries, collections, article endcaps, route features,
+   homepage surfaces, and layout recipes.
+3. **Astro-specific adapter:** reusable across Astro sites or Astro-based
+   platform instances. Examples: content collection loaders, Markdown/MDX
+   transforms, Astro image adapters, Astro head rendering, and Astro component
+   wrappers.
+4. **Framework-agnostic core:** reusable from Astro, Next, scripts, CLIs,
+   workers, tests, or non-web renderers. Examples: citation normalization,
+   semantic metadata graph construction, diagnostics, route manifests, media
+   policy decisions, share URL construction, and generated-output validation
+   rules.
+5. **Environment-agnostic core:** pure logic that avoids filesystem, DOM,
+   process, network, framework, and runtime assumptions. It can run in Bun,
+   Node, browsers, Workers, tests, or future tools with thin adapters.
+6. **Product-agnostic library:** useful beyond editorial publishing. These
+   should be rare and proven. Candidates may include structured diagnostics,
+   anchored positioning math, schema-to-doc tooling, or citation utilities if
+   they mature beyond the publication domain.
+
+The preferred shape for portable domains is:
+
+```text
+pure core
+  -> environment adapter
+  -> framework adapter
+  -> Astro integration or Astro components
+  -> platform integration
+  -> TPM site instance
+```
+
+For example, bibliography should not begin as an Astro-only feature. The
+long-term shape could be:
+
+```text
+citation parser / source model / exporters
+  -> DOI or external lookup adapter
+  -> Markdown/MDX transform adapter
+  -> Astro bibliography integration
+  -> article/site bibliography UI
+  -> TPM citation audit workflow
+```
+
+This keeps the valuable core reusable while allowing TPM and the platform to
+remain opinionated at the integration layer.
+
+Portability should be deliberate, not automatic. Before making a domain more
+generic, ask:
+
+- What exact non-TPM or non-Astro consumer is plausible?
+- Which part is pure domain logic, and which part is Astro/site/UI glue?
+- Can the core avoid `siteConfig`, `process.cwd()`, DOM APIs, Astro imports,
+  Tailwind classes, filesystem reads, and browser globals?
+- What adapters would be needed for Astro, CLI, browser, Workers, or Next?
+- Would generalizing this make the current TPM product weaker or harder to
+  maintain?
+- Can tests prove the core without TPM content or Astro rendering?
+
+The answer may be "do not generalize yet." That is acceptable. The important
+thing is to assign each domain an explicit portability target so boundaries do
+not accidentally lock useful logic into one framework or one publication.
+
+Strong portability candidates:
+
+| Domain                         | Likely portable core                                                                                | Likely adapters/products                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Citations and bibliography     | Source model, parser, normalizer, duplicate detection, BibTeX/RIS/CSL export, citation diagnostics  | Markdown/MDX transform, Astro integration, article bibliography UI, citation-audit CLI |
+| Structured diagnostics         | Diagnostic codes, severities, source locations, remediation, JSON output                            | CLI formatter, CI reporter, future GUI diagnostics, verifier integration               |
+| Metadata and semantic profiles | Schema.org graph builders, Open Graph/Twitter/Scholar data models, metadata validation              | Astro head adapter, Next metadata adapter, feed adapter, metadata audit CLI            |
+| Generated-output verification  | Static artifact contracts, link/route/metadata/feed/PDF/cache validation rules                      | Astro/static-site adapter, Cloudflare adapter, CI CLI, observability importer          |
+| Media policy                   | Media role decisions, alt/caption policy, social image constraints, PDF compatibility, size budgets | Astro image adapter, PDF adapter, embed provider adapters, asset audit CLI             |
+| Route/entity manifests         | Canonical route model, entity relationships, redirects, visibility surfaces                         | Astro route adapter, sitemap/feed/search adapter, GUI route preview                    |
+| Anchored interactions          | Placement math, disclosure state machines, focus/escape rules                                       | DOM adapter, Astro script adapter, React/Next hook adapter                             |
+| Config/schema documentation    | Schema metadata, generated references, editor labels, repair hints                                  | Site config docs, GUI form generation, docs-site renderer                              |
+| Editorial workflow state       | Draft/review/publish states, validation gates, preview state, publish actions                       | GUI editor, Git adapter, deploy adapter, review workflow CLI                           |
+| Studio preview model           | Preview manifests, dirty-state tracking, generated artifact status, diagnostic mapping              | Local preview server, browser studio, cloud preview worker                             |
+| Performance workbench          | Budget models, payload diffing, cache policy checks, metric reports                                 | Lighthouse/Unlighthouse adapters, CI reporter, static report UI                        |
+| Import/export and migration    | Canonical content/archive manifests, migration diagnostics, source maps                             | WordPress/Substack/static HTML importers, author review UI, migration CLI              |
+
+Domains that should usually stay platform- or site-specific:
+
+- TPM branding, theme, support CTAs, and homepage editorial composition.
+- Article list visual style and reading-layout recipes, unless a second
+  platform consumer proves a stable API.
+- Full publishing platform orchestration, which should stay opinionated rather
+  than becoming a vague site-builder framework.
+
 ## Roadmap Dependency Model
 
-The roadmap is easiest to understand as five layers.
+The roadmap is easiest to understand as six layers.
 
 1. **Source contracts:** site instance, config contexts, route/entity registry,
    source/artifact lifecycle, and content compiler artifacts.
@@ -206,14 +356,197 @@ The roadmap is easiest to understand as five layers.
 5. **Distribution systems:** internal package boundaries, extension contracts,
    deployment adapters, starter sites, localization readiness, security/privacy
    defaults, and public platform documentation.
+6. **Studio product systems:** GUI editing, real-time preview, media
+   management, diagnostics, provider connection, publish orchestration,
+   rollback, and non-technical site-owner workflows.
 
 Work should generally move from lower layers to higher layers. Later layers can
 be designed early, but implementation should avoid guessing at unfinished lower
-contracts.
+contracts. The phases below are dependency layers, not a waterfall: shared
+contracts should land before broad consumers, while design work for later
+systems can begin early when it clarifies lower-level requirements.
+
+## Roadmap Preflight: Tooling And Repo Health Baseline
+
+**Goal:** make the QA foundation fast, scoped, reproducible, and trustworthy
+before large platform refactors begin.
+
+This preflight is part of the roadmap even though it does not change product
+behavior. The planned roadmap depends on strong guardrails. If the linter,
+compiler, tests, generated-output verifiers, fix scripts, ignore files, or CI
+jobs are noisy, slow, overbroad, under-scoped, or hard to reproduce locally,
+later platform work will be slower and riskier.
+
+Current evidence:
+
+- The QA pipeline is powerful but complex: linting, formatting, type checks,
+  Astro diagnostics, unit/component/e2e/a11y/performance tests, markdown review,
+  generated-output verification, security checks, and release checks all exist.
+- CI has caught issues that should ideally be reproducible through a documented
+  local command.
+- Some tools may be scanning generated output, reports, caches, downloaded
+  artifacts, fixture output, or other files that are not meaningful source
+  inputs.
+- Long-running checks may be doing work that belongs only in release or CI
+  gates rather than fast local feedback.
+
+Mature contract:
+
+- Every script has a clear role: fast local check, focused domain check,
+  mutation/fix command, release check, CI-only check, or investigation tool.
+- Local release commands match CI closely enough that CI failures are
+  reproducible without guessing.
+- Tool scopes are explicit and justified. Linters, formatters, type checkers,
+  markdown checks, HTML validators, and scanners ignore generated artifacts,
+  caches, reports, dependency folders, and intentionally parked files unless a
+  tool explicitly owns those paths.
+- Ignore files are consistent across Git, formatters, linters, test runners,
+  asset scanners, generated-output verifiers, and CI.
+- Slow checks are either made faster, split into focused and release modes, or
+  documented as intentionally heavy.
+- The QA pipeline catches representative failures through probes or fixtures,
+  so scope reductions do not silently reduce coverage.
+
+Work:
+
+- Audit `package.json` scripts, CI workflows, lint/format configs, TypeScript
+  configs, Astro configs, Playwright configs, markdown/html validators, security
+  checks, generated-output verifiers, coverage settings, and Git ignore files.
+- Classify scripts by purpose and expected runtime. Remove or document obsolete
+  scripts and make command names reflect their actual scope.
+- Identify overbroad scans and tighten globs/excludes for generated files,
+  build output, reports, caches, fixture output, downloaded artifacts,
+  screenshots, coverage output, dependency folders, and parked unused assets.
+- Compare local commands against CI commands and document the exact local
+  reproduction path for every CI gate.
+- Add or update `PACKAGE_SCRIPTS.md` and related docs so developers know which
+  command to run while editing, before handoff, before release, and during CI
+  failure triage.
+- Measure before/after runtime for expensive checks where practical.
+
+Tooling to add or strongly consider:
+
+- **Script registry:** a machine-readable manifest for scripts with purpose,
+  expected runtime, validation/mutation behavior, inputs, outputs, CI usage,
+  owner domain, and whether the script is fast, focused, release-level,
+  CI-only, or investigative.
+- **CI/local parity checker:** compares GitHub Actions commands, `package.json`
+  scripts, and docs so every CI gate has a local reproduction command or a
+  documented CI-only reason.
+- **Tool-scope verifier:** asserts that source paths remain covered while
+  generated artifacts, caches, reports, dependency folders, and parked files are
+  excluded for explicit reasons.
+- **Diagnostic diff harness:** runs old and new versions of a verifier, linter,
+  scanner, or script and compares diagnostic codes, files, severities, and
+  counts before a scope or implementation change lands.
+- **Failure-probe fixtures:** intentionally bad fixture inputs that prove each
+  major QA layer still catches representative failures: bad frontmatter, bad
+  links, missing alt text, invalid metadata, broken redirects, unsafe embeds,
+  malformed citations, oversized assets, layout overflow, and invalid generated
+  artifacts.
+- **Generated artifact manifest checker:** verifies that every emitted public
+  artifact has an owner, source, route or policy, cache role, crawler role, and
+  expected verification path.
+- **Package and import boundary checker:** prevents site-specific code from
+  leaking into platform core, Astro adapters from leaking into pure logic, UI
+  from importing filesystem/process code, and test-only helpers from becoming
+  production APIs.
+- **Performance and payload diff reporter:** records route-level JavaScript,
+  CSS, image, font, PDF, and HTML payload changes, cache headers, and key
+  Lighthouse/Unlighthouse metrics against a baseline.
+- **Release health report:** summarizes changed routes, changed generated
+  artifacts, redirects, metadata, PDFs, payload deltas, dependency/security
+  status, known warnings, deploy readiness, and manual follow-up items.
+- **Schema/docs drift generator:** generates or checks references from
+  frontmatter, site config, route, feature, metadata, and extension schemas so
+  docs drift is caught automatically.
+
+Tooling sequence:
+
+- **Preflight first:** build or formalize the script registry, CI/local parity
+  checker, tool-scope verifier, diagnostic diff harness, and failure-probe
+  fixture pattern before major roadmap refactors. These are the tools that make
+  QA cleanup safe.
+- **Phase 1 source contracts:** build the generated artifact manifest checker
+  as source/artifact lifecycle work matures, then use it to declare ownership
+  for routes, assets, feeds, PDFs, redirects, headers, and generated public
+  files.
+- **Phase 2 output engines:** extend the diagnostic diff harness and failure
+  probes into verifier-module tests as metadata, references, media/PDF, search,
+  feeds, and generated-output checks become more modular.
+- **Phase 3 presentation and performance:** build the performance and payload
+  diff reporter alongside the performance workbench, and expand visual/layout
+  probes alongside the component catalog and interaction primitives.
+- **Phase 4 product tooling:** build the release health report, schema/docs
+  drift generator, and domain ownership reports when site doctor, public docs,
+  observability, and author diagnostics consume the same schemas and
+  diagnostics.
+- **Phase 5 distribution:** add package/import boundary checks before internal
+  package boundaries or extension points are treated as stable, and expand
+  public API/doc freshness reports before publishing reusable packages or Astro
+  integrations.
+- **Phase 6 studio product:** add provider-adapter QA, preview/build parity,
+  credential-boundary checks, and editor round-trip probes before any GUI
+  publish workflow is considered production-ready.
+
+Tooling to investigate during the audit:
+
+- mutation testing for pure domain logic where normal coverage can be
+  misleading;
+- property-based tests for route, slug, visibility, metadata, citation, media,
+  cache, and share-target invariants;
+- visual regression tooling beyond the current component catalog and Playwright
+  invariants;
+- static dependency graph analysis for package-boundary planning;
+- code ownership or domain ownership reports based on source paths and
+  generated-output contracts;
+- docs freshness and public API report tooling for future package extraction;
+- local watch-mode orchestration for fast author/developer feedback;
+- hosted or saved QA dashboards for release history, payload growth,
+  accessibility drift, and crawler/SEO health.
+
+Safe migration model:
+
+1. **Inventory before changing scope.** Record each tool, its input globs, its
+   ignore rules, its CI usage, and the bug classes it is expected to catch.
+2. **Characterize current coverage.** Capture the current command output and
+   runtime for important checks before changing configs.
+3. **Add failure probes before narrowing.** For each tightened tool scope, keep
+   or add a small source fixture that should fail if the check stops covering
+   its intended domain.
+4. **Run old and new scopes in parallel when risk is high.** Temporarily compare
+   diagnostics from the current command and the proposed scoped command, then
+   document intentional differences before deleting the old path.
+5. **Diff diagnostics, not just exit codes.** A faster command is only valid if
+   removed diagnostics are irrelevant, duplicated elsewhere, or explicitly
+   deferred.
+6. **Keep release checks conservative.** Fast local checks can be narrower, but
+   release checks should retain broad public-output coverage until replacement
+   verifiers prove equivalent or better protection.
+7. **Make exclusions visible.** Any ignored path class should have a reason:
+   generated output, external dependency, cache/report artifact, intentionally
+   parked source, or separately verified artifact.
+8. **Protect against regression.** Add tests or script assertions for tool
+   config where practical, especially for ignore lists, script taxonomy,
+   generated-artifact ownership, and CI/local command parity.
+
+Verification:
+
+- Script taxonomy and docs match `package.json`.
+- Local release command reproduces CI gates or clearly documents CI-only
+  exceptions.
+- Lint, format, markdown, type, Astro, HTML, generated-output, and test scopes
+  exclude irrelevant artifacts without dropping source coverage.
+- Probe fixtures prove representative lint/type/markdown/generated-output
+  failures are still caught.
+- Before/after runtime and diagnostic diffs are recorded for scoped or split
+  checks.
+- `bun --silent run review:markdown` and the final selected release command pass
+  after cleanup.
 
 ## Phase 1: Source Contracts
 
-### A. Source And Artifact Lifecycle
+### 1. Source And Artifact Lifecycle
 
 **Goal:** make the boundary between editable source files, processed build
 inputs, generated artifacts, and parked legacy assets explicit.
@@ -250,7 +583,7 @@ Verification:
 - Fixture-site tests for processed assets, public files, downloads, and parked
   unused assets.
 
-### B. Platform Context And Site Config Contract
+### 2. Platform Context And Site Config Contract
 
 **Goal:** replace implicit singleton site assumptions with typed config
 contexts that can support TPM, docs examples, fixture sites, and future users.
@@ -287,7 +620,7 @@ Verification:
 - Boundary tests that catch platform domains importing active-site singletons.
 - Fixture-site builds proving non-TPM configs work.
 
-### C. Canonical Route, Feature, And Entity Registry
+### 3. Canonical Route, Feature, And Entity Registry
 
 **Goal:** make routes, feature availability, entity kinds, and generated outputs
 discoverable through one typed registry.
@@ -323,7 +656,7 @@ Verification:
 - Redirect and sitemap tests generated from registry data.
 - Build verifier fails on undocumented public routes or generated artifacts.
 
-### D. Article Compiler Artifact
+### 4. Article Compiler Artifact
 
 **Goal:** make rendered article output a typed build artifact rather than a set
 of ad hoc computations scattered across layouts, scripts, and verifiers.
@@ -362,7 +695,7 @@ Verification:
 
 ## Phase 2: Output Engines
 
-### E. Publishable Entry And Visibility Model
+### 5. Publishable Entry And Visibility Model
 
 **Goal:** make every list, feed, collection, search result, related block,
 homepage panel, and recommendation surface consume the same expressive
@@ -400,7 +733,7 @@ Verification:
 - Fixture-site tests for homepage, archive, collection, feed, and search
   inclusion rules.
 
-### F. Route-Level View Models
+### 6. Route-Level View Models
 
 **Goal:** keep routes thin and make complex pages render from display-ready view
 models.
@@ -432,7 +765,7 @@ Verification:
 - Route smoke tests for metadata and empty-state output.
 - Component tests assert view contract behavior instead of route internals.
 
-### G. Metadata, Semantics, Search, And Scholarly Engine
+### 7. Metadata, Semantics, Search, And Scholarly Engine
 
 **Goal:** make machine-readable output a platform engine with automatic
 defaults and optional advanced profiles.
@@ -471,7 +804,7 @@ Verification:
 - Search/social/Scholar/PDF metadata verifiers.
 - Fixture-site tests for profile opt-in and defaults.
 
-### H. References, Citations, And Bibliography Domain
+### 8. References, Citations, And Bibliography Domain
 
 **Goal:** make citations and references a dependable scholarly subsystem rather
 than best-effort transformed prose.
@@ -508,7 +841,7 @@ Verification:
 - Golden bibliography aggregation snapshots.
 - DOI lookup fixtures where external data is used for validation.
 
-### I. Media, Image, Embed, And PDF Policy Engine
+### 9. Media, Image, Embed, And PDF Policy Engine
 
 **Goal:** make media behavior policy-driven across HTML, lists, social previews,
 RSS/search, PDFs, and future editors.
@@ -546,7 +879,7 @@ Verification:
 - Asset verifier checks raw/unoptimized output and social-image constraints.
 - E2E tests for image inspector, embeds, and layout containment.
 
-### J. Generated-Output Verifier Architecture
+### 10. Generated-Output Verifier Architecture
 
 **Goal:** turn build verification into a modular static-site contract engine.
 
@@ -580,7 +913,7 @@ Verification:
 
 ## Phase 3: Presentation And Interaction Systems
 
-### K. UI Primitives, Layout Recipes, And Component Catalog
+### 11. UI Primitives, Layout Recipes, And Component Catalog
 
 **Goal:** solve common layout and component problems once, then make future UI
 changes faster and safer.
@@ -621,7 +954,7 @@ Verification:
   content.
 - Playwright layout invariants for overflow, wrapping, and alignment.
 
-### L. Progressive Interaction Primitives
+### 12. Progressive Interaction Primitives
 
 **Goal:** keep interactive behavior small, lazy, accessible, and consistent.
 
@@ -652,7 +985,7 @@ Verification:
 - Playwright tests for keyboard, touch, pointer, and focus flows.
 - Lighthouse/payload checks for unused JavaScript and critical-path impact.
 
-### M. Performance, Payload, And Cache Workbench
+### 13. Performance, Payload, And Cache Workbench
 
 **Goal:** make performance experimentation repeatable and promote successful
 experiments into durable gates.
@@ -690,7 +1023,7 @@ Verification:
 
 ## Phase 4: Product Tooling
 
-### N. Site Doctor And Author Diagnostics
+### 14. Site Doctor And Author Diagnostics
 
 **Goal:** make strict platform contracts friendly to non-technical authors and
 site owners.
@@ -722,7 +1055,7 @@ Verification:
 - Snapshot tests for diagnostic wording.
 - Docs examples for non-technical authors.
 
-### O. Documentation System And Public Platform Docs
+### 15. Documentation System And Public Platform Docs
 
 **Goal:** keep docs useful without creating stale parallel truth.
 
@@ -753,7 +1086,7 @@ Verification:
 - Markdown review, broken-link checks, generated-doc drift checks, docs-site
   build, and changed-domain doc accountability.
 
-### P. Test Matrix And Correctness Strategy
+### 16. Test Matrix And Correctness Strategy
 
 **Goal:** make high-velocity development safe through better fixtures and
 stronger invariants.
@@ -787,7 +1120,7 @@ Verification:
 - Accountability scripts require tests for changed source areas.
 - CI separates fast local checks from rigorous release checks.
 
-### Q. Observability And Webmaster Intelligence
+### 17. Observability And Webmaster Intelligence
 
 **Goal:** turn production signals into structured platform feedback.
 
@@ -819,9 +1152,10 @@ Verification:
 - Golden incident reports.
 - Release reports include before/after comparisons for changed route types.
 
-### R. Authoring Studio Readiness
+### 18. Authoring Studio Readiness
 
-**Goal:** make a future GUI a natural consumer of existing platform contracts.
+**Goal:** make a future static blog studio a natural consumer of existing
+platform contracts.
 
 Current evidence:
 
@@ -833,6 +1167,14 @@ Mature contract:
 - The GUI does not invent a parallel CMS model. It edits the same site instance
   files and consumes the same schemas, diagnostics, route previews, and
   generated-output contracts as CLI and CI.
+- The editor can round-trip Markdown and MDX without destroying author intent.
+- The studio can explain platform errors in author language and link each issue
+  to a repairable field, file, asset, route, or generated artifact.
+- Real-time preview, form editing, media management, and publish actions all
+  compile through the same platform contracts.
+- Provider details such as Git branches, commits, PRs, API keys, OAuth,
+  Cloudflare projects, preview URLs, and deploy logs are modeled as typed
+  adapters and product actions, not scattered UI state.
 
 Work:
 
@@ -843,16 +1185,27 @@ Work:
   typed states.
 - Design Git-backed submission workflows: branch creation, commit summary, PR
   body, author diagnostics, and preview links.
+- Define a real-time preview contract that maps dirty editor state to route
+  previews, article compiler artifacts, diagnostics, generated metadata, media
+  fallbacks, and PDF eligibility without requiring a full production deploy.
+- Define MDX component editing and fallback rules: which components can be
+  edited visually, which are code-only escape hatches, and how PDF/search/feed
+  fallbacks are surfaced to authors.
+- Design provider-connection models for Git hosts, static deploy hosts, asset
+  storage, analytics imports, and future identity providers.
 
 Verification:
 
 - State-machine tests for editorial workflows.
 - Schema-generation tests for editor forms.
 - Fixture diagnostics proving GUI output matches CLI output.
+- Round-trip tests for Markdown, MDX, frontmatter, collections, redirects,
+  media metadata, and site config.
+- Provider adapter tests with mocked Git/deploy providers.
 
 ## Phase 5: Distribution And Ecosystem Readiness
 
-### S. Internal Package Boundaries And Extraction Candidates
+### 19. Internal Package Boundaries And Extraction Candidates
 
 **Goal:** make reusable subdomains portable before publishing anything
 externally.
@@ -863,6 +1216,8 @@ Current evidence:
   article references, generated-output verifiers, config/site-doctor, route
   registry, media/social images, PDF/scholarly output, interaction primitives,
   and component catalog tooling.
+- Some of those domains should only become Astro/platform modules, while
+  others have plausible framework-agnostic or environment-agnostic cores.
 
 Mature contract:
 
@@ -870,6 +1225,10 @@ Mature contract:
 - Internal entrypoints prove boundaries before external publication.
 - Extraction happens only after docs, tests, fixtures, versioning expectations,
   and at least one non-TPM consumer exist.
+- Each candidate declares a portability target:
+  site-agnostic platform module, Astro library, Astro integration,
+  framework-agnostic core, environment-agnostic core, CLI tool, or broader
+  product-agnostic library.
 - Extraction follows a ladder:
   local domain module, internal package boundary, private workspace package,
   reusable Astro library, Astro integration when build hooks are required, or
@@ -885,6 +1244,9 @@ Work:
   verification, testing, and performance tooling.
 - Use examples and fixture sites to prove non-TPM use.
 - Identify future Astro integration candidates where the boundary is stable.
+- Identify framework-agnostic cores before writing Astro adapters, especially
+  for citations, metadata, diagnostics, media policy, route manifests,
+  generated-output verification, and interaction state machines.
 - Require each candidate to document its public API, diagnostics, fixtures,
   package boundary, current consumers, and missing blockers before extraction.
 
@@ -893,8 +1255,10 @@ Verification:
 - Import boundary checks.
 - Package-level unit tests.
 - Example site builds against package entrypoints.
+- Candidate tests run pure cores without `site/`, Astro, DOM, filesystem, or
+  process assumptions when the declared portability target requires it.
 
-### T. Extension Architecture
+### 20. Extension Architecture
 
 **Goal:** let future features extend the platform through deliberate extension
 points instead of patching global files.
@@ -918,7 +1282,7 @@ Verification:
 - Type tests and fixture builds.
 - Generated-output verifier asserts extension-owned artifacts are declared.
 
-### U. Deployment Adapters And Release Governance
+### 21. Deployment Adapters And Release Governance
 
 **Goal:** make deployment policy host-portable while keeping TPM's Cloudflare
 choice cleanly configured.
@@ -937,6 +1301,8 @@ Mature contract:
   backed by the same output contracts.
 - Releases include route, redirect, metadata, payload, dependency, and manual
   launch-step reports.
+- Future studio publish actions can call deployment adapters without exposing
+  host-specific details to non-technical users.
 
 Work:
 
@@ -945,6 +1311,9 @@ Work:
 - Add host-portable adapters as fixture-backed platform work.
 - Define versioning, changelog, migration, deprecation, and compatibility
   policy for platform APIs, site config, frontmatter, output, and routes.
+- Model preview deploys, production deploys, rollback, cache invalidation,
+  publish status, provider diagnostics, and launch checklists as adapter
+  outputs.
 
 Verification:
 
@@ -952,7 +1321,7 @@ Verification:
 - Fixture builds for at least two adapters before declaring portability mature.
 - Release health report snapshots.
 
-### V. Security, Privacy, And Trust Policy
+### 22. Security, Privacy, And Trust Policy
 
 **Goal:** make static publishing safe by default without hiding tradeoffs.
 
@@ -964,6 +1333,9 @@ Mature contract:
   boundaries.
 - Authors get diagnostics when content introduces new third-party origins or
   privacy-sensitive behavior.
+- Future studio credentials, OAuth grants, API keys, deploy tokens, webhooks,
+  analytics imports, and provider logs have explicit trust boundaries and never
+  leak into generated static output.
 
 Work:
 
@@ -971,6 +1343,8 @@ Work:
 - Add third-party origin and embed trust diagnostics.
 - Document dependency, lockfile, third-party script, asset provenance, and
   secret-scanning policy.
+- Define credential-storage and provider-connection expectations for the future
+  studio before any GUI publish workflow is implemented.
 
 Verification:
 
@@ -978,7 +1352,7 @@ Verification:
 - CSP smoke tests against embeds.
 - Dependency/security audit in release checks.
 
-### W. Import, Export, Migration, And Portability
+### 23. Import, Export, Migration, And Portability
 
 **Goal:** make content durable across platform versions, site instances, legacy
 systems, and future tools.
@@ -1004,7 +1378,7 @@ Verification:
 - Migration fixture tests.
 - Diagnostics include source-file/source-line references where practical.
 
-### X. Localization And Inclusive Defaults
+### 24. Localization And Inclusive Defaults
 
 **Goal:** make non-English and multilingual publications possible without a
 later rewrite.
@@ -1030,7 +1404,7 @@ Verification:
   and PDF metadata.
 - Playwright layout tests with long translated strings and RTL.
 
-### Y. Starter Templates And Distribution
+### 25. Starter Templates And Distribution
 
 **Goal:** make the platform easy to adopt and evaluate outside TPM.
 
@@ -1054,6 +1428,70 @@ Verification:
 - Every starter builds and passes core generated-output checks.
 - Scaffold output matches documented structure.
 - Example sites cover the feature matrix without TPM imports.
+
+## Phase 6: Static Blog Studio Product
+
+### 26. Comprehensive Static Blog Studio
+
+**Goal:** turn the platform into a non-technical, GUI-based static blog CMS
+without weakening the static compiler model.
+
+Current evidence:
+
+- Schemas, diagnostics, content collections, site config, route helpers,
+  generated-output verification, author docs, and deployment scripts already
+  point toward a studio.
+- The current workflow still assumes technical comfort with files, Git, Bun,
+  preview servers, CI, Cloudflare, and build logs.
+
+Mature contract:
+
+- A site owner can create and maintain a static blog from one application:
+  content editing, site config, theme choices, navigation, homepage surfaces,
+  collections, announcements, redirects, metadata, media, previews, diagnostics,
+  deploys, and rollback.
+- Authors can use a real-time WYSIWYG or split-view Markdown/MDX editor while
+  the platform preserves source fidelity and exposes code escape hatches only
+  when needed.
+- The studio edits the same source model as the CLI. It never stores canonical
+  content in a separate database that can drift from the static site source.
+- Provider accounts are connected through explicit adapters. Users should not
+  need to understand GitHub, branches, PRs, Cloudflare projects, cache headers,
+  or deploy logs unless they choose to inspect advanced details.
+- Every publish action produces deterministic source changes, generated-output
+  checks, preview output, release reports, and deploy artifacts.
+
+Work:
+
+- Define the studio product architecture: local app, hosted app, desktop app,
+  or hybrid model; account connection model; preview/build execution model; and
+  publication workspace model.
+- Build schema-driven editing surfaces for content, frontmatter, site config,
+  redirects, navigation, homepage slots, collections, media, metadata profiles,
+  deployment settings, and feature flags.
+- Add editor experiences for common Markdown, article images, citations,
+  footnotes, embeds, MDX components with visual fallbacks, and raw-code escape
+  hatches.
+- Add preview orchestration that can update route previews quickly while still
+  using the platform compiler and diagnostics.
+- Add publish orchestration over Git and deploy adapters: save draft, create
+  preview, submit for review, merge/publish, deploy, rollback, and view release
+  health.
+- Add product-level permission, audit, credential, and recovery models before
+  supporting multi-user or hosted operation.
+
+Verification:
+
+- End-to-end product tests for non-technical author and site-owner journeys.
+- Golden source-diff tests proving studio edits produce expected file changes.
+- Output-parity tests proving studio-generated changes match CLI-generated
+  output.
+- Provider-adapter tests using mocked Git, preview, deploy, auth, and rollback
+  flows.
+- Accessibility, keyboard, autosave, offline/error recovery, and data-loss
+  tests for the editor.
+- Security tests for credential handling, generated-output leakage, provider
+  scopes, and publish authorization.
 
 ## Verification Strategy
 
@@ -1094,13 +1532,26 @@ prove the whole platform.
 11. **Portability checks** prove productization: starter sites, extension
     fixtures, package entrypoint tests, import/export round trips, migration
     fixtures, and compatibility reports.
+12. **Studio product checks** prove future GUI safety: schema-to-form parity,
+    Markdown/MDX round trips, preview/build parity, provider-adapter mocks,
+    publish/rollback workflows, credential-boundary tests, and non-technical
+    repair-flow journeys.
+13. **Tooling health checks** prove QA reliability: script taxonomy, CI/local
+    parity, scoped tool inputs, ignored artifact classes, failure probes,
+    runtime budgets, diagnostic diffs, artifact manifests, import-boundary
+    checks, release reports, and release-gate reproducibility.
 
 Every active milestone should identify:
 
 - the smallest useful fast check developers can run while editing;
 - the focused tests that prove the domain contract;
 - the release-level checks that prove public output is safe;
-- the docs checks that prove the repo teaches the new behavior.
+- the docs checks that prove the repo teaches the new behavior;
+- whether the change needs a tooling-scope comparison before replacing or
+  removing an existing check;
+- whether the change should update script registry data, generated artifact
+  ownership, import-boundary rules, performance baselines, or release-report
+  output.
 
 ## Implementation Protocol
 
@@ -1133,6 +1584,50 @@ For risky domains, write tests and fixtures before broad refactors. For visual
 or responsive work, add component catalog examples and Playwright invariants.
 For generated output, add golden manifests or verifier diagnostics.
 
+## Milestone Breakdown Standard
+
+This roadmap is intentionally written at product-roadmap scale. Before any
+milestone becomes active implementation work, it should be broken into a small
+set of concrete implementation slices with explicit dependency and verification
+fields.
+
+Recommended breakdown:
+
+1. **Milestone scope:** one roadmap milestone or one narrow subdomain inside a
+   milestone. It should name the owner domain, user impact, target contract,
+   dependency stage, direct blockers, parallel-safe tracks, and exit criteria.
+2. **Implementation slice:** one shippable unit of work. It should name
+   affected files or modules, source contracts, generated artifacts, tests,
+   docs, and expected visible or invisible behavior changes.
+3. **Supporting task:** fixture setup, characterization tests, docs updates,
+   script changes, migration notes, package-boundary checks, or release-report
+   updates.
+4. **Regression item:** a discovered invalid state or bug. It should ask why
+   the bug was representable and whether a schema, type, policy, recipe, or
+   verifier can prevent the class of failure.
+
+Every active implementation slice should include:
+
+- **Start condition:** what upstream contract, fixture, tool, or design packet
+  must exist before implementation can begin.
+- **Blocked by:** milestones, contracts, source maps, registries, diagnostics,
+  or tool reliability work that must land first.
+- **Parallel-safe with:** work that can proceed at the same time without
+  writing the same source files or inventing duplicate contracts.
+- **Conflict zones:** source paths, generated artifacts, public routes, schema
+  names, diagnostics, or tests likely to conflict with other active work.
+- **Verification:** fast local checks, focused domain tests, generated-output
+  checks, browser/a11y/performance checks, docs checks, and release-level
+  gates.
+- **Exit criteria:** the smallest observable state that proves the milestone
+  slice is complete and safe to build on.
+
+The goal is that a milestone can be decomposed without losing the roadmap's
+contracts, dependencies, and verification requirements. If a proposed
+implementation item cannot state its start condition, blockers, parallel-safe
+work, and exit criteria, it should remain in the roadmap until the design
+packet is clearer.
+
 ## Milestone Readiness Criteria
 
 A roadmap milestone is ready to move into `CHECKLIST.md` only when it has:
@@ -1144,7 +1639,10 @@ A roadmap milestone is ready to move into `CHECKLIST.md` only when it has:
 - pre-change characterization tests where current behavior is risky;
 - fixture data when platform generality matters;
 - docs that must be updated;
-- rollback or compatibility notes when public output may change.
+- rollback or compatibility notes when public output may change;
+- a QA impact note when it changes scripts, linters, compiler settings,
+  generated-output verifiers, CI workflows, ignore files, test scopes, or
+  release gates.
 
 Checklist items should be written in this order:
 
@@ -1156,54 +1654,478 @@ Checklist items should be written in this order:
 6. Release-level verification when the milestone touches build output,
    routing, metadata, performance, accessibility, authoring behavior, or public
    generated artifacts.
+7. QA migration notes when a tool scope, script, ignore rule, or CI gate changes
+   from the previous behavior.
 
 Avoid generic active checklist items such as “refactor components” or “improve
 tests.” Those belong in this roadmap until they are decomposed into files,
 contracts, tests, and expected output.
 
-## Recommended Sequencing
+## Dependency Timeline
 
-The strongest dependency-aware sequence is:
+This timeline is not a calendar. It is the dependency order that should guide
+active planning, parallel work, and merge sequencing. Each stage can contain
+multiple implementation PRs. A later stage can start design work early, but it
+should not merge broad implementation that depends on contracts still being
+defined below it.
 
-1. Source/artifact lifecycle, platform context, route/entity registry.
-2. Article compiler artifact, publishable entry model, route view models.
-3. Generated-output verifier architecture.
-4. Metadata engine, references domain, media/PDF policy engine.
-5. UI layout recipes, component catalog, interaction primitives, performance
-   workbench, and test matrix.
-6. Site doctor, author diagnostics, docs system, and observability imports.
-7. Internal package boundaries and extension architecture.
-8. Deployment adapters, release governance, security/privacy, import/export,
-   localization, starter templates, and GUI readiness.
+Implementation can start when a stage's required upstream contracts are stable
+enough to consume directly or through fixtures. Design and characterization can
+start earlier when it clarifies lower-level requirements. Broad migrations
+should wait until their source contracts, diagnostic codes, and verification
+probes exist.
 
-This order keeps later work from inventing private models that should have been
-shared lower in the stack.
+### Planning Matrix
+
+Use this matrix when deciding what can start, what must wait, and what can run
+in parallel.
+
+1. **Preflight QA tooling.** Start immediately. Blocks large refactors. Can run
+   beside isolated bug fixes, docs work, content fixes, fixture additions, and
+   roadmap design. Do not merge high-risk scope reductions without probes and
+   diagnostic diffs.
+2. **Milestones 1 through 3.** Start after preflight design has classified the
+   relevant checks. Blocks most broad platform work because these milestones
+   define source, config, route, feature, and entity vocabulary. Can be
+   designed together; implementation should be sliced so source ownership,
+   config context, and registry adoption do not fight over the same files.
+3. **Milestone 4.** Start design with milestones 1 through 3, but implement
+   after their core contracts are accepted. Blocks publishable entries,
+   metadata, references, media/PDFs, and route view models. Characterization
+   tests and artifact sketches can run in parallel before the final compiler
+   shape lands.
+4. **Milestones 5, 6, and the first slice of 10.** Start once route/entity and
+   article artifact contracts can be consumed. Blocks consistent homepage,
+   archive, taxonomy, feed, search, related-entry, diagnostics, and author-tool
+   behavior. Can run in parallel if all tracks use the same publishable model
+   and diagnostic type.
+5. **Milestones 7 through 9.** Start after shared content, route, visibility,
+   compiler artifact, and diagnostic contracts are stable. These can run in
+   parallel with shared fixtures, but must coordinate social image, feed,
+   search, PDF, Scholar, JSON-LD, bibliography, and media artifact names.
+6. **Milestones 11, 12, 13, and 16.** Start characterization and catalog work
+   early. Broad migration starts after route view models and component
+   contracts are stable enough that UI does not consume raw content shapes.
+   These tracks can run in parallel if layout recipes, interaction loading
+   policy, payload budgets, and test layers are coordinated.
+7. **Milestones 14, 15, 17, and 18.** Start information architecture and UX
+   research early. Implementation depends on schemas, diagnostics, source
+   maps, route manifests, and generated references. These tracks can run in
+   parallel when they consume the same diagnostic and schema sources.
+8. **Milestones 19 through 25.** Start design after internal seams have at
+   least one real consumer and fixture coverage. Implement incrementally after
+   source contracts, output engines, UI recipes, deployment policy, security
+   policy, docs, and fixture sites are stable enough to avoid freezing weak
+   APIs.
+9. **Milestone 26.** Start product research and prototypes early, but treat
+   production implementation as blocked by the platform contracts from the
+   previous milestones. The studio must consume the compiler, schemas,
+   diagnostics, media policy, route registry, deploy adapters, and release
+   reports instead of inventing a parallel CMS.
+
+### Stage 0. Preserve The Release Baseline
+
+Purpose:
+
+- Keep the current site releasable while roadmap work proceeds.
+- Complete the tooling and repo-health preflight before large structural
+  refactors begin.
+- Maintain release checks, URL stability, content fidelity, and production
+  observability.
+
+Can run at any time:
+
+- isolated bug fixes;
+- author docs corrections;
+- content-only fixes;
+- fixture additions;
+- component catalog examples that do not change public APIs;
+- small tests around current behavior.
+
+Blocks:
+
+- Large roadmap refactors should wait until the QA/tooling preflight has made
+  local checks, CI parity, tool scopes, and release gates trustworthy.
+- Small fixes and scoped design work do not need to wait.
+
+Safe parallel work:
+
+- Tooling audit can run alongside roadmap design and isolated bug fixes.
+- Actual tool-scope changes should be isolated from product refactors so
+  diagnostic changes are easy to review.
+- High-risk scope reductions should use the safe migration model: inventory,
+  characterize, add probes, compare old and new outputs, document intentional
+  differences, and only then remove the old scope.
+
+### Stage 1. Foundation Spine
+
+Milestones:
+
+- Milestone 1: source and artifact lifecycle.
+- Milestone 2: platform context and site config contract.
+- Milestone 3: canonical route, feature, and entity registry.
+- Milestone 4: article compiler artifact.
+
+Purpose:
+
+- Establish source identity, config context, route/entity ownership, and article
+  artifact contracts.
+- Create the domain language that later output engines, UI, tools, and
+  adapters consume.
+
+Blocks:
+
+- publishable entry expansion;
+- route view model standardization;
+- metadata and search manifests;
+- references and bibliography portability;
+- media/PDF policy;
+- modular generated-output verification;
+- site doctor and future GUI tooling;
+- deployment adapters and starter templates.
+
+Safe parallel work:
+
+- Milestones 1 and 2 can be designed together and implemented in adjacent
+  slices.
+- Milestone 3 can be designed alongside 1 and 2, but registry adoption should
+  wait until source/config context ownership is clear.
+- Milestone 4 can begin with characterization tests and artifact sketches while
+  1 through 3 are being finalized.
+
+Conflict risks:
+
+- Multiple workers editing route helpers, content loaders, metadata helpers, or
+  article rendering at the same time can create incompatible private models.
+- Avoid broad route migrations before the registry shape is accepted.
+
+### Stage 2. Shared Content And Output Spine
+
+Milestones:
+
+- Milestone 5: publishable entry and visibility model.
+- Milestone 6: route-level view models.
+- Milestone 10: generated-output verifier architecture.
+
+Purpose:
+
+- Turn source contracts into reusable output-facing models.
+- Make verification modular early enough that later domains can report
+  diagnostics through one format.
+
+Blocks:
+
+- homepage, archive, taxonomy, collection, feed, search, and related-entry
+  consistency;
+- site doctor diagnostics;
+- generated docs and schema references;
+- observability imports;
+- future authoring studio previews;
+- package extraction readiness.
+
+Safe parallel work:
+
+- Milestone 5 can proceed after enough of the route/entity registry exists to
+  name publishable surfaces.
+- Milestone 6 can proceed route by route, as long as each route consumes the
+  same publishable and registry contracts.
+- Milestone 10 should start with diagnostic types and a small verifier slice,
+  then expand alongside later output engines.
+
+Conflict risks:
+
+- View model work and verifier work can duplicate filtering, route, and
+  visibility rules if milestone 5 is not treated as the shared source.
+- Diagnostics should not be invented independently by metadata, media, links,
+  and author tooling.
+
+### Stage 3. Domain Output Engines
+
+Milestones:
+
+- Milestone 7: metadata, semantics, search, and scholarly engine.
+- Milestone 8: references, citations, and bibliography domain.
+- Milestone 9: media, image, embed, and PDF policy engine.
+
+Purpose:
+
+- Build durable engines for machine readability, scholarly references, media
+  behavior, and PDF output.
+- Convert high-risk output rules into typed policies, manifests, diagnostics,
+  and fixtures.
+
+Blocks:
+
+- advanced semantic profiles;
+- citation exports and source audits;
+- PDF size and eligibility policy;
+- social image and feed consistency;
+- search and AI-readable manifests;
+- high-confidence starter templates.
+
+Safe parallel work:
+
+- Milestones 7, 8, and 9 can run in parallel after stages 1 and 2 define route
+  identity, publishable entries, compiler artifacts, visibility, and diagnostic
+  codes.
+- The three tracks should share fixtures: plain article, image-heavy article,
+  citation-heavy article, embed-heavy article, MDX article, feature-disabled
+  site, and hostile-content site.
+- Each track can expose a pure core and Astro adapter seam without publishing a
+  package yet.
+
+Conflict risks:
+
+- Metadata and media both touch social images, feeds, search, PDF data, and
+  route head output.
+- References and metadata both touch citation JSON-LD, bibliography manifests,
+  Scholar tags, and PDF citations.
+- Coordinate public artifact names and verifier codes before implementation
+  branches diverge.
+
+### Stage 4. Presentation, Interaction, And Performance
+
+Milestones:
+
+- Milestone 11: UI primitives, layout recipes, and component catalog.
+- Milestone 12: progressive interaction primitives.
+- Milestone 13: performance, payload, and cache workbench.
+- Milestone 16: test matrix and correctness strategy.
+
+Purpose:
+
+- Make responsive design, interaction behavior, payload policy, and visual
+  regression prevention repeatable.
+- Give developers primitives that make future UI work fast and hard to break.
+
+Blocks:
+
+- broad component migrations;
+- reusable interaction package candidates;
+- performance budgets as release gates;
+- reliable visual and responsive design work for starter sites;
+- future GUI component reuse.
+
+Safe parallel work:
+
+- Component catalog and layout recipe design can start immediately using
+  current components, then converge on view-model contracts as stage 2 lands.
+- Interaction primitives can progress independently if pure state and placement
+  logic are separated from DOM adapters.
+- Performance workbench can characterize current payloads and cache behavior
+  early, then enforce budgets after route types and interaction policies are
+  stable.
+- Test matrix design should run with all three tracks so risky UI and output
+  behavior gets the right test layer.
+
+Conflict risks:
+
+- UI migrations can conflict with route view model changes if components still
+  consume raw content.
+- Interaction lazy-loading and performance work can fight each other unless
+  script loading policies are explicit.
+- Visual standardization should avoid changing many surfaces without catalog
+  fixtures and Playwright containment checks.
+
+### Stage 5. Author And Product Tooling
+
+Milestones:
+
+- Milestone 14: site doctor and author diagnostics.
+- Milestone 15: documentation system and public platform docs.
+- Milestone 17: observability and webmaster intelligence.
+- Milestone 18: authoring studio readiness.
+
+Purpose:
+
+- Convert platform contracts into author-facing guidance, docs, reports,
+  dashboards, and future editing workflows.
+- Make non-technical author and site-owner work safer while preserving the
+  static source model.
+
+Blocks:
+
+- full studio/editor implementation;
+- public platform documentation;
+- release report automation;
+- actionable webmaster analytics;
+- third-party adoption.
+
+Safe parallel work:
+
+- Docs information architecture can start early, but generated references
+  should wait for schemas and registries.
+- Site doctor can start once diagnostic codes and source maps exist, then add
+  checks as output engines mature.
+- Observability can design import schemas early, but production interpretation
+  should wait for route manifests and generated-output ownership.
+- Authoring studio readiness should stay as schema, preview, and diagnostic
+  contracts until the CLI and docs workflows prove the author model.
+- Product UX research, user journeys, and prototype sketches can happen here,
+  but production GUI workflows should not become a second content model.
+
+Conflict risks:
+
+- Tooling can accidentally become a second source of truth for config,
+  visibility, metadata, routes, or diagnostics.
+- Documentation can drift if generated references are not tied to the same
+  schemas and registries used by the platform.
+
+### Stage 6. Distribution, Portability, And Ecosystem
+
+Milestones:
+
+- Milestone 19: internal package boundaries and extraction candidates.
+- Milestone 20: extension architecture.
+- Milestone 21: deployment adapters and release governance.
+- Milestone 22: security, privacy, and trust policy.
+- Milestone 23: import, export, migration, and portability.
+- Milestone 24: localization and inclusive defaults.
+- Milestone 25: starter templates and distribution.
+
+Purpose:
+
+- Turn proven internal seams into reusable packages, adapters, integrations,
+  starter templates, and public platform practices.
+- Preserve TPM as the production fixture while making the platform adoptable by
+  other sites and future repos.
+- Make deployment and provider behavior abstract enough for the future studio
+  to present simple publish actions.
+
+Blocks:
+
+- public package publishing;
+- Astro integration releases;
+- non-Astro adapters;
+- production starter templates;
+- supported migration/import workflows;
+- full platform productization;
+- comprehensive static blog studio implementation.
+
+Safe parallel work:
+
+- Milestone 19 should start with internal boundaries and entrypoint tests after
+  stages 1 through 4 have proven stable APIs.
+- Milestone 20 depends on internal extension points from milestone 19 and route
+  or verifier registries from earlier stages.
+- Milestone 21 depends on source/artifact ownership, route manifests, cache
+  policy, and generated-output verification.
+- Milestone 22 can define policy earlier, but enforcement depends on media,
+  embed, deployment, and verifier contracts.
+- Milestone 23 depends on source maps, route manifests, artifact ownership,
+  and citation/media normalization.
+- Milestone 24 should influence schemas and layout recipes early, but fixture
+  implementation should wait until route/entity and component contracts are
+  stable.
+- Milestone 25 depends on stable config defaults, docs, deployment adapters,
+  fixture sites, and release governance.
+
+Conflict risks:
+
+- Publishing packages before the internal APIs have second consumers can freeze
+  weak abstractions.
+- Extension architecture can become too abstract if it is not driven by real
+  plugin candidates.
+- Starter templates can become stale if docs, schemas, and release checks are
+  not generated or tested together.
+
+### Stage 7. Static Blog Studio Product
+
+Milestones:
+
+- Milestone 26: comprehensive static blog studio.
+
+Purpose:
+
+- Deliver the GUI product that makes the platform usable by non-technical
+  authors and site owners from one application.
+- Hide technical provider details behind clear authoring, preview, publish, and
+  rollback workflows.
+
+Blocks:
+
+- Nothing below it should depend on the full studio product. The studio is an
+  integration and productization layer over the platform, not the platform's
+  source of truth.
+
+Safe parallel work:
+
+- Product research, UX prototypes, and editor experiments can happen earlier as
+  long as they explicitly test assumptions and do not define canonical platform
+  models.
+- Implementation should wait for stable contracts from milestones 1 through
+  25, especially schemas, diagnostics, compiler artifacts, media policy,
+  deployment adapters, security policy, fixture sites, and docs.
+- Early prototypes should use mocked providers or local source folders before
+  credentialed hosted workflows.
+
+Conflict risks:
+
+- A studio-first shortcut can create a parallel CMS model, separate validation
+  rules, separate preview rendering, or source changes that the CLI cannot
+  reproduce.
+- Credential, provider, and publish flows can create serious security risk if
+  they are treated as UI details instead of trust-boundary contracts.
+- Real-time preview pressure can tempt the platform away from deterministic
+  static output. Preview acceleration is good, but publish output must still
+  compile through the same static contracts.
+
+## Parallel Planning Map
+
+Use this map to decide what can be staffed in parallel.
+
+1. **Roadmap preflight:** tooling and repo-health audit can run before and
+   alongside design work, but tool-scope changes should be isolated from major
+   product refactors.
+2. **High-conflict serial work:** milestones 1, 2, 3, and the core of 4.
+   These change the vocabulary everyone else uses.
+3. **Parallel after foundation contracts:** milestones 5, 6, and the first
+   diagnostic slice of 10.
+4. **Parallel output-engine tracks:** milestones 7, 8, and 9, coordinated by
+   shared compiler artifacts, route manifests, visibility policy, and
+   diagnostics.
+5. **Parallel UI and performance tracks:** milestones 11, 12, 13, and 16,
+   coordinated by catalog fixtures, payload budgets, and route view models.
+6. **Parallel author-product tracks:** milestones 14, 15, 17, and 18,
+   coordinated by schemas, diagnostics, and generated references.
+7. **Parallel distribution design, incremental implementation:** milestones 19
+   through 25, coordinated by package-boundary reviews, fixture sites, and
+   starter templates.
+8. **Studio product research early, implementation late:** milestone 26 can be
+   researched and prototyped early, but production implementation should depend
+   on stable platform contracts rather than defining them.
 
 ## Safe Batching
 
-The roadmap does not need to be implemented one letter at a time. Batching is
-useful when milestones share vocabulary, tests, fixtures, and migration
-surfaces. Batching is unsafe when a later milestone would have to guess at an
-unfinished lower-level contract.
+Batching is useful when milestones share vocabulary, tests, fixtures, and
+migration surfaces. Batching is unsafe when a later milestone would have to
+guess at an unfinished lower-level contract.
 
-Recommended batches:
+Recommended design batches:
 
-1. **Source contracts design:** A, B, and C together. These define source
+1. **Tooling and repo-health preflight:** audit and cleanup scripts, CI parity,
+   tool scopes, ignore files, compiler/linter/test settings, and release gates
+   before major roadmap implementation.
+2. **Source contracts:** milestones 1, 2, and 3 together. These define source
    lifecycle, config/context boundaries, and route/entity ownership.
-2. **Article/content model design:** D, E, and F together. Article compiler
-   artifacts, publishable entries, and route view models should agree on
-   shared vocabulary before implementation.
-3. **Output engine design:** G, H, I, and J together. Metadata, references,
-   media/PDFs, and verifiers all need route/content artifacts and structured
-   diagnostics.
-4. **Presentation and performance design:** K, L, M, and P together. Layout
-   recipes, interactions, performance, and tests share UX, accessibility, and
-   regression controls.
-5. **Author/product tooling design:** N, O, Q, and R together. Site doctor,
-   docs, observability, and future GUI workflows should consume the same
-   schemas and diagnostics.
-6. **Distribution design:** S, T, U, V, W, X, and Y together at the design
-   level. Actual implementation should stay incremental and fixture-driven.
+3. **Article and content model:** milestones 4, 5, and 6 together. Article
+   compiler artifacts, publishable entries, and route view models should agree
+   on shared vocabulary before implementation.
+4. **Output engines and diagnostics:** milestones 7, 8, 9, and 10 together.
+   Metadata, references, media/PDFs, and verifiers all need route/content
+   artifacts and structured diagnostics.
+5. **Presentation, interaction, performance, and tests:** milestones 11, 12,
+   13, and 16 together. Layout recipes, interactions, performance, and tests
+   share UX, accessibility, and regression controls.
+6. **Author and product tooling:** milestones 14, 15, 17, and 18 together.
+   Site doctor, docs, observability, and future GUI workflows should consume
+   the same schemas and diagnostics.
+7. **Distribution and ecosystem:** milestones 19, 20, 21, 22, 23, 24, and 25
+   together at the design level. Actual implementation should stay
+   incremental, fixture-driven, and blocked on proven internal seams.
+8. **Static blog studio product:** milestone 26 should be designed with
+   milestones 14, 18, 21, 22, and 25 in mind, but implemented as a product layer
+   after the platform contracts are stable enough to prevent a parallel CMS.
 
 Implementation should still proceed in small patches. A batch is permission to
 design shared contracts together, not permission to ship a giant refactor.
@@ -1222,6 +2144,9 @@ design shared contracts together, not permission to ship a giant refactor.
   more bespoke block designs.
 - **Performance regression:** every interaction and media feature needs payload,
   cache, and Lighthouse evidence.
+- **QA coverage regression:** making checks faster must not silently make them
+  weaker. Tightened tool scopes need probes, diagnostic diffs, documented
+  exclusions, and conservative release gates.
 - **Static-output regression:** any change to routes, redirects, feeds,
   metadata, PDFs, search, headers, or public files must be treated as a public
   API change.
@@ -1229,6 +2154,15 @@ design shared contracts together, not permission to ship a giant refactor.
   practical and keep narrative docs audience-specific.
 - **GUI parallel model:** future editor/admin tools must consume platform
   schemas and diagnostics rather than becoming a separate CMS.
+- **Studio shortcut risk:** do not let the future GUI become the fastest way to
+  bypass compiler contracts. If studio prototypes need behavior the platform
+  cannot express, strengthen the platform model first.
+- **Credential and provider risk:** Git, deploy, analytics, identity, and asset
+  provider connections must have explicit scopes, storage rules, audit trails,
+  and failure states before they are exposed to non-technical users.
+- **Preview parity drift:** real-time preview must remain a faithful view of
+  the same compiler output. Fast preview paths need parity tests against
+  release builds.
 - **TPM dilution:** platform generality must not weaken TPM as the real
   production fixture. Generality should be proven through examples and fixture
   sites, not by making TPM's design less intentional.
@@ -1260,6 +2194,16 @@ Before moving roadmap work into implementation, ask:
 - Does a fixture site need to prove non-TPM behavior?
 - Does this help or hurt future extraction into internal packages, Astro
   libraries, Astro integrations, CLIs, or starter templates?
+- If this changes tooling, what proves the new scope catches the same intended
+  bug classes as the old scope?
+- Are ignored files ignored because they are generated artifacts, external
+  dependencies, caches/reports, parked assets, or separately verified outputs?
+- Would a future static blog studio be able to consume this contract without
+  inventing a parallel source model?
+- Does this expose enough schema, diagnostics, source maps, and preview data
+  for non-technical repair flows?
+- If this touches deployment, credentials, provider APIs, or previews, is the
+  trust boundary explicit?
 - If the change fixes a bug, why was that bug possible?
 - If the change adds an abstraction, what concrete invariant or repeated domain
   concept justifies it?
