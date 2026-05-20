@@ -73,13 +73,22 @@ to the active milestone.
 - `src/content.config.ts`: Astro content collection config that resolves the
   active site instance.
 - `scripts/`: repository maintenance, verification, and quality scripts.
+- `scripts/quality/`: QA orchestration helpers, the command/CI parity
+  registry, diagnostic diff tooling, failure-probe metadata, and platform
+  boundary checks.
 - `tests/`: unit, e2e, accessibility, and performance tests.
 - `dist/`: generated build output. Do not edit by hand.
+- `dist-catalog/`: generated private component catalog output. Do not edit by
+  hand.
 - `CHECKLIST.md`: implementation milestone tracker.
 - `DEFERRED.md`: postponed work with reasons and resume triggers.
 - `PACKAGE_SCRIPTS.md`: brief reference for every `package.json` script.
 - `agent-docs/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
   strictness, modularity, type-driven design, and testing philosophy.
+- `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
+  tooling, and productization roadmap.
+- `agent-docs/QA_PREFLIGHT.md`: QA command inventory, CI parity model,
+  failure-probe plan, diagnostic-diff design, and scope-cleanup notes.
 - `agent-docs/DESIGN_PHILOSOPHY.md`: expanded design philosophy notes.
 - `agent-docs/COMPONENT_ARCHITECTURE.md`: target component hierarchy,
   component responsibilities, navigation redesign direction, and migration
@@ -452,6 +461,9 @@ Static data rules:
 Environment:
 
 - Avoid adding environment-variable requirements to the static site.
+- Track only non-secret env defaults that are part of the repo contract.
+  Local overrides and secrets belong in ignored `.env.local` or
+  `.env.*.local` files.
 - Do not read secrets in client-side code.
 - Never put secrets in `PUBLIC_*`.
 - `.env` is not automatically loaded in `astro.config.ts`; use `process.env`
@@ -1141,9 +1153,22 @@ Keep QA commands simple and transparent. Do not add clever wrapper scripts,
 suppressed output, or copied flags unless their behavior is understood and the
 reason is documented.
 
+The executable command surface is `package.json`. The human-readable command
+map is `PACKAGE_SCRIPTS.md`. The machine-readable QA contract is
+`scripts/quality/qa-command-registry.ts`, which classifies package scripts and
+maps CI jobs to local reproduction commands or documented CI-only reasons.
+Update the registry, docs, and tests together when adding, removing, or changing
+package scripts or CI jobs.
+
+Use `scripts/quality/diagnostic-diff.ts` through `bun run diagnostics:diff`
+when replacing or narrowing a risky QA command. Compare diagnostic codes, files,
+severities, messages, and counts rather than trusting exit-code parity alone.
+
 Current baseline scripts:
 
 - `bun run dev`: start Astro dev server.
+- `bun run check:fast`: run cheap high-signal invariants for early feedback,
+  including command/config contract tests.
 - `bun run check`: run content validation, Astro and tooling typechecking,
   ESLint, asset validation, package ordering, code/config Prettier check, Knip,
   test-accountability verification, Bun unit tests, and Astro component tests.
@@ -1152,6 +1177,8 @@ Current baseline scripts:
 - `bun run test:unit`: run Bun unit/script/component/page tests.
 - `bun run test:astro`: run Astro component and page tests through Vitest and
   the Astro container API.
+- `bun run test:config`: run repository config and QA registry contract tests
+  that catch script, workflow, and tooling drift before heavier checks.
 - `bun run test:accountability`: verify every repository file is covered by a
   mirrored test or documented accountability rule.
 - `bun run test:accountability:release`: run the same accountability check and
@@ -1171,6 +1198,8 @@ Current baseline scripts:
 - `bun run test:e2e`: run Playwright smoke/responsive/search tests.
 - `bun run test:a11y`: run axe accessibility review tests.
 - `bun run test:perf`: run Lighthouse CI review.
+- `bun run diagnostics:diff`: compare normalized diagnostic snapshots for QA
+  scope-change reviews.
 - `bun run check:release`: run the blocking pre-release validation gate.
 - `bun run quality:release`: run the heavy pre-release gate quietly, printing
   only failures and review warnings.
@@ -1343,7 +1372,9 @@ design/tooling/project document when the intended work should be reviewable
 before code changes.
 
 Do not create planning docs for routine QA commands. Routine tooling
-expectations belong in this file and `PACKAGE_SCRIPTS.md`.
+expectations belong in this file, `PACKAGE_SCRIPTS.md`, and the QA command
+registry. Use `agent-docs/QA_PREFLIGHT.md` only when changing the QA foundation
+or resuming scoped QA-tooling work from the roadmap.
 
 ## Generated Files And Historical Assets
 
@@ -1352,9 +1383,20 @@ Do not edit generated files by hand.
 Generated or disposable paths include:
 
 - `dist/`
+- `dist-catalog/`
 - `.astro/`
+- `.wrangler/`
+- `.lighthouseci/`
+- `.unlighthouse/`
+- `coverage/`
+- `playwright-report/`
+- `test-results/`
+- `tmp/`
 - Pagefind output under built `dist/`
-- coverage output
+
+These paths should stay ignored by Git and by broad formatter, linter,
+dead-code, Markdown, accountability, and coverage scans unless a task
+explicitly changes the QA scope and verifies the diagnostic impact.
 
 `site/unused-assets/` is an intentionally tracked archive of unreferenced
 media. Do not delete, rename, or repurpose those files unless the active task
