@@ -34,3 +34,56 @@ they are useful context. Explicitly deferred work belongs in
 - [x] Link the document from `AGENTS.md` so future agents discover it during
       normal repository orientation.
       Documented in `agent-docs/ENGINEERING_PHILOSOPHY.md`.
+
+### Milestone 180: Comprehensive Codebase Roadmap Audit
+
+- [x] Create organized roadmap working docs for coverage tracking, raw
+      findings, domain mapping, and final synthesis.
+      Created under `agent-docs/codebase-roadmap/`.
+- [x] Inventory repo configuration, site instance files, Astro routes/layouts,
+      components, platform libraries, styles, scripts, tests, docs, and
+      generated-output contracts.
+      Coverage is recorded in
+      `agent-docs/codebase-roadmap/COVERAGE_LEDGER.md`.
+- [x] Audit each domain against `agent-docs/ENGINEERING_PHILOSOPHY.md`,
+      capturing concrete evidence, roadmap candidates, risks, dependencies,
+      and verification paths.
+      Raw observations are recorded in
+      `agent-docs/codebase-roadmap/FINDINGS_SCRATCHPAD.md` and
+      `agent-docs/codebase-roadmap/DOMAIN_MAP.md`.
+- [x] Synthesize the final ambitious roadmap for platform productionization,
+      productization, component architecture, content/compiler pipeline,
+      tooling, testing, performance, accessibility, metadata, and future
+      extractable modules.
+      Final roadmap written in
+      `agent-docs/codebase-roadmap/COMPREHENSIVE_ROADMAP.md`.
+- [x] Cross-check the final roadmap against the coverage ledger and philosophy
+      guardrails, then run focused documentation checks before handoff.
+      `bun --silent run review:markdown` passes.
+
+### Milestone 181: Roadmap Execution Plan Refinement
+
+- [x] Rework the comprehensive roadmap so it is clearly a planning and handoff
+      document, not an instruction to begin implementation immediately.
+- [x] Add a repeatable design-packet template for each roadmap milestone:
+      intended contracts, affected users, risk level, tests, docs,
+      performance/accessibility/SEO checks, and approval criteria.
+- [x] Add milestone sequencing guidance that explains dependencies and safe
+      batching without skipping any valid long-term work.
+- [x] Add an explicit developer handoff protocol for turning roadmap items into
+      future checklist implementation milestones.
+- [x] Run documentation checks after the roadmap refinement.
+      `bun --silent run review:markdown` passes.
+
+### Milestone 182: Mature Platform Roadmap Gap Pass
+
+- [x] Reread `agent-docs/ENGINEERING_PHILOSOPHY.md` against the comprehensive
+      roadmap with the mature platform/product vision in mind.
+- [x] Add missing long-term roadmap domains for extension architecture,
+      authoring studio workflows, content portability, deployment adapters,
+      release governance, security/privacy, observability, localization, and
+      starter/distribution readiness.
+- [x] Update the domain map, findings scratchpad, and coverage ledger so the
+      added roadmap work remains traceable to the audit process.
+- [x] Rerun documentation checks after the roadmap gap pass.
+      `bun --silent run review:markdown` passes.
