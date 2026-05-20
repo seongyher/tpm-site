@@ -4,6 +4,8 @@
     ".agents/skills/**",
     ".astro/**",
     ".lighthouseci/**",
+    ".unlighthouse/**",
+    ".wrangler/**",
     "coverage/**",
     "dist/**",
     "dist-catalog/**",

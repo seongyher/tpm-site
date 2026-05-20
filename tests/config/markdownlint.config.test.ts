@@ -16,6 +16,8 @@ describe("markdownlint config", () => {
 
     expect(config).toContain('"dist/**"');
     expect(config).toContain('"dist-catalog/**"');
+    expect(config).toContain('".unlighthouse/**"');
+    expect(config).toContain('".wrangler/**"');
     expect(config).toContain('"site/unused-assets/**"');
     expect(config).toContain('"playwright-report/**"');
     expect(config).toContain('"test-results/**"');

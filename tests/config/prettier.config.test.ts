@@ -36,6 +36,8 @@ describe("Prettier config", () => {
 
     expect(ignoreFile).toContain("dist/");
     expect(ignoreFile).toContain("dist-catalog/");
+    expect(ignoreFile).toContain(".unlighthouse/");
+    expect(ignoreFile).toContain(".wrangler/");
     expect(ignoreFile).toContain("coverage/");
     expect(ignoreFile).toContain("playwright-report/");
     expect(ignoreFile).toContain("test-results/");

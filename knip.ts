@@ -16,6 +16,8 @@ const config = {
   ignore: [
     ".astro/**",
     ".lighthouseci/**",
+    ".unlighthouse/**",
+    ".wrangler/**",
     "coverage/**",
     "dist/**",
     "dist-catalog/**",

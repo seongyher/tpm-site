@@ -31,7 +31,12 @@ describe("ESLint config", () => {
   test("ignores generated output directories", () => {
     const globalIgnorePatterns = config.flatMap((entry) => entry.ignores ?? []);
 
-    for (const ignoredGeneratedPath of ["dist/", "dist-catalog/"]) {
+    for (const ignoredGeneratedPath of [
+      ".unlighthouse/",
+      ".wrangler/",
+      "dist/",
+      "dist-catalog/",
+    ]) {
       expect(globalIgnorePatterns).toContain(ignoredGeneratedPath);
     }
   });
