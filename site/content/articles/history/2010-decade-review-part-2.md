@@ -91,11 +91,15 @@ This transition from a localised and static view of memes to a potentially globa
 The age of platforms was coming to an end for memecultures. The old cybermetaphysics of the '80s, '90s, and the 2000s, based on the notion of platforms as homeostatic containers for memes and users, had become unsustainable in face of a new kingdom of memes. These new memes were created and shared by users aware of the algorithmically sorted feeds and filter bubbles that had to be gamed in order for the memes to survive in what was an extremely hostile environment for all but the simplest of memes. These users had shifted their attention from insular spaces to the process of memetic spread.
 
 ```tpm-bibtex
-@misc{zannettou-s-2018-origins-of-memes,
-  citation = {Zannettou, S., Caulfield, T., De Cristofaro, E., Kourtellis, N., Leontiadis, I., Sirivianos, M., Stringhini, G., and Blackburn, J. (2018). On the Origins of Memes by Means of Fringe Web Communities. arXiv. Available at: https://arxiv.org/abs/1805.12512},
-  author = {Zannettou, S. and Caulfield, T. and De Cristofaro, E. and Kourtellis, N. and Leontiadis, I. and Sirivianos, M. and Stringhini, G. and Blackburn, J.},
+@inproceedings{zannettou-s-2018-origins-of-memes,
+  citation = {Zannettou, S., Caulfield, T., Blackburn, J., De Cristofaro, E., Sirivianos, M., Stringhini, G., & Suarez-Tangil, G. (2018). On the Origins of Memes by Means of Fringe Web Communities. In Proceedings of the Internet Measurement Conference 2018 (pp. 188-202). ACM. https://doi.org/10.1145/3278532.3278550},
+  author = {Zannettou, Savvas and Caulfield, Tristan and Blackburn, Jeremy and De Cristofaro, Emiliano and Sirivianos, Michael and Stringhini, Gianluca and Suarez-Tangil, Guillermo},
   title = {On the Origins of Memes by Means of Fringe Web Communities},
+  booktitle = {Proceedings of the Internet Measurement Conference 2018},
+  pages = {188--202},
+  publisher = {ACM},
   year = {2018},
+  doi = {10.1145/3278532.3278550},
   url = {https://arxiv.org/abs/1805.12512},
 }
 ```

@@ -31,7 +31,11 @@ Chess and Shaw suggest that the "opacity and inscrutability" of academia helped 
   author = {Boluk, Stephanie and Lemieux, Patrick},
   title = {Metagaming: Playing, Competing, Spectating, Cheating, Trading, Making, and Breaking Videogames},
   publisher = {University of Minnesota Press},
-  year = {2017}
+  location = {Minneapolis},
+  year = {2017},
+  date = {2017-04-04},
+  isbn = {9780816687169},
+  url = {https://www.upress.umn.edu/9780816687169/metagaming/},
 }
 
 @article{chess-shaw-2015,
@@ -40,15 +44,19 @@ Chess and Shaw suggest that the "opacity and inscrutability" of academia helped 
   journal = {Journal of Broadcasting & Electronic Media},
   volume = {59},
   number = {1},
-  pages = {208-220},
-  year = {2015}
+  pages = {208--220},
+  year = {2015},
+  date = {2015-03-11},
+  doi = {10.1080/08838151.2014.999917},
 }
 
-@misc{keogh-2014,
+@online{keogh-2014,
   author = {Keogh, Brendan},
-  title = {Game of moans: the death throes of the male gamer},
-  publisher = {Overland literary journal},
-  year = {2014}
+  title = {Game of moans: the death throes of the male ‘gamer’},
+  organization = {Overland Literary Journal},
+  date = {2014-09-05},
+  url = {https://overland.org.au/2014/09/game-of-moans-the-death-throes-of-the-male-gamer/},
+  urldate = {2026-05-18},
 }
 
 @article{mortensen-2018,
@@ -57,7 +65,9 @@ Chess and Shaw suggest that the "opacity and inscrutability" of academia helped 
   journal = {Games and Culture},
   volume = {13},
   number = {8},
-  pages = {787-806},
-  year = {2018}
+  pages = {787--806},
+  year = {2018},
+  date = {2016-04-13},
+  doi = {10.1177/1555412016640408},
 }
 ```

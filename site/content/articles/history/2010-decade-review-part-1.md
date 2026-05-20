@@ -52,26 +52,33 @@ The new ways of using the Internet that were invented during the 2000's were int
 The importance of the 2010's to meme history was not in its novelty but its scale. During the 2010's, the world reached a cultural boiling point as the underground spilled out irreversibly into the mainstream and destroyed the boundaries between the two. More memes were produced during the 2010's than in all of the Web's history. The historical significance of this explosion is undeniable. With the unprecedented spread of memetic literacy, memes went from novelty content that had to be defined and explained before discussion (usually with reference to Dawkins and pictures of cats) to a commonplace term detached from its etymology. It's no wonder that clickbait outlets are publishing "The Top 10 Memes of the Decade" articles everywhere. Normies love listicles. But this stems from a cargo cult view of memes as something that the Internet spontaneously generates, which their viewers take as they come, dutifully categorising them by their morphology. This leads to superstitious thinking about how memes work. Autists reflected the same superstition about sociopolitical development by adopting the idea of _meme magic_. It was an exegetical framework which allowed them to recuperate the _Clown World_ political climate, which began around 2013 as memes and exploded in 2016, as the one thing they could control and understand: memes. The 2010's was marked by the scale and frequency of open conflict between various perspectives on memes. The conflict was integral to the memetic history of the 2010's. In the next part of this series about the decade, I will explore the development of ironic memes which resulted from the clash between the mainstream and the underground.
 
 ```tpm-bibtex
-@misc{her-zharova-2015-six-eras-of-memetic-history,
+@online{her-zharova-2015-six-eras-of-memetic-history,
   citation = {Her, S.-Y., Zharova, M. (2015). Six eras of memetic history. Video. Available at: https://www.youtube.com/watch?v=fRdUG9LOJGA},
-  author = {Her, S.-Y., Zharova, M.},
-  title = {Six eras of memetic history},
+  author = {Her, Seong-Young and Zharova, Mariya},
+  title = {Six Eras of Memetic History},
+  organization = {YouTube},
   year = {2015},
   url = {https://www.youtube.com/watch?v=fRdUG9LOJGA},
+  urldate = {2026-05-18},
 }
 
-@misc{zannettou-caulfield-2018-origins-of-memes,
-  citation = {Zannettou, S., Caulfield, T., De Cristofaro, E., Kourtelris, N., Leontiadis, I., Sirivianos, M., Stringhini, G., Blackburn, J. (2018). On the Origins of Memes by Means of Fringe Web Communities. arXiv. Available at: https://arxiv.org/abs/1805.12512},
-  author = {Zannettou, S., Caulfield, T., De Cristofaro, E., Kourtelris, N., Leontiadis, I., Sirivianos, M., Stringhini, G., Blackburn, J.},
+@inproceedings{zannettou-caulfield-2018-origins-of-memes,
+  citation = {Zannettou, S., Caulfield, T., Blackburn, J., De Cristofaro, E., Sirivianos, M., Stringhini, G., & Suarez-Tangil, G. (2018). On the Origins of Memes by Means of Fringe Web Communities. In Proceedings of the Internet Measurement Conference 2018 (pp. 188-202). ACM. https://doi.org/10.1145/3278532.3278550},
+  author = {Zannettou, Savvas and Caulfield, Tristan and Blackburn, Jeremy and De Cristofaro, Emiliano and Sirivianos, Michael and Stringhini, Gianluca and Suarez-Tangil, Guillermo},
   title = {On the Origins of Memes by Means of Fringe Web Communities},
+  booktitle = {Proceedings of the Internet Measurement Conference 2018},
+  pages = {188--202},
+  publisher = {ACM},
   year = {2018},
+  doi = {10.1145/3278532.3278550},
   url = {https://arxiv.org/abs/1805.12512},
 }
 
 @misc{benjamin-w-1935-the-work-of-art,
   citation = {Benjamin, W. (1935). The Work of Art in the Age of Mechanical Reproduction.},
-  author = {Benjamin, W.},
+  author = {Benjamin, Walter},
   title = {The Work of Art in the Age of Mechanical Reproduction},
+  origdate = {1935},
   year = {1935},
 }
 ```

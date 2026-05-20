@@ -175,47 +175,55 @@ The following is a list of some important works in modern and contemporary philo
 - 2009: _PhilPapers_ is established.
 
 ```tpm-bibtex
-@misc{nsf-2007-cyberinfrastructure,
+@online{nsf-2007-cyberinfrastructure,
   author = {National Science Foundation},
   title = {Cyberinfrastructure Vision for 21st Century Discovery},
   year = {2007},
   url = {https://www.nsf.gov/pubs/2007/nsf0728/nsf0728.pdf}
 }
 
-@misc{schwitzgebel-2009-armchair,
+@online{schwitzgebel-2009-armchair,
   author = {Schwitzgebel, Eric},
   title = {Alternatives to Burning the Armchair},
+  organization = {The Splintered Mind},
+  date = {2009-06-22},
   year = {2009},
   url = {http://schwitzsplinters.blogspot.com/2009/06/alternatives-to-burning-armchair.html}
 }
 
 @article{taylor-francis-2018-philosophical-method,
-  title = {Philosophical method article},
+  author = {Bickle, John},
+  title = {Lessons for Experimental Philosophy from the Rise and “Fall” of Neurophilosophy},
+  journal = {Philosophical Psychology},
+  volume = {32},
+  number = {1},
+  pages = {1--22},
   year = {2018},
   doi = {10.1080/09515089.2018.1512705}
 }
 
-@misc{ndpr-2009-experimental-philosophy,
+@online{ndpr-2009-experimental-philosophy,
   title = {Experimental Philosophy, Rationalism, and Naturalism: Rethinking Philosophical Method},
-  publisher = {Notre Dame Philosophical Reviews},
+  organization = {Notre Dame Philosophical Reviews},
   year = {2009},
   url = {https://ndpr.nd.edu/news/experimental-philosophy-rationalism-and-naturalism-rethinking-philosophical-method/}
 }
 
-@misc{sep-automated-reasoning,
+@online{sep-automated-reasoning,
   title = {Automated Reasoning},
-  publisher = {Stanford Encyclopedia of Philosophy},
+  organization = {Stanford Encyclopedia of Philosophy},
   url = {https://plato.stanford.edu/entries/reasoning-automated/}
 }
 
 @article{bundy-2011-automated-theorem-proving,
   author = {Bundy, Alan},
-  title = {Automated theorem proving: a practical tool for the working mathematician?},
+  title = {Automated Theorem Provers: A Practical Tool for the Working Mathematician?},
   journal = {Annals of Mathematics and Artificial Intelligence},
   volume = {61},
   number = {1},
-  pages = {3-14},
-  year = {2011}
+  pages = {3--14},
+  year = {2011},
+  doi = {10.1007/s10472-011-9248-8}
 }
 
 @article{matson-1984-metametaphilosophy,
@@ -232,33 +240,44 @@ The following is a list of some important works in modern and contemporary philo
 @article{clark-chalmers-1998-extended-mind,
   author = {Clark, Andy and Chalmers, David},
   title = {The Extended Mind},
+  journal = {Analysis},
+  volume = {58},
+  number = {1},
+  pages = {7--19},
   year = {1998},
+  doi = {10.1093/analys/58.1.7},
   url = {https://www.jstor.org/stable/3328150}
 }
 
 @article{allen-collinson-2009-sporting-embodiment,
   author = {Allen-Collinson, Jacquelyn},
-  title = {Sporting embodiment: sports studies and the continuing promise of phenomenology},
+  title = {Sporting Embodiment: Sports Studies and the (Continuing) Promise of Phenomenology},
+  journal = {Qualitative Research in Sport and Exercise},
+  volume = {1},
+  number = {3},
+  pages = {279--296},
   year = {2009},
   doi = {10.1080/19398440903192340}
 }
 
 @article{uidhir-2013-caricature,
   author = {Uidhir, Christy Mag},
-  title = {The Epistemic Misuse and Abuse of Pictorial Caricature},
+  title = {The Epistemic Misuse \& Abuse of Pictorial Caricature},
   journal = {American Philosophical Quarterly},
   volume = {50},
   number = {2},
-  pages = {137-152},
+  pages = {137--152},
   year = {2013}
 }
 
 @article{consigny-1994-nietzsche-sophists,
   author = {Consigny, Scott},
-  title = {Nietzsche's reading of the sophists},
+  title = {Nietzsche's Reading of the Sophists},
   journal = {Rhetoric Review},
   volume = {13},
   number = {1},
+  pages = {5--26},
+  doi = {10.1080/07350199409359172},
   year = {1994}
 }
 
@@ -287,6 +306,9 @@ The following is a list of some important works in modern and contemporary philo
 @book{tipton-2014-philosophical-biology,
   author = {Tipton, Jason A.},
   title = {Philosophical Biology in Aristotle's Parts of Animals},
+  publisher = {Springer},
+  location = {Cham},
+  isbn = {9783319014203},
   year = {2014}
 }
 
@@ -295,11 +317,20 @@ The following is a list of some important works in modern and contemporary philo
   title = {Neo-Teleology},
   booktitle = {Philosophy of Biology: An Anthology},
   editor = {Rosenberg, Alex and Arp, Robert},
-  year = {2010}
+  publisher = {Wiley-Blackwell},
+  location = {Malden, MA},
+  pages = {164--174},
+  year = {2010},
+  isbn = {9781405183161}
 }
 
 @article{springer-2007-darwin-aristotle,
-  title = {Springer article on Darwin and Aristotle},
+  author = {Johnson, Curtis N.},
+  title = {The Preface to Darwin's Origin of Species: The Curious History of the “Historical Sketch”},
+  journal = {Journal of the History of Biology},
+  volume = {40},
+  number = {3},
+  pages = {529--556},
   year = {2007},
   doi = {10.1007/s10739-006-9118-0}
 }
@@ -307,6 +338,9 @@ The following is a list of some important works in modern and contemporary philo
 @book{tipton-2014-parts-of-animals,
   author = {Tipton, Jason A.},
   title = {Philosophical Biology in Aristotle's Parts of Animals},
+  publisher = {Springer},
+  location = {Cham},
+  isbn = {9783319014203},
   year = {2014}
 }
 
@@ -316,18 +350,19 @@ The following is a list of some important works in modern and contemporary philo
 }
 
 @article{steinberger-1996-cephalus,
-  author = {Steinberger, Peter},
+  author = {Steinberger, Peter J.},
   title = {Who is Cephalus?},
   journal = {Political Theory},
   volume = {24},
   number = {2},
-  pages = {172-199},
-  year = {1996}
+  pages = {172--199},
+  year = {1996},
+  doi = {10.1177/0090591796024002002}
 }
 
-@misc{sep-mohism,
+@online{sep-mohism,
   title = {Mohism},
-  publisher = {Stanford Encyclopedia of Philosophy},
+  organization = {Stanford Encyclopedia of Philosophy},
   url = {https://plato.stanford.edu/entries/mohism}
 }
 
@@ -336,45 +371,54 @@ The following is a list of some important works in modern and contemporary philo
   title = {What is abduction? The fundamental problem of contemporary epistemology},
   journal = {Transactions of the Charles S. Peirce Society},
   volume = {34},
-  pages = {503-533},
-  year = {1998}
+  number = {3},
+  pages = {503--533},
+  year = {1998},
+  url = {https://www.jstor.org/stable/40320712}
 }
 
 @book{haack-1998-passionate-moderate,
   author = {Haack, Susan},
   title = {Manifesto of a Passionate Moderate},
-  year = {1998}
+  publisher = {University of Chicago Press},
+  location = {Chicago},
+  year = {1998},
+  isbn = {9780226311364}
 }
 
-@misc{sep-dewey-political,
+@online{sep-dewey-political,
   title = {Dewey's Political Philosophy},
-  publisher = {Stanford Encyclopedia of Philosophy},
+  organization = {Stanford Encyclopedia of Philosophy},
   url = {https://plato.stanford.edu/entries/dewey-political/#DemoIdeaReal}
 }
 
-@misc{iep-rorty,
+@online{iep-rorty,
   title = {Richard Rorty},
-  publisher = {Internet Encyclopedia of Philosophy},
+  organization = {Internet Encyclopedia of Philosophy},
   url = {https://www.iep.utm.edu/rorty/}
 }
 
-@misc{sep-deleuze,
+@online{sep-deleuze,
   title = {Gilles Deleuze},
-  publisher = {Stanford Encyclopedia of Philosophy},
+  organization = {Stanford Encyclopedia of Philosophy},
   url = {https://plato.stanford.edu/entries/deleuze/}
 }
 
 @book{rorty-1989-contingency,
   author = {Rorty, Richard},
   title = {Contingency, Irony, and Solidarity},
-  year = {1989}
+  publisher = {Cambridge University Press},
+  location = {Cambridge},
+  year = {1989},
+  isbn = {0521367816}
 }
 
 @article{berry-2011-computational-turn,
   author = {Berry, David},
-  title = {The computational turn: thinking about the digital humanities},
+  title = {The Computational Turn: Thinking about the Digital Humanities},
   journal = {Culture Machine},
   volume = {12},
+  pages = {1--22},
   year = {2011}
 }
 
@@ -385,9 +429,9 @@ The following is a list of some important works in modern and contemporary philo
   url = {http://codev2.cc/}
 }
 
-@misc{ietf-tao,
+@online{ietf-tao,
   title = {The Tao of IETF},
-  publisher = {Internet Engineering Task Force},
+  organization = {Internet Engineering Task Force},
   url = {http://www.ietf.org/tao.html}
 }
 
@@ -402,15 +446,23 @@ The following is a list of some important works in modern and contemporary philo
   doi = {10.2307/202202}
 }
 
-@misc{wolfram-2012-new-kind-of-science,
+@online{wolfram-2012-new-kind-of-science,
   author = {Wolfram, Stephen},
   title = {It's Been 10 Years: What's Happened with A New Kind of Science?},
+  organization = {Stephen Wolfram Writings},
+  date = {2012-05-07},
   year = {2012},
   url = {https://writings.stephenwolfram.com/2012/05/its-been-10-years-whats-happened-with-a-new-kind-of-science/}
 }
 
-@incollection{springer-2012-slime-mold-network,
-  title = {Springer chapter on slime mould network optimisation},
+@inproceedings{springer-2012-slime-mold-network,
+  author = {Johansson, Anders and Zou, James},
+  title = {A Slime Mold Solver for Linear Programming Problems},
+  booktitle = {How the World Computes},
+  editor = {Cooper, S. Barry and Dawar, Anuj and Löwe, Benedikt},
+  publisher = {Springer},
+  location = {Berlin and Heidelberg},
+  pages = {344--354},
   year = {2012},
   doi = {10.1007/978-3-642-30870-3_35}
 }

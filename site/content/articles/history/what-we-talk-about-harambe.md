@@ -61,87 +61,109 @@ As Harambe has become a melting pot of meaning, people’s disdain for the meme 
 @online{goodall-ifaw-2016-harambe-killing,
   citation = {Goodall, J., & Downes, A. (2016). Together offer thoughts on tragic Harambe killing. International Fund for Animal Welfare. Available at: http://www.ifaw.org/united-states/news/jane-goodall-azzedine-downes-together-offer-thoughts-tragic-harambe-killing},
   author = {Goodall, Jane and Downes, Azzedine},
-  title = {Together Offer Thoughts on Tragic Harambe Killing},
-  year = {2016},
-  url = {http://www.ifaw.org/united-states/news/jane-goodall-azzedine-downes-together-offer-thoughts-tragic-harambe-killing}
+  title = {Jane Goodall, Azzedine Downes Together Offer Thoughts on Tragic Harambe Killing},
+  organization = {International Fund for Animal Welfare},
+  date = {2016-06-19},
+  url = {http://www.ifaw.org/united-states/news/jane-goodall-azzedine-downes-together-offer-thoughts-tragic-harambe-killing},
+  urldate = {2026-05-18},
 }
 
 @online{gervais-r-2016-harambe-tweet,
   citation = {Gervais, R. (2016). Harambe tweet. X/Twitter. Available at: https://twitter.com/rickygervais/status/737031591294291968},
   author = {Gervais, Ricky},
   title = {Harambe Tweet},
-  year = {2016},
-  url = {https://twitter.com/rickygervais/status/737031591294291968}
+  organization = {X},
+  date = {2016-05-29},
+  url = {https://twitter.com/rickygervais/status/737031591294291968},
+  urldate = {2026-05-18},
 }
 
 @online{wardell-b-2016-dicks-out-for-harambe-tweet,
   citation = {Wardell, B. (2016). Dicks out for Harambe tweet. X/Twitter. Available at: https://twitter.com/BRANDONWARDELL/status/750140619801014273},
   author = {Wardell, Brandon},
   title = {Dicks Out for Harambe Tweet},
-  year = {2016},
-  url = {https://twitter.com/BRANDONWARDELL/status/750140619801014273}
+  organization = {X},
+  date = {2016-07-05},
+  url = {https://twitter.com/BRANDONWARDELL/status/750140619801014273},
+  urldate = {2026-05-18},
 }
 
 @online{wardell-b-trejo-d-harambe-vine,
   citation = {Wardell, B., & Trejo, D. Harambe Vine. Available at: https://vine.co/v/5apgA7BFm6K},
   author = {Wardell, Brandon and Trejo, Danny},
   title = {Harambe Vine},
-  url = {https://vine.co/v/5apgA7BFm6K}
+  organization = {Vine},
+  url = {https://vine.co/v/5apgA7BFm6K},
+  urldate = {2026-05-18},
 }
 
 @online{robinson-j-2016-harambe-mcharambeface,
   citation = {Robinson, J. (2016). Gorilla named Harambe McHarambeface after Chinese zoo visitors are asked to choose one. Daily Mail. Available at: http://www.dailymail.co.uk/news/article-3786973/Gorilla-named-Harambe-McHarambeface-Chinese-zoo-visitors-asked-choose-one.html},
   author = {Robinson, Julian},
   title = {Gorilla Named Harambe McHarambeface After Chinese Zoo Visitors Are Asked to Choose One},
-  year = {2016},
-  url = {http://www.dailymail.co.uk/news/article-3786973/Gorilla-named-Harambe-McHarambeface-Chinese-zoo-visitors-asked-choose-one.html}
+  organization = {Daily Mail},
+  date = {2016-09-13},
+  url = {http://www.dailymail.co.uk/news/article-3786973/Gorilla-named-Harambe-McHarambeface-Chinese-zoo-visitors-asked-choose-one.html},
+  urldate = {2026-05-18},
 }
 
 @online{kriss-s-2016-the-harambe-variations,
   citation = {Kriss, S. (2016). The Harambe variations. Available at: https://samkriss.wordpress.com/2016/07/30/the-harambe-variations/},
   author = {Kriss, Sam},
   title = {The Harambe Variations},
-  year = {2016},
-  url = {https://samkriss.wordpress.com/2016/07/30/the-harambe-variations/}
+  organization = {Idiot Joy Showland},
+  date = {2016-07-30},
+  url = {https://samkriss.wordpress.com/2016/07/30/the-harambe-variations/},
+  urldate = {2026-05-18},
 }
 
 @online{feldman-b-2016-harambe-forever,
   citation = {Feldman, B. (2016). Harambe forever. New York Magazine Select All. Available at: http://nymag.com/selectall/2016/07/harambe-forever.html},
   author = {Feldman, Brian},
-  title = {Harambe Forever},
-  year = {2016},
-  url = {http://nymag.com/selectall/2016/07/harambe-forever.html}
+  title = {The Dark Internet Humor of Harambe Jokes},
+  organization = {New York Magazine},
+  date = {2016-07-27},
+  url = {http://nymag.com/selectall/2016/07/harambe-forever.html},
+  urldate = {2026-05-18},
 }
 
 @online{collins-m-2010-post-irony-is-real,
   citation = {Collins, M. (2010). Post-irony is real and so what? The Georgetown Voice. Available at: http://georgetownvoice.com/2010/03/04/post-irony-is-real-and-so-what/},
   author = {Collins, Matthew},
-  title = {Post-Irony Is Real and So What?},
-  year = {2010},
-  url = {http://georgetownvoice.com/2010/03/04/post-irony-is-real-and-so-what/}
+  title = {Post-irony is real, and so what?},
+  organization = {The Georgetown Voice},
+  date = {2010-03-04},
+  url = {http://georgetownvoice.com/2010/03/04/post-irony-is-real-and-so-what/},
+  urldate = {2026-05-18},
 }
 
 @online{lettuce-dog-2016-harambe-racism,
   citation = {Lettuce Dog. (2016). Harambe racism argument. Facebook post. Available at: https://www.facebook.com/lettucedogmemes/photos/a.765134030263853.1073741827.765127320264524/927543420689579/},
   author = {{Lettuce Dog}},
   title = {Harambe Racism Argument},
+  organization = {Facebook},
   year = {2016},
-  url = {https://www.facebook.com/lettucedogmemes/photos/a.765134030263853.1073741827.765127320264524/927543420689579/}
+  url = {https://www.facebook.com/lettucedogmemes/photos/a.765134030263853.1073741827.765127320264524/927543420689579/},
+  urldate = {2026-05-18},
 }
 
 @online{griffin-a-2016-cincinnati-zoo-harambe-memes,
   citation = {Griffin, A. (2016). Cincinnati Zoo asks people to stop making Harambe memes. The Independent. Available at: http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-cincinnati-zoo-gorilla-shot-dead-rip-a7203356.html},
   author = {Griffin, Andrew},
   title = {Cincinnati Zoo Asks People to Stop Making Harambe Memes},
-  year = {2016},
-  url = {http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-cincinnati-zoo-gorilla-shot-dead-rip-a7203356.html}
+  organization = {The Independent},
+  date = {2016-08-22},
+  url = {http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-cincinnati-zoo-gorilla-shot-dead-rip-a7203356.html},
+  urldate = {2026-05-18},
 }
 
 @online{griffin-a-2016-cincinnati-zoo-deletes-social-media,
   citation = {Griffin, A. (2016). Cincinnati Zoo deletes social media accounts after Harambe memes. The Independent. Available at: http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-twitter-facebook-cincinnati-zoo-hacked-deletes-social-media-accounts-a7205111.html},
   author = {Griffin, Andrew},
-  title = {Cincinnati Zoo Deletes Social Media Accounts After Harambe Memes},
-  year = {2016},
-  url = {http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-twitter-facebook-cincinnati-zoo-hacked-deletes-social-media-accounts-a7205111.html}
+  title = {Harambe: Cincinnati Zoo Deletes Its Facebook and Twitter Accounts After Being Bombarded by Memes},
+  organization = {The Independent},
+  date = {2016-08-25},
+  url = {http://www.independent.co.uk/life-style/gadgets-and-tech/news/harambe-memes-twitter-facebook-cincinnati-zoo-hacked-deletes-social-media-accounts-a7205111.html},
+  urldate = {2026-05-18},
 }
 ```

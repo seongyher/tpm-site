@@ -54,6 +54,33 @@ Rules:
 - `tpm-bibtex` blocks are hidden source data and should never appear to
   readers.
 
+Prefer structured BibTeX fields over a prose-only source string. For ordinary
+sources, include as much of the following as is easy to verify:
+
+- `author` or `editor`;
+- `title`;
+- `year` or `date`;
+- `journal`, `booktitle`, `publisher`, `volume`, `number`, and `pages` when
+  they apply;
+- `doi`, `isbn`, `url`, and `urldate` when available.
+
+Use the source type that best matches the work:
+
+- `@article` for journal or magazine articles;
+- `@book` for books;
+- `@inbook` or `@incollection` for chapters and anthology entries;
+- `@inproceedings` for conference papers;
+- `@online` for web pages, videos, social posts, archives, and other web-only
+  sources;
+- `@misc` only when no better type fits.
+
+When metadata is uncertain, do not invent fields. Keep the author's intended
+source clear with a conservative title, URL, access date, and any known
+creator/date information. If the source is dead, dynamic, private, ambiguous,
+or needs an edition/translator decision, leave a short note for a maintainer in
+the pull request instead of forcing the citation to look more complete than it
+is.
+
 ## Ordinary Links
 
 Normal Markdown links are just prose links.

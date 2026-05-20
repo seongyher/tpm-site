@@ -57,26 +57,34 @@ Conceptualising memes _monoculturally_ and excluding the ingroup-first, [_emic_]
 We are already deluged in nonsense about memes, and I treasure the (still small) voices that speak up for the memes.
 
 ```tpm-bibtex
-@misc{raymond-e-s-1998-homesteading-the-noosphere,
+@article{raymond-e-s-1998-homesteading-the-noosphere,
   citation = {Raymond, E.S. (1998). Homesteading the Noosphere. First Monday. Available at: https://firstmonday.org/ojs/index.php/fm/article/download/1474/1389},
-  author = {Raymond, E.S.},
+  author = {Raymond, Eric S.},
   title = {Homesteading the Noosphere},
+  journal = {First Monday},
+  volume = {3},
+  number = {10},
   year = {1998},
   url = {https://firstmonday.org/ojs/index.php/fm/article/download/1474/1389},
+  urldate = {2026-05-18},
 }
 
-@misc{putnam-h-bad-philosophy-is-omnipresent,
+@online{putnam-h-bad-philosophy-is-omnipresent,
   citation = {Putnam, H. Bad philosophy is omnipresent. Video. Available at: https://www.youtube.com/watch?v=oLJfEVu3kbY},
-  author = {Putnam, H.},
+  author = {Putnam, Hilary},
   title = {Bad philosophy is omnipresent},
+  organization = {YouTube},
   url = {https://www.youtube.com/watch?v=oLJfEVu3kbY},
+  urldate = {2026-05-18},
 }
 
 @online{godwin-m-1994-meme-counter-meme,
   citation = {Godwin, M. (1994). Meme, Counter-meme. Wired. Available at: http://www.wired.com/1994/10/godwin-if-2/},
   author = {Godwin, Mike},
   title = {Meme, Counter-meme},
-  year = {1994},
+  organization = {Wired},
+  date = {1994-10-01},
   url = {http://www.wired.com/1994/10/godwin-if-2/},
+  urldate = {2026-05-18},
 }
 ```

@@ -54,7 +54,9 @@ And you're goddamn right the Internet is serious business.
   author = {Dawkins, Richard},
   title = {The Selfish Gene},
   year = {1976},
-  publisher = {Oxford University Press}
+  publisher = {Oxford University Press},
+  location = {Oxford},
+  isbn = {019857519X},
 }
 
 @book{cavalli-sforza-feldman-1981-cultural-transmission,
@@ -62,6 +64,8 @@ And you're goddamn right the Internet is serious business.
   author = {Cavalli-Sforza, Luigi Luca and Feldman, Marcus W.},
   title = {Cultural Transmission and Evolution: A Quantitative Approach},
   year = {1981},
-  publisher = {Princeton University Press}
+  publisher = {Princeton University Press},
+  location = {Princeton, NJ},
+  isbn = {0691082839},
 }
 ```
