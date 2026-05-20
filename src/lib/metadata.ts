@@ -307,6 +307,7 @@ export function webPageJsonLd(
   metadata: RouteMetadata,
   site: string | undefined | URL,
   config: SiteConfig = siteConfig,
+  options: { mainEntity?: JsonLdNode } = {},
 ): JsonLdNode {
   return compactJsonLdNode({
     "@id": webPageEntityId(metadata.canonicalPath, site),
@@ -314,6 +315,7 @@ export function webPageJsonLd(
     description: metadata.description,
     inLanguage: config.identity.language,
     isPartOf: { "@id": websiteEntityId(site) },
+    mainEntity: options.mainEntity,
     name: metadata.title,
     publisher: { "@id": publisherEntityId(site) },
     url: absoluteUrl(metadata.canonicalPath, site),

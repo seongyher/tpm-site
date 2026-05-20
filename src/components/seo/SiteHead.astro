@@ -14,11 +14,18 @@ import {
 interface Props {
   image?: SocialPreviewImage | undefined;
   metadata: RouteMetadata;
+  webPageMainEntity?: JsonLdNode | undefined;
   structuredData?: readonly (JsonLdNode | undefined)[] | undefined;
   type?: "website" | "article";
 }
 
-const { image, metadata, structuredData = [], type = "website" } = Astro.props;
+const {
+  image,
+  metadata,
+  webPageMainEntity,
+  structuredData = [],
+  type = "website",
+} = Astro.props;
 const canonicalUrl = absoluteUrl(metadata.canonicalPath, Astro.site);
 const absoluteImageUrl =
   image === undefined ? undefined : absoluteUrl(image.src, Astro.site);
@@ -28,7 +35,9 @@ const twitterSite =
     : `@${siteConfig.share.xViaHandle.replace(/^@/u, "")}`;
 const metadataGraph = jsonLdGraph([
   ...siteIdentityJsonLd(Astro.site),
-  webPageJsonLd(metadata, Astro.site),
+  webPageJsonLd(metadata, Astro.site, undefined, {
+    mainEntity: webPageMainEntity,
+  }),
   ...structuredData.filter((node): node is JsonLdNode => node !== undefined),
 ]);
 const metadataJsonLd =
