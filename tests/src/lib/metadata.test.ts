@@ -88,12 +88,61 @@ describe("metadata contract", () => {
         kind,
         title: `${kind} title`,
       });
+      const options =
+        kind === "author-profile"
+          ? {
+              mainEntity: {
+                "@type": "Person",
+                name: `${kind} author`,
+              },
+            }
+          : undefined;
 
-      expect(webPageJsonLd(metadata, "https://example.com")).toMatchObject({
+      expect(
+        webPageJsonLd(metadata, "https://example.com", siteConfig, options),
+      ).toMatchObject({
         "@type": schemaType,
         name: `${kind} title`,
       });
     }
+  });
+
+  test("requires ProfilePage mainEntity metadata to describe an author profile", () => {
+    const metadata = normalizeRouteMetadata({
+      canonicalPath: "/authors/example/",
+      description: "Example author profile.",
+      kind: "author-profile",
+      title: "Example Author",
+    });
+    const author = profileEntityJsonLd(
+      {
+        href: "/authors/example/",
+        name: "Example Author",
+        type: "person",
+      },
+      "https://example.com",
+    );
+
+    expect(() => webPageJsonLd(metadata, "https://example.com")).toThrow(
+      "ProfilePage JSON-LD requires a mainEntity Person or Organization.",
+    );
+    expect(
+      webPageJsonLd(metadata, "https://example.com", siteConfig, {
+        mainEntity: author,
+      }),
+    ).toMatchObject({
+      "@id": "https://example.com/authors/example/#webpage",
+      "@type": "ProfilePage",
+      mainEntity: author,
+    });
+    expect(() =>
+      webPageJsonLd(metadata, "https://example.com", siteConfig, {
+        mainEntity: {
+          "@type": "Thing",
+          name: "Example Author",
+        },
+      }),
+    ).toThrow("ProfilePage mainEntity must be a Person or Organization");
   });
 
   test("keeps non-indexable and archive-like routes out of the right discovery surfaces", () => {

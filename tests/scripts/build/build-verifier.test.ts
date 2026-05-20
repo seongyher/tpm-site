@@ -641,6 +641,56 @@ describe("build verifier helpers", () => {
     expect(report).toContain("Unexpected hydration boundaries:");
   });
 
+  test("reports ProfilePage JSON-LD without a concrete main entity", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(root, "src/content/articles/.keep", "");
+      await writeRequiredDistShell(root);
+      await writeText(
+        root,
+        "dist/authors/example/index.html",
+        pageHtmlFixture("authors/example/index.html").replace(
+          '"@type":"WebPage"',
+          '"@type":"ProfilePage"',
+        ),
+      );
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+      });
+
+      expect(result.issues.metadataIssues).toContain(
+        "authors/example/index.html: ProfilePage JSON-LD missing mainEntity Person or Organization",
+      );
+    }));
+
+  test("accepts ProfilePage JSON-LD with a Person or Organization main entity", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(root, "src/content/articles/.keep", "");
+      await writeRequiredDistShell(root);
+      await writeText(
+        root,
+        "dist/authors/example/index.html",
+        pageHtmlFixture("authors/example/index.html").replace(
+          '"@type":"WebPage"',
+          '"@type":"ProfilePage","mainEntity":{"@type":"Person","name":"Example Author"}',
+        ),
+      );
+
+      const result = await verifyBuild({
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+      });
+
+      expect(result.issues.metadataIssues).not.toContain(
+        "authors/example/index.html: ProfilePage JSON-LD missing mainEntity Person or Organization",
+      );
+    }));
+
   test("verifies built output against source articles and categories", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");

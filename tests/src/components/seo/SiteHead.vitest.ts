@@ -48,4 +48,29 @@ describe("SiteHead", () => {
       '"@id":"https://thephilosophersmeme.com/#publisher"',
     );
   });
+
+  test("renders ProfilePage JSON-LD with the required main entity", async () => {
+    const container = await createAstroTestContainer();
+    const view = await container.renderToString(SiteHead, {
+      props: {
+        metadata: normalizeRouteMetadata({
+          canonicalPath: "/authors/example/",
+          description: "Example author profile.",
+          kind: "author-profile",
+          title: "Example Author",
+        }),
+        webPageMainEntity: {
+          "@id": "https://thephilosophersmeme.com/authors/example/#author",
+          "@type": "Person",
+          name: "Example Author",
+          url: "https://thephilosophersmeme.com/authors/example/",
+        },
+      },
+    });
+
+    expect(view).toContain('"@type":"ProfilePage"');
+    expect(view).toContain(
+      '"mainEntity":{"@id":"https://thephilosophersmeme.com/authors/example/#author","@type":"Person","name":"Example Author","url":"https://thephilosophersmeme.com/authors/example/"}',
+    );
+  });
 });

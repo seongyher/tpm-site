@@ -1180,11 +1180,41 @@ function inspectHtmlMetadata(
     }
   }
 
+  inspectProfilePageJsonLd(html, relativeHtmlPath, issues);
   inspectHtmlImageAlt(html, relativeHtmlPath, issues);
 
   if (robots !== undefined && !robots.includes("noindex")) {
     inspectShareableHtmlMetadata(html, relativeHtmlPath, issues);
   }
+}
+
+function inspectProfilePageJsonLd(
+  html: string,
+  relativeHtmlPath: string,
+  issues: BuildVerificationIssues,
+): void {
+  for (const node of jsonLdNodesByType(html, "ProfilePage")) {
+    if (!isProfilePageMainEntity(node["mainEntity"])) {
+      issues.metadataIssues.push(
+        `${relativeHtmlPath}: ProfilePage JSON-LD missing mainEntity Person or Organization`,
+      );
+    }
+  }
+}
+
+function isProfilePageMainEntity(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const name = value["name"];
+
+  return (
+    (jsonLdTypeIncludes(value["@type"], "Person") ||
+      jsonLdTypeIncludes(value["@type"], "Organization")) &&
+    typeof name === "string" &&
+    name.trim().length > 0
+  );
 }
 
 function inspectHtmlImageAlt(

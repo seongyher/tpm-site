@@ -40,6 +40,19 @@ const hasProfileBody = (profile.entry.body ?? "").trim().length > 0;
 const description =
   profile.shortBio ??
   `Articles by ${profile.displayName} in ${SITE_TITLE} archive.`;
+const profileJsonLd = profileEntityJsonLd(
+  {
+    description: profile.shortBio,
+    href: profile.href,
+    name: profile.displayName,
+    sameAs: [
+      ...(profile.website === undefined ? [] : [profile.website]),
+      ...profile.socials.map((social) => social.href),
+    ],
+    type: profile.type,
+  },
+  Astro.site,
+);
 ---
 
 <BaseLayout
@@ -47,6 +60,7 @@ const description =
   description={description}
   canonicalPath={profile.href}
   kind="author-profile"
+  webPageMainEntity={profileJsonLd}
   structuredData={[
     breadcrumbListJsonLd(
       profile.href,
@@ -55,19 +69,6 @@ const description =
         { href: authorsIndexUrl(), title: "Authors" },
         { href: profile.href, title: profile.displayName },
       ],
-      Astro.site,
-    ),
-    profileEntityJsonLd(
-      {
-        description: profile.shortBio,
-        href: profile.href,
-        name: profile.displayName,
-        sameAs: [
-          ...(profile.website === undefined ? [] : [profile.website]),
-          ...profile.socials.map((social) => social.href),
-        ],
-        type: profile.type,
-      },
       Astro.site,
     ),
     itemListJsonLd(profile.href, articleItems, Astro.site),

@@ -31,6 +31,8 @@ export default tseslint.config(
   globalIgnores([
     ".astro/",
     ".lighthouseci/",
+    ".unlighthouse/",
+    ".wrangler/",
     "coverage/",
     "dist/",
     "dist-catalog/",
