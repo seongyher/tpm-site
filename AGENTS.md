@@ -78,6 +78,8 @@ to the active milestone.
 - `CHECKLIST.md`: implementation milestone tracker.
 - `DEFERRED.md`: postponed work with reasons and resume triggers.
 - `PACKAGE_SCRIPTS.md`: brief reference for every `package.json` script.
+- `agent-docs/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
+  strictness, modularity, type-driven design, and testing philosophy.
 - `agent-docs/DESIGN_PHILOSOPHY.md`: expanded design philosophy notes.
 - `agent-docs/COMPONENT_ARCHITECTURE.md`: target component hierarchy,
   component responsibilities, navigation redesign direction, and migration
