@@ -18,6 +18,7 @@ const config = {
     ".lighthouseci/**",
     "coverage/**",
     "dist/**",
+    "dist-catalog/**",
     "playwright-report/**",
     "public/**",
     "test-results/**",

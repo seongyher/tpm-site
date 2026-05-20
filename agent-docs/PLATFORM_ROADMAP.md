@@ -46,16 +46,17 @@ The ideal developer path is similarly safe:
 The far-end product is a static blog CMS/studio: a single GUI application where
 non-technical users can write Markdown or MDX, edit metadata, manage media,
 configure the site, preview changes, receive repairable diagnostics, and publish
-static output with a button. Git hosts, deploy providers, build logs, API keys,
-OAuth flows, branches, previews, and cache invalidation should eventually feel
-like implementation details behind clear product actions such as “Save draft,”
-“Preview,” “Submit for review,” “Publish,” and “Rollback.”
+static output with a button. That product should be backed by a headless studio
+core that can also power a CLI and an MCP server. Git hosts, deploy providers,
+build logs, API keys, OAuth flows, branches, previews, and cache invalidation
+should eventually feel like implementation details behind clear product actions
+such as “Save draft,” “Preview,” “Submit for review,” “Publish,” and “Rollback.”
 
 That product must not become a separate CMS model. The studio should consume the
 same site directory, schemas, compiler artifacts, route registry, diagnostics,
 media policies, metadata profiles, deployment adapters, and generated-output
-contracts as the CLI and CI. The platform compiler is the source of truth; the
-GUI is the humane interface over it.
+contracts as the CLI, MCP server, and CI. The platform compiler is the source of
+truth; GUI, CLI, MCP, and CI are interfaces over it.
 
 The end-state user paths are:
 
@@ -71,6 +72,9 @@ The end-state user paths are:
 4. **Operator path:** connect provider accounts or credentials once, then let
    the platform manage previews, builds, deploys, rollbacks, cache policy, and
    release reports through explicit deployment adapters.
+5. **Automation path:** use a CLI or MCP server to run the same diagnostics,
+   previews, source edits, release reports, deploy proposals, and gated publish
+   actions without creating a second implementation of studio behavior.
 
 ## Current Foundation
 
@@ -193,7 +197,8 @@ static editorial publishing platform
     -> import/export and migration portability
     -> localization and inclusive defaults
     -> starter templates and distribution
-    -> studio/editor product, real-time preview, and publish orchestration
+  -> studio/editor product, real-time preview, and publish orchestration
+  -> CLI and MCP adapters over the same studio core
 ```
 
 The target architecture should let a developer say “add a semantic metadata
@@ -328,7 +333,8 @@ Strong portability candidates:
 | Anchored interactions          | Placement math, disclosure state machines, focus/escape rules                                       | DOM adapter, Astro script adapter, React/Next hook adapter                             |
 | Config/schema documentation    | Schema metadata, generated references, editor labels, repair hints                                  | Site config docs, GUI form generation, docs-site renderer                              |
 | Editorial workflow state       | Draft/review/publish states, validation gates, preview state, publish actions                       | GUI editor, Git adapter, deploy adapter, review workflow CLI                           |
-| Studio preview model           | Preview manifests, dirty-state tracking, generated artifact status, diagnostic mapping              | Local preview server, browser studio, cloud preview worker                             |
+| Studio preview model           | Preview manifests, dirty-state tracking, generated artifact status, diagnostic mapping              | Local preview server, browser studio, CLI/MCP preview tools, cloud preview worker      |
+| Studio action model            | Source edit commands, dry-run diffs, validation gates, publish proposals, audit events              | GUI actions, CLI commands, MCP tools, Git/deploy adapters                              |
 | Performance workbench          | Budget models, payload diffing, cache policy checks, metric reports                                 | Lighthouse/Unlighthouse adapters, CI reporter, static report UI                        |
 | Import/export and migration    | Canonical content/archive manifests, migration diagnostics, source maps                             | WordPress/Substack/static HTML importers, author review UI, migration CLI              |
 
@@ -1450,22 +1456,38 @@ Mature contract:
   content editing, site config, theme choices, navigation, homepage surfaces,
   collections, announcements, redirects, metadata, media, previews, diagnostics,
   deploys, and rollback.
+- The GUI, CLI, and MCP server all use the same headless studio core for source
+  edits, diagnostics, previews, generated-output checks, release reports,
+  deploy proposals, and publish/rollback workflows.
 - Authors can use a real-time WYSIWYG or split-view Markdown/MDX editor while
   the platform preserves source fidelity and exposes code escape hatches only
   when needed.
-- The studio edits the same source model as the CLI. It never stores canonical
-  content in a separate database that can drift from the static site source.
+- The studio edits the same source model as the CLI and MCP server. It never
+  stores canonical content in a separate database that can drift from the static
+  site source.
 - Provider accounts are connected through explicit adapters. Users should not
   need to understand GitHub, branches, PRs, Cloudflare projects, cache headers,
   or deploy logs unless they choose to inspect advanced details.
 - Every publish action produces deterministic source changes, generated-output
   checks, preview output, release reports, and deploy artifacts.
+- CLI and MCP write operations default to dry-run/proposed-diff behavior unless
+  an explicit trusted workflow grants a narrow write scope.
 
 Work:
 
 - Define the studio product architecture: local app, hosted app, desktop app,
   or hybrid model; account connection model; preview/build execution model; and
   publication workspace model.
+- Define a headless studio core with explicit interfaces for source reads,
+  source edits, diagnostics, preview builds, generated artifacts, release
+  reports, provider actions, audit logs, and credential scopes.
+- Design CLI workflows for developer, CI, migration, automation, preview,
+  publish, rollback, and release-report tasks. The CLI should expose the same
+  domain actions as the studio instead of becoming a script wrapper around
+  unrelated commands.
+- Design an MCP server that gives agents safe access to the same platform
+  services with read-only defaults, dry-run diffs, scoped writes, secret
+  redaction, audit logs, and gated provider-backed actions.
 - Build schema-driven editing surfaces for content, frontmatter, site config,
   redirects, navigation, homepage slots, collections, media, metadata profiles,
   deployment settings, and feature flags.
@@ -1484,8 +1506,10 @@ Verification:
 
 - End-to-end product tests for non-technical author and site-owner journeys.
 - Golden source-diff tests proving studio edits produce expected file changes.
-- Output-parity tests proving studio-generated changes match CLI-generated
-  output.
+- Output-parity tests proving GUI, CLI, MCP, and CI-generated changes consume
+  the same source contracts and produce equivalent output.
+- MCP safety tests for read-only defaults, dry-run proposals, blocked unsafe
+  writes, credential redaction, audit logging, and gated publish actions.
 - Provider-adapter tests using mocked Git, preview, deploy, auth, and rollback
   flows.
 - Accessibility, keyboard, autosave, offline/error recovery, and data-loss
@@ -2058,17 +2082,26 @@ Safe parallel work:
   deployment adapters, security policy, fixture sites, and docs.
 - Early prototypes should use mocked providers or local source folders before
   credentialed hosted workflows.
+- CLI and MCP planning can begin once the headless studio core contract is
+  sketched, but write-capable commands and tools must wait for deployment
+  adapters, security policy, audit logs, and provider-scope rules.
+- The CLI should harden first as the automation and CI interface; the MCP
+  server should reuse the same core after safety defaults, dry-run semantics,
+  and write scopes are explicit.
 
 Conflict risks:
 
 - A studio-first shortcut can create a parallel CMS model, separate validation
-  rules, separate preview rendering, or source changes that the CLI cannot
-  reproduce.
+  rules, separate preview rendering, or source changes that the CLI, MCP
+  server, and CI cannot reproduce.
 - Credential, provider, and publish flows can create serious security risk if
   they are treated as UI details instead of trust-boundary contracts.
 - Real-time preview pressure can tempt the platform away from deterministic
   static output. Preview acceleration is good, but publish output must still
   compile through the same static contracts.
+- Agent-facing tools can amplify mistakes if MCP write actions bypass the same
+  diagnostics, previews, proposed diffs, audit logs, and human confirmation
+  gates as GUI and CLI publish workflows.
 
 ## Parallel Planning Map
 

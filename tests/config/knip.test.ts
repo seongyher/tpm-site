@@ -12,6 +12,7 @@ describe("Knip config", () => {
 
   test("ignores generated output and known external binaries", () => {
     expect(config.ignore).toContain("dist/**");
+    expect(config.ignore).toContain("dist-catalog/**");
     expect(config.ignore).toContain("coverage/**");
     expect(config.ignoreBinaries).toContain("gitleaks");
     expect(config.ignoreDependencies).toContain("html-validate");

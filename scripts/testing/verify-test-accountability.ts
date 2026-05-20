@@ -10,6 +10,7 @@ const ignoredPathSegments = new Set([
   ".git",
   "coverage",
   "dist",
+  "dist-catalog",
   "node_modules",
 ]);
 const mirroredExtensionPattern = /\.(?:astro|d\.ts|[cm]?[jt]sx?)$/i;

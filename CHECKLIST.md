@@ -278,3 +278,89 @@ they are useful context. Explicitly deferred work belongs in
       redaction, and gated provider-backed actions.
 - [x] Add cross-interface parity planning so GUI, CLI, and MCP cannot drift into
       separate implementations.
+
+### Milestone 212: Roadmap Studio CLI And MCP Refresh
+
+- [x] Refresh the platform roadmap against the engineering philosophy.
+- [x] Update the roadmap so the final studio product explicitly includes GUI,
+      CLI, and MCP adapters over one headless studio core.
+- [x] Call out CLI/MCP safety, parity, deployment, and verification
+      expectations before auditing Linear dependencies.
+
+### Milestone 213: Linear Roadmap Dependency Audit
+
+- [x] Review TPM Linear issues against the roadmap dependency model.
+- [x] Fix inaccurate blocker/blocking relationships or obvious issue metadata
+      mistakes.
+- [x] Re-check changed issues and confirm the plan can guide parallel work.
+
+### Milestone 214: QA Preflight Planning And Linear Hygiene
+
+- [x] Treat `IRK-8` as the active roadmap preflight parent and `IRK-36` through
+      `IRK-40` as the concrete work sequence.
+- [x] Ignore or resolve superseded `IRK-35` before implementation tracking so it
+      does not confuse the active preflight plan.
+- [x] Define the local audit artifacts needed for the preflight work before
+      changing any QA behavior.
+- [x] Create or update the preflight design/audit document with the command,
+      config, CI, scope, risk, probe, and cleanup sections needed for the
+      remaining preflight milestones.
+
+### Milestone 215: IRK-36 QA Inventory
+
+- [x] Inventory `package.json` scripts and classify each package command.
+- [x] Inventory GitHub Actions workflows and map every CI command to a local
+      script or CI-only reason.
+- [x] Inventory lint, format, TypeScript, Astro, Playwright, Vitest, coverage,
+      markdown, HTML, security, performance, generated-output, and content
+      verification configs.
+- [x] Inventory Git, formatter, linter, test, validator, and tool ignore files
+      or exclude lists.
+- [x] Classify each command by purpose, owner domain, inputs, outputs, CI usage,
+      mutation behavior, expected runtime, and whether it is fast local,
+      focused, release-level, CI-only, mutation/fix, or investigative.
+- [x] Identify stale commands, undocumented CI gates, overbroad scans, duplicate
+      checks, and scope risks without changing tool behavior.
+- [x] Verify the inventory covers every script and every CI command before
+      unblocking registry, probes, and diagnostic-diff work.
+
+### Milestone 216: IRK-37 Script Registry And CI Parity
+
+- [x] Design the script registry and CI/local parity contract from the completed
+      QA inventory.
+- [x] Add or update machine-readable and human-readable script references so
+      command purpose, scope, runtime expectation, and CI reproduction path are
+      explicit.
+- [x] Verify script docs and registry data match `package.json` and CI.
+
+### Milestone 217: IRK-38 Failure-Probe Fixtures
+
+- [x] Design the failure-probe fixture location and execution model so probes do
+      not leak into production content or generated output.
+- [x] Add intentionally bad fixture inputs for representative QA layers without
+      letting those fixtures contaminate normal site content or release output.
+- [x] Verify each probe is caught by the intended script or verifier.
+- [x] Document which bug class each probe protects before any scope narrowing.
+
+### Milestone 218: IRK-39 Diagnostic Diff Harness
+
+- [x] Design the diagnostic record shape used for command/verifier comparisons.
+- [x] Build a diagnostic comparison path for risky QA changes that compares
+      diagnostic codes, files, severities, and counts instead of only exit
+      codes.
+- [x] Document that any high-risk `IRK-40` scope replacement must characterize
+      current behavior with the harness before narrowing.
+- [x] Document how to interpret intentional diagnostic differences.
+
+### Milestone 219: IRK-40 QA Scope Cleanup And Final Command Map
+
+- [x] Decide which scope changes are safe now versus deferred based on inventory,
+      probes, and diagnostic diffs.
+- [x] Tighten overbroad tool scopes only after inventory, registry, probes, and
+      diagnostic diff support are complete enough to preserve coverage.
+- [x] Update `PACKAGE_SCRIPTS.md` and related docs with the final command map
+      for editing, handoff, release, CI reproduction, and investigation.
+- [x] Record before/after runtime and diagnostic differences for scoped or split
+      checks.
+- [x] Run the agreed preflight verification set and update Linear/checklist
+      status after the milestone is verified.

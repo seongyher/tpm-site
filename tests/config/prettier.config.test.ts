@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { describe, expect, test } from "bun:test";
 import { type Options, resolveConfig } from "prettier";
 
@@ -27,5 +29,15 @@ describe("Prettier config", () => {
     const config = await resolveProjectConfig(".github/dependabot.yml");
 
     expect(config.trailingComma).toBe("none");
+  });
+
+  test("ignores generated output directories", async () => {
+    const ignoreFile = await readFile(".prettierignore", "utf8");
+
+    expect(ignoreFile).toContain("dist/");
+    expect(ignoreFile).toContain("dist-catalog/");
+    expect(ignoreFile).toContain("coverage/");
+    expect(ignoreFile).toContain("playwright-report/");
+    expect(ignoreFile).toContain("test-results/");
   });
 });
