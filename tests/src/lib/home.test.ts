@@ -200,6 +200,77 @@ describe("homepage view model", () => {
     ]);
   });
 
+  test("resolves every configured homepage discovery route key", () => {
+    const config = parseSiteConfig({
+      identity: {
+        description: "A configurable publication.",
+        language: "en",
+        title: "Example Blog",
+        url: "https://example.com",
+      },
+      homepage: {
+        discoveryLinks: [
+          { label: "Home", route: "home" },
+          { label: "Articles", route: "articles" },
+          { label: "Archive", route: "allArticles" },
+          { label: "Announcements", route: "announcements" },
+          { label: "Authors", route: "authors" },
+          { label: "Bibliography", route: "bibliography" },
+          { label: "Categories", route: "categories" },
+          { label: "Collections", route: "collections" },
+          { label: "Feed", route: "feed" },
+          { label: "Search", route: "search" },
+          { label: "Tags", route: "tags" },
+        ],
+      },
+      navigation: {
+        footer: [],
+        primary: [],
+      },
+      routes: {
+        allArticles: "/archive/",
+        announcements: "/news/",
+        articles: "/writing/",
+        authors: "/people/",
+        bibliography: "/sources/",
+        categories: "/topics/",
+        collections: "/series/",
+        feed: "/rss.xml",
+        home: "/",
+        search: "/find/",
+        tags: "/labels/",
+      },
+      support: {
+        block: {
+          body: "Keep publishing going.",
+          title: "Support Example Blog",
+        },
+        discord: {
+          href: "https://discord.gg/example",
+          label: "Join Discord",
+        },
+        patreon: {
+          href: "https://patreon.com/example",
+          label: "Support Us",
+        },
+      },
+    });
+
+    expect(homepageDiscoveryLinks(config)).toEqual([
+      { href: "/", label: "Home" },
+      { href: "/writing/", label: "Articles" },
+      { href: "/archive/", label: "Archive" },
+      { href: "/news/", label: "Announcements" },
+      { href: "/people/", label: "Authors" },
+      { href: "/sources/", label: "Bibliography" },
+      { href: "/topics/", label: "Categories" },
+      { href: "/series/", label: "Collections" },
+      { href: "/rss.xml", label: "Feed" },
+      { href: "/find/", label: "Search" },
+      { href: "/labels/", label: "Tags" },
+    ]);
+  });
+
   test("builds full homepage route props from site config and loaded content", () => {
     const config = parseSiteConfig({
       identity: {
@@ -301,6 +372,69 @@ describe("homepage view model", () => {
     expect(viewModel.announcements.titleHref).toBeUndefined();
     expect(viewModel.categories).toBeUndefined();
     expect(viewModel.recent.ariaLabel).toBe("Latest");
+  });
+
+  test("fails clearly when the homepage page is missing hero configuration", () => {
+    const config = parseSiteConfig({
+      identity: {
+        description: "A configurable publication.",
+        language: "en",
+        title: "Example Blog",
+        url: "https://example.com",
+      },
+      navigation: {
+        footer: [],
+        primary: [],
+      },
+      routes: {
+        allArticles: "/articles/all/",
+        announcements: "/announcements/",
+        articles: "/writing/",
+        authors: "/authors/",
+        bibliography: "/bibliography/",
+        categories: "/categories/",
+        collections: "/collections/",
+        feed: "/feed.xml",
+        home: "/",
+        search: "/search/",
+        tags: "/tags/",
+      },
+      support: {
+        block: {
+          body: "Keep publishing going.",
+          title: "Support Example Blog",
+        },
+        discord: {
+          href: "https://discord.gg/example",
+          label: "Join Discord",
+        },
+        patreon: {
+          href: "https://patreon.com/example",
+          label: "Support Us",
+        },
+      },
+    });
+
+    expect(() =>
+      homePageRouteViewModel({
+        announcements: [],
+        archiveItems: [],
+        categoryItems: [],
+        collections: [
+          collectionEntry("featured", { items: [] }),
+          collectionEntry("start-here", { items: [] }),
+        ],
+        config,
+        home: {
+          data: {
+            startHere: [],
+            title: "Home",
+          },
+        },
+      }),
+    ).toThrow(
+      "Missing homepage hero config at site/content/pages/index.md frontmatter.",
+    );
   });
 });
 

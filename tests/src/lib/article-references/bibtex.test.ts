@@ -45,6 +45,7 @@ describe("BibTeX parser", () => {
     const ignored = parseBibtexEntries(`
 % exported from a citation manager
 @comment{not a bibliography item}
+@preamble("ignored preamble")
 @article{real-source, title = {Real Source}}
 `);
 
@@ -70,5 +71,67 @@ describe("BibTeX parser", () => {
       "Expected ',' after BibTeX key",
     );
     expect(malformed.diagnostics[0]?.offset).toBeGreaterThan(0);
+  });
+
+  test("reports precise diagnostics for unsupported or incomplete BibTeX syntax", () => {
+    const cases = [
+      ["@", "Expected a BibTeX entry type after '@'."],
+      ["@book title = {Broken}", "Expected '{' or '(' after BibTeX type."],
+      ["@book{, title = {Broken}}", "Expected a BibTeX key."],
+      ["@book{source, = {Broken}}", "Expected a BibTeX field name."],
+      [
+        "@book{source, title {Broken}}",
+        "Expected '=' after BibTeX field name.",
+      ],
+      ["@book{source, title = }", "Expected a BibTeX field value."],
+      [
+        "@book{source, title = {Broken}",
+        "Expected ',' or the end of the BibTeX entry after a field value.",
+      ],
+      ["@book{source,", "Unterminated BibTeX entry."],
+      ['@book{source, title = "Broken}', "Unterminated quoted BibTeX value."],
+      ["@book{source, title = {Broken", "Unterminated braced BibTeX value."],
+      [
+        "@book{source, title = Journal # Volume}",
+        "BibTeX string concatenation is not supported",
+      ],
+      [
+        "@book{source, title = {Good} unexpected}",
+        "Expected ',' or the end of the BibTeX entry after a field value.",
+      ],
+      ["@comment{not closed", "Unterminated ignored BibTeX entry."],
+    ] as const;
+
+    for (const [source, message] of cases) {
+      const result = parseBibtexEntries(source);
+
+      expect(result.ok).toBe(false);
+
+      if (result.ok) {
+        throw new Error(`Expected ${source} to fail.`);
+      }
+
+      expect(result.diagnostics[0]?.message).toContain(message);
+    }
+  });
+
+  test("preserves escaped delimiters inside field values", () => {
+    const result = parseBibtexEntries(String.raw`
+@misc{escaped,
+  note = {Literal \{ brace and escaped \} brace},
+  title = "A \"quoted\" title"
+}
+`);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      throw new Error("Expected escaped field values to parse.");
+    }
+
+    expect(result.entries[0]?.fields).toMatchObject({
+      note: String.raw`Literal \{ brace and escaped \} brace`,
+      title: String.raw`A \"quoted\" title`,
+    });
   });
 });

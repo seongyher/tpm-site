@@ -27,6 +27,14 @@ describe("article reference preview browser script", () => {
     expect(
       textContent(panel, "[data-article-reference-preview-content]"),
     ).toContain("Source title");
+    expect(
+      panel.querySelector("[data-article-reference-preview-content] [id]"),
+    ).toBe(null);
+    expect(
+      panel.querySelector(
+        "[data-article-reference-preview-content] [data-article-reference-marker]",
+      ),
+    ).toBe(null);
     expect(panel.querySelector("[data-article-reference-preview-label]")).toBe(
       null,
     );
@@ -85,11 +93,83 @@ describe("article reference preview browser script", () => {
     expect(panel.hidden).toBe(true);
     expect(panel.classList.contains("hidden")).toBe(true);
   });
+
+  test("keeps touch hover quiet but opens the first coarse-pointer tap as a preview", () => {
+    const window = browserWindow({ coarsePointer: true });
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 120, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchPointerEvent(marker, window, "pointerover", "touch");
+    expect(panel.hidden).toBe(true);
+
+    const click = dispatchWindowEvent(marker, window, "click", {
+      cancelable: true,
+    });
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(panel.hidden).toBe(false);
+    expect(marker.getAttribute("aria-describedby")).toBe(panel.id);
+  });
+
+  test("closes active previews when users click outside", () => {
+    const window = browserWindow();
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+    expect(panel.hidden).toBe(false);
+
+    dispatchWindowEvent(
+      requiredElement(window, "#outside-target"),
+      window,
+      "click",
+    );
+
+    expect(panel.hidden).toBe(true);
+    expect(panel.classList.contains("hidden")).toBe(true);
+    expect(marker.getAttribute("aria-describedby")).toBe(null);
+  });
+
+  test("repositions an active preview when the viewport changes", () => {
+    const window = browserWindow();
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+    const firstX = panel.style.getPropertyValue("--anchor-x");
+
+    setRect(marker, { height: 16, width: 24, x: 12, y: 160 });
+    dispatchWindowEvent(window, window, "resize");
+
+    expect(panel.style.getPropertyValue("--anchor-x")).not.toBe(firstX);
+  });
 });
 
 function referencePreviewFixture(): string {
   return `
     <main>
+      <button id="outside-target" type="button">Outside</button>
       <article data-article-prose>
         <p>
           This paragraph cites a source
@@ -121,7 +201,14 @@ function referencePreviewFixture(): string {
         <ol>
           <li id="cite-source">
             <div data-article-reference-definition-content>
-              <p>Author. <em>Source title</em>. <a href="https://example.com/source">Archive</a>.</p>
+              <p>
+                Author. <em>Source title</em>.
+                <a href="https://example.com/source">Archive</a>.
+                <span
+                  id="nested-reference-preview-id"
+                  data-article-reference-marker="true"
+                >Nested marker metadata should not survive cloning.</span>
+              </p>
             </div>
             <nav>
               <a
@@ -151,12 +238,16 @@ function referencePreviewFixture(): string {
   `;
 }
 
-function browserWindow(): Window {
+function browserWindow(
+  options: { readonly coarsePointer?: boolean } = {},
+): Window {
   const window = new Window({ url: "https://example.com/articles/source/" });
   Reflect.set(window, "SyntaxError", SyntaxError);
   Reflect.set(window, "innerHeight", 844);
   Reflect.set(window, "innerWidth", 390);
-  Reflect.set(window, "matchMedia", () => ({ matches: false }));
+  Reflect.set(window, "matchMedia", () => ({
+    matches: options.coarsePointer === true,
+  }));
 
   return window;
 }
@@ -199,19 +290,42 @@ function dispatchWindowEvent(
   element: unknown,
   window: Window,
   eventName: string,
+  options: EventInit = {},
+): DispatchedEventState {
+  if (!isDispatchableEventTarget(element)) {
+    throw new Error("Expected fixture target to dispatch browser events.");
+  }
+
+  const event = new window.Event(eventName, { bubbles: true, ...options });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+  element.dispatchEvent(event as unknown as Event);
+
+  return { defaultPrevented: event.defaultPrevented };
+}
+
+function dispatchPointerEvent(
+  element: unknown,
+  window: Window,
+  eventName: string,
+  pointerType: string,
 ): void {
   if (!isDispatchableEventTarget(element)) {
     throw new Error("Expected fixture target to dispatch browser events.");
   }
 
   const event = new window.Event(eventName, { bubbles: true });
-
+  Reflect.set(event, "pointerType", pointerType);
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
   element.dispatchEvent(event as unknown as Event);
 }
 
 interface DispatchableEventTarget {
   readonly dispatchEvent: (event: Event) => boolean;
+}
+
+interface DispatchedEventState {
+  readonly defaultPrevented: boolean;
 }
 
 function isDispatchableEventTarget(
