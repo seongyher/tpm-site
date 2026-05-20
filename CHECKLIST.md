@@ -1023,3 +1023,73 @@ they are useful context. Explicitly deferred work belongs in
       and unresolved-source guidance.
       Updated `docs/ARTICLE_REFERENCE_AUTHORING.md` with source-type, field,
       and uncertainty guidance.
+
+### Milestone 179: IRK-93 Test Matrix Inventory
+
+- [x] Inventory the current test layers, fixture sites, release gates, catalog
+      checks, accessibility checks, performance checks, and generated-output
+      verifiers.
+- [x] Identify which current checks are fast local checks, focused local checks,
+      release gates, CI checks, review-only checks, or investigation-only
+      tooling.
+- [x] Verify the inventory is grounded in current scripts, tests, docs, and
+      existing fixture-site behavior before designing the target matrix.
+      Documented in `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md` and verified
+      against `package.json`, `scripts/testing/*`,
+      `scripts/quality/run-quality.ts`, `tests/fixtures/site-instance/`,
+      `examples/docs-site/`, and `src/catalog/`. Formatting and markdown lint
+      passed with `bunx prettier --check docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md --log-level warn`
+      and `bunx markdownlint-cli2 docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`.
+
+### Milestone 180: IRK-93 Fixture-Site And Test-Layer Design
+
+- [x] Define the target test-layer ownership matrix for source contracts,
+      output engines, UI, interactions, performance, diagnostics, docs,
+      deployment, and future studio workflows.
+- [x] Define the required fixture-site matrix for minimal, docs/example,
+      scholarly, media-heavy, broken/hostile, feature-disabled, and
+      kitchen-sink scenarios.
+- [x] Document local/release/CI placement rules and the non-goals that prevent
+      monolithic or duplicated tests.
+- [x] Verify the design is developer-ready and gives new roadmap work a clear
+      test home before implementation.
+      Documented in `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`. The design
+      gives each domain a primary owner, names the fixture-site matrix, and
+      defines placement rules/non-goals for future implementation issues.
+      Verified with `bunx prettier --check docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md --log-level warn`
+      and `bunx markdownlint-cli2 docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`.
+
+### Milestone 181: IRK-89 Performance Baseline Inventory
+
+- [x] Inventory the current performance tooling, Lighthouse/Unlighthouse
+      findings, payload reports, cache policy, PDF budget checks, and
+      representative route classes.
+- [x] Collect or cite current build-output and Lighthouse evidence for the
+      first budget pass without inventing unsupported thresholds.
+- [x] Verify the baseline inventory distinguishes current evidence from future
+      enforcement work.
+      Documented in `docs/performance/route-class-performance-budgets.md`.
+      Evidence was collected from `lighthouserc.json`,
+      `docs/performance/unlighthouse-audit-2026-05-17.md`,
+      `site/public/_headers`, PDF/social-preview verifier policy, and fresh
+      local output from `bun --silent run build` plus
+      `bun --silent run payload:report -- --top 12`. The doc distinguishes
+      existing enforcement from warning-only and future route-class work.
+
+### Milestone 182: IRK-89 Route-Class Performance Budget Design
+
+- [x] Define route classes, representative baseline routes, viewport/device
+      profiles, metrics, and warning/failure threshold policy.
+- [x] Define how HTML, CSS, JS, image, font, PDF, total transfer, LCP, CLS, TBT,
+      cache-header, and critical-request-chain budgets should be measured and
+      enforced.
+- [x] Document how performance budgets integrate with local checks, release
+      checks, CI, experiment workflows, and future implementation issues.
+- [x] Verify the design is evidence-based, measurable, and ready to unblock
+      performance workbench implementation.
+      Documented in `docs/performance/route-class-performance-budgets.md`.
+      The design defines route classes, baseline routes, Core Web Vitals,
+      Lighthouse, payload, PDF, image/media, cache, critical-chain, and rollout
+      policy, with acceptance criteria for future implementation.
+      Verified with `bunx prettier --check docs/performance/route-class-performance-budgets.md --log-level warn`
+      and `bunx markdownlint-cli2 docs/performance/route-class-performance-budgets.md`.
