@@ -87,3 +87,20 @@ they are useful context. Explicitly deferred work belongs in
       added roadmap work remains traceable to the audit process.
 - [x] Rerun documentation checks after the roadmap gap pass.
       `bun --silent run review:markdown` passes.
+
+### Milestone 183: Fresh Comprehensive Codebase Audit
+
+- [x] Reread `agent-docs/ENGINEERING_PHILOSOPHY.md` and use it as the
+      independent audit standard.
+- [x] Create a new audit workspace that does not reuse the previous roadmap
+      files.
+- [x] Inventory tracked source, content, docs, tests, tooling, config, site
+      instance files, and ignored generated/local artifacts.
+- [x] Inspect every tracked file or file family with explicit coverage notes,
+      separating text-source review from binary/generated artifact inventory.
+- [x] Write and iterate a fresh roadmap/audit document from the new evidence
+      only.
+- [x] After the fresh roadmap is complete, compare it with the prior roadmap
+      and synthesize the standalone `agent-docs/PLATFORM_ROADMAP.md`.
+- [x] Critique and refine the platform roadmap through multiple passes, then
+      run documentation checks before handoff.
