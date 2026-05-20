@@ -104,3 +104,177 @@ they are useful context. Explicitly deferred work belongs in
       and synthesize the standalone `agent-docs/PLATFORM_ROADMAP.md`.
 - [x] Critique and refine the platform roadmap through multiple passes, then
       run documentation checks before handoff.
+
+### Milestone 184: Linear Sub-Issue Planning - IRK-8 Roadmap Preflight
+
+- [x] Break `IRK-8` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 185: Linear Sub-Issue Planning - IRK-9 Source And Artifact Lifecycle
+
+- [x] Break `IRK-9` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 186: Linear Sub-Issue Planning - IRK-10 Platform Context
+
+- [x] Break `IRK-10` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 187: Linear Sub-Issue Planning - IRK-11 Route Registry
+
+- [x] Break `IRK-11` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 188: Linear Sub-Issue Planning - IRK-12 Article Compiler Artifact
+
+- [x] Break `IRK-12` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 189: Linear Sub-Issue Planning - IRK-13 Publishable Entry Model
+
+- [x] Break `IRK-13` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 190: Linear Sub-Issue Planning - IRK-14 Route-Level View Models
+
+- [x] Break `IRK-14` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 191: Linear Sub-Issue Planning - IRK-15 Generated-Output Verifiers
+
+- [x] Break `IRK-15` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 192: Linear Sub-Issue Planning - IRK-16 Metadata Engine
+
+- [x] Break `IRK-16` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 193: Linear Sub-Issue Planning - IRK-17 References And Bibliography
+
+- [x] Break `IRK-17` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 194: Linear Sub-Issue Planning - IRK-18 Media And PDF Policy
+
+- [x] Break `IRK-18` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 195: Linear Sub-Issue Planning - IRK-19 UI Primitives And Catalog
+
+- [x] Break `IRK-19` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 196: Linear Sub-Issue Planning - IRK-20 Interaction Primitives
+
+- [x] Break `IRK-20` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 197: Linear Sub-Issue Planning - IRK-21 Performance Workbench
+
+- [x] Break `IRK-21` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 198: Linear Sub-Issue Planning - IRK-22 Test Matrix
+
+- [x] Break `IRK-22` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 199: Linear Sub-Issue Planning - IRK-23 Site Doctor
+
+- [x] Break `IRK-23` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 200: Linear Sub-Issue Planning - IRK-24 Documentation System
+
+- [x] Break `IRK-24` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 201: Linear Sub-Issue Planning - IRK-25 Observability
+
+- [x] Break `IRK-25` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 202: Linear Sub-Issue Planning - IRK-26 Studio Readiness
+
+- [x] Break `IRK-26` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 203: Linear Sub-Issue Planning - IRK-27 Package Boundaries
+
+- [x] Break `IRK-27` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 204: Linear Sub-Issue Planning - IRK-28 Extension Architecture
+
+- [x] Break `IRK-28` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 205: Linear Sub-Issue Planning - IRK-29 Deployment Adapters
+
+- [x] Break `IRK-29` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 206: Linear Sub-Issue Planning - IRK-30 Security And Trust Policy
+
+- [x] Break `IRK-30` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 207: Linear Sub-Issue Planning - IRK-31 Migration And Portability
+
+- [x] Break `IRK-31` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 208: Linear Sub-Issue Planning - IRK-32 Localization
+
+- [x] Break `IRK-32` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 209: Linear Sub-Issue Planning - IRK-33 Starter Templates
+
+- [x] Break `IRK-33` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 210: Linear Sub-Issue Planning - IRK-34 Static Blog Studio
+
+- [x] Break `IRK-34` into specific child issues with meaningful blockers,
+      parallel-safe work, verification, and exit criteria.
+- [x] Verify the child issue set is actionable without fake precision.
+
+### Milestone 211: Linear Studio CLI And MCP Planning
+
+- [x] Add Linear work for a shared headless studio core with GUI, CLI, and MCP
+      adapters over the same platform services.
+- [x] Add CLI workflow planning for developer, CI, migration, automation,
+      preview, publish, rollback, and release-report operations.
+- [x] Add MCP planning for safe agent/tool access with read-only defaults,
+      dry-run/proposed-diff behavior, write scopes, audit logs, secret
+      redaction, and gated provider-backed actions.
+- [x] Add cross-interface parity planning so GUI, CLI, and MCP cannot drift into
+      separate implementations.
