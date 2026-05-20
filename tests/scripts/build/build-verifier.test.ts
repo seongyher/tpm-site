@@ -9,6 +9,8 @@ import {
   announcementPublicationStats,
   type ArticlePublication,
   articlePublicationStats,
+  buildVerificationDiagnosticReport,
+  buildVerificationDiagnostics,
   collectionPublicationStats,
   formatBuildVerificationReport,
   isExternal,
@@ -641,6 +643,70 @@ describe("build verifier helpers", () => {
     expect(report).toContain("Unexpected hydration boundaries:");
   });
 
+  test("maps each build verification issue bucket to structured diagnostics", () => {
+    const result = {
+      articlePageCount: 2,
+      astroClientScriptCount: 1,
+      issues: {
+        articlePdfIssues: [
+          "articles/post/post.pdf: missing PDF title metadata",
+        ],
+        articleCountIssues: ["expected 1 article page, found 2"],
+        brokenLinks: ["index.html -> /missing/"],
+        catalogLeaks: ["catalog/"],
+        draftLeaks: ["feed.xml -> draft-post"],
+        invalidLegacyRedirects: ["2022/01/01/post/index.html: invalid"],
+        imageAltIssues: [
+          "articles/post/index.html: /image.webp is missing alt",
+        ],
+        metadataIssues: ["index.html: missing meta description"],
+        missingArticleJsonLd: ["articles/post/index.html"],
+        missingLegacyRedirects: ["/2022/01/01/post/ -> /articles/post/"],
+        missingRequired: ["feed.xml"],
+        sourceMaps: ["_astro/index.js.map"],
+        socialImageIssues: ["articles/post/index.html: social image invalid"],
+        unexpectedHydrationBoundaries: ["articles/post/index.html"],
+        unexpectedClientScripts: ["index.html -> /_astro/index.js"],
+        unexpectedDatedPages: ["2022/01/01/post/index.html"],
+      },
+    };
+    const diagnostics = buildVerificationDiagnostics(result);
+    const report = buildVerificationDiagnosticReport(result);
+
+    expect(diagnostics).toHaveLength(16);
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      "pdf.article-output-invalid",
+      "content.article-count-mismatch",
+      "link.internal-target-missing",
+      "build.catalog-leak",
+      "content.draft-leak",
+      "redirect.legacy-fallback-invalid",
+      "html.image-alt-missing",
+      "metadata.html-invalid",
+      "metadata.article-json-ld-missing",
+      "redirect.legacy-fallback-missing",
+      "route.required-output-missing",
+      "asset.source-map-leak",
+      "metadata.social-preview-invalid",
+      "html.hydration-boundary-unexpected",
+      "asset.client-script-unexpected",
+      "route.dated-page-unexpected",
+    ]);
+    expect(diagnostics[10]).toMatchObject({
+      location: { outputPath: "feed.xml" },
+      moduleId: "build.routes",
+      owner: "generated-output",
+      severity: "error",
+    });
+    expect(report.summary).toMatchObject({
+      errors: 16,
+      total: 16,
+      warnings: 0,
+    });
+    expect(report.articlePageCount).toBe(2);
+    expect(report.astroClientScriptCount).toBe(1);
+  });
+
   test("verifies built output against source articles and categories", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
@@ -1265,6 +1331,46 @@ describe("build verifier helpers", () => {
             "Build verification failed",
           );
         } finally {
+          error.mockRestore();
+        }
+      }),
+  );
+
+  test.serial(
+    "prints build verification JSON from the command-line workflow",
+    async () =>
+      withTempRoot(async (root) => {
+        const log = spyOn(console, "log").mockImplementation(() => undefined);
+        const error = spyOn(console, "error").mockImplementation(
+          () => undefined,
+        );
+
+        try {
+          await writeText(root, "astro.config.ts", "export default {};\n");
+          await writeText(root, "site/content/categories/history.json", "{}");
+          await writeText(
+            root,
+            "site/content/articles/history/published.md",
+            "---\ntitle: Published\n---\n",
+          );
+          await writeText(root, "dist/index.html", "");
+          await writeText(root, "dist/articles/index.html", "");
+          await writeText(root, "dist/articles/all/index.html", "");
+          await writeText(root, "dist/articles/published/index.html", "");
+
+          const exitCode = await runBuildVerificationCli(["--json"], root);
+          const output = String(log.mock.calls[0]?.[0]);
+          const json: unknown = JSON.parse(output);
+
+          expect(exitCode).toBe(1);
+          expect(error.mock.calls).toHaveLength(0);
+          expect(json).toHaveProperty("summary");
+          expect(output).toContain('"diagnostics"');
+          expect(output).toContain('"errors":');
+          expect(output).toContain('"total":');
+          expect(output).toContain('"metadata.html-invalid"');
+        } finally {
+          log.mockRestore();
           error.mockRestore();
         }
       }),

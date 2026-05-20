@@ -109,7 +109,7 @@ Script sources are grouped by responsibility:
 | `typecheck:astro`                 | Runs `astro check` and treats Astro warnings as failures.                                                                                                                                                                       |
 | `typecheck:tools`                 | Runs TypeScript checking for scripts, tests, and tooling config.                                                                                                                                                                |
 | `validate:html`                   | Validates representative built HTML files for the active site output directory, including enabled optional route surfaces, and fails on warnings.                                                                               |
-| `verify`                          | Verifies the active built output directory: expected pages, local links, draft exclusion, JSON-LD, PDFs, social images, and static-page script constraints.                                                                     |
+| `verify`                          | Verifies the active built output directory: expected pages, local links, draft exclusion, JSON-LD, PDFs, social images, and static-page script constraints. Pass `--json` for structured diagnostics.                           |
 | `verify:content`                  | Verifies source content invariants such as URL-safe slugs/categories and duplicate article slugs.                                                                                                                               |
 
 Coverage is a review and accountability tool, not an excuse to leave testable
