@@ -114,6 +114,61 @@ resume trigger. When deferred work becomes active, move it back into
 `CHECKLIST.md` before implementation begins. Do not mark deferred work complete
 in `DEFERRED.md`; completion belongs in the active checklist after verification.
 
+## Engineering Philosophy In Practice
+
+The repo should behave like a typed static publishing compiler: authors and
+site owners express publication intent through content, assets, redirects,
+theme, and typed config; platform code validates and normalizes that intent,
+then emits static routes, HTML, metadata, feeds, search data, PDFs, assets, and
+diagnostics.
+
+Use `agent-docs/ENGINEERING_PHILOSOPHY.md` as the decision aid for substantial
+platform work. Use `agent-docs/PLATFORM_ROADMAP.md` when work touches roadmap
+domains, future CMS/studio readiness, CLI/MCP behavior, public generated
+output, or platform productization.
+
+Apply these rules when designing or changing code:
+
+- Treat author confusion as a product bug. Normal article, announcement,
+  collection, support link, social link, and homepage changes should move
+  toward content/config edits rather than app-code edits.
+- Design features so correct changes are easy, obvious, and local while
+  incorrect changes are hard to express, rejected early, or forced through
+  explicit escape hatches. Anticipate likely future mistakes and encode
+  prevention in schemas, types, registries, policies, primitives, diagnostics,
+  and tests.
+- Treat recurring bugs as abstraction feedback. When fixing one, ask whether a
+  schema, type, policy helper, layout recipe, component primitive, or verifier
+  can make that bug class impossible or noisy.
+- Use small, useful seams that separate real concerns: pure from impure,
+  platform from site instance, policy from presentation, data model from view
+  model, and source input from generated artifact.
+- Prefer domain-expressive APIs over generic helpers. Use project concepts such
+  as publishable entries, visibility surfaces, route references, metadata
+  profiles, media policies, citations, artifacts, diagnostics, and view models.
+- Keep one canonical normalized model for each recurring domain concept.
+  Derive surface-specific view models from that model instead of duplicating
+  string literals, schema fragments, route rules, labels, or visibility logic.
+- Keep messy edges thin. Filesystem, Astro collection, DOM, browser storage,
+  network, process/env, and deployment code should be adapters around pure,
+  typed domain logic.
+- Keep future studio, CLI, MCP, CI, and GUI workflows on the same contracts.
+  Do not create a parallel CMS/source model; expose the same schemas,
+  compiler artifacts, route registry, diagnostics, media policies, metadata
+  profiles, and generated-output contracts through different interfaces.
+- Design for extractability before extraction. Identify whether code is
+  site-specific, platform-specific, Astro-adapter code, framework-agnostic
+  core, environment-agnostic core, or a future product-agnostic library. Do not
+  publish packages prematurely, but avoid TPM, Astro, cwd, and singleton
+  assumptions in code that should become portable.
+- Make diagnostics actionable. Author/site-owner diagnostics should identify
+  the file, route or artifact, severity, stable code when practical, cause, and
+  concrete remediation in author language.
+- Optimize for fearless velocity: the fastest path should be the valid path.
+  Good abstractions should reduce what developers must remember, make
+  intentional changes local and testable, and make subtle bugs difficult to
+  introduce.
+
 ## Architecture Standard
 
 Build the site from responsive design blocks and responsive components.
@@ -1231,11 +1286,19 @@ truth.
 
 Core principles:
 
-- Use type-driven design to make invalid states unrepresentable wherever
-  practical.
+- Use type-driven design by default. Make invalid states unrepresentable
+  wherever practical.
+- Normalize inputs once into strict internal models before passing data to UI,
+  metadata, feed, search, PDF, route, or generated-output code.
+- Model platform concepts with named domain types, literal registries,
+  discriminated unions, and narrow view models rather than loose objects,
+  duplicated strings, or scattered boolean flags.
 - Write defensively by making future misuse difficult: validate boundaries,
   model finite states explicitly, isolate side effects, and prefer clear APIs
   that prevent whole classes of bugs without speculative abstractions.
+- When a bug is fixed, consider whether the bug was possible because of a weak
+  abstraction, missing invariant, duplicated policy, or under-specified
+  component contract. Strengthen the seam when that prevents recurrence.
 - Prefer simple, explicit, maintainable code over clever abstractions.
 - Keep changes narrowly scoped.
 - Preserve module boundaries unless there is a clear reason to improve them.
@@ -1246,6 +1309,8 @@ Core principles:
 - Keep side effects behind narrow boundaries.
 - Keep pure logic easy to test.
 - Prefer typed domain objects over passing raw content entries deep into UI.
+- If a helper becomes generally useful, give it a domain name, a small
+  interface, useful JSDoc, and tests around its contract.
 - Throw `Error` instances, not strings or arbitrary values.
 - Do not leave silent `catch` blocks.
 - Keep exports intentional and minimal.
@@ -1309,6 +1374,17 @@ only to make tests easier. Test-only exports require explicit user permission.
 If a test appears to need a private helper, first reconsider the module
 boundary and separate stable pure logic from side-effect-heavy edge code.
 
+Tests should protect platform invariants, not incidental implementation
+details. Prefer tests around schemas, normalizers, registries, route builders,
+metadata builders, visibility policy, media policy, diagnostics, generated
+artifacts, and component contracts because those seams make product behavior
+safe to change.
+
+For refactors and bug-prone domains, add characterization tests before moving
+code. For bug fixes, add regression coverage for the immediate failure and,
+where practical, the broader invariant that should have made the failure
+impossible or noisy.
+
 Aim for 100% useful coverage of testable behavior. Coverage must come from
 meaningful behavior tests, not weakened runtime code, brittle assertions, or
 leaky public interfaces. A coverage exception must be explicitly justified in a
@@ -1350,6 +1426,11 @@ generation, category derivation, draft filtering, metadata normalization, route
 helpers, duplicate slug detection, image path validation, RSS/feed output,
 content helpers, quality/verification scripts, and custom content transforms.
 
+Generated output is a platform contract. When changing public output, add or
+update tests for the relevant HTML semantics, metadata, redirects, RSS, sitemap,
+search data, PDF eligibility/output, citation output, bibliography output,
+asset policy, cache headers, diagnostics, or verifier behavior.
+
 For UI work, prefer tests that assert user-visible behavior. Use happy-dom for
 fast unit tests of DOM script behavior, such as event wiring, query parsing, and
 small browser-entry helpers. Use Vitest with Astro's container API for granular
@@ -1366,6 +1447,27 @@ performance, accessibility, best practices, and SEO review checks.
 
 Use a focused project document only when work is large enough to need explicit
 coordination or reviewable sequencing.
+
+For substantial roadmap or platform work, prepare a design packet before code
+changes. Keep it as short as the work allows, but make it concrete enough that
+another engineer can implement the first patch without rediscovering the
+domain.
+
+A design packet should name:
+
+- the roadmap milestone, platform domain, and smaller subdomain;
+- user impact for authors, site owners, readers, developers, and future
+  tooling such as the studio, CLI, MCP, or CI;
+- affected source files, generated artifacts, public routes, and output
+  contracts;
+- typed interfaces, schemas, registries, policies, diagnostics, or view models
+  being added or changed;
+- invalid states the change should prevent;
+- visible UX changes, if any;
+- performance, accessibility, SEO, machine-readability, payload, and
+  compatibility risks;
+- pre-change tests or fixtures, implementation sequence, focused verification,
+  release-level verification, and docs that must change.
 
 Before starting a non-trivial implementation phase, update the relevant
 design/tooling/project document when the intended work should be reviewable
