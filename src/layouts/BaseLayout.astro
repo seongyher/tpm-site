@@ -30,6 +30,7 @@ interface Props {
   robots?: RobotsPolicy | undefined;
   structuredData?: readonly (JsonLdNode | undefined)[] | undefined;
   type?: "website" | "article";
+  webPageMainEntity?: JsonLdNode | undefined;
 }
 
 const {
@@ -41,6 +42,7 @@ const {
   robots,
   structuredData = [],
   type = "website",
+  webPageMainEntity,
 } = Astro.props;
 const metadata = normalizeRouteMetadata({
   canonicalPath,
@@ -73,6 +75,7 @@ const socialPreviewImage =
       metadata={metadata}
       structuredData={structuredData}
       type={type}
+      webPageMainEntity={webPageMainEntity}
     />
     <slot name="head" />
   </head>

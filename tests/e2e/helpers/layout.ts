@@ -18,6 +18,8 @@ export const viewportMatrix = [
 ] as const;
 
 const defaultGeometryTolerance = 2;
+const geometryExpectationTimeout = 2_000;
+const geometryExpectationIntervals = [25, 50, 100, 250];
 
 /**
  * Returns a visible element bounding box and fails with a useful label when the
@@ -46,12 +48,20 @@ export async function visibleBoundingBox(
  * @param page Current Playwright page.
  */
 export async function expectNoHorizontalOverflow(page: Page): Promise<void> {
-  const overflow = await page.evaluate(() => {
-    const documentElement = document.documentElement;
-    return documentElement.scrollWidth - documentElement.clientWidth;
-  });
-
-  expect(overflow).toBeLessThanOrEqual(1);
+  await expect
+    .poll(
+      async () =>
+        page.evaluate(() => {
+          const documentElement = document.documentElement;
+          return documentElement.scrollWidth - documentElement.clientWidth;
+        }),
+      {
+        intervals: geometryExpectationIntervals,
+        message: "page should not have unintended horizontal overflow",
+        timeout: geometryExpectationTimeout,
+      },
+    )
+    .toBeLessThanOrEqual(1);
 }
 
 /**
@@ -67,6 +77,31 @@ export function expectApproximatelyEqual(
   tolerance = defaultGeometryTolerance,
 ): void {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance);
+}
+
+/**
+ * Retries a geometry measurement until the layout invariant is stable.
+ *
+ * Browser-driven positioning often updates on `requestAnimationFrame`,
+ * `ResizeObserver`, or scroll/resize events. Polling the measured delta keeps
+ * tests focused on the invariant instead of racing the browser's next paint.
+ *
+ * @param measure Returns a non-negative delta from the desired geometry.
+ * @param message Human-readable assertion message.
+ * @param tolerance Maximum allowed delta in CSS pixels.
+ */
+async function expectGeometryDelta(
+  measure: () => Promise<number>,
+  message: string,
+  tolerance: number,
+): Promise<void> {
+  await expect
+    .poll(measure, {
+      intervals: geometryExpectationIntervals,
+      message,
+      timeout: geometryExpectationTimeout,
+    })
+    .toBeLessThanOrEqual(tolerance);
 }
 
 /**
@@ -89,12 +124,25 @@ export async function expectViewportContained(
     throw new Error("Expected Playwright viewport to be configured.");
   }
 
-  const box = await visibleBoundingBox(locator, label);
+  await expectGeometryDelta(
+    async () => {
+      const box = await locator.boundingBox();
 
-  expect(box.x).toBeGreaterThanOrEqual(gutter);
-  expect(box.x + box.width).toBeLessThanOrEqual(viewport.width - gutter);
-  expect(box.y).toBeGreaterThanOrEqual(gutter);
-  expect(box.y + box.height).toBeLessThanOrEqual(viewport.height - gutter);
+      if (box === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.max(
+        gutter - box.x,
+        box.x + box.width - (viewport.width - gutter),
+        gutter - box.y,
+        box.y + box.height - (viewport.height - gutter),
+        0,
+      );
+    },
+    `${label} should stay within the viewport`,
+    0,
+  );
 }
 
 /**
@@ -113,10 +161,20 @@ export async function expectTopAlignedToBottom(
   labels: { readonly bottomOf: string; readonly top: string },
   tolerance = defaultGeometryTolerance,
 ): Promise<void> {
-  const topBox = await visibleBoundingBox(topElement, labels.top);
-  const bottomBox = await visibleBoundingBox(bottomOfElement, labels.bottomOf);
+  await expectGeometryDelta(
+    async () => {
+      const topBox = await topElement.boundingBox();
+      const bottomBox = await bottomOfElement.boundingBox();
 
-  expectApproximatelyEqual(topBox.y, bottomBox.y + bottomBox.height, tolerance);
+      if (topBox === null || bottomBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.abs(topBox.y - (bottomBox.y + bottomBox.height));
+    },
+    `${labels.top} should align to the bottom of ${labels.bottomOf}`,
+    tolerance,
+  );
 }
 
 /**
@@ -131,10 +189,20 @@ export async function expectInlineStartAligned(
   panel: Locator,
   tolerance = defaultGeometryTolerance,
 ): Promise<void> {
-  const triggerBox = await visibleBoundingBox(trigger, "anchored trigger");
-  const panelBox = await visibleBoundingBox(panel, "anchored panel");
+  await expectGeometryDelta(
+    async () => {
+      const triggerBox = await trigger.boundingBox();
+      const panelBox = await panel.boundingBox();
 
-  expectApproximatelyEqual(panelBox.x, triggerBox.x, tolerance);
+      if (triggerBox === null || panelBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.abs(panelBox.x - triggerBox.x);
+    },
+    "anchored panel should align to trigger inline start",
+    tolerance,
+  );
 }
 
 /**
@@ -149,12 +217,20 @@ export async function expectInlineEndAligned(
   panel: Locator,
   tolerance = defaultGeometryTolerance,
 ): Promise<void> {
-  const triggerBox = await visibleBoundingBox(trigger, "anchored trigger");
-  const panelBox = await visibleBoundingBox(panel, "anchored panel");
+  await expectGeometryDelta(
+    async () => {
+      const triggerBox = await trigger.boundingBox();
+      const panelBox = await panel.boundingBox();
 
-  expectApproximatelyEqual(
-    panelBox.x + panelBox.width,
-    triggerBox.x + triggerBox.width,
+      if (triggerBox === null || panelBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.abs(
+        panelBox.x + panelBox.width - (triggerBox.x + triggerBox.width),
+      );
+    },
+    "anchored panel should align to trigger inline end",
     tolerance,
   );
 }
@@ -179,11 +255,22 @@ export async function expectCenteredInViewport(
     throw new Error("Expected Playwright viewport to be configured.");
   }
 
-  const box = await visibleBoundingBox(locator, label);
-  const elementCenter = box.x + box.width / 2;
-  const viewportCenter = viewport.width / 2;
+  await expectGeometryDelta(
+    async () => {
+      const box = await locator.boundingBox();
 
-  expectApproximatelyEqual(elementCenter, viewportCenter, tolerance);
+      if (box === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      const elementCenter = box.x + box.width / 2;
+      const viewportCenter = viewport.width / 2;
+
+      return Math.abs(elementCenter - viewportCenter);
+    },
+    `${label} should be centered in the viewport`,
+    tolerance,
+  );
 }
 
 /**
@@ -218,12 +305,23 @@ export async function expectHorizontallyContained(
   labels: { readonly inner: string; readonly outer: string },
   tolerance = 1,
 ): Promise<void> {
-  const innerBox = await visibleBoundingBox(inner, labels.inner);
-  const outerBox = await visibleBoundingBox(outer, labels.outer);
+  await expectGeometryDelta(
+    async () => {
+      const innerBox = await inner.boundingBox();
+      const outerBox = await outer.boundingBox();
 
-  expect(innerBox.x).toBeGreaterThanOrEqual(outerBox.x - tolerance);
-  expect(innerBox.x + innerBox.width).toBeLessThanOrEqual(
-    outerBox.x + outerBox.width + tolerance,
+      if (innerBox === null || outerBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.max(
+        outerBox.x - innerBox.x,
+        innerBox.x + innerBox.width - (outerBox.x + outerBox.width),
+        0,
+      );
+    },
+    `${labels.inner} should stay horizontally contained inside ${labels.outer}`,
+    tolerance,
   );
 }
 
@@ -243,11 +341,19 @@ export async function expectVerticallyBefore(
   labels: { readonly after: string; readonly before: string },
   tolerance = 1,
 ): Promise<void> {
-  const beforeBox = await visibleBoundingBox(before, labels.before);
-  const afterBox = await visibleBoundingBox(after, labels.after);
+  await expectGeometryDelta(
+    async () => {
+      const beforeBox = await before.boundingBox();
+      const afterBox = await after.boundingBox();
 
-  expect(beforeBox.y + beforeBox.height).toBeLessThanOrEqual(
-    afterBox.y + tolerance,
+      if (beforeBox === null || afterBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      return Math.max(beforeBox.y + beforeBox.height - afterBox.y, 0);
+    },
+    `${labels.before} should appear before ${labels.after}`,
+    tolerance,
   );
 }
 
@@ -267,16 +373,29 @@ export async function expectNoOverlap(
   labels: { readonly first: string; readonly second: string },
   tolerance = 1,
 ): Promise<void> {
-  const firstBox = await visibleBoundingBox(first, labels.first);
-  const secondBox = await visibleBoundingBox(second, labels.second);
-  const separatedHorizontally =
-    firstBox.x + firstBox.width <= secondBox.x + tolerance ||
-    secondBox.x + secondBox.width <= firstBox.x + tolerance;
-  const separatedVertically =
-    firstBox.y + firstBox.height <= secondBox.y + tolerance ||
-    secondBox.y + secondBox.height <= firstBox.y + tolerance;
+  await expectGeometryDelta(
+    async () => {
+      const firstBox = await first.boundingBox();
+      const secondBox = await second.boundingBox();
 
-  expect(separatedHorizontally || separatedVertically).toBe(true);
+      if (firstBox === null || secondBox === null) {
+        return Number.POSITIVE_INFINITY;
+      }
+
+      const horizontalOverlap = Math.min(
+        firstBox.x + firstBox.width - secondBox.x,
+        secondBox.x + secondBox.width - firstBox.x,
+      );
+      const verticalOverlap = Math.min(
+        firstBox.y + firstBox.height - secondBox.y,
+        secondBox.y + secondBox.height - firstBox.y,
+      );
+
+      return Math.min(horizontalOverlap, verticalOverlap);
+    },
+    `${labels.first} should not overlap ${labels.second}`,
+    tolerance,
+  );
 }
 
 /**
