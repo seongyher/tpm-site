@@ -1,6 +1,9 @@
 node_modules/
 dist/
+dist-catalog/
 .astro/
+.unlighthouse/
+.wrangler/
 .agents/skills/
 coverage/
 .lighthouseci/

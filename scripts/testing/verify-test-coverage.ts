@@ -25,6 +25,7 @@ const ignoredPathSegments = new Set([
   ".lighthouseci",
   "coverage",
   "dist",
+  "dist-catalog",
   "node_modules",
   "playwright-report",
   "test-results",
