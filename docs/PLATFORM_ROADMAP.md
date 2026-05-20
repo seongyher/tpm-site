@@ -78,6 +78,10 @@ The site instance provides:
 Make the config surface explicit and machine-readable before adding more
 features.
 
+- Add source-contract modules for source/artifact ownership, platform context,
+  route/entity/feature registry metadata, and compiled article facts so future
+  tools can consume the platform without duplicating path, route, and article
+  policy.
 - Generate JSON Schema for `site/config/site.json`.
 - Add `site:doctor` for webmaster-friendly validation.
 - Validate route/nav/feature/homepage/content-default relationships.

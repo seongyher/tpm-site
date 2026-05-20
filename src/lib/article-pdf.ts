@@ -1,13 +1,7 @@
+import { articleCompilerArtifact } from "./article-compiler";
 import type { ArticleReferenceData } from "./article-references/model";
 import type { AuthorSummary } from "./authors";
-import {
-  type ArticleEntry,
-  articleSlug,
-  articleUrl,
-  authorName,
-  entryDate,
-  entryTitle,
-} from "./routes";
+import { type ArticleEntry, articleUrl, authorName } from "./routes";
 import { absoluteUrl } from "./seo";
 import { type SiteConfig, siteConfig } from "./site-config";
 
@@ -64,18 +58,19 @@ export function articleScholarMetaViewModel({
   config = siteConfig,
   site,
 }: ArticlePdfViewModelInput): ArticleScholarMetaViewModel {
-  const slug = articleSlug(article);
+  const artifact = articleCompilerArtifact(article, { config });
+  const slug = artifact.slug;
   const authorNames = articlePdfAuthorNames(article, authors);
-  const publicationDate = entryDate(article);
+  const publicationDate = artifact.date;
   const publicationDateForScholar = scholarPublicationDate(publicationDate);
-  const title = entryTitle(article);
+  const title = artifact.title;
 
   return {
-    abstract: article.data.description,
+    abstract: artifact.description,
     authors: authorNames,
-    keywords: article.data.tags,
+    keywords: artifact.tags,
     language: config.identity.language,
-    pdf: articlePdfEnabled(article, config)
+    pdf: artifact.pdfEnabled
       ? {
           articleUrl: absoluteUrl(articleUrl(slug), site),
           authors: authorNames,
@@ -117,13 +112,7 @@ export function articlePdfEnabled(
   article: ArticleEntry,
   config: Pick<SiteConfig, "contentDefaults" | "features"> = siteConfig,
 ): boolean {
-  if (!config.features.pdf) {
-    return false;
-  }
-
-  return "pdf" in article.data
-    ? article.data.pdf
-    : config.contentDefaults.articles.pdf.enabled;
+  return articleCompilerArtifact(article, { config }).pdfEnabled;
 }
 
 /**

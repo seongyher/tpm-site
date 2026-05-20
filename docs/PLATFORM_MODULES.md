@@ -11,17 +11,19 @@ incidental TPM implementation details.
 - Content model
   Owns loading, validating, normalizing, sorting, and aggregating publishable
   entries and editorial metadata. Current modules: `announcements`, `archive`,
-  `article-continuity`, `article-list`, `article-page-view-model`,
+  `article-compiler`, `article-continuity`, `article-list`,
+  `article-page-view-model`,
   `article-view`, `authors`, `collections`, `content`, `content-schemas`,
   `feed`, `home`, `publishable`, and `tags`.
 - Routes and features
   Owns URL construction, static path helpers, optional feature routes,
   navigation, metadata contracts, SEO, social previews, share targets, support
   CTAs, site config, site instance paths, and redirects. Current modules:
-  `feature-routes`, `metadata`, `navigation`, `routes`, `semantic-metadata`,
-  `seo`, `share-targets`, `site-config`,
-  `site-config-defaults`, `site-instance`, `site-redirects`, `social-images`,
-  `static-paths`, and `support`.
+  `feature-routes`, `metadata`, `navigation`, `platform-context`,
+  `route-registry`, `routes`, `semantic-metadata`, `seo`, `share-targets`,
+  `site-config`,
+  `site-config-defaults`, `site-instance`, `site-redirects`,
+  `source-artifacts`, `social-images`, `static-paths`, and `support`.
 - Article rendering
   Owns prose-adjacent article view helpers such as embed media layout, image
   policy, title fitting, and table-of-contents data. Current modules:

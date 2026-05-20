@@ -1,6 +1,7 @@
 import type { ImageMetadata } from "astro";
 
 import { articleArchiveItems } from "./archive";
+import { articleCompilerArtifact } from "./article-compiler";
 import {
   type ArticleContinuityItem,
   articleContinuityItem,
@@ -16,10 +17,7 @@ import {
   articleScholarMetaViewModel,
 } from "./article-pdf";
 import type { ArticleReferenceData } from "./article-references/model";
-import {
-  type ArticleTableOfContentsHeading,
-  hasUsefulTableOfContents,
-} from "./article-toc";
+import type { ArticleTableOfContentsHeading } from "./article-toc";
 import { type ArticleViewModel, articleViewModel } from "./article-view";
 import {
   type AuthorProfile,
@@ -34,7 +32,6 @@ import {
   articleCitationMenuViewModel,
 } from "./citations/article-citation";
 import { homepageDiscoveryLinks } from "./home";
-import { normalizePublishableVisibility } from "./publishable";
 import {
   type ArticleEntry,
   type AuthorEntry,
@@ -133,6 +130,11 @@ export async function articlePageViewModel({
   site,
   tableOfContentsHeadings = [],
 }: ArticlePageViewModelInput): Promise<ArticlePageViewModel> {
+  const artifact = articleCompilerArtifact(article, {
+    articleReferences,
+    config,
+    tableOfContentsHeadings,
+  });
   const articleView = articleViewModel(article);
   const [allArticles, authorEntries, categories, fallbackSocialPreviewImage] =
     await Promise.all([
@@ -142,12 +144,12 @@ export async function articlePageViewModel({
       content?.fallbackSocialPreviewImage ?? getSiteSocialFallbackImage(),
     ]);
   const socialPreviewImage = await socialPreviewImageViewModel({
-    alt: articleView.imageAlt ?? articleView.title,
+    alt: artifact.imageAlt ?? artifact.title,
     fallback: fallbackSocialPreviewImage,
     optimize: optimizeImage,
-    source: article.data.image,
+    source: artifact.image,
   });
-  const canonicalUrl = absoluteUrl(articleView.canonicalPath, site ?? origin);
+  const canonicalUrl = absoluteUrl(artifact.canonicalPath, site ?? origin);
   const authors = authorSummariesForArticle(article, authorEntries);
   const category = categories.find(
     (summary) => summary.slug === articleView.categorySlug,
@@ -206,12 +208,7 @@ export async function articlePageViewModel({
     profileLinksEnabled: config.features.authors,
     readingNavigationLinks: homepageDiscoveryLinks(config),
     scholarMeta,
-    searchable:
-      config.features.search &&
-      normalizePublishableVisibility(
-        article.data.visibility,
-        config.contentDefaults.articles.visibility,
-      ).search,
+    searchable: config.features.search && artifact.visibility.search,
     semanticDetails: semanticDetailsViewModel(article.data.semantic),
     share: articleShareMenuViewModel({
       articleUrl: canonicalUrl,
@@ -220,10 +217,10 @@ export async function articlePageViewModel({
       targetIds: config.share.targets,
       title: articleView.title,
     }),
-    showTableOfContents: hasUsefulTableOfContents(tableOfContentsHeadings),
+    showTableOfContents: artifact.tableOfContents.useful,
     socialPreviewImage,
     support: supportBlockViewModel(config),
-    tagsVisible: config.features.tags && article.data.tags.length > 0,
+    tagsVisible: config.features.tags && artifact.tags.length > 0,
   };
 }
 

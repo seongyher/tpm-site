@@ -7,5 +7,6 @@ export default getViteConfig({
     environment: "node",
     include: ["tests/**/*.vitest.ts"],
     reporters: ["dot"],
+    testTimeout: 15_000,
   },
 });

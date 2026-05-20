@@ -2,6 +2,10 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
+import {
+  createPlatformContext,
+  type PlatformContext,
+} from "../../src/lib/platform-context";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import {
   projectRelativePath,
@@ -20,6 +24,7 @@ interface SiteDoctorCliIo {
 
 interface SiteDoctorOptions {
   config?: SiteConfig | undefined;
+  context?: PlatformContext | undefined;
   exists?: ((targetPath: string) => boolean) | undefined;
   paths?: SiteInstancePaths | undefined;
 }
@@ -45,9 +50,15 @@ export interface SiteDoctorIssue {
 export function siteDoctorIssues(
   options: SiteDoctorOptions = {},
 ): SiteDoctorIssue[] {
-  const config = options.config ?? siteConfig;
+  const context =
+    options.context ??
+    createPlatformContext({
+      config: options.config ?? siteConfig,
+      paths: options.paths ?? siteInstance,
+    });
+  const config = context.config;
   const exists = options.exists ?? existsSync;
-  const paths = options.paths ?? siteInstance;
+  const paths = context.paths;
 
   return [
     ...siteInstancePathIssues(paths, config, exists),
