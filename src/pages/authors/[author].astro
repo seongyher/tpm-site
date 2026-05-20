@@ -40,6 +40,7 @@ const hasProfileBody = (profile.entry.body ?? "").trim().length > 0;
 const description =
   profile.shortBio ??
   `Articles by ${profile.displayName} in ${SITE_TITLE} archive.`;
+const profileEntityId = `${profile.href}#author`;
 ---
 
 <BaseLayout
@@ -47,6 +48,7 @@ const description =
   description={description}
   canonicalPath={profile.href}
   kind="author-profile"
+  webPageMainEntity={{ "@id": profileEntityId }}
   structuredData={[
     breadcrumbListJsonLd(
       profile.href,
