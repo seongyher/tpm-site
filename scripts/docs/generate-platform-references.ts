@@ -3,6 +3,10 @@ import path from "node:path";
 
 import type { ImageMetadata } from "astro";
 import { toJSONSchema, z } from "astro/zod";
+import {
+  format as formatWithPrettier,
+  resolveConfig as resolvePrettierConfig,
+} from "prettier";
 
 import {
   authorDiagnosticCategories,
@@ -91,19 +95,39 @@ export function generatedPlatformReferenceMarkdown(): string {
 }
 
 /**
+ * Formats generated platform reference Markdown with the repository Markdown
+ * formatter so generated docs and `fix:markdown` share one canonical shape.
+ *
+ * @param markdown Raw generated Markdown.
+ * @param outputPath Path used for parser inference and diagnostics.
+ * @returns Prettier-canonical Markdown.
+ */
+async function formatGeneratedPlatformReferenceMarkdown(
+  markdown: string,
+  outputPath = defaultOutputPath,
+): Promise<string> {
+  const options = await resolvePrettierConfig(defaultOutputPath);
+
+  return formatWithPrettier(markdown, {
+    ...options,
+    filepath: outputPath,
+  });
+}
+
+/**
  * Runs the platform reference generator CLI.
  *
  * @param args CLI arguments.
  * @param io Output writers.
  * @returns Process exit code.
  */
-export function runGeneratePlatformReferencesCli(
+export async function runGeneratePlatformReferencesCli(
   args = Bun.argv.slice(2),
   io: GeneratePlatformReferencesCliIo = {
     stderr: process.stderr,
     stdout: process.stdout,
   },
-): number {
+): Promise<number> {
   if (args.includes("--help")) {
     io.stdout.write(usage());
 
@@ -113,7 +137,10 @@ export function runGeneratePlatformReferencesCli(
   const outputPath = outputPathFromArgs(args);
   const quiet = args.includes("--quiet");
   const check = args.includes("--check");
-  const text = generatedPlatformReferenceMarkdown();
+  const text = await formatGeneratedPlatformReferenceMarkdown(
+    generatedPlatformReferenceMarkdown(),
+    outputPath,
+  );
 
   if (check) {
     const existingText = readFileSync(outputPath, "utf8");
@@ -702,5 +729,5 @@ function usage(): string {
 }
 
 if (import.meta.main) {
-  process.exitCode = runGeneratePlatformReferencesCli();
+  process.exitCode = await runGeneratePlatformReferencesCli();
 }

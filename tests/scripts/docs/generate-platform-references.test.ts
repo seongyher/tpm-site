@@ -3,6 +3,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { describe, expect, test } from "bun:test";
+import {
+  format as formatWithPrettier,
+  resolveConfig as resolvePrettierConfig,
+} from "prettier";
 
 import {
   generatedPlatformReferenceMarkdown,
@@ -45,24 +49,24 @@ describe("platform reference generation", () => {
     expect(markdown).toContain("## QA Commands And Domains");
   });
 
-  test("writes deterministic output and fails when generated docs are stale", () => {
+  test("writes formatted deterministic output and fails when generated docs are stale", async () => {
     const directory = mkdtempSync(path.join(tmpdir(), "tpm-platform-ref-"));
     const outputPath = path.join(directory, "platform-reference.md");
     const writeIo = captureIo();
 
     expect(
-      runGeneratePlatformReferencesCli(
+      await runGeneratePlatformReferencesCli(
         ["--quiet", "--output", outputPath],
         writeIo.io,
       ),
     ).toBe(0);
 
     const generatedText = readFileSync(outputPath, "utf8");
-    expect(generatedText).toBe(generatedPlatformReferenceMarkdown());
+    expect(generatedText).toBe(await formatMarkdownWithRepoConfig(outputPath));
 
     const checkIo = captureIo();
     expect(
-      runGeneratePlatformReferencesCli(
+      await runGeneratePlatformReferencesCli(
         ["--check", "--quiet", "--output", outputPath],
         checkIo.io,
       ),
@@ -72,7 +76,7 @@ describe("platform reference generation", () => {
 
     const staleIo = captureIo();
     expect(
-      runGeneratePlatformReferencesCli(
+      await runGeneratePlatformReferencesCli(
         ["--check", "--quiet", "--output", outputPath],
         staleIo.io,
       ),
@@ -81,4 +85,30 @@ describe("platform reference generation", () => {
       "Generated platform reference is stale",
     );
   });
+
+  test("check accepts Prettier-canonical generated Markdown", async () => {
+    const directory = mkdtempSync(path.join(tmpdir(), "tpm-platform-ref-"));
+    const outputPath = path.join(directory, "platform-reference.md");
+    writeFileSync(outputPath, await formatMarkdownWithRepoConfig(outputPath));
+
+    const checkIo = captureIo();
+
+    expect(
+      await runGeneratePlatformReferencesCli(
+        ["--check", "--quiet", "--output", outputPath],
+        checkIo.io,
+      ),
+    ).toBe(0);
+  });
 });
+
+async function formatMarkdownWithRepoConfig(outputPath: string) {
+  const options = await resolvePrettierConfig(
+    path.join(process.cwd(), "docs/generated/platform-reference.md"),
+  );
+
+  return formatWithPrettier(generatedPlatformReferenceMarkdown(), {
+    ...options,
+    filepath: outputPath,
+  });
+}
