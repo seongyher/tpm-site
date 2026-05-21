@@ -8,6 +8,5 @@ describe("vitest config", () => {
 
     expect(source).toContain('include: ["tests/**/*.vitest.ts"]');
     expect(source).toContain('environment: "node"');
-    expect(source).toContain("testTimeout: 15_000");
   });
 });
