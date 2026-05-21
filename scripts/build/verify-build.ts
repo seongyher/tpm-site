@@ -12,6 +12,15 @@ import {
 } from "../../src/lib/article-pdf";
 import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
 import { sitemapIncludesPath } from "../../src/lib/metadata";
+import {
+  createOutputDiagnostic,
+  createOutputVerificationReport,
+  type OutputDiagnostic,
+  type OutputDiagnosticCategory,
+  type OutputDiagnosticCode,
+  type OutputDiagnosticOwner,
+  type OutputVerificationReport,
+} from "../../src/lib/output-verification";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import {
@@ -75,6 +84,163 @@ export interface BuildVerificationIssues {
   unexpectedDatedPages: string[];
   unexpectedHydrationBoundaries: string[];
 }
+
+type BuildVerificationIssueBucket = keyof BuildVerificationIssues;
+
+interface BuildIssueBucketMetadata {
+  category: OutputDiagnosticCategory;
+  code: OutputDiagnosticCode;
+  key: BuildVerificationIssueBucket;
+  moduleId: string;
+  owner: OutputDiagnosticOwner;
+  remediation: string;
+}
+
+const buildIssueBuckets: readonly BuildIssueBucketMetadata[] = [
+  {
+    category: "pdf",
+    code: "pdf.article-output-invalid",
+    key: "articlePdfIssues",
+    moduleId: "build.article-pdf",
+    owner: "generated-output",
+    remediation:
+      "Inspect the article PDF link, Scholar metadata, generated PDF file, and PDF document metadata.",
+  },
+  {
+    category: "content",
+    code: "content.article-count-mismatch",
+    key: "articleCountIssues",
+    moduleId: "build.article-pages",
+    owner: "generated-output",
+    remediation:
+      "Compare published article source files with generated article pages.",
+  },
+  {
+    category: "link",
+    code: "link.internal-target-missing",
+    key: "brokenLinks",
+    moduleId: "build.links",
+    owner: "content",
+    remediation:
+      "Update the rendered link target or generate the missing internal route.",
+  },
+  {
+    category: "build",
+    code: "build.catalog-leak",
+    key: "catalogLeaks",
+    moduleId: "build.catalog",
+    owner: "platform",
+    remediation:
+      "Remove private component catalog output from the public release build.",
+  },
+  {
+    category: "content",
+    code: "content.draft-leak",
+    key: "draftLeaks",
+    moduleId: "build.drafts",
+    owner: "content",
+    remediation:
+      "Remove draft entries from generated feeds, sitemaps, and search output.",
+  },
+  {
+    category: "redirect",
+    code: "redirect.legacy-fallback-invalid",
+    key: "invalidLegacyRedirects",
+    moduleId: "build.redirects",
+    owner: "site-config",
+    remediation:
+      "Regenerate or correct the legacy redirect fallback so it matches configured redirects.",
+  },
+  {
+    category: "html",
+    code: "html.image-alt-missing",
+    key: "imageAltIssues",
+    moduleId: "build.html",
+    owner: "content",
+    remediation:
+      "Add meaningful alt text or mark the image decorative with valid semantics.",
+  },
+  {
+    category: "metadata",
+    code: "metadata.html-invalid",
+    key: "metadataIssues",
+    moduleId: "build.metadata",
+    owner: "generated-output",
+    remediation:
+      "Inspect the page metadata, robots policy, JSON-LD, sitemap policy, or share metadata.",
+  },
+  {
+    category: "metadata",
+    code: "metadata.article-json-ld-missing",
+    key: "missingArticleJsonLd",
+    moduleId: "build.metadata",
+    owner: "generated-output",
+    remediation:
+      "Ensure every generated article page includes BlogPosting JSON-LD.",
+  },
+  {
+    category: "redirect",
+    code: "redirect.legacy-fallback-missing",
+    key: "missingLegacyRedirects",
+    moduleId: "build.redirects",
+    owner: "site-config",
+    remediation:
+      "Generate redirect fallback output for every configured legacy redirect.",
+  },
+  {
+    category: "route",
+    code: "route.required-output-missing",
+    key: "missingRequired",
+    moduleId: "build.routes",
+    owner: "generated-output",
+    remediation:
+      "Generate the required route or update feature/route expectations if the route is intentionally disabled.",
+  },
+  {
+    category: "asset",
+    code: "asset.source-map-leak",
+    key: "sourceMaps",
+    moduleId: "build.assets",
+    owner: "platform",
+    remediation: "Remove source maps from public release output.",
+  },
+  {
+    category: "metadata",
+    code: "metadata.social-preview-invalid",
+    key: "socialImageIssues",
+    moduleId: "build.social-preview",
+    owner: "generated-output",
+    remediation:
+      "Ensure social preview metadata points to one generated local JPG within the configured size and dimension policy.",
+  },
+  {
+    category: "html",
+    code: "html.hydration-boundary-unexpected",
+    key: "unexpectedHydrationBoundaries",
+    moduleId: "build.html",
+    owner: "platform",
+    remediation:
+      "Keep static reading pages free of unexpected hydrated islands.",
+  },
+  {
+    category: "asset",
+    code: "asset.client-script-unexpected",
+    key: "unexpectedClientScripts",
+    moduleId: "build.assets",
+    owner: "platform",
+    remediation:
+      "Remove unexpected client JavaScript from static reading pages or explicitly allow a narrowly scoped script.",
+  },
+  {
+    category: "route",
+    code: "route.dated-page-unexpected",
+    key: "unexpectedDatedPages",
+    moduleId: "build.routes",
+    owner: "generated-output",
+    remediation:
+      "Keep historical dated URLs as redirect fallbacks, not generated article pages.",
+  },
+];
 
 /** Inputs needed to verify a completed Astro build. */
 export interface BuildVerificationOptions {
@@ -163,6 +329,12 @@ export interface BuildVerificationResult {
   articlePageCount: number;
   astroClientScriptCount: number;
   issues: BuildVerificationIssues;
+}
+
+/** Machine-readable build verification report with generated-output metadata. */
+export interface BuildVerificationDiagnosticReport extends OutputVerificationReport {
+  articlePageCount: number;
+  astroClientScriptCount: number;
 }
 
 /** Publication metadata for one non-draft article source file. */
@@ -280,6 +452,104 @@ export function formatBuildVerificationReport(
 }
 
 /**
+ * Converts current build-verifier issue buckets into shared output
+ * diagnostics.
+ *
+ * @param result Build verification result.
+ * @returns Structured generated-output diagnostics.
+ */
+export function buildVerificationDiagnostics(
+  result: BuildVerificationResult,
+): OutputDiagnostic[] {
+  return buildIssueBuckets.flatMap((bucket) =>
+    result.issues[bucket.key].map((issue) =>
+      createOutputDiagnostic({
+        category: bucket.category,
+        code: bucket.code,
+        evidence: [`${bucket.key}: ${issue}`],
+        location: buildIssueLocation(bucket.key, issue),
+        message: issue,
+        moduleId: bucket.moduleId,
+        owner: bucket.owner,
+        remediation: bucket.remediation,
+        severity: "error",
+      }),
+    ),
+  );
+}
+
+/**
+ * Builds the machine-readable build-verifier report.
+ *
+ * @param result Build verification result.
+ * @returns Structured diagnostic report with build summary fields.
+ */
+export function buildVerificationDiagnosticReport(
+  result: BuildVerificationResult,
+): BuildVerificationDiagnosticReport {
+  return {
+    ...createOutputVerificationReport(buildVerificationDiagnostics(result)),
+    articlePageCount: result.articlePageCount,
+    astroClientScriptCount: result.astroClientScriptCount,
+  };
+}
+
+function buildIssueLocation(
+  key: BuildVerificationIssueBucket,
+  issue: string,
+): OutputDiagnostic["location"] {
+  switch (key) {
+    case "articleCountIssues":
+      return undefined;
+
+    case "articlePdfIssues":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "brokenLinks":
+      return { outputPath: issue.split(" -> ")[0] ?? issue };
+
+    case "catalogLeaks":
+      return { outputPath: issue };
+
+    case "draftLeaks":
+      return { outputPath: issue.split(" -> ")[0] ?? issue };
+
+    case "imageAltIssues":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "invalidLegacyRedirects":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "metadataIssues":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "missingArticleJsonLd":
+      return { outputPath: issue };
+
+    case "missingLegacyRedirects":
+      return { route: issue.split(" -> ")[0] ?? issue };
+
+    case "missingRequired":
+      return { outputPath: issue };
+
+    case "socialImageIssues":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "sourceMaps":
+      return { outputPath: issue };
+
+    case "unexpectedClientScripts":
+      return { outputPath: issue.split(" -> ")[0] ?? issue };
+
+    case "unexpectedDatedPages":
+      return { outputPath: issue };
+
+    case "unexpectedHydrationBoundaries":
+      return { outputPath: issue };
+  }
+}
+
+/**
  * Checks whether a URL points outside the generated static site.
  *
  * @param url URL or URL-like target from rendered HTML.
@@ -372,6 +642,7 @@ export async function runBuildVerificationCli(
   args = process.argv.slice(2),
   rootDir = process.cwd(),
 ): Promise<number> {
+  const json = args.includes("--json");
   const quiet = args.includes("--quiet");
   const paths = resolveSiteInstancePaths({ cwd: rootDir });
   const expectedRedirects = await configuredRedirects(rootDir);
@@ -384,6 +655,11 @@ export async function runBuildVerificationCli(
     expectedRedirects,
   });
   const report = formatBuildVerificationReport(result);
+
+  if (json) {
+    console.log(JSON.stringify(buildVerificationDiagnosticReport(result)));
+    return hasIssues(result.issues) ? 1 : 0;
+  }
 
   if (hasIssues(result.issues)) {
     console.error(report);

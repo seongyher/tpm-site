@@ -32,6 +32,10 @@ incidental TPM implementation details.
 - PDF and scholarly output
   Owns article PDF compatibility, PDF output metadata, and PDF generation
   inputs. Current modules: `article-pdf` and `article-pdf-compatibility`.
+- Output verification
+  Owns shared generated-output diagnostic types, verifier module contracts,
+  diagnostic aggregation, and machine-readable release-report shapes. Current
+  module: `output-verification`.
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:
