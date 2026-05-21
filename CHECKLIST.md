@@ -15,6 +15,42 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+### Milestone 226: IRK-101 Documentation Lifecycle Design
+
+- [x] Re-read the Milestone 4 documentation roadmap, source-contract docs, docs
+      site notes, and current author/developer docs to ground the lifecycle
+      design in existing repo contracts.
+- [x] Define the documentation audience model, document kinds, ownership rules,
+      update triggers, and generated-reference lifecycle for the platform.
+- [x] Verify the design does not overreach into downstream generated-reference,
+      docs-site IA, or drift-checker implementation issues.
+      Documented in `docs/DOCUMENTATION_LIFECYCLE.md`; the downstream boundary
+      section keeps `IRK-102`, `IRK-103`, and `IRK-104` out of this design.
+
+### Milestone 227: IRK-101 Documentation Inventory And Ownership Map
+
+- [x] Inventory the current documentation surfaces and classify them by
+      audience, document kind, source of truth, update trigger, and verification
+      owner.
+- [x] Identify planned generated references and record the schema, registry, or
+      manifest that must own each generated reference.
+- [x] Verify every existing and planned documentation family has a clear
+      ownership path without creating stale parallel truth.
+      `docs/DOCUMENTATION_LIFECYCLE.md` now records placement rules, the
+      current documentation map, a documentation ownership matrix, generated
+      reference owners, update triggers, and verification owners.
+
+### Milestone 228: IRK-101 Verification And Handoff
+
+- [x] Run focused documentation checks for the new lifecycle documentation.
+      Verified with `bun --silent run review:markdown` and `git diff --check`.
+- [x] Update this checklist with verified completion notes and record any
+      downstream implementation boundaries for `IRK-102`, `IRK-103`, and
+      `IRK-104`.
+      Downstream generated references, docs-site diagnostic links, and
+      documentation drift/link tooling remain intentionally scoped to those
+      later issues.
+
 ### Milestone 220: IRK-9-IRK-12 Source Contracts Closeout Design
 
 - [x] Re-read the current source-contract implementation against the Milestone
