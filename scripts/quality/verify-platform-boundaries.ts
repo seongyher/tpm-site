@@ -96,7 +96,11 @@ const libDomainFiles = {
     "article-pdf-compatibility.ts",
     "article-pdf.ts",
   ],
-  "output-verification": ["output-verification.ts", "performance-budgets.ts"],
+  "output-verification": [
+    "author-diagnostics.ts",
+    "output-verification.ts",
+    "performance-budgets.ts",
+  ],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",

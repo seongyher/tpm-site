@@ -7,6 +7,7 @@ import { describe, expect, test } from "bun:test";
 import {
   formatSiteDoctorIssues,
   runSiteDoctorCli,
+  siteDoctorAuthorDiagnostics,
   siteDoctorIssues,
 } from "../../../scripts/site/site-doctor";
 import { parseSiteConfig } from "../../../src/lib/site-config";
@@ -163,6 +164,63 @@ describe("site doctor", () => {
       repair:
         "Either enable the feature or remove this link from site/config/site.json.",
       severity: "error",
+    });
+  });
+
+  test("maps site-doctor issues into author-facing diagnostics", () => {
+    const config = parseSiteConfig({
+      ...validConfig,
+      features: {
+        tags: false,
+      },
+      navigation: {
+        footer: [{ href: "/tags/", label: "Tags" }],
+        primary: [],
+      },
+    });
+    const diagnostics = siteDoctorAuthorDiagnostics({
+      config,
+      exists: () => true,
+    });
+
+    expect(diagnostics).toContainEqual({
+      category: "config",
+      code: "config.disabled-feature-linked",
+      fixability: "source-edit",
+      relatedDocs: ["docs/SITE_ANATOMY.md"],
+      remediation:
+        "Either enable the feature or remove this link from site/config/site.json.",
+      repairOwner: "site-owner",
+      severity: "error",
+      source: "site-doctor",
+      summary:
+        'footer navigation link "Tags" points to disabled feature "tags".',
+    });
+  });
+
+  test("maps route-shape site-doctor issues into route diagnostics", () => {
+    const config = parseSiteConfig({
+      ...validConfig,
+      routes: {
+        ...validConfig.routes,
+        articles: "/articles",
+      },
+    });
+    const diagnostics = siteDoctorAuthorDiagnostics({
+      config,
+      exists: () => true,
+    });
+
+    expect(diagnostics).toContainEqual({
+      category: "routes",
+      code: "routes.configured-shape-invalid",
+      fixability: "source-edit",
+      relatedDocs: ["docs/SOURCE_CONTRACTS.md"],
+      remediation: "Set routes.articles to a path ending in /.",
+      repairOwner: "site-owner",
+      severity: "error",
+      source: "site-doctor",
+      summary: "Route articles should be trailing-slashed.",
     });
   });
 

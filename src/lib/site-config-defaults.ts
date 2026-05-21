@@ -65,6 +65,21 @@ export const defaultHomepageConfig = {
   startHereCollection: "start-here",
 } as const;
 
+/** Feature flags exposed by site-owner config. */
+export const siteFeatureKeys = [
+  "announcements",
+  "authors",
+  "bibliography",
+  "categories",
+  "collections",
+  "feed",
+  "pdf",
+  "search",
+  "support",
+  "tags",
+  "themeToggle",
+] as const;
+
 /** Default feature flags for site-owner config. */
 export const defaultFeatureConfig = {
   announcements: true,
@@ -78,7 +93,7 @@ export const defaultFeatureConfig = {
   support: true,
   tags: true,
   themeToggle: true,
-} as const;
+} as const satisfies Record<(typeof siteFeatureKeys)[number], boolean>;
 
 /** Default metadata controls for site-owner config. */
 export const defaultMetadataConfig = {

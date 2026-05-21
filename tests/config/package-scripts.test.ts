@@ -18,6 +18,8 @@ const expectedScriptEntrypoints = [
   ["build:raw", "scripts/build/build-raw.ts"],
   ["catalog:check", "scripts/quality/verify-component-catalog.ts"],
   ["coverage:verify", "scripts/testing/verify-test-coverage.ts"],
+  ["docs:references", "scripts/docs/generate-platform-references.ts"],
+  ["docs:references:check", "scripts/docs/generate-platform-references.ts"],
   [
     "payload:minify-html:experiment",
     "scripts/payload/minify-html-experiment.ts",
@@ -116,6 +118,7 @@ describe("package scripts", () => {
       "tags:check",
       "site:doctor",
       "site:schema:check",
+      "docs:references:check",
       "platform:check",
       "assets:locations",
       "assets:shared",

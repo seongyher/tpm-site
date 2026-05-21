@@ -12,6 +12,7 @@ Script sources are grouped by responsibility:
 - `scripts/assets/`: image and asset inventory checks.
 - `scripts/build/`: generated build output verification and optimization.
 - `scripts/content/`: content collection validation helpers.
+- `scripts/docs/`: generated platform reference documentation.
 - `scripts/payload/`: payload measurement and optimization experiments.
 - `scripts/quality/`: quality orchestration, catalog accountability, and
   platform boundary checks.
@@ -40,7 +41,7 @@ Script sources are grouped by responsibility:
 | `catalog:preview`                 | Serves a previously built catalog-enabled `dist-catalog/` output.                                                                                                                                                               |
 | `catalog:preview:fresh`           | Builds the isolated catalog output, then previews it.                                                                                                                                                                           |
 | `check`                           | Runs `check:fast`, then the normal blocking quality gate for PR work: typecheck, lint, formatting, dead-code checks, and unit tests.                                                                                            |
-| `check:fast`                      | Runs cheap high-signal invariants for early feedback: content, tags, site config, platform boundaries, asset locations, catalog accountability, package ordering, and config contract tests.                                    |
+| `check:fast`                      | Runs cheap high-signal invariants for early feedback: content, tags, site config, generated references, platform boundaries, asset locations, catalog accountability, package ordering, and config contract tests.              |
 | `check:release`                   | Runs release accountability, `check`, one production build, build verification, HTML validation, browser tests against that build, catalog tests, high-severity audit, and secrets scan.                                        |
 | `coverage`                        | Runs unit/script/component/page tests with LCOV output, then reports broad code-like source files missing LCOV coverage, mirrored tests, or approved exceptions.                                                                |
 | `coverage:check`                  | Runs the broad coverage review with concise test output. Review signal; not part of the normal blocking `check` gate.                                                                                                           |
@@ -50,6 +51,8 @@ Script sources are grouped by responsibility:
 | `diagnostics:diff`                | Compares two normalized diagnostic JSON snapshots by tool, code, severity, file/route, message, and count so risky QA scope changes can be reviewed beyond exit-code parity.                                                    |
 | `deploy:cloudflare`               | Deploys the current `dist/` directory to Cloudflare Workers Static Assets through Wrangler. Requires Cloudflare credentials in the calling environment.                                                                         |
 | `dev`                             | Starts the Astro development server.                                                                                                                                                                                            |
+| `docs:references`                 | Generates `docs/generated/platform-reference.md` from platform schemas, registries, source-artifact contracts, media policies, route definitions, and QA metadata.                                                              |
+| `docs:references:check`           | Fails when the generated platform reference is stale. Blocking source-contract drift gate.                                                                                                                                      |
 | `docs-site:build`                 | Builds the example documentation site into `dist/examples/docs-site` with the docs site instance config.                                                                                                                        |
 | `docs-site:dev`                   | Starts the Astro development server for the example documentation site.                                                                                                                                                         |
 | `docs-site:preview`               | Serves a previously built example documentation site from `dist/examples/docs-site`.                                                                                                                                            |

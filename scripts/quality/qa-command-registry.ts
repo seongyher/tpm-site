@@ -199,6 +199,24 @@ export const qaCommandGroups = [
     scripts: ["diagnostics:diff"],
   },
   {
+    ciUsage: "blocking",
+    class: "focused",
+    domain: "docs",
+    mutation: "none",
+    runtime: "fast",
+    scope: "Generated platform reference drift check.",
+    scripts: ["docs:references:check"],
+  },
+  {
+    ciUsage: "none",
+    class: "mutation",
+    domain: "docs",
+    mutation: "source",
+    runtime: "fast",
+    scope: "Generated platform reference updates.",
+    scripts: ["docs:references"],
+  },
+  {
     ciUsage: "deploy",
     class: "release",
     domain: "deploy",
@@ -652,6 +670,13 @@ export const qaDomainCoverageRegistry = [
     focusedScripts: ["diagnostics:diff"],
     purpose: "Structured diagnostic snapshot comparison.",
     releaseScripts: [],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "docs",
+    focusedScripts: ["docs:references:check"],
+    purpose: "Generated platform reference drift checks.",
+    releaseScripts: ["check:release"],
   },
   {
     ciJobs: ["deploy-cloudflare"],
