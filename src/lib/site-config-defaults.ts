@@ -1,3 +1,5 @@
+import { semanticProfileKinds } from "./semantic-profile-kinds";
+
 /** Route keys exposed by the site-owner configuration. */
 export const siteRouteKeys = [
   "allArticles",
@@ -78,12 +80,24 @@ export const defaultFeatureConfig = {
   themeToggle: true,
 } as const;
 
+/** Default metadata controls for site-owner config. */
+export const defaultMetadataConfig = {
+  semanticProfiles: {
+    enabled: semanticProfileKinds,
+  },
+} as const;
+
 /** Default publishable visibility controls for article-like content. */
 export const defaultPublishableVisibilityConfig = {
+  collections: true,
   directory: true,
+  external: true,
   feed: true,
   homepage: true,
+  pdf: true,
+  related: true,
   search: true,
+  sitemap: true,
 } as const;
 
 /** Default article and announcement frontmatter behavior. */

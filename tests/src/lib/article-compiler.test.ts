@@ -31,7 +31,7 @@ const config = parseSiteConfig({
         enabled: false,
       },
       visibility: {
-        directory: true,
+        ...defaultPublishableVisibility,
         feed: true,
         homepage: false,
         search: true,
@@ -111,10 +111,13 @@ describe("article compiler artifact", () => {
         format: "markdown",
       },
       surfaces: {
+        collections: true,
         directory: true,
+        external: true,
         feed: true,
         homepage: true,
         pdf: true,
+        related: true,
         search: true,
         sitemap: true,
       },
@@ -131,7 +134,7 @@ describe("article compiler artifact", () => {
     );
 
     expect(artifact.visibility).toEqual({
-      directory: true,
+      ...defaultPublishableVisibility,
       feed: true,
       homepage: false,
       search: true,
@@ -147,7 +150,7 @@ describe("article compiler artifact", () => {
       article({
         pdf: true,
         visibility: {
-          directory: true,
+          ...defaultPublishableVisibility,
           feed: true,
           homepage: true,
           search: false,
@@ -157,7 +160,7 @@ describe("article compiler artifact", () => {
     );
 
     expect(artifact.visibility).toEqual({
-      directory: true,
+      ...defaultPublishableVisibility,
       feed: true,
       homepage: true,
       search: false,

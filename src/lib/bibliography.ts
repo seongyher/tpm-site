@@ -5,6 +5,10 @@ import type {
   ParsedBibtexEntry,
 } from "./article-references/model";
 import {
+  citationSourceIdentityKey,
+  normalizedCitationSource,
+} from "./article-references/source";
+import {
   type ArticleEntry,
   articleUrl,
   entryTitle,
@@ -12,7 +16,7 @@ import {
 } from "./routes";
 
 /** Article plus normalized reference data ready for bibliography aggregation. */
-interface BibliographyArticleReferencesInput {
+export interface BibliographyArticleReferencesInput {
   article: ArticleEntry;
   references: ArticleReferenceData | undefined;
 }
@@ -104,66 +108,33 @@ export function bibliographyEntriesFromArticleReferences(
 }
 
 function bibliographySourceKey(entry: ParsedBibtexEntry): string {
-  const doi = normalizedField(entry, "doi");
-  const url = normalizedField(entry, "url");
-  const title = normalizedField(entry, "title");
-  const contributor =
-    normalizedField(entry, "author") ?? normalizedField(entry, "editor");
-  const year = normalizedYear(entry);
-
-  if (doi !== undefined) {
-    return `doi:${normalizeDoi(doi)}`;
-  }
-
-  if (url !== undefined) {
-    return `url:${normalizeUrl(url)}`;
-  }
-
-  if (title !== undefined && contributor !== undefined && year !== undefined) {
-    return [
-      "fingerprint",
-      entry.entryType,
-      normalizeFingerprintValue(contributor),
-      normalizeFingerprintValue(year),
-      normalizeFingerprintValue(title),
-    ].join(":");
-  }
-
-  return [
-    "exact",
-    entry.entryType,
-    entry.normalizedKey,
-    ...Object.entries(entry.fields)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, value]) => `${key}=${normalizeFingerprintValue(value)}`),
-  ].join("\n");
+  return citationSourceIdentityKey(entry);
 }
 
 function bibliographyDisplayFields(
   citation: ArticleCitation,
 ): BibliographyDisplayFields {
-  const { bibtex } = citation;
+  const source = normalizedCitationSource(citation.bibtex);
   const authors =
-    normalizedField(bibtex, "author") ?? normalizedField(bibtex, "editor");
-  const containerTitle = normalizedContainerTitle(bibtex);
-  const doi = normalizedField(bibtex, "doi");
-  const publisher = normalizedField(bibtex, "publisher");
-  const sourceUrl = normalizedField(bibtex, "url") ?? doiUrl(doi);
-  const title = normalizedField(bibtex, "title");
-  const year = normalizedYear(bibtex);
+    source.authors.length === 0
+      ? source.editors.join("; ")
+      : source.authors.join("; ");
+  const sourceUrl = source.url ?? doiUrl(source.doi);
 
   return {
-    ...(authors === undefined ? {} : { authors }),
-    ...(containerTitle === undefined ? {} : { containerTitle }),
-    ...(doi === undefined ? {} : { doi }),
+    ...(authors.length === 0 ? {} : { authors }),
+    ...(source.containerTitle === undefined
+      ? {}
+      : { containerTitle: source.containerTitle }),
+    ...(source.doi === undefined ? {} : { doi: source.doi }),
     fallbackText: citation.definition.children
       .map((block) => block.text)
       .join(" ")
       .trim(),
-    ...(publisher === undefined ? {} : { publisher }),
+    ...(source.publisher === undefined ? {} : { publisher: source.publisher }),
     ...(sourceUrl === undefined ? {} : { sourceUrl }),
-    ...(title === undefined ? {} : { title }),
-    ...(year === undefined ? {} : { year }),
+    ...(source.title === undefined ? {} : { title: source.title }),
+    ...(source.year === undefined ? {} : { year: source.year }),
   };
 }
 
@@ -269,50 +240,12 @@ function compareOptionalText(
   return left.localeCompare(right, "en", { numeric: true });
 }
 
-function normalizedContainerTitle(
-  entry: ParsedBibtexEntry,
-): string | undefined {
-  return (
-    normalizedField(entry, "journal") ??
-    normalizedField(entry, "journaltitle") ??
-    normalizedField(entry, "booktitle")
-  );
-}
-
-function normalizedYear(entry: ParsedBibtexEntry): string | undefined {
-  return (
-    normalizedField(entry, "year") ??
-    normalizedField(entry, "date")?.match(/\d{4}/u)?.at(0)
-  );
-}
-
-function normalizedField(
-  entry: ParsedBibtexEntry,
-  name: string,
-): string | undefined {
-  const value = Object.entries(entry.fields).find(([key]) => key === name)?.[1];
-  const normalized =
-    value === undefined
-      ? undefined
-      : value.replace(/[{}]/gu, "").replace(/\s+/gu, " ").trim();
-
-  return normalized === "" ? undefined : normalized;
-}
-
 function doiUrl(doi: string | undefined): string | undefined {
   return doi === undefined ? undefined : `https://doi.org/${normalizeDoi(doi)}`;
 }
 
 function normalizeDoi(value: string): string {
   return value.replace(/^https?:\/\/(?:dx\.)?doi\.org\//iu, "").toLowerCase();
-}
-
-function normalizeUrl(value: string): string {
-  return value.trim();
-}
-
-function normalizeFingerprintValue(value: string): string {
-  return value.trim().toLowerCase().replace(/[{}]/gu, "").replace(/\s+/gu, " ");
 }
 
 function stableSlug(value: string): string {

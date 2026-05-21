@@ -160,8 +160,10 @@ If tag formatting is the only problem, `bun run author:fix` can usually fix it.
 
 ## Visibility, Drafts, And Exceptions
 
-By default, articles and announcements are visible everywhere they should be:
-directories, homepage surfaces, RSS, and search.
+By default, articles and announcements are visible everywhere they normally
+should be: directories, homepage surfaces, collections, RSS, search, sitemap
+discovery, related-entry blocks, PDFs when supported, and future export/API
+surfaces.
 
 Use `draft: true` when something should not be published at all.
 
@@ -172,17 +174,27 @@ stay out of one or more automatic lists:
 visibility:
   homepage: false
   directory: false
+  collections: false
   search: false
   feed: false
+  sitemap: false
+  related: false
+  pdf: false
+  external: false
 ```
 
 What each option means:
 
-- `homepage`: automatic homepage slots and homepage collections.
+- `homepage`: automatic homepage slots and homepage curation.
 - `directory`: browsing pages such as archive, category, tag, author,
-  announcement, and collection pages.
-- `search`: the site search index.
+- `collections`: curated collection pages.
 - `feed`: the RSS feed.
+- `search`: the site search index.
+- `sitemap`: sitemap discovery for search engines.
+- `related`: Next Article, More in Category, and similar reading blocks.
+- `pdf`: generated PDF links and PDF-related discovery. This only applies to
+  articles.
+- `external`: future API, MCP, studio, and export manifests.
 
 You can set only the values you need. Omitted values use the defaults from
 `config/site.json`.
@@ -564,6 +576,7 @@ Common things a webmaster might change there:
 - homepage labels, discovery links, empty-state text, and list limits;
 - support links;
 - share-menu targets and social handles;
+- metadata settings such as which optional semantic profiles authors may use;
 - feature switches;
 - default visibility and PDF behavior.
 
@@ -575,6 +588,21 @@ Most omitted optional fields have safe defaults. For example, articles and
 announcements are visible in directories, search, RSS, and homepage surfaces by
 default unless their frontmatter or the site defaults say otherwise. PDFs are
 enabled by default for articles that can be rendered as PDFs.
+
+Site owners can disable advanced semantic profile kinds if they do not fit the
+publication:
+
+```json
+{
+  "metadata": {
+    "semanticProfiles": {
+      "enabled": ["review", "event", "book", "video"]
+    }
+  }
+}
+```
+
+Leave this setting out to allow every supported profile kind.
 
 After changing `site/config/site.json`, run:
 

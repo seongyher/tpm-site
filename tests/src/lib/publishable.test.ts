@@ -1,12 +1,9 @@
-import type { ImageMetadata } from "astro";
 import { describe, expect, test } from "bun:test";
 
-import type { ArticleArchiveItem } from "../../../src/lib/archive";
 import {
   defaultPublishableVisibility,
   normalizePublishableVisibility,
   publishableFromAnnouncement,
-  publishableFromArticleArchive,
   publishableIndex,
   publishableListItem,
   publishableListItems,
@@ -14,56 +11,80 @@ import {
   visiblePublishables,
 } from "../../../src/lib/publishable";
 import { announcementEntry, articleEntry } from "../../helpers/content";
+import {
+  announcementPublishableFixture,
+  articlePublishableFixture,
+  collectionOnlyVisibilityFixture,
+  publishableImage,
+  publishableImageMetadata,
+  publishableVisibilityFixture,
+} from "../../helpers/publishable";
 
 describe("publishable model", () => {
-  const image = {
-    format: "jpg",
-    height: 600,
-    src: "/preview.jpg",
-    width: 800,
-  } as const satisfies ImageMetadata;
-
   test("normalizes visibility with true defaults and explicit overrides", () => {
     expect(normalizePublishableVisibility(undefined)).toEqual(
       defaultPublishableVisibility,
     );
     expect(normalizePublishableVisibility({ homepage: false })).toEqual({
-      directory: true,
-      feed: true,
+      ...defaultPublishableVisibility,
       homepage: false,
-      search: true,
     });
     expect(
       normalizePublishableVisibility(
         { homepage: true },
         {
-          directory: true,
+          ...defaultPublishableVisibility,
           feed: false,
           homepage: false,
+          related: false,
           search: false,
         },
       ),
     ).toEqual({
-      directory: true,
+      ...defaultPublishableVisibility,
       feed: false,
       homepage: true,
+      related: false,
       search: false,
     });
   });
 
   test("derives article kind and list data from archive items", () => {
-    const publishable = publishableFromArticleArchive(
-      archiveItem("what-is-a-meme"),
-    );
+    const publishable = articlePublishableFixture({ id: "what-is-a-meme" });
 
     expect(publishable).toMatchObject({
       category: {
         href: "/categories/metamemetics/",
         title: "Metamemetics",
       },
+      display: {
+        category: {
+          href: "/categories/metamemetics/",
+          title: "Metamemetics",
+        },
+        title: "What Is A Meme?",
+      },
       href: "/articles/what-is-a-meme/",
       kind: "article",
+      metadata: {
+        canonicalPath: "/articles/what-is-a-meme/",
+        title: "What Is A Meme?",
+      },
+      route: {
+        canonicalPath: "/articles/what-is-a-meme/",
+        href: "/articles/what-is-a-meme/",
+      },
       slug: "what-is-a-meme",
+      source: {
+        collection: "articles",
+        draft: false,
+        format: "markdown",
+        id: "what-is-a-meme",
+        kind: "article",
+      },
+      taxonomy: {
+        tags: [],
+      },
       title: "What Is A Meme?",
     });
     expect(publishableListItem(publishable)).toMatchObject({
@@ -76,7 +97,7 @@ describe("publishable model", () => {
   test("derives announcement kind and image fallback data from announcement entries", () => {
     const announcement = announcementEntry({
       data: {
-        image,
+        image: publishableImageMetadata,
         title: "Join Discord",
       },
       id: "join-discord",
@@ -85,19 +106,39 @@ describe("publishable model", () => {
 
     expect(publishable).toMatchObject({
       author: "The Philosopher's Meme",
+      display: {
+        title: "Join Discord",
+      },
       href: "/announcements/join-discord/",
       image: {
         alt: "Join Discord",
-        src: image,
+        src: publishableImageMetadata,
       },
       kind: "announcement",
+      media: {
+        image: {
+          alt: "Join Discord",
+          src: publishableImageMetadata,
+        },
+      },
+      route: {
+        canonicalPath: "/announcements/join-discord/",
+        href: "/announcements/join-discord/",
+      },
       slug: "join-discord",
+      source: {
+        collection: "announcements",
+        draft: false,
+        format: "markdown",
+        id: "join-discord",
+        kind: "announcement",
+      },
       title: "Join Discord",
     });
   });
 
   test("builds a global index and rejects duplicate publishable slugs", () => {
-    const article = publishableFromArticleArchive(archiveItem("same-slug"));
+    const article = articlePublishableFixture({ id: "same-slug" });
     const announcement = publishableFromAnnouncement(
       announcementEntry({ id: "same-slug" }),
     );
@@ -109,15 +150,15 @@ describe("publishable model", () => {
   });
 
   test("filters visible publishables per surface", () => {
-    const hidden = publishableFromArticleArchive(
-      archiveItem("hidden", {
-        visibility: {
-          ...defaultPublishableVisibility,
+    const hidden = articlePublishableFixture({
+      data: {
+        visibility: publishableVisibilityFixture({
           homepage: false,
-        },
-      }),
-    );
-    const visible = publishableFromAnnouncement(announcementEntry());
+        }),
+      },
+      id: "hidden",
+    });
+    const visible = announcementPublishableFixture();
 
     expect(visiblePublishables([hidden, visible], "homepage")).toEqual([
       visible,
@@ -130,11 +171,45 @@ describe("publishable model", () => {
 
   test("maps multiple publishables to source-agnostic list items", () => {
     const items = publishableListItems([
-      publishableFromArticleArchive(archiveItem("article")),
-      publishableFromAnnouncement(announcementEntry({ id: "announcement" })),
+      articlePublishableFixture({ id: "article" }),
+      announcementPublishableFixture({ id: "announcement" }),
     ]);
 
     expect(items.map((item) => item.kind)).toEqual(["article", "announcement"]);
+  });
+
+  test("represents collection-only entries without leaking to other surfaces", () => {
+    const entry = articlePublishableFixture({
+      data: {
+        visibility: collectionOnlyVisibilityFixture(),
+      },
+      id: "collection-only",
+    });
+
+    expect(visiblePublishables([entry], "collections")).toEqual([entry]);
+    expect(visiblePublishables([entry], "directory")).toEqual([]);
+    expect(visiblePublishables([entry], "feed")).toEqual([]);
+    expect(visiblePublishables([entry], "search")).toEqual([]);
+    expect(visiblePublishables([entry], "sitemap")).toEqual([]);
+  });
+
+  test("preserves representative image facts across display, media, and metadata layers", () => {
+    const entry = articlePublishableFixture({
+      image: publishableImage,
+    });
+
+    expect(entry.display.image).toEqual(publishableImage);
+    expect(entry.media.image).toEqual(publishableImage);
+    expect(entry.metadata.image).toEqual(publishableImage);
+    expect(publishableListItem(entry).image).toEqual(publishableImage);
+  });
+
+  test("keeps extension expectations explicit for unsupported future kinds", () => {
+    const entry = articlePublishableFixture();
+
+    expect(entry.kind).toBe("article");
+    expect(entry.source.collection).toBe("articles");
+    expect(entry.source.kind).toBe(entry.kind);
   });
 
   test("returns source hrefs from folder-derived collection kind", () => {
@@ -146,23 +221,3 @@ describe("publishable model", () => {
     ).toBe("/announcements/announcement/");
   });
 });
-
-function archiveItem(
-  id: string,
-  data: Partial<ReturnType<typeof articleEntry>["data"]> = {},
-): ArticleArchiveItem {
-  return {
-    article: articleEntry({ data, id }),
-    author: "Author",
-    authors: [],
-    category: {
-      title: "Metamemetics",
-      url: "/categories/metamemetics/",
-    },
-    date: "November 30, 2021",
-    description: "Article description.",
-    image: undefined,
-    title: "What Is A Meme?",
-    url: `/articles/${id}/`,
-  };
-}

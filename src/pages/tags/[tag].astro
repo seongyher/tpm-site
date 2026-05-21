@@ -2,13 +2,10 @@
 import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { articleListItemsFromArchive } from "../../lib/article-list";
-import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getCategories, getTags } from "../../lib/content";
+import { tagDetailRouteViewModel } from "../../lib/listing-route-view-models";
 import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
-import { tagsIndexUrl } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 import { tagStaticPaths } from "../../lib/static-paths";
 
 /**
@@ -21,38 +18,33 @@ export async function getStaticPaths() {
 }
 
 const { tag } = Astro.props;
-const authors = await getAuthorEntries();
-const categories = await getCategories();
-const tagItems = articleListItemsFromArchive(
-  articleArchiveItems(tag.articles, categories, authors),
-);
-const description = `Articles tagged ${tag.label}.`;
+const model = tagDetailRouteViewModel({
+  authors: await getAuthorEntries(),
+  categories: await getCategories(),
+  tag,
+});
 ---
 
 <BaseLayout
-  title={titleWithSite(`${tag.label} | Tags`)}
-  description={description}
-  canonicalPath={tag.href}
-  kind="tag-detail"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
     breadcrumbListJsonLd(
-      tag.href,
-      [
-        { href: "/", title: "Home" },
-        { href: tagsIndexUrl(), title: "Tags" },
-        { href: tag.href, title: tag.label },
-      ],
+      model.document.canonicalPath,
+      model.breadcrumbs,
       Astro.site,
     ),
-    itemListJsonLd(tag.href, tagItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <ArchiveListBlock
-      eyebrow="Tag"
-      title={tag.label}
-      description={description}
-      items={tagItems}
+      eyebrow={model.eyebrow}
+      title={model.listTitle}
+      description={model.listDescription}
+      items={model.items}
     />
   </BrowsingBody>
 </BaseLayout>

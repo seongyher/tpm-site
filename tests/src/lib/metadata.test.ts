@@ -21,6 +21,7 @@ import {
   webPageJsonLd,
   websiteEntityId,
 } from "../../../src/lib/metadata";
+import { defaultPublishableVisibility } from "../../../src/lib/publishable";
 import { siteConfig } from "../../../src/lib/site-config";
 
 describe("metadata contract", () => {
@@ -122,7 +123,7 @@ describe("metadata contract", () => {
   test("maps article-like visibility to sitemap, feed, and content index policy", () => {
     expect(
       publishableDiscoveryPolicy({
-        directory: true,
+        ...defaultPublishableVisibility,
         feed: false,
         search: true,
       }),

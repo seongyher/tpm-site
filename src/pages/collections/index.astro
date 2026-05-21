@@ -3,39 +3,29 @@ import TermOverviewBlock from "../../components/blocks/TermOverviewBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getEditorialCollections } from "../../lib/content";
-import {
-  collectionsIndexUrl,
-  collectionUrl,
-  SITE_TITLE,
-} from "../../lib/routes";
+import { collectionsIndexRouteViewModel } from "../../lib/listing-route-view-models";
 import { itemListJsonLd } from "../../lib/metadata";
-import { titleWithSite } from "../../lib/site-config";
 
-const collectionItems = (await getEditorialCollections()).map((collection) => ({
-  count: collection.data.items.length,
-  description: collection.data.description,
-  href: collectionUrl(collection.id),
-  title: collection.data.title,
-}));
+const model = collectionsIndexRouteViewModel(await getEditorialCollections());
 ---
 
 <BaseLayout
-  title={titleWithSite("Collections")}
-  description={`Curated article and announcement collections from ${SITE_TITLE}.`}
-  canonicalPath={collectionsIndexUrl()}
-  kind="collection-index"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
-    itemListJsonLd(collectionsIndexUrl(), collectionItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <TermOverviewBlock
-      title="Collections"
-      description={`Curated paths through ${SITE_TITLE} articles and announcements.`}
-      items={collectionItems}
-      itemNoun="entry"
-      itemNounPlural="entries"
-      emptyLabel="No collections are available yet."
+      title={model.overviewTitle}
+      description={model.overviewDescription}
+      items={model.items}
+      itemNoun={model.itemNoun}
+      itemNounPlural={model.itemNounPlural}
+      emptyLabel={model.emptyLabel}
     />
   </BrowsingBody>
 </BaseLayout>

@@ -4,6 +4,7 @@ import {
   activeEditorialCollections,
   collectionDirectoryListItems,
   collectionItemReferences,
+  collectionListItems,
   editorialCollectionById,
   type EditorialCollectionEntry,
   resolvePublishableCollection,
@@ -117,11 +118,11 @@ describe("editorial collections", () => {
     );
   });
 
-  test("maps directory-visible collection entries into compact list items", () => {
-    const items = collectionDirectoryListItems(
+  test("maps collection-visible collection entries into compact list items", () => {
+    const items = collectionListItems(
       collectionEntry("start-here", {
         items: [
-          { note: "Use this note in the directory.", slug: "visible" },
+          { note: "Use this note in the collection.", slug: "visible" },
           "hidden",
         ],
       }),
@@ -130,7 +131,7 @@ describe("editorial collections", () => {
           "hidden",
           publishable("hidden", "article", {
             ...defaultPublishableVisibility,
-            directory: false,
+            collections: false,
           }),
         ],
         ["visible", publishable("visible")],
@@ -141,12 +142,18 @@ describe("editorial collections", () => {
       {
         author: "Author",
         date: "May 5, 2026",
-        description: "Use this note in the directory.",
+        description: "Use this note in the collection.",
         href: "/articles/visible/",
         kind: "article",
         title: "visible",
       },
     ]);
+    expect(
+      collectionDirectoryListItems(
+        collectionEntry("start-here", { items: ["visible"] }),
+        new Map([["visible", publishable("visible")]]),
+      ),
+    ).toHaveLength(1);
   });
 });
 
@@ -172,14 +179,43 @@ function publishable(
   kind: PublishableEntry["kind"] = "article",
   visibility: PublishableVisibility = defaultPublishableVisibility,
 ): PublishableEntry {
-  return {
+  const href = `/${kind}s/${slug}/`;
+  const display = {
     author: "Author",
     date: "May 5, 2026",
     description: "Description",
-    href: `/${kind}s/${slug}/`,
-    kind,
-    slug,
     title: slug,
+  };
+
+  return {
+    ...display,
+    display,
+    href,
+    kind,
+    media: {},
+    metadata: {
+      canonicalPath: href,
+      date: new Date("2026-05-05T00:00:00.000Z"),
+      description: "Description",
+      semantic: undefined,
+      title: slug,
+    },
+    route: {
+      canonicalPath: href,
+      href,
+      legacyPaths: [],
+    },
+    slug,
+    source: {
+      collection: kind === "article" ? "articles" : "announcements",
+      draft: false,
+      format: "markdown",
+      id: slug,
+      kind,
+    },
+    taxonomy: {
+      tags: [],
+    },
     visibility,
   };
 }

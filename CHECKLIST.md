@@ -111,6 +111,344 @@ they are useful context. Explicitly deferred work belongs in
 - [x] Update all completed Milestone 1 Linear issues to `In Review` after local
       verification passes.
 
+### Milestone 226: Milestone 2 Execution Plan And Shared Contract Review
+
+- [x] Translate Linear Milestone 2 into checklist milestones for publishable
+      entries, route view models, generated-output verifiers, metadata,
+      citations, media/PDF policy, and release verification.
+- [x] Re-read the Milestone 2 source docs and current implementations for
+      shared vocabulary, cross-domain dependencies, and blocker risks.
+- [x] Verify the checklist sequence is dependency-safe before implementation
+      begins.
+
+### Milestone 227: IRK-57 Publishable Entry Model Design
+
+- [x] Define the layered publishable-entry contract across source facts, route
+      facts, display facts, discovery/visibility surfaces, taxonomy, media,
+      ordering, metadata, and diagnostics.
+- [x] Confirm the design covers articles and announcements now while leaving
+      clean extension points for pages, reviews, events, books, media, datasets,
+      and future platform users.
+- [x] Verify the design is implementation-ready and does not duplicate route,
+      metadata, media, or verifier ownership.
+
+### Milestone 228: IRK-57 Publishable Entry Model Implementation
+
+- [x] Expand `src/lib/publishable.ts` and direct consumers around the layered
+      publishable-entry contract without changing public reader-facing output.
+- [x] Add or update focused unit tests for publishable conversion, indexing,
+      display list items, source facts, route facts, taxonomy facts, and media
+      facts.
+- [x] Update publishable-entry docs before marking the milestone complete.
+
+### Milestone 229: IRK-58 Publishable Visibility Matrix
+
+- [x] Implement explicit visibility surfaces and defaults for homepage,
+      directory, collections, feeds, search, sitemap, related content, PDFs, and
+      future external/API manifests where applicable.
+- [x] Add schema and diagnostic coverage for invalid or unsupported visibility
+      states while preserving permissive defaults.
+- [x] Verify all publishable filtering uses the shared visibility matrix.
+
+### Milestone 230: IRK-59 Publishable Consumer Migration
+
+- [x] Migrate lists, feeds, search, homepage discovery, collections, related
+      content, and archive-style surfaces to consume normalized publishable view
+      models where practical.
+- [x] Remove duplicated article/announcement shaping logic that now belongs in
+      publishable helpers.
+- [x] Verify behavior with focused publishable, feed, search, collection, home,
+      archive, and route tests.
+
+### Milestone 231: IRK-60 Publishable Fixtures And Documentation
+
+- [x] Add representative publishable fixtures for articles, announcements,
+      hidden entries, collection-only entries, image fallbacks, and future-kind
+      extension expectations where useful.
+- [x] Document author-facing visibility defaults and developer-facing
+      publishable ownership boundaries.
+- [x] Run focused publishable checks and mark the publishable model complete.
+
+### Milestone 232: IRK-61 Route View-Model Contract Design
+
+- [x] Inventory current routes and classify their source inputs, route params,
+      sorting/filtering, metadata inputs, empty states, navigation, and component
+      prop responsibilities.
+- [x] Define the route view-model contract so route files orchestrate and typed
+      helpers prepare display-ready data.
+- [x] Verify the design composes with publishable entries, route registry,
+      article compiler artifacts, metadata, and verifier diagnostics.
+
+### Milestone 233: IRK-62 Core Listing And Taxonomy View Models
+
+- [x] Implement typed view models for listing, archive, categories, tags,
+      authors, collections, announcements, search, and related taxonomy-style
+      routes where applicable.
+- [x] Move route-level shaping out of pages and into pure helpers without
+      changing visible layout or URL behavior.
+- [x] Add focused view-model and page tests for sorting, filtering, empty
+      states, feature flags, metadata inputs, and component props.
+
+### Milestone 234: IRK-63 Article, Page, Bibliography, And Homepage View Models
+
+- [x] Bring article, Markdown page, bibliography, and homepage route composition
+      into the shared route view-model pattern.
+- [x] Ensure complex routes consume compiler artifacts, publishable models,
+      metadata helpers, media facts, and support/navigation config through clear
+      seams.
+- [x] Verify route output and component props with focused tests.
+
+### Milestone 235: IRK-64 Route Snapshot And Consumer Coverage
+
+- [x] Add route view-model fixtures or snapshots that lock public route behavior
+      without making tests brittle.
+- [x] Add component-consumer tests proving route view models pass stable,
+      explicit props into blocks/layouts.
+- [x] Update route view-model docs and verify the route-model migration is
+      complete.
+
+### Milestone 236: IRK-66 Route-Family Verifier Modules
+
+- [x] Design the route-family verifier split around focused modules,
+      diagnostic ownership, and legacy report compatibility.
+- [x] Split route, link, redirect, feed, and sitemap checks into focused
+      verifier modules using the shared output diagnostic API.
+- [x] Preserve existing release-check behavior and human/JSON output while
+      moving logic out of the monolithic verifier.
+- [x] Add golden diagnostics for missing routes, broken links, redirect fallback
+      errors, feed errors, sitemap policy mistakes, and canonical route
+      mistakes.
+- [x] Verify focused verifier tests and the build verifier gate.
+
+### Milestone 237: IRK-67 Public-Output Verifier Modules
+
+- [x] Design the public-output split around common HTML inspection helpers,
+      focused diagnostic modules, and legacy report compatibility.
+- [x] Split HTML, metadata/social/JSON-LD, PDF, asset/client-script, and
+      content-leak checks into focused verifier modules using shared
+      diagnostics.
+- [x] Identify existing cache, search, and security coverage; add focused
+      modules only where the current release gate has real checks to preserve.
+- [x] Reuse route registry, artifact manifest, article compiler artifacts,
+      metadata facts, and media facts instead of duplicating source rules.
+- [x] Add focused diagnostics for existing semantic HTML,
+      metadata/social/JSON-LD, PDF, asset, search-output leak, and catalog
+      checks; keep cache/security categories documented until concrete
+      generated-output contracts land.
+- [x] Verify focused public-output tests and the build verifier gate.
+
+### Milestone 238: IRK-68 Verifier Compatibility And Release Fixtures
+
+- [x] Add golden diagnostic fixtures and compatibility wrappers that prove the
+      modular verifier is equivalent to or stronger than the previous release
+      gate.
+- [x] Update generated-output verifier docs with module ownership and extension
+      guidance.
+- [x] Run focused verifier checks and relevant release checks before closing the
+      verifier split.
+
+### Milestone 239: IRK-69 Metadata Graph And Semantic Profile Design
+
+- [x] Define metadata graph nodes for site, organization, pages, articles,
+      announcements, authors, categories, tags, collections, bibliography
+      entries, media, citations, and generated artifacts.
+- [x] Define semantic profile contracts for article, scholarly, review, book,
+      media, event, dataset, software, FAQ, organization/site, breadcrumb,
+      list/search/archive, and future extension profiles.
+- [x] Verify the design separates automatic defaults from optional author/site
+      metadata and avoids untruthful or over-specific structured data.
+
+### Milestone 240: IRK-70 Metadata Graph Generation
+
+- [x] Generate head tags, canonical URLs, robots policy, OG/Twitter data,
+      JSON-LD, Scholar metadata, feed/search metadata, and route metadata from
+      the normalized metadata graph.
+- [x] Preserve current public metadata output unless an improvement is explicit
+      and covered by tests.
+- [x] Add focused metadata snapshot and pure helper tests.
+
+### Milestone 241: IRK-71 Advanced Semantic Profile Config
+
+- [x] Add safe frontmatter and site-config support for advanced semantic
+      profiles such as reviews, books, media, events, datasets, software, and
+      FAQ-like content.
+- [x] Validate advanced fields at schema boundaries and keep author-facing
+      defaults simple.
+- [x] Document the author and developer interface for semantic profiles.
+
+### Milestone 242: IRK-72 Metadata Verification And Machine-Readability Checks
+
+- [x] Add generated-output checks for route metadata completeness, JSON-LD
+      validity, stable entity IDs, robots/discovery alignment, social previews,
+      Scholar tags, feeds, and search records.
+- [x] Add fixtures covering normal, hidden, semantic-profile, and feature-flagged
+      metadata cases.
+- [x] Verify metadata remains static-first and does not add runtime JavaScript.
+
+### Milestone 243: IRK-73 Citation Source Model Design
+
+- [x] Define a normalized citation source model covering BibTeX/RIS/CSL-like
+      data, web/video/book/article fields, identifiers, locators, access dates,
+      archive URLs, notes, backlinks, and duplicate identity.
+- [x] Define citation diagnostics for malformed syntax, missing fields,
+      unsupported types, ambiguous author intent, duplicate sources, and broken
+      URLs.
+- [x] Verify the design aligns with article-reference authoring docs,
+      bibliography output, PDFs, metadata, and hover previews.
+
+### Milestone 244: IRK-74 Citation Export And Duplicate Detection
+
+- [x] Improve BibTeX, RIS, and CSL-style export around the normalized citation
+      source model.
+- [x] Improve sitewide bibliography duplicate detection without merging
+      ambiguous sources silently.
+- [x] Add focused tests for export formatting, identifiers, duplicate clusters,
+      and legacy transitional fields.
+      Implemented `src/lib/article-references/source.ts` as the normalized
+      source/export layer and updated bibliography grouping to use explicit
+      exact/strong/weak identity confidence. Verified with
+      `bun test tests/src/lib/article-references/source.test.ts tests/src/lib/bibliography.test.ts`,
+      `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet src/lib/article-references/source.ts src/lib/bibliography.ts tests/src/lib/article-references/source.test.ts tests/src/lib/bibliography.test.ts scripts/quality/verify-platform-boundaries.ts`,
+      `bunx prettier --check src/lib/article-references/source.ts src/lib/bibliography.ts tests/src/lib/article-references/source.test.ts tests/src/lib/bibliography.test.ts docs/CITATION_SOURCE_MODEL.md docs/PLATFORM_MODULES.md CHECKLIST.md scripts/quality/verify-platform-boundaries.ts --log-level warn`,
+      and
+      `bunx markdownlint-cli2 docs/CITATION_SOURCE_MODEL.md docs/PLATFORM_MODULES.md CHECKLIST.md`.
+
+### Milestone 245: IRK-75 Citation Diagnostics And Audit Fixtures
+
+- [x] Add malformed-input fixtures for broken BibTeX, missing contributor/date,
+      unsupported source types, duplicate keys, ambiguous locators, and legacy
+      migration uncertainty.
+- [x] Surface citation diagnostics through the shared verifier or content-audit
+      path as appropriate.
+- [x] Verify diagnostics are actionable without forcing false certainty.
+      Added structured citation audit diagnostics to
+      `scripts/content/audit-bibtex-citations.ts`, including blocking parser,
+      missing-entry, and duplicate-key diagnostics plus review-only flags for
+      transitional and uncertain source data. Regenerated
+      `docs/CITATION_BIBTEX_AUDIT.md`. Verified with
+      `bun test tests/scripts/content/audit-bibtex-citations.test.ts`,
+      `bun --silent run lint -- --quiet scripts/content/audit-bibtex-citations.ts tests/scripts/content/audit-bibtex-citations.test.ts`,
+      `bun --silent run typecheck`,
+      `bunx prettier --check scripts/content/audit-bibtex-citations.ts tests/scripts/content/audit-bibtex-citations.test.ts docs/CITATION_BIBTEX_AUDIT.md CHECKLIST.md --log-level warn`,
+      `bunx markdownlint-cli2 docs/CITATION_BIBTEX_AUDIT.md CHECKLIST.md`,
+      and `bun run references:bibtex:audit -- --write --quiet`.
+
+### Milestone 246: IRK-76 Citation Cross-Output Verification
+
+- [x] Verify bibliography, article references, citation/footnote previews,
+      backlinks, PDFs, metadata, and export surfaces all consume the normalized
+      citation model.
+- [x] Add cross-output tests for citation-heavy pages and pages without
+      citations.
+- [x] Update citation docs and run focused reference checks.
+      Updated `docs/CITATION_SOURCE_MODEL.md` with current normalized-source
+      consumer ownership, moved bibliography and Scholar/PDF citation reference
+      rendering onto normalized source fields, and added cross-output coverage.
+      Verified with
+      `bun test tests/src/lib/citation-cross-output.test.ts tests/src/lib/bibliography.test.ts tests/src/lib/article-pdf.test.ts`,
+      `bun --silent run test:astro -- 'tests/src/pages/articles/[...slug].vitest.ts'`,
+      `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet src/lib/bibliography.ts src/lib/article-pdf.ts tests/src/lib/citation-cross-output.test.ts 'tests/src/pages/articles/[...slug].vitest.ts'`,
+      `bunx prettier --check docs/CITATION_SOURCE_MODEL.md CHECKLIST.md src/lib/bibliography.ts src/lib/article-pdf.ts tests/src/lib/citation-cross-output.test.ts 'tests/src/pages/articles/[...slug].vitest.ts' --log-level warn`,
+      and `bunx markdownlint-cli2 docs/CITATION_SOURCE_MODEL.md CHECKLIST.md`.
+
+### Milestone 247: IRK-77 Media Policy And Provider Adapter Design
+
+- [x] Define media policy records for article images, inline images, hover
+      images, list thumbnails, social images, PDF images, embeds, fallbacks,
+      downloads, and generated artifacts.
+- [x] Define provider adapter shapes for YouTube, SoundCloud, hover images, PDF
+      fallbacks, no-JS fallbacks, search/feed fallbacks, and future providers.
+- [x] Verify media policy ownership is compatible with metadata, PDFs, image
+      optimization, generated-output verifiers, and author-facing docs.
+      Added `docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md` and linked it from
+      `docs/PLATFORM_MODULES.md`. The design defines media roles, surfaces,
+      source records, policy records, provider adapter shape, initial adapters,
+      diagnostics, ownership boundaries, implementation sequence, and
+      verification requirements. Verified with
+      `bunx prettier --check docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/PLATFORM_MODULES.md CHECKLIST.md --log-level warn`
+      and
+      `bunx markdownlint-cli2 docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/PLATFORM_MODULES.md CHECKLIST.md`.
+
+### Milestone 248: IRK-78 Media Policy Implementation
+
+- [x] Implement image, social-preview, PDF, embed, search, feed, and fallback
+      policy selection through shared media policy helpers.
+- [x] Migrate existing media/embed components and generated outputs to consume
+      policy results where practical.
+- [x] Add focused media policy tests for alt/caption, dimensions, formats,
+      optimization path, provider fallbacks, no-JS fallback, and PDF eligibility.
+      Added `src/lib/media-policy.ts` as the shared media policy vocabulary and
+      migrated article image policy, social preview transforms, embed
+      classification/layout, publishable media fallbacks, and MDX PDF fallback
+      compatibility through it. Updated platform module ownership and media
+      policy docs. Verified with
+      `bun test tests/scripts/quality/verify-platform-boundaries.test.ts tests/src/lib/media-policy.test.ts tests/src/lib/article-image-policy.test.ts tests/src/lib/embed-media.test.ts tests/src/lib/social-images.test.ts tests/src/lib/article-pdf-compatibility.test.ts`,
+      `bun --silent run test:astro -- tests/src/components/articles/PublishableMediaFrame.vitest.ts tests/src/components/media/EmbedFrame.vitest.ts tests/src/components/media/ResponsiveIframe.vitest.ts tests/src/components/media/SoundCloudEmbed.vitest.ts tests/src/components/media/YouTubeEmbed.vitest.ts`,
+      `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet src/lib/media-policy.ts src/lib/article-image-policy.ts src/lib/embed-media.ts src/lib/social-images.ts src/lib/article-pdf-compatibility.ts src/components/articles/PublishableMediaFrame.astro tests/src/lib/media-policy.test.ts tests/src/lib/article-image-policy.test.ts tests/src/lib/embed-media.test.ts tests/src/lib/social-images.test.ts tests/src/lib/article-pdf-compatibility.test.ts scripts/quality/verify-platform-boundaries.ts`,
+      `bunx prettier --check src/lib/media-policy.ts src/lib/article-image-policy.ts src/lib/embed-media.ts src/lib/social-images.ts src/lib/article-pdf-compatibility.ts src/components/articles/PublishableMediaFrame.astro tests/src/lib/media-policy.test.ts tests/src/lib/article-image-policy.test.ts tests/src/lib/embed-media.test.ts tests/src/lib/social-images.test.ts tests/src/lib/article-pdf-compatibility.test.ts docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/PLATFORM_MODULES.md CHECKLIST.md scripts/quality/verify-platform-boundaries.ts --log-level warn`,
+      and
+      `bunx markdownlint-cli2 docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/PLATFORM_MODULES.md CHECKLIST.md`.
+
+### Milestone 249: IRK-79 PDF Eligibility And Media Diagnostics
+
+- [x] Add explicit PDF eligibility and image-size diagnostics from media policy
+      records and generated artifacts.
+- [x] Enforce or report sensible PDF/media budgets without degrading article
+      output or forcing authors into technical decisions.
+- [x] Verify diagnostics cover missing images, oversized outputs, unsupported
+      embeds, missing fallbacks, and social/PDF media mismatches.
+      Added media-policy PDF diagnostics for unloaded printable images,
+      unoptimized printable image sources, unsupported MDX component PDF
+      fallbacks, missing embed fallbacks, and oversized generated PDF artifacts.
+      PDF generation and generated-output verification now consume those
+      diagnostics while preserving existing human-readable issue text. Updated
+      media and verifier docs. Verified with
+      `bun test tests/src/lib/media-policy.test.ts tests/scripts/build/generate-article-pdfs.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/build-verifier.test.ts`,
+      `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet src/lib/media-policy.ts scripts/build/generate-article-pdfs.ts scripts/build/verify-build.ts scripts/build/verify-build/pdf-verifier.ts tests/src/lib/media-policy.test.ts tests/scripts/build/generate-article-pdfs.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/build-verifier.test.ts`,
+      `bunx prettier --check src/lib/media-policy.ts scripts/build/generate-article-pdfs.ts scripts/build/verify-build.ts scripts/build/verify-build/pdf-verifier.ts tests/src/lib/media-policy.test.ts tests/scripts/build/generate-article-pdfs.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/build-verifier.test.ts docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md CHECKLIST.md --log-level warn`,
+      and
+      `bunx markdownlint-cli2 docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md CHECKLIST.md`.
+
+### Milestone 250: IRK-80 Media Output Verification
+
+- [x] Verify article images, hover images, embeds, social images, PDFs, search,
+      feeds, and asset outputs across representative routes.
+- [x] Add browser, PDF, asset-audit, and generated-output checks that protect
+      accessible optimized media output.
+- [x] Update media/PDF docs and run focused media checks.
+      Added scoped generated-output checks for article, hover, and publishable
+      media images, embed fallback output, and immutable generated-asset cache
+      headers. Updated the media policy and generated-output verifier docs,
+      explicit media data contracts, verifier tests, and golden diagnostics.
+      Verified with
+      `bun test tests/scripts/build/build-verifier.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/verify-build.test.ts`,
+      `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet scripts/build/verify-build.ts scripts/build/verify-build/html-verifier.ts scripts/build/verify-build/asset-verifier.ts tests/scripts/build/build-verifier.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/verify-build.test.ts src/components/articles/HoverImageCard.astro src/components/articles/PublishableMediaFrame.astro`,
+      `bunx prettier --check scripts/build/verify-build.ts scripts/build/verify-build/html-verifier.ts scripts/build/verify-build/asset-verifier.ts tests/scripts/build/build-verifier.test.ts tests/scripts/build/public-output-verifiers.test.ts tests/scripts/build/verify-build.test.ts tests/fixtures/build-verifier/golden-diagnostic-report.json src/components/articles/HoverImageCard.astro src/components/articles/PublishableMediaFrame.astro docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md CHECKLIST.md --log-level warn`,
+      and
+      `bunx markdownlint-cli2 docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md CHECKLIST.md`.
+
+### Milestone 251: Milestone 2 Release Verification And Linear Handoff
+
+- [x] Run focused tests for publishables, route view models, verifier modules,
+      metadata, citations, media/PDF policy, and affected pages/components.
+- [x] Run full release checks and fix any regressions.
+- [x] Update docs, checklist notes, and Milestone 2 Linear statuses after local
+      verification passes.
+      Verified Milestone 2 with focused output-engine, citation, metadata,
+      media/PDF, route view-model, feed, and verifier tests; added missing
+      mirrored tests for build-verifier modules and semantic profile kinds so
+      accountability checks cover the new source files. Fixed release-gate
+      formatting and dead-code findings by formatting drifted files and
+      narrowing internal type/helper exports. Final verification passed with
+      `bun --silent run test:accountability:release`,
+      `bun --silent run typecheck`, `bun --silent run deadcode`, and
+      `bun --silent run check:release`.
+
 ### Milestone 179: Engineering Philosophy Synthesis
 
 - [x] Synthesize the repo's long-term code-health philosophy across platform

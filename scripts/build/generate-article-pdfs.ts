@@ -9,6 +9,10 @@ import {
   articlePdfHref,
   articlePdfOutputPath,
 } from "../../src/lib/article-pdf";
+import {
+  articlePdfFileSizeMediaDiagnostics,
+  articlePdfRenderMediaDiagnostics,
+} from "../../src/lib/media-policy";
 import { siteConfig } from "../../src/lib/site-config";
 import {
   projectRelativePath,
@@ -287,7 +291,11 @@ export async function validateGeneratedArticlePdf(
 
   if (data.byteLength > maxPdfBytes) {
     issues.push(
-      `${target.relativeOutputPath}: generated PDF is ${data.byteLength} bytes, above the ${maxPdfBytes} byte limit`,
+      ...articlePdfFileSizeMediaDiagnostics({
+        byteLength: data.byteLength,
+        maxBytes: maxPdfBytes,
+        relativeOutputPath: target.relativeOutputPath,
+      }).map((diagnostic) => diagnostic.message),
     );
   }
 
@@ -316,21 +324,11 @@ export function articlePdfRenderStatsIssues(
   target: ArticlePdfTarget,
   stats: ArticlePdfRenderStats,
 ): string[] {
-  const issues: string[] = [];
-
-  if (stats.unloadedArticleImages.length > 0) {
-    issues.push(
-      `${target.relativeOutputPath}: article images failed to load before PDF rendering: ${stats.unloadedArticleImages.join(", ")}`,
-    );
-  }
-
-  if (stats.unoptimizedArticleImageSources.length > 0) {
-    issues.push(
-      `${target.relativeOutputPath}: article images bypassed Astro optimization: ${stats.unoptimizedArticleImageSources.join(", ")}`,
-    );
-  }
-
-  return issues;
+  return articlePdfRenderMediaDiagnostics({
+    relativeOutputPath: target.relativeOutputPath,
+    unloadedArticleImages: stats.unloadedArticleImages,
+    unoptimizedArticleImageSources: stats.unoptimizedArticleImageSources,
+  }).map((diagnostic) => diagnostic.message);
 }
 
 /**

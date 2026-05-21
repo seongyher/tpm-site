@@ -2,13 +2,10 @@
 import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { articleListItemsFromArchive } from "../../lib/article-list";
-import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getCategories } from "../../lib/content";
+import { categoryDetailRouteViewModel } from "../../lib/listing-route-view-models";
 import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
-import { categoriesIndexUrl, categoryUrl } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 import { categoryStaticPaths } from "../../lib/static-paths";
 
 /**
@@ -21,38 +18,32 @@ export async function getStaticPaths() {
 }
 
 const { category } = Astro.props;
-const authors = await getAuthorEntries();
-const categoryItems = articleListItemsFromArchive(
-  articleArchiveItems(category.articles, [category], authors),
-);
+const model = categoryDetailRouteViewModel({
+  authors: await getAuthorEntries(),
+  category,
+});
 ---
 
 <BaseLayout
-  title={titleWithSite(category.title)}
-  description={category.description ??
-    `Articles filed under ${category.title}.`}
-  canonicalPath={categoryUrl(category.slug)}
-  kind="category-detail"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
     breadcrumbListJsonLd(
-      categoryUrl(category.slug),
-      [
-        { href: "/", title: "Home" },
-        { href: categoriesIndexUrl(), title: "Categories" },
-        { href: categoryUrl(category.slug), title: category.title },
-      ],
+      model.document.canonicalPath,
+      model.breadcrumbs,
       Astro.site,
     ),
-    itemListJsonLd(categoryUrl(category.slug), categoryItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <ArchiveListBlock
-      eyebrow="Category"
-      title={category.title}
-      description={category.description ??
-        `Articles filed under ${category.title}.`}
-      items={categoryItems}
+      eyebrow={model.eyebrow}
+      title={model.listTitle}
+      description={model.listDescription}
+      items={model.items}
     />
   </BrowsingBody>
 </BaseLayout>

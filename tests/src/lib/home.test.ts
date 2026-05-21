@@ -337,8 +337,12 @@ describe("homepage view model", () => {
 
     const viewModel = homePageRouteViewModel({
       announcements: [announcementEntry({ id: "news" })],
-      archiveItems: [archiveItem("latest"), archiveItem("starter")],
-      categoryItems: [],
+      articles: [
+        articleEntry({ id: "latest" }),
+        articleEntry({ id: "starter" }),
+      ],
+      authors: [],
+      categories: [],
       collections: [
         collectionEntry("front-page", { items: ["latest"] }),
         collectionEntry("starter-pack", { items: ["starter"] }),
@@ -418,8 +422,9 @@ describe("homepage view model", () => {
     expect(() =>
       homePageRouteViewModel({
         announcements: [],
-        archiveItems: [],
-        categoryItems: [],
+        articles: [],
+        authors: [],
+        categories: [],
         collections: [
           collectionEntry("featured", { items: [] }),
           collectionEntry("start-here", { items: [] }),

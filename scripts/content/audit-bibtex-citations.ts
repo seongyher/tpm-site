@@ -17,6 +17,7 @@ export interface BibtexCitationAuditOptions {
 /** Complete BibTeX citation audit result. */
 export interface BibtexCitationAudit {
   articles: readonly BibtexCitationAuditArticle[];
+  diagnostics: readonly BibtexCitationDiagnostic[];
   duplicateClusters: readonly BibtexDuplicateCluster[];
   generatedDate: string;
   inventory: readonly BibtexCitationInventoryEntry[];
@@ -90,12 +91,46 @@ export interface BibtexDuplicateClusterEntry {
   title: string;
 }
 
+/** Machine-readable citation audit finding for tools, CI, and future UI. */
+export interface BibtexCitationDiagnostic {
+  article: string;
+  code: BibtexCitationDiagnosticCode;
+  evidence?: string | undefined;
+  key?: string | undefined;
+  line: number;
+  message: string;
+  severity: BibtexCitationDiagnosticSeverity;
+}
+
+/** Stable diagnostic code emitted by the BibTeX citation audit. */
+export type BibtexCitationDiagnosticCode =
+  | "ambiguous-locator"
+  | "citation-field-transitional"
+  | "citation-only-entry"
+  | "duplicate-bibtex-key"
+  | "duplicate-candidate"
+  | "generic-misc-type"
+  | "malformed-bibtex"
+  | "missing-bibtex-entry"
+  | "missing-contributor"
+  | "missing-date"
+  | "missing-source-title"
+  | "missing-structured-identifier"
+  | "missing-url-field"
+  | "needs-external-verification"
+  | "possible-entry-type-upgrade"
+  | "unsupported-entry-type";
+
+/** Severity for citation audit diagnostics. */
+export type BibtexCitationDiagnosticSeverity = "error" | "review";
+
 /** Aggregate coverage and quality counts. */
 export interface BibtexCitationAuditTotals {
   articlesScanned: number;
   articlesWithBibtex: number;
   articlesWithCitationMarkers: number;
   bibtexBlocks: number;
+  diagnostics: number;
   duplicateClusters: number;
   duplicateKeysWithinArticles: number;
   inventoryEntries: number;
@@ -110,6 +145,7 @@ export interface BibtexCitationAuditTotals {
 
 /** Review flags assigned to entries that need cleanup or verification. */
 export type BibtexCitationReviewFlag =
+  | "ambiguous-locator"
   | "citation-field-transitional"
   | "citation-only-entry"
   | "duplicate-candidate"
@@ -120,7 +156,8 @@ export type BibtexCitationReviewFlag =
   | "missing-structured-identifier"
   | "missing-url-field"
   | "needs-external-verification"
-  | "possible-entry-type-upgrade";
+  | "possible-entry-type-upgrade"
+  | "unsupported-entry-type";
 
 interface BibtexBlock {
   line: number;
@@ -136,8 +173,10 @@ const defaultOutputPath = "docs/CITATION_BIBTEX_AUDIT.md";
 const reviewFlagOrder: readonly BibtexCitationReviewFlag[] = [
   "citation-only-entry",
   "citation-field-transitional",
+  "unsupported-entry-type",
   "possible-entry-type-upgrade",
   "generic-misc-type",
+  "ambiguous-locator",
   "missing-contributor",
   "missing-source-title",
   "missing-date",
@@ -146,6 +185,34 @@ const reviewFlagOrder: readonly BibtexCitationReviewFlag[] = [
   "duplicate-candidate",
   "needs-external-verification",
 ];
+const supportedEntryTypes = new Set([
+  "article",
+  "book",
+  "booklet",
+  "conference",
+  "dataset",
+  "inbook",
+  "incollection",
+  "inproceedings",
+  "manual",
+  "mastersthesis",
+  "misc",
+  "online",
+  "phdthesis",
+  "proceedings",
+  "software",
+  "techreport",
+  "unpublished",
+  "www",
+]);
+const sourceLevelLocatorFields = new Set([
+  "locator",
+  "page",
+  "pinpoint",
+  "quote",
+  "section",
+  "timestamp",
+]);
 
 /**
  * Runs the BibTeX citation audit command-line workflow.
@@ -248,14 +315,20 @@ export async function auditBibtexCitations({
         : entry,
     ),
   }));
+  const diagnostics = citationAuditDiagnostics(articlesWithDuplicateFlags);
 
   return {
     articles: articlesWithDuplicateFlags,
+    diagnostics,
     duplicateClusters,
     generatedDate,
     inventory: inventoryWithDuplicateFlags,
     missingEntries,
-    totals: auditTotals(articlesWithDuplicateFlags, duplicateClusters),
+    totals: auditTotals(
+      articlesWithDuplicateFlags,
+      duplicateClusters,
+      diagnostics,
+    ),
   };
 }
 
@@ -308,6 +381,10 @@ export function formatBibtexCitationAudit(audit: BibtexCitationAudit): string {
     "## High-Level Findings",
     "",
     ...formatFindingRows(audit),
+    "",
+    "## Citation Diagnostics",
+    "",
+    ...formatDiagnosticRows(audit.diagnostics),
     "",
     "## Required Cleanup Strategy",
     "",
@@ -502,6 +579,14 @@ function entryFlags(
     flags.add("citation-field-transitional");
   }
 
+  if (!supportedEntryTypes.has(entry.entryType)) {
+    flags.add("unsupported-entry-type");
+  }
+
+  if (hasSourceLevelLocator(entry)) {
+    flags.add("ambiguous-locator");
+  }
+
   if (
     hasCitation &&
     fields.size <= 2 &&
@@ -539,6 +624,12 @@ function entryFlags(
   }
 
   return reviewFlagOrder.filter((flag) => flags.has(flag));
+}
+
+function hasSourceLevelLocator(entry: ParsedBibtexEntry): boolean {
+  return Object.keys(entry.fields).some((name) =>
+    sourceLevelLocatorFields.has(name),
+  );
 }
 
 function hasContributor(entry: ParsedBibtexEntry): boolean {
@@ -649,12 +740,84 @@ function clustersBy(
   })).filter((cluster) => cluster.entries.length > 1);
 }
 
+function citationAuditDiagnostics(
+  articles: readonly BibtexCitationAuditArticle[],
+): readonly BibtexCitationDiagnostic[] {
+  return articles
+    .flatMap((article) => [
+      ...article.bibtexBlocks.flatMap((block) =>
+        block.diagnostics.map((message) =>
+          citationDiagnostic({
+            article: article.file,
+            code: "malformed-bibtex",
+            line: block.line,
+            message,
+            severity: "error",
+          }),
+        ),
+      ),
+      ...article.duplicateKeys.map((key) =>
+        citationDiagnostic({
+          article: article.file,
+          code: "duplicate-bibtex-key",
+          key,
+          line: article.entries.find((entry) => entry.key.toLowerCase() === key)
+            ?.line,
+          message: `Duplicate BibTeX key "${key}". Keep one source record for this key in the article.`,
+          severity: "error",
+        }),
+      ),
+      ...article.missingEntries.map((entry) =>
+        citationDiagnostic({
+          article: article.file,
+          code: "missing-bibtex-entry",
+          evidence: `Referenced ${entry.markerCount} time(s) on lines ${entry.lines.join(", ")}.`,
+          key: entry.key,
+          line: entry.lines.at(0),
+          message: `Citation marker "cite-${entry.key}" has no matching BibTeX entry.`,
+          severity: "error",
+        }),
+      ),
+      ...article.entries.flatMap((entry) =>
+        entry.flags.map((flag) =>
+          citationDiagnostic({
+            article: article.file,
+            code: flag,
+            evidence: entry.reviewText,
+            key: entry.key,
+            line: entry.line,
+            message: reviewFlagMessage(entry, flag),
+            severity: "review",
+          }),
+        ),
+      ),
+    ])
+    .sort(compareCitationDiagnostics);
+}
+
+function compareCitationDiagnostics(
+  left: BibtexCitationDiagnostic,
+  right: BibtexCitationDiagnostic,
+): number {
+  const articleOrder = left.article.localeCompare(right.article);
+
+  if (articleOrder !== 0) {
+    return articleOrder;
+  }
+
+  const lineOrder = compareNumber(left.line, right.line);
+
+  return lineOrder === 0 ? left.code.localeCompare(right.code) : lineOrder;
+}
+
 function auditTotals(
   articles: readonly BibtexCitationAuditArticle[],
   duplicateClusters: readonly BibtexDuplicateCluster[],
+  diagnostics: readonly BibtexCitationDiagnostic[],
 ): BibtexCitationAuditTotals {
   const inventory = articles.flatMap((article) => article.entries);
   const reviewFlagCounts: Record<BibtexCitationReviewFlag, number> = {
+    "ambiguous-locator": countFlag(inventory, "ambiguous-locator"),
     "citation-field-transitional": countFlag(
       inventory,
       "citation-field-transitional",
@@ -678,6 +841,7 @@ function auditTotals(
       inventory,
       "possible-entry-type-upgrade",
     ),
+    "unsupported-entry-type": countFlag(inventory, "unsupported-entry-type"),
   };
 
   return {
@@ -689,6 +853,7 @@ function auditTotals(
       (article) => article.citationMarkers.length > 0,
     ).length,
     bibtexBlocks: sum(articles, (article) => article.bibtexBlocks.length),
+    diagnostics: diagnostics.length,
     duplicateClusters: duplicateClusters.length,
     duplicateKeysWithinArticles: sum(
       articles,
@@ -806,6 +971,7 @@ function formatCoverageRows(totals: BibtexCitationAuditTotals): string[] {
     `- Bibliography-only BibTeX entries: ${totals.unusedEntries}`,
     `- Missing BibTeX entries for inline markers: ${totals.missingEntries}`,
     `- Parser diagnostics: ${totals.parseDiagnostics}`,
+    `- Citation audit diagnostics: ${totals.diagnostics}`,
     `- Duplicate candidate clusters: ${totals.duplicateClusters}`,
   ];
 }
@@ -814,12 +980,44 @@ function formatFindingRows(audit: BibtexCitationAudit): string[] {
   return [
     `- ${audit.totals.reviewFlagCounts["citation-field-transitional"]} entries still use the transitional \`citation\` field.`,
     `- ${audit.totals.reviewFlagCounts["citation-only-entry"]} entries are effectively literal citation strings rather than structured BibTeX.`,
+    `- ${audit.totals.reviewFlagCounts["unsupported-entry-type"]} entries use unsupported source types.`,
     `- ${audit.totals.reviewFlagCounts["generic-misc-type"]} entries are \`@misc\`; many probably need a more specific type after verification.`,
+    `- ${audit.totals.reviewFlagCounts["ambiguous-locator"]} entries appear to attach usage-specific locator data to source records.`,
     `- ${audit.totals.reviewFlagCounts["missing-contributor"]} entries lack a structured contributor field such as \`author\`, \`editor\`, or \`organization\`.`,
     `- ${audit.totals.reviewFlagCounts["missing-date"]} entries lack a structured date field.`,
     `- ${audit.totals.reviewFlagCounts["missing-structured-identifier"]} entries lack a structured identifier such as \`url\`, \`doi\`, \`isbn\`, or \`issn\`.`,
     `- ${audit.totals.duplicateClusters} probable duplicate clusters need manual comparison before sitewide bibliography aggregation can be trusted.`,
     `- ${audit.totals.missingEntries} inline citation keys have no matching BibTeX entry.`,
+  ];
+}
+
+function formatDiagnosticRows(
+  diagnostics: readonly BibtexCitationDiagnostic[],
+): string[] {
+  if (diagnostics.length === 0) {
+    return ["No citation audit diagnostics were emitted."];
+  }
+
+  const counts = Array.from(
+    countBy(diagnostics, (diagnostic) => diagnostic.code),
+  )
+    .sort((left, right) => left[0].localeCompare(right[0]))
+    .map(([code, count]) => `- ${inlineCode(code)}: ${count}`);
+  const errorCount = diagnostics.filter(
+    (diagnostic) => diagnostic.severity === "error",
+  ).length;
+  const reviewCount = diagnostics.length - errorCount;
+
+  return [
+    `- Error diagnostics: ${errorCount}`,
+    `- Review diagnostics: ${reviewCount}`,
+    "",
+    ...counts,
+    "",
+    "Detailed diagnostics are available from",
+    "`bun run references:bibtex:audit -- --json`; the inventory table below",
+    "keeps per-entry review flags beside the source records authors need to",
+    "repair.",
   ];
 }
 
@@ -926,6 +1124,28 @@ function addFlag(
   };
 }
 
+function citationDiagnostic({
+  article,
+  code,
+  evidence,
+  key,
+  line,
+  message,
+  severity,
+}: Omit<BibtexCitationDiagnostic, "line"> & {
+  line?: number | undefined;
+}): BibtexCitationDiagnostic {
+  return {
+    article,
+    code,
+    evidence,
+    key,
+    line: line ?? 1,
+    message,
+    severity,
+  };
+}
+
 function countBy<T>(
   values: readonly T[],
   keyFor: (value: T) => string,
@@ -945,6 +1165,10 @@ function countFlag(
   flag: BibtexCitationReviewFlag,
 ): number {
   return inventory.filter((entry) => entry.flags.includes(flag)).length;
+}
+
+function compareNumber(left: number, right: number): number {
+  return left === right ? 0 : left - right;
 }
 
 function duplicateValues(values: readonly string[]): readonly string[] {
@@ -1123,6 +1347,40 @@ function reviewText(entry: ParsedBibtexEntry): string {
     field(entry, "url") ??
     entry.key
   );
+}
+
+function reviewFlagMessage(
+  entry: BibtexCitationInventoryEntry,
+  flag: BibtexCitationReviewFlag,
+): string {
+  switch (flag) {
+    case "ambiguous-locator":
+      return `BibTeX entry "${entry.key}" has source-level locator metadata. Keep source facts on the source and preserve usage-specific page, section, quote, or timestamp details in prose until locator metadata exists.`;
+    case "citation-field-transitional":
+      return `BibTeX entry "${entry.key}" still uses the transitional citation field. Rewrite the source as structured BibTeX fields after canonical verification.`;
+    case "citation-only-entry":
+      return `BibTeX entry "${entry.key}" is effectively a literal citation string. Replace it with structured fields before treating it as clean source data.`;
+    case "duplicate-candidate":
+      return `BibTeX entry "${entry.key}" looks similar to another source. Merge only after manually confirming both entries cite the same source.`;
+    case "generic-misc-type":
+      return `BibTeX entry "${entry.key}" uses @misc. Choose a more specific type when the source shape is known.`;
+    case "missing-contributor":
+      return `BibTeX entry "${entry.key}" lacks a structured contributor field such as author, editor, organization, institution, school, or publisher.`;
+    case "missing-date":
+      return `BibTeX entry "${entry.key}" lacks a structured date field such as year, date, or urldate.`;
+    case "missing-source-title":
+      return `BibTeX entry "${entry.key}" lacks a structured title field.`;
+    case "missing-structured-identifier":
+      return `BibTeX entry "${entry.key}" lacks a structured identifier such as doi, isbn, issn, url, pmid, eprint, or archiveurl.`;
+    case "missing-url-field":
+      return `BibTeX entry "${entry.key}" contains a URL in citation prose but lacks a structured url field.`;
+    case "needs-external-verification":
+      return `BibTeX entry "${entry.key}" still needs manual verification against the canonical source.`;
+    case "possible-entry-type-upgrade":
+      return `BibTeX entry "${entry.key}" may be better represented as @${entry.suggestedType ?? "a more specific type"}.`;
+    case "unsupported-entry-type":
+      return `BibTeX entry "${entry.key}" uses unsupported type @${entry.entryType}. Map it to a supported BibTeX/BibLaTeX type before relying on generated outputs.`;
+  }
 }
 
 function sum<T>(values: readonly T[], valueFor: (value: T) => number): number {

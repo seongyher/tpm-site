@@ -1,16 +1,11 @@
-import { authorDisplayNameForArticle } from "./authors";
-import { normalizePublishableVisibility } from "./publishable";
+import { articleArchiveItems } from "./archive";
 import {
-  type AnnouncementEntry,
-  announcementUrl,
-  type ArticleEntry,
-  articleUrl,
-  type AuthorEntry,
-  entryDate,
-  entryTitle,
-  excerpt,
-} from "./routes";
-import { siteConfig } from "./site-config";
+  type PublishableEntry,
+  publishableFromAnnouncement,
+  publishableFromArticleArchive,
+  visiblePublishables,
+} from "./publishable";
+import type { AnnouncementEntry, ArticleEntry, AuthorEntry } from "./routes";
 
 /** Feed item source normalized from any publishable content collection. */
 export interface PublishableFeedEntry {
@@ -37,10 +32,46 @@ interface PublishableFeedEntriesInput {
 export function publishableFeedEntries(
   input: PublishableFeedEntriesInput,
 ): PublishableFeedEntry[] {
-  return [
-    ...articleFeedEntries(input.articles, input.authors),
-    ...announcementFeedEntries(input.announcements),
-  ].sort(sortFeedEntriesNewestFirst);
+  const articles = articleArchiveItems(input.articles, [], input.authors).map(
+    publishableFromArticleArchive,
+  );
+  const announcements = input.announcements.map(publishableFromAnnouncement);
+
+  return publishableFeedEntriesFromPublishables([
+    ...articles,
+    ...announcements,
+  ]);
+}
+
+/**
+ * Builds newest-first RSS source entries from normalized publishables.
+ *
+ * @param entries Publishable entries from any source collection.
+ * @returns Feed entries visible on the feed surface.
+ */
+function publishableFeedEntriesFromPublishables(
+  entries: readonly PublishableEntry[],
+): PublishableFeedEntry[] {
+  return visiblePublishables(entries, "feed")
+    .map(publishableFeedEntry)
+    .sort(sortFeedEntriesNewestFirst);
+}
+
+/**
+ * Converts one normalized publishable entry into RSS source facts.
+ *
+ * @param entry Feed-visible publishable entry.
+ * @returns Feed item source data.
+ */
+function publishableFeedEntry(entry: PublishableEntry): PublishableFeedEntry {
+  return {
+    author: entry.display.author,
+    description: entry.display.description,
+    href: entry.route.href,
+    kind: entry.kind,
+    pubDate: entry.metadata.date,
+    title: entry.display.title,
+  };
 }
 
 /**
@@ -54,18 +85,11 @@ export function articleFeedEntries(
   articles: readonly ArticleEntry[],
   authors: readonly AuthorEntry[],
 ): PublishableFeedEntry[] {
-  return articles.filter(articleVisibleInFeed).map((article) => {
-    const title = entryTitle(article);
-
-    return {
-      author: authorDisplayNameForArticle(article, authors),
-      description: excerpt(article),
-      href: articleUrl(article.id),
-      kind: "article",
-      pubDate: entryDate(article),
-      title,
-    };
-  });
+  return publishableFeedEntriesFromPublishables(
+    articleArchiveItems(articles, [], authors).map(
+      publishableFromArticleArchive,
+    ),
+  );
 }
 
 /**
@@ -77,32 +101,9 @@ export function articleFeedEntries(
 export function announcementFeedEntries(
   announcements: readonly AnnouncementEntry[],
 ): PublishableFeedEntry[] {
-  return announcements.filter(announcementVisibleInFeed).map((announcement) => {
-    const title = announcement.data.title;
-
-    return {
-      author: announcement.data.author,
-      description: announcement.data.description,
-      href: announcementUrl(announcement.id),
-      kind: "announcement",
-      pubDate: announcement.data.date,
-      title,
-    };
-  });
-}
-
-function articleVisibleInFeed(article: ArticleEntry): boolean {
-  return normalizePublishableVisibility(
-    article.data.visibility,
-    siteConfig.contentDefaults.articles.visibility,
-  ).feed;
-}
-
-function announcementVisibleInFeed(announcement: AnnouncementEntry): boolean {
-  return normalizePublishableVisibility(
-    announcement.data.visibility,
-    siteConfig.contentDefaults.announcements.visibility,
-  ).feed;
+  return publishableFeedEntriesFromPublishables(
+    announcements.map(publishableFromAnnouncement),
+  );
 }
 
 function sortFeedEntriesNewestFirst(

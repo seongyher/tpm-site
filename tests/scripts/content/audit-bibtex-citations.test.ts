@@ -131,6 +131,82 @@ describe("BibTeX citation audit", () => {
       );
     }));
 
+  test("surfaces malformed and review-only citation diagnostics", async () =>
+    withTempRoot(async (root) => {
+      await writeText(
+        root,
+        "site/content/articles/culture/problematic.md",
+        [
+          "---",
+          "title: Problematic",
+          "---",
+          "",
+          "Problem.[^cite-missing] Legacy.[^cite-legacy] Literal.[^cite-literal] Weird.[^cite-weird]",
+          "",
+          "```tpm-bibtex",
+          "@article{legacy,",
+          "  citation = {Legacy citation prose with https://example.com/legacy},",
+          "  title = {Legacy Source},",
+          "  locator = {p. 42}",
+          "}",
+          "",
+          "@misc{literal,",
+          "  citation = {Literal-only citation prose.}",
+          "}",
+          "",
+          "@podcast{weird,",
+          "  title = {Unsupported Source Shape}",
+          "}",
+          "",
+          "@book{dupe, title = {First}, year = {2020}}",
+          "@book{dupe, title = {Second}, year = {2021}}",
+          "```",
+          "",
+          "```tpm-bibtex",
+          "@article{broken title = {Broken}}",
+          "```",
+          "",
+        ].join("\n"),
+      );
+
+      const audit = await auditBibtexCitations({
+        articleDir: path.join(root, "site/content/articles"),
+        generatedDate: "May 17, 2026",
+        rootDir: root,
+      });
+      const diagnosticCodes = audit.diagnostics.map(
+        (diagnostic) => diagnostic.code,
+      );
+      const report = formatBibtexCitationAudit(audit);
+
+      expect(diagnosticCodes).toContain("malformed-bibtex");
+      expect(diagnosticCodes).toContain("missing-bibtex-entry");
+      expect(diagnosticCodes).toContain("duplicate-bibtex-key");
+      expect(diagnosticCodes).toContain("missing-contributor");
+      expect(diagnosticCodes).toContain("missing-date");
+      expect(diagnosticCodes).toContain("unsupported-entry-type");
+      expect(diagnosticCodes).toContain("ambiguous-locator");
+      expect(diagnosticCodes).toContain("citation-field-transitional");
+      expect(diagnosticCodes).toContain("citation-only-entry");
+      expect(
+        audit.diagnostics.some(
+          (diagnostic) =>
+            diagnostic.code === "missing-bibtex-entry" &&
+            diagnostic.severity === "error",
+        ),
+      ).toBeTrue();
+      expect(
+        audit.diagnostics.some(
+          (diagnostic) =>
+            diagnostic.code === "ambiguous-locator" &&
+            diagnostic.severity === "review",
+        ),
+      ).toBeTrue();
+      expect(audit.totals.diagnostics).toBe(audit.diagnostics.length);
+      expect(report).toContain("## Citation Diagnostics");
+      expect(report).toContain("`ambiguous-locator`");
+    }));
+
   test("writes the Markdown report through the CLI", async () =>
     withTempRoot(async (root) => {
       await writeText(

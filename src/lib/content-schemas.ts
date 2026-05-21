@@ -1,22 +1,33 @@
 import type { ImageMetadata } from "astro";
 import { z } from "astro/zod";
 
-import { semanticMetadataSchema } from "./semantic-metadata";
+import { semanticMetadataSchemaFor } from "./semantic-metadata";
+import type { SemanticProfileKind } from "./semantic-profile-kinds";
 import { tagDiagnostics } from "./tags";
 
 const publishableVisibilityDefaults = {
+  collections: true,
   directory: true,
+  external: true,
   feed: true,
   homepage: true,
+  pdf: true,
+  related: true,
   search: true,
+  sitemap: true,
 } as const;
 
 /** Content visibility defaults supplied by the platform or site config. */
 interface PublishableVisibilityDefaults {
+  collections: boolean;
   directory: boolean;
+  external: boolean;
   feed: boolean;
   homepage: boolean;
+  pdf: boolean;
+  related: boolean;
   search: boolean;
+  sitemap: boolean;
 }
 
 /** Content-type defaults supplied by the platform or site config. */
@@ -24,6 +35,13 @@ interface PublishableContentDefaults {
   draft: boolean;
   pdf?: undefined | { enabled: boolean };
   visibility: PublishableVisibilityDefaults;
+}
+
+/** Site-owner metadata defaults that influence publishable frontmatter. */
+interface PublishableMetadataDefaults {
+  semanticProfiles: {
+    enabled: readonly SemanticProfileKind[];
+  };
 }
 
 /** Local image schema factory supplied by Astro content collections. */
@@ -37,13 +55,15 @@ interface ImageSchemaContext {
  * @param context Astro image schema context.
  * @param context.image Astro local-image schema helper.
  * @param defaults Site-owned article defaults.
+ * @param metadata Site-owned metadata defaults.
  * @returns Strict article frontmatter schema.
  */
 export function articleSchema(
   context: ImageSchemaContext,
   defaults?: PublishableContentDefaults,
+  metadata?: PublishableMetadataDefaults,
 ): ReturnType<typeof createArticleSchema> {
-  return createArticleSchema(context, { defaults, includePdf: true });
+  return createArticleSchema(context, { defaults, includePdf: true, metadata });
 }
 
 /**
@@ -52,13 +72,19 @@ export function articleSchema(
  * @param context Astro image schema context.
  * @param context.image Astro local-image schema helper.
  * @param defaults Site-owned announcement defaults.
+ * @param metadata Site-owned metadata defaults.
  * @returns Strict announcement frontmatter schema.
  */
 export function announcementSchema(
   context: ImageSchemaContext,
   defaults?: PublishableContentDefaults,
+  metadata?: PublishableMetadataDefaults,
 ): ReturnType<typeof createArticleSchema> {
-  return createArticleSchema(context, { defaults, includePdf: false });
+  return createArticleSchema(context, {
+    defaults,
+    includePdf: false,
+    metadata,
+  });
 }
 
 /**
@@ -134,7 +160,12 @@ function createArticleSchema(
       visibility: publishableVisibilityDefaults,
     },
     includePdf,
-  }: { defaults: PublishableContentDefaults | undefined; includePdf: boolean },
+    metadata,
+  }: {
+    defaults: PublishableContentDefaults | undefined;
+    includePdf: boolean;
+    metadata?: PublishableMetadataDefaults | undefined;
+  },
 ) {
   const publishableSchemaFields = {
     author: z.string().min(1),
@@ -145,7 +176,7 @@ function createArticleSchema(
     imageAlt: z.string().optional(),
     legacyBanner: z.string().optional(),
     legacyPermalink: z.string().optional(),
-    semantic: semanticMetadataSchema,
+    semantic: semanticMetadataSchemaFor(metadata?.semanticProfiles.enabled),
     tags: tagListSchema(),
     title: z.string().min(1),
     updated: z.coerce.date().optional(),
@@ -214,10 +245,15 @@ function createPublishableVisibilitySchema(
 ) {
   return z
     .object({
+      collections: z.boolean().default(defaults.collections),
       directory: z.boolean().default(defaults.directory),
+      external: z.boolean().default(defaults.external),
       feed: z.boolean().default(defaults.feed),
       homepage: z.boolean().default(defaults.homepage),
+      pdf: z.boolean().default(defaults.pdf),
+      related: z.boolean().default(defaults.related),
       search: z.boolean().default(defaults.search),
+      sitemap: z.boolean().default(defaults.sitemap),
     })
     .strict()
     .default(defaults);

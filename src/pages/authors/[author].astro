@@ -4,17 +4,14 @@ import { render } from "astro:content";
 import AuthorPage from "../../components/authors/AuthorPage.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { articleListItemsFromArchive } from "../../lib/article-list";
-import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries, getAuthorProfiles } from "../../lib/authors";
 import { getCategories } from "../../lib/content";
+import { authorDetailRouteViewModel } from "../../lib/listing-route-view-models";
 import {
   breadcrumbListJsonLd,
   itemListJsonLd,
   profileEntityJsonLd,
 } from "../../lib/metadata";
-import { authorsIndexUrl, SITE_TITLE } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 
 /**
  * Generates one static author route for each public author profile.
@@ -32,52 +29,33 @@ export async function getStaticPaths() {
 
 const { profile } = Astro.props;
 const { Content } = await render(profile.entry);
-const authors = await getAuthorEntries();
-const articleItems = articleListItemsFromArchive(
-  articleArchiveItems(profile.articles, await getCategories(), authors),
-);
-const hasProfileBody = (profile.entry.body ?? "").trim().length > 0;
-const description =
-  profile.shortBio ??
-  `Articles by ${profile.displayName} in ${SITE_TITLE} archive.`;
+const model = authorDetailRouteViewModel({
+  authors: await getAuthorEntries(),
+  categories: await getCategories(),
+  profile,
+});
 ---
 
 <BaseLayout
-  title={titleWithSite(profile.displayName)}
-  description={description}
-  canonicalPath={profile.href}
-  kind="author-profile"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
     breadcrumbListJsonLd(
-      profile.href,
-      [
-        { href: "/", title: "Home" },
-        { href: authorsIndexUrl(), title: "Authors" },
-        { href: profile.href, title: profile.displayName },
-      ],
+      model.document.canonicalPath,
+      model.breadcrumbs,
       Astro.site,
     ),
-    profileEntityJsonLd(
-      {
-        description: profile.shortBio,
-        href: profile.href,
-        name: profile.displayName,
-        sameAs: [
-          ...(profile.website === undefined ? [] : [profile.website]),
-          ...profile.socials.map((social) => social.href),
-        ],
-        type: profile.type,
-      },
-      Astro.site,
-    ),
-    itemListJsonLd(profile.href, articleItems, Astro.site),
+    profileEntityJsonLd(model.profileEntity, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <AuthorPage
-      profile={profile}
-      items={articleItems}
-      hasProfileBody={hasProfileBody}
+      profile={model.profile}
+      items={model.items}
+      hasProfileBody={model.hasProfileBody}
     >
       <Content />
     </AuthorPage>

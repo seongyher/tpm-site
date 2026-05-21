@@ -2,15 +2,16 @@
 import SearchResultsBlock from "../components/blocks/SearchResultsBlock.astro";
 import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { searchUrl, SITE_TITLE } from "../lib/routes";
-import { titleWithSite } from "../lib/site-config";
+import { searchRouteViewModel } from "../lib/listing-route-view-models";
+
+const model = searchRouteViewModel();
 ---
 
 <BaseLayout
-  title={titleWithSite("Search")}
-  description={`Search ${SITE_TITLE} archive.`}
-  canonicalPath={searchUrl()}
-  kind="search"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
 >
   <BrowsingBody>
     <SearchResultsBlock />

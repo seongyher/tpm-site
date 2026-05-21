@@ -2,30 +2,27 @@
 import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { announcementDirectoryListItems } from "../../lib/announcements";
 import { getAnnouncements } from "../../lib/content";
+import { announcementsIndexRouteViewModel } from "../../lib/listing-route-view-models";
 import { itemListJsonLd } from "../../lib/metadata";
-import { announcementsIndexUrl, SITE_TITLE } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 
-const announcements = await getAnnouncements();
-const announcementItems = announcementDirectoryListItems(announcements);
+const model = announcementsIndexRouteViewModel(await getAnnouncements());
 ---
 
 <BaseLayout
-  title={titleWithSite("Announcements")}
-  description={`Updates from ${SITE_TITLE}.`}
-  canonicalPath={announcementsIndexUrl()}
-  kind="announcements-index"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
-    itemListJsonLd(announcementsIndexUrl(), announcementItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <ArchiveListBlock
-      title="Announcements"
-      description={`Updates from ${SITE_TITLE}.`}
-      items={announcementItems}
+      title={model.listTitle}
+      description={model.listDescription}
+      items={model.items}
     />
   </BrowsingBody>
 </BaseLayout>

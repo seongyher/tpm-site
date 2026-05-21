@@ -13,6 +13,17 @@ import {
 } from "../../../src/lib/content-schemas";
 
 describe("content schemas", () => {
+  const allVisible = {
+    collections: true,
+    directory: true,
+    external: true,
+    feed: true,
+    homepage: true,
+    pdf: true,
+    related: true,
+    search: true,
+    sitemap: true,
+  } as const;
   const imageSchema = () =>
     z.object({
       format: z.enum([
@@ -195,22 +206,58 @@ describe("content schemas", () => {
     ).toBe(false);
   });
 
+  test("rejects semantic profiles disabled by site config", () => {
+    const schema = articleSchema(
+      {
+        image: imageSchema,
+      },
+      undefined,
+      {
+        semanticProfiles: {
+          enabled: ["event"],
+        },
+      },
+    );
+
+    expect(
+      schema.safeParse({
+        author: "Author",
+        date: "2022-04-06",
+        description: "Description",
+        semantic: {
+          item: {
+            name: "Example Book",
+            type: "book",
+          },
+          kind: "review",
+        },
+        title: "Article Title",
+      }).success,
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        author: "Author",
+        date: "2022-04-06",
+        description: "Description",
+        semantic: {
+          kind: "event",
+          name: "Example Event",
+          startDate: "2026-06-01",
+        },
+        title: "Article Title",
+      }).success,
+    ).toBe(true);
+  });
+
   test("defaults publishable visibility to every public surface", () => {
-    expect(publishableVisibilitySchema().parse(undefined)).toEqual({
-      directory: true,
-      feed: true,
-      homepage: true,
-      search: true,
-    });
+    expect(publishableVisibilitySchema().parse(undefined)).toEqual(allVisible);
     expect(
       publishableVisibilitySchema().parse({
         homepage: false,
       }),
     ).toEqual({
-      directory: true,
-      feed: true,
+      ...allVisible,
       homepage: false,
-      search: true,
     });
     expect(
       articleSchema({ image: imageSchema }).parse({
@@ -223,10 +270,8 @@ describe("content schemas", () => {
         },
       }).visibility,
     ).toEqual({
-      directory: true,
-      feed: true,
+      ...allVisible,
       homepage: false,
-      search: true,
     });
   });
 
@@ -235,18 +280,15 @@ describe("content schemas", () => {
       draft: true,
       pdf: { enabled: false },
       visibility: {
-        directory: true,
+        ...allVisible,
         feed: false,
         homepage: false,
-        search: true,
       },
     };
     const announcementDefaults = {
       draft: false,
       visibility: {
-        directory: true,
-        feed: true,
-        homepage: true,
+        ...allVisible,
         search: false,
       },
     };
@@ -265,10 +307,9 @@ describe("content schemas", () => {
       draft: true,
       pdf: false,
       visibility: {
-        directory: true,
+        ...allVisible,
         feed: false,
         homepage: true,
-        search: true,
       },
     });
     expect(
@@ -280,9 +321,7 @@ describe("content schemas", () => {
         title: "Announcement Title",
       }).visibility,
     ).toEqual({
-      directory: true,
-      feed: true,
-      homepage: true,
+      ...allVisible,
       search: false,
     });
   });

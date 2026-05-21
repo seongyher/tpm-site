@@ -1,15 +1,7 @@
 ---
 import type { SocialPreviewImage } from "../../lib/social-images";
-import { absoluteUrl, safeJsonLd } from "../../lib/seo";
-import { feedUrl, SITE_TITLE } from "../../lib/routes";
-import { siteConfig } from "../../lib/site-config";
-import {
-  jsonLdGraph,
-  siteIdentityJsonLd,
-  type JsonLdNode,
-  type RouteMetadata,
-  webPageJsonLd,
-} from "../../lib/metadata";
+import { routeMetadataGraphViewModel } from "../../lib/metadata-graph";
+import { type JsonLdNode, type RouteMetadata } from "../../lib/metadata";
 
 interface Props {
   image?: SocialPreviewImage | undefined;
@@ -19,68 +11,85 @@ interface Props {
 }
 
 const { image, metadata, structuredData = [], type = "website" } = Astro.props;
-const canonicalUrl = absoluteUrl(metadata.canonicalPath, Astro.site);
-const absoluteImageUrl =
-  image === undefined ? undefined : absoluteUrl(image.src, Astro.site);
-const twitterSite =
-  siteConfig.share.xViaHandle === undefined
-    ? undefined
-    : `@${siteConfig.share.xViaHandle.replace(/^@/u, "")}`;
-const metadataGraph = jsonLdGraph([
-  ...siteIdentityJsonLd(Astro.site),
-  webPageJsonLd(metadata, Astro.site),
-  ...structuredData.filter((node): node is JsonLdNode => node !== undefined),
-]);
-const metadataJsonLd =
-  metadataGraph === undefined ? undefined : safeJsonLd(metadataGraph);
+const head = routeMetadataGraphViewModel({
+  image,
+  metadata,
+  site: Astro.site,
+  structuredData,
+  type,
+});
 ---
 
-<meta name="description" content={metadata.description} />
-<meta name="robots" content={metadata.robots} />
-<meta
-  name="application-name"
-  content={siteConfig.identity.shortTitle ?? SITE_TITLE}
-/>
+<meta name="description" content={head.description} />
+<meta name="robots" content={head.robots} />
+<meta name="application-name" content={head.applicationName} />
 <meta name="color-scheme" content="light dark" />
+{head.themeColor && <meta name="theme-color" content={head.themeColor} />}
+<link rel="canonical" href={head.canonicalUrl} />
 {
-  siteConfig.identity.themeColor && (
-    <meta name="theme-color" content={siteConfig.identity.themeColor} />
-  )
-}
-<link rel="canonical" href={canonicalUrl} />
-{
-  siteConfig.features.feed && (
+  head.feedAlternate && (
     <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={`${SITE_TITLE} RSS`}
-      href={feedUrl()}
+      rel={head.feedAlternate.rel}
+      type={head.feedAlternate.type}
+      title={head.feedAlternate.title}
+      href={head.feedAlternate.href}
     />
   )
 }
-<meta property="og:site_name" content={SITE_TITLE} />
-<meta property="og:locale" content={siteConfig.identity.locale} />
-<meta property="og:type" content={type} />
-<meta property="og:title" content={metadata.title} />
-<meta property="og:description" content={metadata.description} />
-<meta property="og:url" content={canonicalUrl} />
-{absoluteImageUrl && <meta property="og:image" content={absoluteImageUrl} />}
-{image && <meta property="og:image:width" content={image.width.toString()} />}
-{image && <meta property="og:image:height" content={image.height.toString()} />}
-{image && <meta property="og:image:type" content={image.type} />}
-{image?.alt && <meta property="og:image:alt" content={image.alt} />}
-<meta
-  name="twitter:card"
-  content={absoluteImageUrl ? "summary_large_image" : "summary"}
-/>
-{twitterSite && <meta name="twitter:site" content={twitterSite} />}
-<meta name="twitter:title" content={metadata.title} />
-<meta name="twitter:description" content={metadata.description} />
-{absoluteImageUrl && <meta name="twitter:image" content={absoluteImageUrl} />}
-{image?.alt && <meta name="twitter:image:alt" content={image.alt} />}
-<title>{metadata.title}</title>
+<meta property="og:site_name" content={head.openGraph.siteName} />
+<meta property="og:locale" content={head.openGraph.locale} />
+<meta property="og:type" content={head.openGraph.type} />
+<meta property="og:title" content={head.openGraph.title} />
+<meta property="og:description" content={head.openGraph.description} />
+<meta property="og:url" content={head.openGraph.url} />
 {
-  metadataJsonLd && (
-    <script is:inline type="application/ld+json" set:html={metadataJsonLd} />
+  head.openGraph.image && (
+    <meta property="og:image" content={head.openGraph.image.url} />
+  )
+}
+{
+  head.openGraph.image && (
+    <meta
+      property="og:image:width"
+      content={head.openGraph.image.width.toString()}
+    />
+  )
+}
+{
+  head.openGraph.image && (
+    <meta
+      property="og:image:height"
+      content={head.openGraph.image.height.toString()}
+    />
+  )
+}
+{
+  head.openGraph.image && (
+    <meta property="og:image:type" content={head.openGraph.image.type} />
+  )
+}
+{
+  head.openGraph.image?.alt && (
+    <meta property="og:image:alt" content={head.openGraph.image.alt} />
+  )
+}
+<meta name="twitter:card" content={head.twitter.card} />
+{head.twitter.site && <meta name="twitter:site" content={head.twitter.site} />}
+<meta name="twitter:title" content={head.twitter.title} />
+<meta name="twitter:description" content={head.twitter.description} />
+{
+  head.twitter.image && (
+    <meta name="twitter:image" content={head.twitter.image} />
+  )
+}
+{
+  head.twitter.imageAlt && (
+    <meta name="twitter:image:alt" content={head.twitter.imageAlt} />
+  )
+}
+<title>{head.title}</title>
+{
+  head.jsonLd && (
+    <script is:inline type="application/ld+json" set:html={head.jsonLd} />
   )
 }

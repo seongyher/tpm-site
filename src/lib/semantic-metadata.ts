@@ -2,6 +2,10 @@ import { z } from "astro/zod";
 
 import { type JsonLdNode, routeEntityId } from "./metadata";
 import { formatDate } from "./routes";
+import {
+  type SemanticProfileKind,
+  semanticProfileKinds,
+} from "./semantic-profile-kinds";
 
 const semanticItemTypeSchema = z.enum([
   "article",
@@ -193,6 +197,28 @@ export const semanticMetadataSchema = z
     faqSchema,
   ])
   .optional();
+
+/**
+ * Creates semantic metadata validation with site-configured profile gating.
+ *
+ * @param enabledKinds Semantic profile kinds enabled for this site instance.
+ * @returns Semantic metadata schema that rejects disabled profile kinds.
+ */
+export function semanticMetadataSchemaFor(
+  enabledKinds: readonly SemanticProfileKind[] = semanticProfileKinds,
+): typeof semanticMetadataSchema {
+  const enabled = new Set<SemanticProfileKind>(enabledKinds);
+
+  return semanticMetadataSchema.superRefine((semantic, context) => {
+    if (semantic !== undefined && !enabled.has(semantic.kind)) {
+      context.addIssue({
+        code: "custom",
+        message: `Semantic profile "${semantic.kind}" is disabled by site config.`,
+        path: ["kind"],
+      });
+    }
+  });
+}
 
 /** Optional author-facing semantic profile parsed from article-like frontmatter. */
 export type SemanticMetadata = z.infer<typeof semanticMetadataSchema>;

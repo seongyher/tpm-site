@@ -3,15 +3,9 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import matter from "gray-matter";
-import { PDFDocument } from "pdf-lib";
 
-import {
-  articlePdfHref,
-  articlePdfOutputPath,
-  scholarPublicationDate,
-} from "../../src/lib/article-pdf";
+import { articlePdfOutputPath } from "../../src/lib/article-pdf";
 import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
-import { sitemapIncludesPath } from "../../src/lib/metadata";
 import {
   createOutputDiagnostic,
   createOutputVerificationReport,
@@ -28,27 +22,84 @@ import {
 } from "../../src/lib/route-registry";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
-import {
-  maxSocialPreviewImageBytes,
-  socialPreviewImageMimeType,
-  socialPreviewImageSpec,
-} from "../../src/lib/social-images";
 import { normalizeTag } from "../../src/lib/tags";
+import {
+  verifyGeneratedAssetCachePolicy,
+  verifySourceMapOutput,
+  verifyStaticReadingPageAssets,
+} from "./verify-build/asset-verifier";
+import {
+  verifyArticlePageCount,
+  verifyCatalogOutput,
+  verifyDraftLeaks,
+} from "./verify-build/content-output-verifier";
+import { verifyFeedFile } from "./verify-build/feed-verifier";
+import {
+  verifyHtmlImageAlt,
+  verifyHtmlMediaOutput,
+  verifyHydrationBoundaries,
+} from "./verify-build/html-verifier";
+import { verifyHtmlInternalLinks } from "./verify-build/link-verifier";
+import {
+  verifyArticleJsonLdPresence,
+  verifyArticleSocialImageHtml,
+  verifyHtmlMetadata,
+} from "./verify-build/metadata-verifier";
+import {
+  verifyArticlePdfHtml,
+  verifyArticlePdfs,
+} from "./verify-build/pdf-verifier";
+import {
+  isAstroRedirectFallbackPage,
+  verifyLegacyRedirectFallbackHtml,
+  verifyMissingLegacyRedirectFallbacks,
+} from "./verify-build/redirect-verifier";
+import {
+  verifyRenderedRoutePath,
+  verifyRequiredRouteOutputs,
+} from "./verify-build/route-verifier";
+import { verifySitemapFile } from "./verify-build/sitemap-verifier";
 
-const allowedStaticClientScriptPatterns = [
-  /^\/_astro\/AnchoredRoot\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u,
-] as const;
-const articleImageInspectorScriptPattern =
-  /^\/_astro\/ArticleImageInspectorScript\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
-const articleCitationMenuScriptPattern =
-  /^\/_astro\/ArticleCitationMenu\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
-const articleReferencePreviewScriptPattern =
-  /^\/_astro\/ArticleReferences\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
-const astroPrefetchPageScriptPattern = /^\/_astro\/page\.[\w-]+\.js$/u;
-const astroPrefetchChunkImportPattern =
-  /from\s*["'`]\.\/(_astro_prefetch\.[\w-]+\.js)["'`]/u;
-const pdfHeader = "%PDF-";
-const maxArticlePdfBytes = 5 * 1024 * 1024;
+export {
+  verifyGeneratedAssetCachePolicy,
+  verifySourceMapOutput,
+  verifyStaticReadingPageAssets,
+} from "./verify-build/asset-verifier";
+export {
+  verifyArticlePageCount,
+  verifyCatalogOutput,
+  verifyDraftLeaks,
+} from "./verify-build/content-output-verifier";
+export { verifyFeedFile, verifyFeedXml } from "./verify-build/feed-verifier";
+export {
+  verifyHtmlImageAlt,
+  verifyHtmlMediaOutput,
+  verifyHydrationBoundaries,
+} from "./verify-build/html-verifier";
+export { isExternal, linkTargets } from "./verify-build/link-verifier";
+export { verifyHtmlInternalLinks } from "./verify-build/link-verifier";
+export {
+  verifyArticleJsonLdPresence,
+  verifyArticleSocialImageHtml,
+  verifyHtmlMetadata,
+} from "./verify-build/metadata-verifier";
+export {
+  verifyArticlePdfHtml,
+  verifyArticlePdfs,
+} from "./verify-build/pdf-verifier";
+export {
+  isAstroRedirectFallbackPage,
+  verifyLegacyRedirectFallbackHtml,
+  verifyMissingLegacyRedirectFallbacks,
+} from "./verify-build/redirect-verifier";
+export {
+  verifyRenderedRoutePath,
+  verifyRequiredRouteOutputs,
+} from "./verify-build/route-verifier";
+export {
+  verifySitemapFile,
+  verifySitemapXml,
+} from "./verify-build/sitemap-verifier";
 
 /** Source-content publication state used to verify generated output. */
 export interface ArticlePublication {
@@ -75,10 +126,12 @@ export interface BuildVerificationIssues {
   articleCountIssues: string[];
   articlePdfIssues: string[];
   brokenLinks: string[];
+  cachePolicyIssues: string[];
   catalogLeaks: string[];
   draftLeaks: string[];
   imageAltIssues: string[];
   invalidLegacyRedirects: string[];
+  mediaOutputIssues: string[];
   metadataIssues: string[];
   missingArticleJsonLd: string[];
   missingLegacyRedirects: string[];
@@ -110,6 +163,15 @@ const buildIssueBuckets: readonly BuildIssueBucketMetadata[] = [
     owner: "generated-output",
     remediation:
       "Inspect the article PDF link, Scholar metadata, generated PDF file, and PDF document metadata.",
+  },
+  {
+    category: "cache",
+    code: "cache.immutable-asset-policy-missing",
+    key: "cachePolicyIssues",
+    moduleId: "build.assets",
+    owner: "site-config",
+    remediation:
+      "Keep immutable cache headers for hashed generated Astro assets.",
   },
   {
     category: "content",
@@ -164,6 +226,15 @@ const buildIssueBuckets: readonly BuildIssueBucketMetadata[] = [
     owner: "content",
     remediation:
       "Add meaningful alt text or mark the image decorative with valid semantics.",
+  },
+  {
+    category: "html",
+    code: "html.media-output-invalid",
+    key: "mediaOutputIssues",
+    moduleId: "build.html",
+    owner: "generated-output",
+    remediation:
+      "Inspect scoped article, hover, thumbnail, or embed media output.",
   },
   {
     category: "metadata",
@@ -421,11 +492,13 @@ export function formatBuildVerificationReport(
   const lines = ["Build verification failed."];
   const sections: Array<[string, readonly string[], number?]> = [
     ["Article PDF issues", result.issues.articlePdfIssues, 50],
+    ["Cache policy issues", result.issues.cachePolicyIssues, 50],
     ["Missing", result.issues.missingRequired],
     ["Missing legacy redirects", result.issues.missingLegacyRedirects, 50],
     ["Invalid legacy redirects", result.issues.invalidLegacyRedirects, 50],
     ["Metadata issues", result.issues.metadataIssues, 50],
     ["Image alt issues", result.issues.imageAltIssues, 50],
+    ["Media output issues", result.issues.mediaOutputIssues, 50],
     ["Broken links", result.issues.brokenLinks, 50],
     ["Unexpected component catalog output", result.issues.catalogLeaks],
     ["Article count mismatch", result.issues.articleCountIssues],
@@ -513,6 +586,9 @@ function buildIssueLocation(
     case "brokenLinks":
       return { outputPath: issue.split(" -> ")[0] ?? issue };
 
+    case "cachePolicyIssues":
+      return { outputPath: "_headers" };
+
     case "catalogLeaks":
       return { outputPath: issue };
 
@@ -523,6 +599,9 @@ function buildIssueLocation(
       return { outputPath: issue.split(": ")[0] ?? issue };
 
     case "invalidLegacyRedirects":
+      return { outputPath: issue.split(": ")[0] ?? issue };
+
+    case "mediaOutputIssues":
       return { outputPath: issue.split(": ")[0] ?? issue };
 
     case "metadataIssues":
@@ -552,38 +631,6 @@ function buildIssueLocation(
     case "unexpectedHydrationBoundaries":
       return { outputPath: issue };
   }
-}
-
-/**
- * Checks whether a URL points outside the generated static site.
- *
- * @param url URL or URL-like target from rendered HTML.
- * @returns True for protocol-relative, absolute, mail, or telephone URLs.
- */
-export function isExternal(url: string): boolean {
-  // eslint-disable-next-line security/detect-unsafe-regex -- URL scheme detection is bounded to the target string.
-  return /^(?:[a-z]+:)?\/\//i.test(url) || /^(?:mailto|tel):/i.test(url);
-}
-
-/**
- * Extracts link and asset targets from rendered HTML attributes.
- *
- * @param html Rendered HTML text.
- * @returns Values from `href` and `src` attributes.
- */
-export function linkTargets(html: string): string[] {
-  const targets: string[] = [];
-  const attributePattern = /\s(?:href|src)=["']([^"']+)["']/gi;
-  let match: null | RegExpExecArray;
-
-  while ((match = attributePattern.exec(html)) !== null) {
-    const target = match[1];
-    if (target !== undefined) {
-      targets.push(target);
-    }
-  }
-
-  return targets;
 }
 
 /**
@@ -849,17 +896,24 @@ export async function verifyBuild({
       article,
     ]),
   );
-  issues.sourceMaps.push(
-    ...files
-      .map((file) => toPosix(path.relative(distDir, file)))
-      .filter((file) => file.endsWith(".map")),
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifySourceMapOutput({ distDir, files }),
+  );
+  appendGeneratedOutputDiagnostics(
+    issues,
+    await verifyGeneratedAssetCachePolicy({ distDir }),
   );
 
-  await collectMissingRequired(distDir, requiredPaths, issues);
-  await collectMissingLegacyRedirects(distDir, expectedRedirects, issues);
-  if (await exists(distDir, "catalog")) {
-    issues.catalogLeaks.push("catalog/");
-  }
+  appendGeneratedOutputDiagnostics(
+    issues,
+    await verifyRequiredRouteOutputs({ distDir, requiredPaths }),
+  );
+  appendGeneratedOutputDiagnostics(
+    issues,
+    await verifyMissingLegacyRedirectFallbacks({ distDir, expectedRedirects }),
+  );
+  appendGeneratedOutputDiagnostics(issues, await verifyCatalogOutput(distDir));
 
   for (const file of htmlAndXml) {
     if (file.endsWith(".html")) {
@@ -878,20 +932,31 @@ export async function verifyBuild({
       toPosix(path.relative(distDir, file)) ===
         routeOutputBasePath(siteConfig.routes.feed)
     ) {
-      await inspectFeedEnclosures(distDir, file, issues);
+      appendGeneratedOutputDiagnostics(
+        issues,
+        await verifyFeedFile({ distDir, file }),
+      );
     }
 
     if (/\/?sitemap-\d+\.xml$/u.test(toPosix(path.relative(distDir, file)))) {
-      await inspectSitemapPolicy(distDir, file, issues);
+      appendGeneratedOutputDiagnostics(
+        issues,
+        await verifySitemapFile({ distDir, file }),
+      );
     }
 
-    await inspectDraftLeaks(distDir, file, draftSlugs, issues);
+    appendGeneratedOutputDiagnostics(
+      issues,
+      await verifyDraftLeaks({ distDir, draftSlugs, file }),
+    );
   }
 
-  await inspectArticlePdfs(
-    distDir,
-    articlePublication.publishedArticles,
+  appendGeneratedOutputDiagnostics(
     issues,
+    await verifyArticlePdfs({
+      articles: articlePublication.publishedArticles,
+      distDir,
+    }),
   );
 
   const articleStats = await stat(path.join(distDir, "articles"));
@@ -902,11 +967,13 @@ export async function verifyBuild({
   const articlePages = articlePageFiles(files);
   const expectedArticlePages = articlePublication.publishedArticles.length;
 
-  if (articlePages.length !== expectedArticlePages) {
-    issues.articleCountIssues.push(
-      `expected ${expectedArticlePages} article pages from published source content, found ${articlePages.length}`,
-    );
-  }
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyArticlePageCount({
+      actualArticlePageCount: articlePages.length,
+      expectedArticlePageCount: expectedArticlePages,
+    }),
+  );
 
   return {
     articlePageCount: articlePages.length,
@@ -933,33 +1000,6 @@ async function categorySlugsFromMetadata(
   );
 
   return categoryFiles.map((file) => path.basename(file, ".json"));
-}
-
-async function collectMissingLegacyRedirects(
-  distDir: string,
-  expectedRedirects: Record<string, string>,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  for (const [source, destination] of Object.entries(expectedRedirects)) {
-    const fallbackPath = redirectFallbackPath(source);
-    if (!(await exists(distDir, fallbackPath))) {
-      issues.missingLegacyRedirects.push(
-        `${source} -> ${destination} (${fallbackPath})`,
-      );
-    }
-  }
-}
-
-async function collectMissingRequired(
-  distDir: string,
-  requiredPaths: string[],
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  for (const requiredPath of requiredPaths) {
-    if (!(await exists(distDir, requiredPath))) {
-      issues.missingRequired.push(requiredPath);
-    }
-  }
 }
 
 async function configuredRedirects(
@@ -1000,10 +1040,12 @@ function emptyIssues(): BuildVerificationIssues {
     articlePdfIssues: [],
     articleCountIssues: [],
     brokenLinks: [],
+    cachePolicyIssues: [],
     catalogLeaks: [],
     draftLeaks: [],
     invalidLegacyRedirects: [],
     imageAltIssues: [],
+    mediaOutputIssues: [],
     metadataIssues: [],
     missingArticleJsonLd: [],
     missingLegacyRedirects: [],
@@ -1016,12 +1058,99 @@ function emptyIssues(): BuildVerificationIssues {
   };
 }
 
-async function exists(distDir: string, relativePath: string): Promise<boolean> {
-  try {
-    await access(path.join(distDir, relativePath));
-    return true;
-  } catch {
-    return false;
+function appendGeneratedOutputDiagnostics(
+  issues: BuildVerificationIssues,
+  diagnostics: readonly OutputDiagnostic[],
+): void {
+  for (const diagnostic of diagnostics) {
+    switch (diagnostic.code) {
+      case "asset.client-script-unexpected":
+        issues.unexpectedClientScripts.push(diagnostic.message);
+        break;
+
+      case "asset.source-map-leak":
+        issues.sourceMaps.push(diagnostic.message);
+        break;
+
+      case "build.catalog-leak":
+        issues.catalogLeaks.push(diagnostic.message);
+        break;
+
+      case "cache.immutable-asset-policy-missing":
+        issues.cachePolicyIssues.push(diagnostic.message);
+        break;
+
+      case "content.article-count-mismatch":
+        issues.articleCountIssues.push(diagnostic.message);
+        break;
+
+      case "content.draft-leak":
+        issues.draftLeaks.push(diagnostic.message);
+        break;
+
+      case "feed.enclosure-unexpected":
+        issues.socialImageIssues.push(diagnostic.message);
+        break;
+
+      case "html.hydration-boundary-unexpected":
+        issues.unexpectedHydrationBoundaries.push(diagnostic.message);
+        break;
+
+      case "html.image-alt-missing":
+        issues.imageAltIssues.push(diagnostic.message);
+        break;
+
+      case "html.media-output-invalid":
+        issues.mediaOutputIssues.push(diagnostic.message);
+        break;
+
+      case "link.internal-target-missing":
+        issues.brokenLinks.push(diagnostic.message);
+        break;
+
+      case "metadata.article-json-ld-missing":
+        issues.missingArticleJsonLd.push(diagnostic.message);
+        break;
+
+      case "metadata.html-invalid":
+        issues.metadataIssues.push(diagnostic.message);
+        break;
+
+      case "metadata.social-preview-invalid":
+        issues.socialImageIssues.push(diagnostic.message);
+        break;
+
+      case "pdf.article-media-invalid":
+      case "pdf.article-output-invalid":
+        issues.articlePdfIssues.push(diagnostic.message);
+        break;
+
+      case "redirect.legacy-fallback-invalid":
+        issues.invalidLegacyRedirects.push(diagnostic.message);
+        break;
+
+      case "redirect.legacy-fallback-missing":
+        issues.missingLegacyRedirects.push(diagnostic.message);
+        break;
+
+      case "route.dated-page-unexpected":
+        issues.unexpectedDatedPages.push(diagnostic.message);
+        break;
+
+      case "route.required-output-missing":
+        issues.missingRequired.push(diagnostic.message);
+        break;
+
+      case "sitemap.loc-invalid":
+      case "sitemap.noindex-route-included":
+        issues.metadataIssues.push(diagnostic.message);
+        break;
+
+      default:
+        throw new Error(
+          `Unsupported generated-output diagnostic code ${diagnostic.code}.`,
+        );
+    }
   }
 }
 
@@ -1032,10 +1161,6 @@ async function pathExists(fullPath: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-function expectedRedirectSource(relativeHtmlPath: string): string {
-  return `/${relativeHtmlPath.replace(/index\.html$/, "")}`;
 }
 
 function filenameStem(file: string): string {
@@ -1068,20 +1193,6 @@ function hasIssues(issues: BuildVerificationIssues): boolean {
     issues.unexpectedHydrationBoundaries.length > 0 ||
     issues.unexpectedClientScripts.length > 0 ||
     issues.unexpectedDatedPages.length > 0
-  );
-}
-
-function htmlIncludesRedirect(
-  html: string,
-  source: string,
-  destination: string,
-): boolean {
-  return (
-    html.includes(`<title>Redirecting to: ${destination}</title>`) &&
-    html.includes(`content="0;url=${destination}"`) &&
-    html.includes(`href="${destination}"`) &&
-    html.includes(`<code>${source}</code>`) &&
-    html.includes(`<code>${destination}</code>`)
   );
 }
 
@@ -1126,408 +1237,6 @@ function stringValue(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
-async function inspectDraftLeaks(
-  distDir: string,
-  file: string,
-  draftSlugs: string[],
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  const relativePath = toPosix(path.relative(distDir, file));
-  if (
-    relativePath !== "feed.xml" &&
-    !/^sitemap.*\.xml$/.test(relativePath) &&
-    !relativePath.startsWith("pagefind/")
-  ) {
-    return;
-  }
-
-  const text = await readFile(file, "utf8");
-  for (const draftSlug of draftSlugs) {
-    if (text.includes(draftSlug)) {
-      issues.draftLeaks.push(`${relativePath} -> ${draftSlug}`);
-    }
-  }
-}
-
-async function inspectFeedEnclosures(
-  distDir: string,
-  file: string,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  const xml = await readFile(file, "utf8");
-  const relativePath = toPosix(path.relative(distDir, file));
-  const enclosureCount = Array.from(
-    xml.matchAll(/<enclosure\b[^>]*>/giu),
-  ).length;
-
-  if (enclosureCount > 0) {
-    issues.socialImageIssues.push(
-      `${relativePath}: RSS feed must not include item enclosures; found ${enclosureCount}`,
-    );
-  }
-}
-
-async function inspectSitemapPolicy(
-  distDir: string,
-  file: string,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  const xml = await readFile(file, "utf8");
-  const relativePath = toPosix(path.relative(distDir, file));
-  const locPattern = /<loc>([^<]+)<\/loc>/giu;
-  let match: null | RegExpExecArray;
-
-  while ((match = locPattern.exec(xml)) !== null) {
-    const loc = match[1];
-    if (loc === undefined) {
-      continue;
-    }
-
-    const pathname = absoluteUrlPathname(loc);
-    if (pathname === undefined) {
-      issues.metadataIssues.push(
-        `${relativePath}: sitemap contains invalid URL ${loc}`,
-      );
-    } else if (!sitemapIncludesPath(pathname)) {
-      issues.metadataIssues.push(
-        `${relativePath}: sitemap includes noindex route ${pathname}`,
-      );
-    }
-  }
-}
-
-function metaContentValues(html: string, metaName: string): string[] {
-  return metaContentValuesByAttribute(html, "name", metaName);
-}
-
-function metaPropertyContentValues(
-  html: string,
-  metaProperty: string,
-): string[] {
-  return metaContentValuesByAttribute(html, "property", metaProperty);
-}
-
-function metaContentValuesByAttribute(
-  html: string,
-  attributeName: "name" | "property",
-  attributeValue: string,
-): string[] {
-  const values: string[] = [];
-  const metaPattern = /<meta\b[^>]*>/giu;
-  let match: null | RegExpExecArray;
-
-  while ((match = metaPattern.exec(html)) !== null) {
-    const tag = match[0];
-    if (htmlAttributeValue(tag, attributeName) === attributeValue) {
-      const content = htmlAttributeValue(tag, "content");
-      if (content !== undefined) {
-        values.push(decodeHtmlAttributeValue(content));
-      }
-    }
-  }
-
-  return values;
-}
-
-function articleJsonLdImageValues(html: string): string[] {
-  const values: string[] = [];
-
-  for (const node of articleJsonLdNodes(html)) {
-    const image = node["image"];
-    if (typeof image === "string") {
-      values.push(image);
-    }
-  }
-
-  return values;
-}
-
-function articleJsonLdNodes(html: string): Array<Record<string, unknown>> {
-  return jsonLdNodesByType(html, "BlogPosting");
-}
-
-function jsonLdNodesByType(
-  html: string,
-  type: string,
-): Array<Record<string, unknown>> {
-  const nodes: Array<Record<string, unknown>> = [];
-
-  for (const script of htmlScriptTextsByType(html, "application/ld+json")) {
-    const text = script.trim();
-    if (text === "") {
-      continue;
-    }
-
-    try {
-      const parsed = JSON.parse(text) as unknown;
-      for (const node of jsonLdNodeCandidates(parsed)) {
-        if (jsonLdTypeIncludes(node["@type"], type)) {
-          nodes.push(node);
-        }
-      }
-    } catch {
-      // Invalid JSON-LD is reported by the generic metadata verifier.
-    }
-  }
-
-  return nodes;
-}
-
-function jsonLdNodeCandidates(value: unknown): Array<Record<string, unknown>> {
-  if (!isRecord(value)) {
-    return [];
-  }
-
-  const candidates = [value];
-  const graph = value["@graph"];
-  if (Array.isArray(graph)) {
-    candidates.push(...graph.filter(isRecord));
-  }
-
-  return candidates;
-}
-
-function jsonLdTypeIncludes(value: unknown, type: string): boolean {
-  return (
-    value === type ||
-    (Array.isArray(value) &&
-      value.some((entry) => typeof entry === "string" && entry === type))
-  );
-}
-
-function localGeneratedSocialImagePath(
-  value: string,
-  distDir: string,
-): string | undefined {
-  const pathname = absoluteUrlPathname(value);
-  if (pathname === undefined) {
-    return undefined;
-  }
-
-  if (!pathname.startsWith("/_astro/") || !/\.jpe?g$/i.test(pathname)) {
-    return undefined;
-  }
-
-  return path.join(distDir, decodeURIComponent(pathname.slice(1)));
-}
-
-/**
- * Extracts an absolute URL pathname without constructing a mutable URL object.
- *
- * @param value Absolute URL string.
- * @returns URL pathname, or `undefined` for non-absolute input.
- */
-function absoluteUrlPathname(value: string): string | undefined {
-  const authoritySeparator = value.indexOf("://");
-  if (authoritySeparator <= 0) {
-    return undefined;
-  }
-
-  const pathStart = value.indexOf("/", authoritySeparator + 3);
-  if (pathStart === -1) {
-    return "/";
-  }
-
-  const queryStart = value.indexOf("?", pathStart);
-  const hashStart = value.indexOf("#", pathStart);
-  const pathEndCandidates = [queryStart, hashStart].filter(
-    (index) => index >= 0,
-  );
-  const pathEnd =
-    pathEndCandidates.length === 0
-      ? value.length
-      : Math.min(...pathEndCandidates);
-
-  const pathname = value.slice(pathStart, pathEnd);
-  return pathname === "" ? "/" : pathname;
-}
-
-function htmlAttributeValue(
-  tag: string,
-  attributeName: string,
-): string | undefined {
-  const attributePattern = /\s([a-z:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/giu;
-  let match: null | RegExpExecArray;
-
-  while ((match = attributePattern.exec(tag)) !== null) {
-    if (match[1]?.toLowerCase() !== attributeName) {
-      continue;
-    }
-
-    return match[2] ?? match[3];
-  }
-
-  return undefined;
-}
-
-function decodeHtmlAttributeValue(value: string): string {
-  return value
-    .replaceAll("&amp;", "&")
-    .replaceAll("&quot;", '"')
-    .replaceAll("&#39;", "'")
-    .replaceAll("&apos;", "'")
-    .replaceAll("&lt;", "<")
-    .replaceAll("&gt;", ">");
-}
-
-function scholarPdfMetaMatches(value: string, pdfHref: string): boolean {
-  let withoutProtocol: string | undefined;
-  if (value.startsWith("https://")) {
-    withoutProtocol = value.slice("https://".length);
-  } else if (value.startsWith("http://")) {
-    withoutProtocol = value.slice("http://".length);
-  }
-
-  if (withoutProtocol === undefined) {
-    return false;
-  }
-
-  const pathStart = withoutProtocol.indexOf("/");
-  if (pathStart === -1) {
-    return false;
-  }
-
-  const pathAndQuery = withoutProtocol.slice(pathStart);
-  const pathname = pathAndQuery.split("?")[0]?.split("#")[0] ?? "";
-
-  return pathname === pdfHref;
-}
-
-function inspectHtmlMetadata(
-  html: string,
-  relativeHtmlPath: string,
-  issues: BuildVerificationIssues,
-): void {
-  const title = htmlTitleText(html);
-  const canonicalLinks = htmlTags(html, "link").filter(
-    (tag) => htmlAttributeValue(tag, "rel") === "canonical",
-  );
-  const description = metaContentValues(html, "description")[0];
-  const robots = metaContentValues(html, "robots")[0];
-  const jsonLdScripts = htmlScriptTextsByType(html, "application/ld+json");
-
-  if (title === "") {
-    issues.metadataIssues.push(`${relativeHtmlPath}: missing document title`);
-  }
-
-  if (canonicalLinks.length !== 1) {
-    issues.metadataIssues.push(
-      `${relativeHtmlPath}: expected exactly one canonical link, found ${canonicalLinks.length}`,
-    );
-  } else if (
-    htmlAttributeValue(canonicalLinks[0] ?? "", "href")?.trim() === ""
-  ) {
-    issues.metadataIssues.push(`${relativeHtmlPath}: canonical link is empty`);
-  }
-
-  if (description === undefined || description.trim() === "") {
-    issues.metadataIssues.push(`${relativeHtmlPath}: missing meta description`);
-  }
-
-  if (robots === undefined || robots.trim() === "") {
-    issues.metadataIssues.push(`${relativeHtmlPath}: missing robots policy`);
-  }
-
-  if (jsonLdScripts.length === 0) {
-    issues.metadataIssues.push(`${relativeHtmlPath}: missing JSON-LD`);
-  }
-
-  for (const script of jsonLdScripts) {
-    try {
-      JSON.parse(script.trim());
-    } catch {
-      issues.metadataIssues.push(`${relativeHtmlPath}: invalid JSON-LD script`);
-    }
-  }
-
-  inspectHtmlImageAlt(html, relativeHtmlPath, issues);
-
-  if (robots !== undefined && !robots.includes("noindex")) {
-    inspectShareableHtmlMetadata(html, relativeHtmlPath, issues);
-  }
-}
-
-function inspectHtmlImageAlt(
-  html: string,
-  relativeHtmlPath: string,
-  issues: BuildVerificationIssues,
-): void {
-  htmlTags(html, "img").forEach((image, index) => {
-    const role = htmlAttributeValue(image, "role");
-    const isDecorative =
-      htmlAttributeValue(image, "aria-hidden") === "true" ||
-      role === "presentation" ||
-      role === "none";
-
-    if (!isDecorative && htmlAttributeValue(image, "alt") === undefined) {
-      const src = htmlAttributeValue(image, "src") ?? `image ${index + 1}`;
-      issues.imageAltIssues.push(`${relativeHtmlPath}: ${src} is missing alt`);
-    }
-  });
-}
-
-function inspectShareableHtmlMetadata(
-  html: string,
-  relativeHtmlPath: string,
-  issues: BuildVerificationIssues,
-): void {
-  const requiredMeta = [
-    ["property", "og:site_name"],
-    ["property", "og:locale"],
-    ["property", "og:type"],
-    ["property", "og:title"],
-    ["property", "og:description"],
-    ["property", "og:url"],
-    ["property", "og:image"],
-    ["name", "twitter:card"],
-    ["name", "twitter:title"],
-    ["name", "twitter:description"],
-    ["name", "twitter:image"],
-  ] as const;
-
-  for (const [attributeName, attributeValue] of requiredMeta) {
-    const value =
-      attributeName === "name"
-        ? metaContentValues(html, attributeValue)[0]
-        : metaPropertyContentValues(html, attributeValue)[0];
-    if (value === undefined || value.trim() === "") {
-      issues.metadataIssues.push(
-        `${relativeHtmlPath}: missing ${attributeName}="${attributeValue}" metadata`,
-      );
-    }
-  }
-}
-
-function htmlScriptTextsByType(html: string, type: string): string[] {
-  const texts: string[] = [];
-  const scriptPattern = /<script(?<attributes>[^>]*)>([\s\S]*?)<\/script>/giu;
-  let match: null | RegExpExecArray;
-
-  while ((match = scriptPattern.exec(html)) !== null) {
-    const attributes = match.groups?.["attributes"];
-    if (
-      attributes !== undefined &&
-      htmlAttributeValue(`<script${attributes}>`, "type") === type
-    ) {
-      texts.push(match[2] ?? "");
-    }
-  }
-
-  return texts;
-}
-
-function htmlTags(html: string, tagName: "img" | "link"): string[] {
-  const tagPattern = tagName === "img" ? /<img\b[^>]*>/giu : /<link\b[^>]*>/giu;
-
-  return Array.from(html.matchAll(tagPattern), (match) => match[0]);
-}
-
-function htmlTitleText(html: string): string {
-  const titleMatch = /<title\b[^>]*>([\s\S]*?)<\/title>/iu.exec(html);
-
-  return decodeHtmlAttributeValue(titleMatch?.[1]?.trim() ?? "");
-}
-
 async function inspectHtmlFile(
   distDir: string,
   file: string,
@@ -1543,465 +1252,89 @@ async function inspectHtmlFile(
     relativeHtmlPath,
   );
 
-  if (isDatedHtmlPage(relativeHtmlPath) && !isRedirectFallback) {
-    issues.unexpectedDatedPages.push(relativeHtmlPath);
-  }
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyRenderedRoutePath({ isRedirectFallback, relativeHtmlPath }),
+  );
 
   if (isRedirectFallback) {
-    const source = expectedRedirectSource(relativeHtmlPath);
-    const expectedDestination = new Map(Object.entries(expectedRedirects)).get(
-      source,
+    appendGeneratedOutputDiagnostics(
+      issues,
+      verifyLegacyRedirectFallbackHtml({
+        expectedRedirects,
+        html: text,
+        relativeHtmlPath,
+      }),
     );
-
-    if (expectedDestination === undefined) {
-      issues.invalidLegacyRedirects.push(
-        `${relativeHtmlPath}: no matching redirect in astro.config.ts for ${source}`,
-      );
-    } else if (!htmlIncludesRedirect(text, source, expectedDestination)) {
-      issues.invalidLegacyRedirects.push(
-        `${relativeHtmlPath}: does not match configured redirect ${source} -> ${expectedDestination}`,
-      );
-    }
-
     return;
   }
 
-  inspectHtmlMetadata(text, relativeHtmlPath, issues);
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyHtmlMetadata({ html: text, relativeHtmlPath }),
+  );
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyHtmlImageAlt({ html: text, relativeHtmlPath }),
+  );
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyHtmlMediaOutput({ html: text, relativeHtmlPath }),
+  );
 
-  if (
-    isArticleHtmlPath(relativeHtmlPath) &&
-    articleJsonLdNodes(text).length === 0
-  ) {
-    issues.missingArticleJsonLd.push(relativeHtmlPath);
+  if (isArticleHtmlPath(relativeHtmlPath)) {
+    appendGeneratedOutputDiagnostics(
+      issues,
+      verifyArticleJsonLdPresence({ html: text, relativeHtmlPath }),
+    );
   }
 
   const article = publishedArticleByHtmlPath.get(relativeHtmlPath);
   if (article !== undefined) {
-    inspectArticlePdfHtml(text, relativeHtmlPath, article, issues);
-    await inspectArticleSocialImageHtml(
-      text,
-      relativeHtmlPath,
-      distDir,
+    appendGeneratedOutputDiagnostics(
       issues,
+      verifyArticlePdfHtml({
+        article,
+        html: text,
+        relativeHtmlPath,
+      }),
+    );
+    appendGeneratedOutputDiagnostics(
+      issues,
+      await verifyArticleSocialImageHtml({
+        distDir,
+        html: text,
+        relativeHtmlPath,
+      }),
     );
   }
 
-  await inspectStaticReadingPageHtml(
-    text,
-    relativeHtmlPath,
-    staticReadingPages,
-    distDir,
+  appendGeneratedOutputDiagnostics(
     issues,
+    await verifyStaticReadingPageAssets({
+      distDir,
+      html: text,
+      relativeHtmlPath,
+      staticReadingPages,
+    }),
+  );
+  appendGeneratedOutputDiagnostics(
+    issues,
+    verifyHydrationBoundaries({
+      html: text,
+      relativeHtmlPath,
+      staticReadingPages,
+    }),
   );
 
-  for (const target of linkTargets(text)) {
-    if (!isExternal(target) && !(await internalTargetExists(distDir, target))) {
-      issues.brokenLinks.push(`${relativeHtmlPath} -> ${target}`);
-    }
-  }
-}
-
-function inspectArticlePdfHtml(
-  html: string,
-  relativeHtmlPath: string,
-  article: PublishedArticle,
-  issues: BuildVerificationIssues,
-): void {
-  const pdfHref = articlePdfHref(article.slug);
-  const pdfMetaValues = metaContentValues(html, "citation_pdf_url");
-  const titleMetaValues = metaContentValues(html, "citation_title");
-  const authorMetaValues = metaContentValues(html, "citation_author").map(
-    decodeHtmlAttributeValue,
+  appendGeneratedOutputDiagnostics(
+    issues,
+    await verifyHtmlInternalLinks({ distDir, html: text, relativeHtmlPath }),
   );
-  const publicationDateValues = metaContentValues(
-    html,
-    "citation_publication_date",
-  );
-
-  if (!article.pdfEnabled) {
-    if (linkTargets(html).includes(pdfHref)) {
-      issues.articlePdfIssues.push(
-        `${relativeHtmlPath}: PDF disabled but Save PDF link is present for ${pdfHref}`,
-      );
-    }
-
-    if (pdfMetaValues.length > 0) {
-      issues.articlePdfIssues.push(
-        `${relativeHtmlPath}: PDF disabled but citation_pdf_url metadata is present`,
-      );
-    }
-  } else if (!linkTargets(html).includes(pdfHref)) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing Save PDF link to ${pdfHref}`,
-    );
-  }
-
-  if (!article.pdfEnabled) {
-    // Base Scholar metadata is still verified below for PDF-disabled articles.
-  } else if (pdfMetaValues.length === 0) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing citation_pdf_url metadata`,
-    );
-  } else if (
-    !pdfMetaValues.some((value) => scholarPdfMetaMatches(value, pdfHref))
-  ) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: citation_pdf_url does not point to ${pdfHref}`,
-    );
-  }
-
-  if (titleMetaValues.length === 0 || titleMetaValues[0]?.trim() === "") {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing citation_title metadata`,
-    );
-  }
-
-  for (const author of article.authors) {
-    if (!authorMetaValues.includes(author)) {
-      issues.articlePdfIssues.push(
-        `${relativeHtmlPath}: missing citation_author metadata for ${author}`,
-      );
-    }
-  }
-
-  if (
-    article.publicationDate !== undefined &&
-    !publicationDateValues.includes(
-      scholarPublicationDate(article.publicationDate),
-    )
-  ) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing citation_publication_date metadata`,
-    );
-  }
-}
-
-async function inspectArticleSocialImageHtml(
-  html: string,
-  relativeHtmlPath: string,
-  distDir: string,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  const ogImages = metaPropertyContentValues(html, "og:image");
-  const twitterImages = metaContentValues(html, "twitter:image");
-  const jsonLdImages = articleJsonLdImageValues(html);
-  const ogWidths = metaPropertyContentValues(html, "og:image:width");
-  const ogHeights = metaPropertyContentValues(html, "og:image:height");
-  const ogTypes = metaPropertyContentValues(html, "og:image:type");
-
-  if (ogImages.length !== 1) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: expected exactly one og:image, found ${ogImages.length}`,
-    );
-  }
-
-  if (twitterImages.length !== 1) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: expected exactly one twitter:image, found ${twitterImages.length}`,
-    );
-  }
-
-  if (jsonLdImages.length !== 1) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: expected exactly one BlogPosting JSON-LD image, found ${jsonLdImages.length}`,
-    );
-  }
-
-  const ogImage = ogImages[0];
-  if (ogImage === undefined) {
-    return;
-  }
-
-  if (twitterImages[0] !== undefined && twitterImages[0] !== ogImage) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: twitter:image does not match og:image`,
-    );
-  }
-
-  if (jsonLdImages[0] !== undefined && jsonLdImages[0] !== ogImage) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: BlogPosting JSON-LD image does not match og:image`,
-    );
-  }
-
-  if (ogWidths[0] !== socialPreviewImageSpec.width.toString()) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: og:image:width is not ${socialPreviewImageSpec.width}`,
-    );
-  }
-
-  if (ogHeights[0] !== socialPreviewImageSpec.height.toString()) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: og:image:height is not ${socialPreviewImageSpec.height}`,
-    );
-  }
-
-  if (ogTypes[0] !== socialPreviewImageMimeType) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: og:image:type is not ${socialPreviewImageMimeType}`,
-    );
-  }
-
-  const localImagePath = localGeneratedSocialImagePath(ogImage, distDir);
-  if (localImagePath === undefined) {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: og:image must point to a generated local JPG asset`,
-    );
-    return;
-  }
-
-  try {
-    const imageStats = await stat(localImagePath);
-    if (imageStats.size > maxSocialPreviewImageBytes) {
-      issues.socialImageIssues.push(
-        `${relativeHtmlPath}: social preview image is ${imageStats.size} bytes, above the ${maxSocialPreviewImageBytes} byte budget`,
-      );
-    }
-  } catch {
-    issues.socialImageIssues.push(
-      `${relativeHtmlPath}: social preview image file is missing for ${ogImage}`,
-    );
-  }
-}
-
-async function inspectArticlePdfs(
-  distDir: string,
-  articles: readonly PublishedArticle[],
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  for (const article of articles) {
-    const relativePdfPath = articlePdfOutputPath(article.slug);
-    const pdfExists = await exists(distDir, relativePdfPath);
-
-    if (!article.pdfEnabled) {
-      if (pdfExists) {
-        issues.articlePdfIssues.push(
-          `${relativePdfPath}: PDF disabled but generated PDF exists`,
-        );
-      }
-      continue;
-    }
-
-    if (!pdfExists) {
-      continue;
-    }
-
-    const data = await readFile(path.join(distDir, relativePdfPath));
-    const header = new TextDecoder().decode(data.subarray(0, pdfHeader.length));
-
-    if (header !== pdfHeader) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: generated file is not a PDF`,
-      );
-      continue;
-    }
-
-    if (data.byteLength > maxArticlePdfBytes) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: generated PDF is ${data.byteLength} bytes, above the ${maxArticlePdfBytes} byte limit`,
-      );
-    }
-
-    await inspectArticlePdfDocumentMetadata(
-      relativePdfPath,
-      data,
-      article,
-      issues,
-    );
-  }
-}
-
-async function inspectArticlePdfDocumentMetadata(
-  relativePdfPath: string,
-  data: Uint8Array,
-  article: PublishedArticle,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  try {
-    const pdf = await PDFDocument.load(data);
-    const expectedAuthor = article.authors.join(", ");
-
-    if (pdf.getTitle() !== article.title) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: missing PDF title metadata`,
-      );
-    }
-
-    if (expectedAuthor !== "" && pdf.getAuthor() !== expectedAuthor) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: missing PDF author metadata`,
-      );
-    }
-  } catch (error) {
-    issues.articlePdfIssues.push(
-      `${relativePdfPath}: ${error instanceof Error ? error.message : String(error)}`,
-    );
-  }
-}
-
-async function inspectStaticReadingPageHtml(
-  text: string,
-  relativeHtmlPath: string,
-  staticReadingPages: string[],
-  distDir: string,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  if (!staticReadingPages.includes(relativeHtmlPath)) {
-    return;
-  }
-
-  const unexpectedScriptSources: string[] = [];
-
-  for (const source of scriptSources(text)) {
-    if (
-      /^\/_astro\/[^"']+\.js$/iu.test(source) &&
-      !(await isAllowedStaticClientScript(distDir, relativeHtmlPath, source))
-    ) {
-      unexpectedScriptSources.push(source);
-    }
-  }
-
-  if (unexpectedScriptSources.length > 0) {
-    issues.unexpectedClientScripts.push(
-      `${relativeHtmlPath} -> ${unexpectedScriptSources.join(", ")}`,
-    );
-  }
-
-  if (/<astro-island\b/i.test(text)) {
-    issues.unexpectedHydrationBoundaries.push(relativeHtmlPath);
-  }
-}
-
-async function isAllowedStaticClientScript(
-  distDir: string,
-  relativeHtmlPath: string,
-  source: string,
-): Promise<boolean> {
-  if (
-    isArticleHtmlPath(relativeHtmlPath) &&
-    (articleImageInspectorScriptPattern.test(source) ||
-      articleCitationMenuScriptPattern.test(source) ||
-      articleReferencePreviewScriptPattern.test(source))
-  ) {
-    return true;
-  }
-
-  if (
-    allowedStaticClientScriptPatterns.some((pattern) => pattern.test(source))
-  ) {
-    return true;
-  }
-
-  if (!astroPrefetchPageScriptPattern.test(source)) {
-    return false;
-  }
-
-  const scriptText = await staticClientScriptText(distDir, source);
-  if (isAstroPrefetchRuntime(scriptText)) {
-    return true;
-  }
-
-  const prefetchChunk = astroPrefetchChunkImport(scriptText);
-  if (prefetchChunk === null) {
-    return false;
-  }
-
-  return isAstroPrefetchRuntime(
-    await staticClientScriptText(distDir, `/_astro/${prefetchChunk}`),
-  );
-}
-
-function isAstroPrefetchRuntime(scriptText: string): boolean {
-  return (
-    readsAstroPrefetchDataset(scriptText) &&
-    supportsPrefetchLinkCapabilityCheck(scriptText) &&
-    preservesSlowConnectionGuard(scriptText)
-  );
-}
-
-function astroPrefetchChunkImport(scriptText: string): null | string {
-  const match = astroPrefetchChunkImportPattern.exec(scriptText);
-  const prefetchChunk = match?.[1];
-
-  return prefetchChunk ?? null;
-}
-
-function preservesSlowConnectionGuard(scriptText: string): boolean {
-  return (
-    scriptText.includes("ignoreSlowConnection") &&
-    scriptText.includes("navigator.connection")
-  );
-}
-
-function readsAstroPrefetchDataset(scriptText: string): boolean {
-  return /dataset\s*\.\s*astroPrefetch/u.test(scriptText);
-}
-
-function supportsPrefetchLinkCapabilityCheck(scriptText: string): boolean {
-  return /relList\s*\??\.\s*supports\s*\??\.\s*\(\s*["'`]prefetch["'`]\s*\)/u.test(
-    scriptText,
-  );
-}
-
-async function staticClientScriptText(
-  distDir: string,
-  source: string,
-): Promise<string> {
-  try {
-    return await readFile(
-      path.join(distDir, source.replace(/^\//u, "")),
-      "utf8",
-    );
-  } catch {
-    return "";
-  }
-}
-
-function scriptSources(html: string): string[] {
-  const sources: string[] = [];
-  const scriptSourcePattern = /<script\b[^>]*\ssrc=["']([^"']+)["'][^>]*>/giu;
-  let match: null | RegExpExecArray;
-
-  while ((match = scriptSourcePattern.exec(html)) !== null) {
-    const source = match[1];
-    if (source !== undefined) {
-      sources.push(source);
-    }
-  }
-
-  return sources;
 }
 
 function isArticleHtmlPath(relativeHtmlPath: string): boolean {
   return /^articles\/(?!all\/)[^/]+\/index\.html$/.test(relativeHtmlPath);
-}
-
-async function internalTargetExists(
-  distDir: string,
-  url: string,
-): Promise<boolean> {
-  const cleanUrl = withoutFragmentAndQuery(url);
-  if (cleanUrl === "" || cleanUrl.startsWith("#")) {
-    return true;
-  }
-  if (!cleanUrl.startsWith("/")) {
-    return true;
-  }
-
-  const decoded = decodeURIComponent(cleanUrl).replace(/^\//, "");
-  const candidates = [
-    decoded,
-    path.join(decoded, "index.html"),
-    decoded.endsWith("/") ? path.join(decoded, "index.html") : "",
-  ].filter((candidate): candidate is string => candidate !== "");
-
-  for (const candidate of candidates) {
-    if (await exists(distDir, candidate)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 function isAstroConfigModule(
@@ -2015,27 +1348,6 @@ function isAstroConfigModule(
 
   const redirects = value["default"]["redirects"];
   return redirects === undefined || isRecord(redirects);
-}
-
-function isAstroRedirectFallbackPage(
-  html: string,
-  relativeHtmlPath: string,
-): boolean {
-  return (
-    /<title>Redirecting to: [^<]+<\/title>/i.test(html) &&
-    /<meta\s+http-equiv=["']refresh["']\s+content=["']0;url=[^"']+["']>/i.test(
-      html,
-    ) &&
-    /<meta\s+name=["']robots["']\s+content=["']noindex["']>/i.test(html) &&
-    /<link\s+rel=["']canonical["']\s+href=["']https?:\/\/[^"']+["']>/i.test(
-      html,
-    ) &&
-    html.includes(`<code>${expectedRedirectSource(relativeHtmlPath)}</code>`)
-  );
-}
-
-function isDatedHtmlPage(relativeHtmlPath: string): boolean {
-  return /^\d{4}\/\d{2}\/\d{2}\/[^/]+\/index\.html$/.test(relativeHtmlPath);
 }
 
 function isDraft(
@@ -2079,16 +1391,8 @@ async function listFiles(dir: string): Promise<string[]> {
   return files;
 }
 
-function redirectFallbackPath(source: string): string {
-  return `${source.replace(/^\//, "")}index.html`;
-}
-
 function toPosix(file: string): string {
   return file.split(path.sep).join("/");
-}
-
-function withoutFragmentAndQuery(url: string): string {
-  return url.split("#")[0]?.split("?")[0] ?? "";
 }
 
 // Coverage note: this wrapper only wires the exported CLI workflow to process

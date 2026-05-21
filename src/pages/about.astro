@@ -4,8 +4,7 @@ import { getEntry, render } from "astro:content";
 import ReadingBody from "../components/layout/ReadingBody.astro";
 import MarkdownPage from "../components/pages/MarkdownPage.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { pageUrl, SITE_TITLE } from "../lib/routes";
-import { titleWithSite } from "../lib/site-config";
+import { markdownPageRouteViewModel } from "../lib/content-route-view-models";
 
 const about = await getEntry("pages", "about");
 
@@ -14,16 +13,17 @@ if (!about) {
 }
 
 const { Content } = await render(about);
-const description = about.data.description ?? `About ${SITE_TITLE}.`;
+const model = markdownPageRouteViewModel(about, "about");
 ---
 
 <BaseLayout
-  title={titleWithSite(about.data.title)}
-  description={description}
-  canonicalPath={pageUrl("about")}
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
 >
   <ReadingBody>
-    <MarkdownPage title={about.data.title} description={description}>
+    <MarkdownPage title={model.title} description={model.description}>
       <Content />
     </MarkdownPage>
   </ReadingBody>
