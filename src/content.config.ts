@@ -20,7 +20,11 @@ const articles = defineCollection({
     generateId: ({ entry }) => filenameStem(entry),
   }),
   schema: (context) =>
-    articleSchema(context, siteConfig.contentDefaults.articles),
+    articleSchema(
+      context,
+      siteConfig.contentDefaults.articles,
+      siteConfig.metadata,
+    ),
 });
 
 const announcements = defineCollection({
@@ -30,7 +34,11 @@ const announcements = defineCollection({
     pattern: "**/*.{md,mdx}",
   }),
   schema: (context) =>
-    announcementSchema(context, siteConfig.contentDefaults.announcements),
+    announcementSchema(
+      context,
+      siteConfig.contentDefaults.announcements,
+      siteConfig.metadata,
+    ),
 });
 
 const categories = defineCollection({

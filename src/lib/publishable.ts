@@ -9,17 +9,29 @@ import {
   articleUrl,
   formatDate,
 } from "./routes";
+import type { SemanticMetadata } from "./semantic-metadata";
 import { siteConfig } from "./site-config";
 
 /** Runtime kind derived from the source content collection. */
 export type PublishableKind = "announcement" | "article";
 
+/** Source content collection that currently produces publishable entries. */
+type PublishableSourceCollection = "announcements" | "articles";
+
+/** Source body format derived from the content file path. */
+type PublishableSourceFormat = "markdown" | "mdx" | "unknown";
+
 /** Public surfaces a publishable entry may opt out of. */
 export type PublishableVisibilitySurface =
+  | "collections"
   | "directory"
+  | "external"
   | "feed"
   | "homepage"
-  | "search";
+  | "pdf"
+  | "related"
+  | "search"
+  | "sitemap";
 
 /** Normalized publishable visibility with permissive defaults. */
 export type PublishableVisibility = Record<
@@ -28,28 +40,88 @@ export type PublishableVisibility = Record<
 >;
 
 /** Image metadata consumed by publishable cards, lists, and feature slots. */
-interface PublishableImage {
+export interface PublishableImage {
   alt: string;
   src: ImageMetadata;
+}
+
+/** Category facts shared by article-like publishable entries. */
+interface PublishableCategory {
+  href: string;
+  title: string;
+}
+
+/** Stable source facts for a publishable entry. */
+interface PublishableSourceFacts {
+  collection: PublishableSourceCollection;
+  draft: boolean;
+  filePath?: string | undefined;
+  format: PublishableSourceFormat;
+  id: string;
+  kind: PublishableKind;
+}
+
+/** Canonical route facts for a publishable entry. */
+interface PublishableRouteFacts {
+  canonicalPath: string;
+  href: string;
+  legacyPaths: readonly string[];
+  outputPath?: string | undefined;
+}
+
+/** Display facts safe to pass to list/card/feed/view-model consumers. */
+interface PublishableDisplayFacts {
+  author: string;
+  authors?: readonly AuthorSummary[] | undefined;
+  category?: PublishableCategory | undefined;
+  date: string;
+  description: string;
+  image?: PublishableImage | undefined;
+  title: string;
+  updated?: string | undefined;
+}
+
+/** Taxonomy facts for grouping and discovery surfaces. */
+interface PublishableTaxonomyFacts {
+  category?: PublishableCategory | undefined;
+  tags: readonly string[];
+}
+
+/** Representative media facts carried by publishable entries. */
+interface PublishableMediaFacts {
+  image?: PublishableImage | undefined;
+}
+
+/** Entry-level metadata facts consumed by the metadata engine. */
+interface PublishableMetadataFacts {
+  canonicalPath: string;
+  date: Date;
+  description: string;
+  image?: PublishableImage | undefined;
+  semantic: SemanticMetadata;
+  title: string;
+  updated?: Date | undefined;
 }
 
 /** Article or announcement normalized for source-agnostic helpers. */
 export interface PublishableEntry {
   author: string;
   authors?: readonly AuthorSummary[] | undefined;
-  category?:
-    | undefined
-    | {
-        href: string;
-        title: string;
-      };
+  category?: PublishableCategory | undefined;
   date: string;
   description: string;
+  display: PublishableDisplayFacts;
   href: string;
   image?: PublishableImage | undefined;
   kind: PublishableKind;
+  media: PublishableMediaFacts;
+  metadata: PublishableMetadataFacts;
+  route: PublishableRouteFacts;
   slug: string;
+  source: PublishableSourceFacts;
+  taxonomy: PublishableTaxonomyFacts;
   title: string;
+  updated?: string | undefined;
   visibility: PublishableVisibility;
 }
 
@@ -68,10 +140,15 @@ export interface PublishableListItem {
 
 /** Default visibility for published entries that omit overrides. */
 export const defaultPublishableVisibility = {
+  collections: true,
   directory: true,
+  external: true,
   feed: true,
   homepage: true,
+  pdf: true,
+  related: true,
   search: true,
+  sitemap: true,
 } as const satisfies PublishableVisibility;
 
 /**
@@ -100,27 +177,69 @@ export function normalizePublishableVisibility(
 export function publishableFromArticleArchive(
   item: ArticleArchiveItem,
 ): PublishableEntry {
-  return {
+  const category =
+    item.category === undefined
+      ? undefined
+      : {
+          href: item.category.url,
+          title: item.category.title,
+        };
+  const href = item.url;
+  const display = publishableDisplayFacts({
     author: item.author,
     authors: item.authors,
-    category:
-      item.category === undefined
-        ? undefined
-        : {
-            href: item.category.url,
-            title: item.category.title,
-          },
+    category,
     date: item.date,
     description: item.description,
-    href: item.url,
     image: item.image,
-    kind: "article",
-    slug: item.article.id,
     title: item.title,
-    visibility: normalizePublishableVisibility(
-      item.article.data.visibility,
-      siteConfig.contentDefaults.articles.visibility,
-    ),
+    updated:
+      item.article.data.updated === undefined
+        ? undefined
+        : formatDate(item.article.data.updated),
+  });
+  const metadata = publishableMetadataFacts({
+    canonicalPath: href,
+    date: item.article.data.date,
+    description: item.description,
+    image: item.image,
+    semantic: item.article.data.semantic,
+    title: item.title,
+    updated: item.article.data.updated,
+  });
+  const visibility = normalizePublishableVisibility(
+    item.article.data.visibility,
+    siteConfig.contentDefaults.articles.visibility,
+  );
+
+  return {
+    ...display,
+    display,
+    href,
+    kind: "article",
+    media: {
+      image: item.image,
+    },
+    metadata,
+    route: {
+      canonicalPath: href,
+      href,
+      legacyPaths: publishableLegacyPaths(item.article.data.legacyPermalink),
+    },
+    slug: item.article.id,
+    source: {
+      collection: "articles",
+      draft: item.article.data.draft,
+      filePath: item.article.filePath,
+      format: publishableSourceFormat(item.article.filePath),
+      id: item.article.id,
+      kind: "article",
+    },
+    taxonomy: {
+      category,
+      tags: item.article.data.tags,
+    },
+    visibility,
   };
 }
 
@@ -133,25 +252,67 @@ export function publishableFromArticleArchive(
 export function publishableFromAnnouncement(
   announcement: AnnouncementEntry,
 ): PublishableEntry {
-  return {
+  const title = announcement.data.title;
+  const href = announcementUrl(announcement.id);
+  const image =
+    announcement.data.image === undefined
+      ? undefined
+      : {
+          alt: announcement.data.imageAlt ?? title,
+          src: announcement.data.image,
+        };
+  const display = publishableDisplayFacts({
     author: announcement.data.author,
     date: formatDate(announcement.data.date),
     description: announcement.data.description,
-    href: announcementUrl(announcement.id),
-    image:
-      announcement.data.image === undefined
+    image,
+    title,
+    updated:
+      announcement.data.updated === undefined
         ? undefined
-        : {
-            alt: announcement.data.imageAlt ?? announcement.data.title,
-            src: announcement.data.image,
-          },
+        : formatDate(announcement.data.updated),
+  });
+  const metadata = publishableMetadataFacts({
+    canonicalPath: href,
+    date: announcement.data.date,
+    description: announcement.data.description,
+    image,
+    semantic: announcement.data.semantic,
+    title,
+    updated: announcement.data.updated,
+  });
+  const visibility = normalizePublishableVisibility(
+    announcement.data.visibility,
+    siteConfig.contentDefaults.announcements.visibility,
+  );
+
+  return {
+    ...display,
+    display,
+    href,
     kind: "announcement",
+    media: {
+      image,
+    },
+    metadata,
+    route: {
+      canonicalPath: href,
+      href,
+      legacyPaths: publishableLegacyPaths(announcement.data.legacyPermalink),
+    },
     slug: announcement.id,
-    title: announcement.data.title,
-    visibility: normalizePublishableVisibility(
-      announcement.data.visibility,
-      siteConfig.contentDefaults.announcements.visibility,
-    ),
+    source: {
+      collection: "announcements",
+      draft: announcement.data.draft,
+      filePath: announcement.filePath,
+      format: publishableSourceFormat(announcement.filePath),
+      id: announcement.id,
+      kind: "announcement",
+    },
+    taxonomy: {
+      tags: [],
+    },
+    visibility,
   };
 }
 
@@ -177,15 +338,15 @@ export function publishableListItem(
   entry: PublishableEntry,
 ): PublishableListItem {
   return {
-    author: entry.author,
-    authors: entry.authors,
-    category: entry.category,
-    date: entry.date,
-    description: entry.description,
+    author: entry.display.author,
+    authors: entry.display.authors,
+    category: entry.display.category,
+    date: entry.display.date,
+    description: entry.display.description,
     href: entry.href,
-    image: entry.image,
+    image: entry.display.image,
     kind: entry.kind,
-    title: entry.title,
+    title: entry.display.title,
   };
 }
 
@@ -201,14 +362,24 @@ export function publishableVisibleOn(
   surface: PublishableVisibilitySurface,
 ): boolean {
   switch (surface) {
+    case "collections":
+      return entry.visibility.collections;
     case "directory":
       return entry.visibility.directory;
+    case "external":
+      return entry.visibility.external;
     case "feed":
       return entry.visibility.feed;
     case "homepage":
       return entry.visibility.homepage;
+    case "pdf":
+      return entry.visibility.pdf;
+    case "related":
+      return entry.visibility.related;
     case "search":
       return entry.visibility.search;
+    case "sitemap":
+      return entry.visibility.sitemap;
   }
 }
 
@@ -263,4 +434,38 @@ export function publishableSourceHref(
   return entry.collection === "articles"
     ? articleUrl(entry.id)
     : announcementUrl(entry.id);
+}
+
+function publishableDisplayFacts(
+  display: PublishableDisplayFacts,
+): PublishableDisplayFacts {
+  return display;
+}
+
+function publishableLegacyPaths(
+  legacyPermalink: string | undefined,
+): readonly string[] {
+  return legacyPermalink === undefined || legacyPermalink.trim() === ""
+    ? []
+    : [legacyPermalink];
+}
+
+function publishableMetadataFacts(
+  metadata: PublishableMetadataFacts,
+): PublishableMetadataFacts {
+  return metadata;
+}
+
+function publishableSourceFormat(
+  filePath: string | undefined,
+): PublishableSourceFormat {
+  if (filePath?.endsWith(".mdx") === true) {
+    return "mdx";
+  }
+
+  if (filePath?.endsWith(".md") === true) {
+    return "markdown";
+  }
+
+  return "unknown";
 }

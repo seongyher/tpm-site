@@ -62,10 +62,13 @@ export interface ArticleCompilerArtifact {
     readonly format: "markdown" | "mdx" | "unknown";
   };
   readonly surfaces: {
+    readonly collections: boolean;
     readonly directory: boolean;
+    readonly external: boolean;
     readonly feed: boolean;
     readonly homepage: boolean;
     readonly pdf: boolean;
+    readonly related: boolean;
     readonly search: boolean;
     readonly sitemap: boolean;
   };
@@ -242,11 +245,14 @@ function articleSurfaces(
   const published = !article.data.draft;
 
   return {
+    collections: published && visibility.collections,
     directory: published && visibility.directory,
+    external: published && visibility.external,
     feed: published && visibility.feed,
     homepage: published && visibility.homepage,
-    pdf: published && pdfEnabled,
+    pdf: published && pdfEnabled && visibility.pdf,
+    related: published && visibility.related,
     search: published && visibility.search,
-    sitemap: published && visibility.directory,
+    sitemap: published && visibility.sitemap,
   };
 }

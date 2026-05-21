@@ -10,25 +10,53 @@ or publishable-entry contracts to land first.
 
 ## Current Inventory
 
-`scripts/build/verify-build.ts` currently verifies generated output through
-bucketed string arrays:
+`scripts/build/verify-build.ts` still exposes the release-check CLI and legacy
+bucketed string arrays so existing CI output stays stable. The checks now run
+through focused verifier modules under `scripts/build/verify-build/`:
+
+- `route-verifier.ts` owns required route output and unexpected dated pages;
+- `link-verifier.ts` owns rendered local `href`/`src` targets;
+- `redirect-verifier.ts` owns legacy redirect fallback output;
+- `feed-verifier.ts` owns generated RSS feed policy;
+- `sitemap-verifier.ts` owns sitemap policy;
+- `html-inspection.ts` provides shared generated-HTML parsing helpers;
+- `html-verifier.ts` owns image alt semantics, scoped media output, embed
+  fallback output, and hydration boundaries;
+- `metadata-verifier.ts` owns document metadata, JSON-LD, and social previews;
+- `pdf-verifier.ts` owns article PDF links, Scholar metadata, generated PDF
+  files, PDF document metadata, and media-policy PDF diagnostics;
+- `asset-verifier.ts` owns source maps, immutable generated-asset cache policy,
+  and unexpected client scripts;
+- `content-output-verifier.ts` owns draft leaks, article page counts, and
+  private catalog output.
+
+The current release gate verifies:
 
 - required output paths;
 - legacy redirect fallbacks;
 - invalid redirect pages;
 - metadata and JSON-LD;
 - image alt attributes;
+- scoped article, hover, thumbnail, and embed media output;
 - broken links;
 - component catalog leakage;
 - article page counts;
 - draft leakage into feeds, sitemaps, and search output;
 - missing article JSON-LD;
 - source maps;
+- immutable cache headers for hashed generated Astro assets;
 - social preview images;
 - unexpected static client scripts;
 - unexpected generated dated pages;
 - unexpected hydration boundaries;
-- PDF links, PDF files, Scholar metadata, and PDF document metadata.
+- PDF links, PDF files, Scholar metadata, PDF document metadata, and
+  media-policy PDF diagnostics.
+
+The broader `search` and `security` categories are part of the verifier
+vocabulary, but they should gain dedicated modules only when the release gate
+has concrete generated-output contracts for them. Today, search coverage is
+represented by draft-leak checks against Pagefind output, and cache coverage is
+limited to the `_headers` policy for immutable hashed Astro assets.
 
 `scripts/site/site-doctor.ts` already has a smaller author-facing diagnostic
 shape with `severity`, `message`, `path`, and `repair`. The generated-output
@@ -85,9 +113,9 @@ Planned module categories are:
 - `build`;
 - `content`.
 
-The first implementation may adapt the current bucketed verifier output into
-this model before extracting each verifier family. Later milestones can replace
-each adapter with dedicated modules.
+The current implementation adapts module diagnostics back into the legacy
+bucketed report shape. This keeps human CLI output and existing JSON report
+codes stable while allowing each verifier family to be tested directly.
 
 ## Output Expectations
 
@@ -116,6 +144,6 @@ IRK-65 is complete when:
   have focused unit coverage;
 - reusable platform modules remain free of TPM-specific coupling.
 
-Later milestones may then split the route/link/redirect/feed/sitemap verifier
-family and the HTML/metadata/PDF/asset/cache/search/security verifier family
-behind the same API.
+Later milestones can replace the compatibility bridge with a native diagnostic
+runner once downstream release reports and GUI/CLI/MCP consumers are ready to
+consume module diagnostics directly.

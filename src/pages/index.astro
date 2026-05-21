@@ -10,7 +10,6 @@ import ArticleList from "../components/articles/ArticleList.astro";
 import FlatArticleList from "../components/articles/FlatArticleList.astro";
 import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { articleArchiveItems } from "../lib/archive";
 import { getAuthorEntries } from "../lib/authors";
 import {
   getAnnouncements,
@@ -20,7 +19,6 @@ import {
 } from "../lib/content";
 import { homePageRouteViewModel } from "../lib/home";
 import { itemListJsonLd } from "../lib/metadata";
-import { sectionNavigationItems } from "../lib/navigation";
 import { siteConfig } from "../lib/site-config";
 
 const home = await getEntry("pages", "index");
@@ -38,11 +36,11 @@ const authors = await getAuthorEntries();
 const collections = siteConfig.features.collections
   ? await getEditorialCollections()
   : [];
-const archiveItems = articleArchiveItems(articles, categories, authors);
 const homeView = homePageRouteViewModel({
   announcements,
-  archiveItems,
-  categoryItems: sectionNavigationItems(categories, "/"),
+  articles,
+  authors,
+  categories,
   collections,
   config: siteConfig,
   home,
@@ -50,12 +48,16 @@ const homeView = homePageRouteViewModel({
 ---
 
 <BaseLayout
-  title={homeView.title}
-  description={homeView.description}
-  canonicalPath={homeView.canonicalPath}
-  kind="home"
+  title={homeView.document.title}
+  description={homeView.document.description}
+  canonicalPath={homeView.document.canonicalPath}
+  kind={homeView.document.kind}
   structuredData={[
-    itemListJsonLd(homeView.canonicalPath, homeView.recent.items, Astro.site),
+    itemListJsonLd(
+      homeView.document.canonicalPath,
+      homeView.recent.items,
+      Astro.site,
+    ),
   ]}
 >
   <BrowsingBody width="wide" padding="snug">

@@ -36,9 +36,15 @@ export interface DiscoveryPolicy {
 
 /** Visibility fields available on article-like content. */
 export interface PublishableVisibility {
+  collections: boolean;
   directory: boolean;
+  external: boolean;
   feed: boolean;
+  homepage: boolean;
+  pdf: boolean;
+  related: boolean;
   search: boolean;
+  sitemap: boolean;
 }
 
 /** Minimal visible item shape accepted by `ItemList` metadata helpers. */
@@ -141,7 +147,7 @@ export function publishableDiscoveryPolicy(
   return {
     contentIndex: visibility.search,
     feed: visibility.feed,
-    sitemap: visibility.directory,
+    sitemap: visibility.sitemap,
   };
 }
 

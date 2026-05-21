@@ -3,31 +3,26 @@ import CategoryOverviewBlock from "../../components/blocks/CategoryOverviewBlock
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCategories } from "../../lib/content";
+import { categoriesIndexRouteViewModel } from "../../lib/listing-route-view-models";
 import { itemListJsonLd } from "../../lib/metadata";
-import { sectionNavigationItems } from "../../lib/navigation";
-import { categoriesIndexUrl } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 
-const categoryItems = sectionNavigationItems(
-  await getCategories(),
-  categoriesIndexUrl(),
-);
+const model = categoriesIndexRouteViewModel(await getCategories());
 ---
 
 <BaseLayout
-  title={titleWithSite("Categories")}
-  description="Browse articles by category."
-  canonicalPath={categoriesIndexUrl()}
-  kind="category-index"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
-    itemListJsonLd(categoriesIndexUrl(), categoryItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
     <CategoryOverviewBlock
-      title="Categories"
-      description="Browse the archive by subject."
-      items={categoryItems}
+      title={model.overviewTitle}
+      description={model.overviewDescription}
+      items={model.items}
     />
   </BrowsingBody>
 </BaseLayout>

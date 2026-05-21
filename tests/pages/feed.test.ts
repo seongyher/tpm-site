@@ -1,5 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 
+import { defaultPublishableVisibility } from "../../src/lib/publishable";
+
 await mock.module("astro:content", () => ({
   getCollection: async (collection: string) => {
     await Promise.resolve();
@@ -73,6 +75,7 @@ await mock.module("astro:content", () => ({
             tags: [],
             title: "Hidden Feed Announcement",
             visibility: {
+              ...defaultPublishableVisibility,
               directory: true,
               feed: false,
               homepage: true,

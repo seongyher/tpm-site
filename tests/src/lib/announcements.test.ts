@@ -5,6 +5,7 @@ import {
   announcementListItem,
   announcementListItems,
 } from "../../../src/lib/announcements";
+import { defaultPublishableVisibility } from "../../../src/lib/publishable";
 import { announcementEntry } from "../../helpers/content";
 
 describe("announcement list helpers", () => {
@@ -60,6 +61,7 @@ describe("announcement list helpers", () => {
       data: {
         title: "Off-Site Update",
         visibility: {
+          ...defaultPublishableVisibility,
           directory: false,
           feed: false,
           homepage: false,

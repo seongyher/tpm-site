@@ -9,6 +9,7 @@ import {
   announcementPublicationStats,
   type ArticlePublication,
   articlePublicationStats,
+  type BuildVerificationDiagnosticReport,
   buildVerificationDiagnosticReport,
   buildVerificationDiagnostics,
   collectionPublicationStats,
@@ -135,11 +136,67 @@ function pageHtmlFixture(
     '<meta name="description" content="Test description">',
     `<meta name="robots" content="${robots}">`,
     ...shareMeta,
-    '<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage"}</script>',
+    `<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"${canonical}#webpage"}</script>`,
     "</head><body>",
     body,
     "</body></html>",
   ].join("");
+}
+
+function diagnosticReportFingerprint(
+  report: BuildVerificationDiagnosticReport,
+) {
+  return {
+    articlePageCount: report.articlePageCount,
+    astroClientScriptCount: report.astroClientScriptCount,
+    diagnostics: report.diagnostics.map((diagnostic) => ({
+      category: diagnostic.category,
+      code: diagnostic.code,
+      location: diagnostic.location,
+      message: diagnostic.message,
+      moduleId: diagnostic.moduleId,
+      owner: diagnostic.owner,
+      severity: diagnostic.severity,
+    })),
+    summary: report.summary,
+  };
+}
+
+type DiagnosticReportFingerprint = ReturnType<
+  typeof diagnosticReportFingerprint
+>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isDiagnosticReportFingerprint(
+  value: unknown,
+): value is DiagnosticReportFingerprint {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value["articlePageCount"] === "number" &&
+    typeof value["astroClientScriptCount"] === "number" &&
+    Array.isArray(value["diagnostics"]) &&
+    isRecord(value["summary"])
+  );
+}
+
+function parseDiagnosticReportFingerprint(
+  text: string,
+): DiagnosticReportFingerprint {
+  const parsed: unknown = JSON.parse(text);
+
+  if (!isDiagnosticReportFingerprint(parsed)) {
+    throw new TypeError(
+      "Golden diagnostic report fixture has an unexpected shape.",
+    );
+  }
+
+  return parsed;
 }
 
 async function writeRequiredDistShell(root: string) {
@@ -579,10 +636,12 @@ describe("build verifier helpers", () => {
           articlePdfIssues: [],
           articleCountIssues: ["expected 1 article page, found 0"],
           brokenLinks: [],
+          cachePolicyIssues: [],
           catalogLeaks: [],
           draftLeaks: [],
           invalidLegacyRedirects: [],
           imageAltIssues: [],
+          mediaOutputIssues: [],
           metadataIssues: [],
           missingArticleJsonLd: [],
           missingLegacyRedirects: [],
@@ -607,11 +666,17 @@ describe("build verifier helpers", () => {
         ],
         articleCountIssues: ["expected 1 article page, found 2"],
         brokenLinks: ["index.html -> /missing/"],
+        cachePolicyIssues: [
+          "_headers: missing /_astro/* immutable cache header block",
+        ],
         catalogLeaks: ["catalog/"],
         draftLeaks: ["feed.xml -> draft-post"],
         invalidLegacyRedirects: ["2022/01/01/post/index.html: invalid"],
         imageAltIssues: [
           "articles/post/index.html: /image.webp is missing alt",
+        ],
+        mediaOutputIssues: [
+          "articles/post/index.html: /raw.png is not an optimized Astro asset",
         ],
         metadataIssues: ["index.html: missing meta description"],
         missingArticleJsonLd: ["articles/post/index.html"],
@@ -627,10 +692,12 @@ describe("build verifier helpers", () => {
 
     expect(report).toContain("Missing:");
     expect(report).toContain("Article PDF issues:");
+    expect(report).toContain("Cache policy issues:");
     expect(report).toContain("Missing legacy redirects:");
     expect(report).toContain("Invalid legacy redirects:");
     expect(report).toContain("Metadata issues:");
     expect(report).toContain("Image alt issues:");
+    expect(report).toContain("Media output issues:");
     expect(report).toContain("Broken links:");
     expect(report).toContain("Unexpected component catalog output:");
     expect(report).toContain("Article count mismatch:");
@@ -643,7 +710,7 @@ describe("build verifier helpers", () => {
     expect(report).toContain("Unexpected hydration boundaries:");
   });
 
-  test("maps each build verification issue bucket to structured diagnostics", () => {
+  test("maps each build verification issue bucket to structured diagnostics", async () => {
     const result = {
       articlePageCount: 2,
       astroClientScriptCount: 1,
@@ -653,11 +720,17 @@ describe("build verifier helpers", () => {
         ],
         articleCountIssues: ["expected 1 article page, found 2"],
         brokenLinks: ["index.html -> /missing/"],
+        cachePolicyIssues: [
+          "_headers: missing /_astro/* immutable cache header block",
+        ],
         catalogLeaks: ["catalog/"],
         draftLeaks: ["feed.xml -> draft-post"],
         invalidLegacyRedirects: ["2022/01/01/post/index.html: invalid"],
         imageAltIssues: [
           "articles/post/index.html: /image.webp is missing alt",
+        ],
+        mediaOutputIssues: [
+          "articles/post/index.html: /raw.png is not an optimized Astro asset",
         ],
         metadataIssues: ["index.html: missing meta description"],
         missingArticleJsonLd: ["articles/post/index.html"],
@@ -673,15 +746,17 @@ describe("build verifier helpers", () => {
     const diagnostics = buildVerificationDiagnostics(result);
     const report = buildVerificationDiagnosticReport(result);
 
-    expect(diagnostics).toHaveLength(16);
+    expect(diagnostics).toHaveLength(18);
     expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
       "pdf.article-output-invalid",
+      "cache.immutable-asset-policy-missing",
       "content.article-count-mismatch",
       "link.internal-target-missing",
       "build.catalog-leak",
       "content.draft-leak",
       "redirect.legacy-fallback-invalid",
       "html.image-alt-missing",
+      "html.media-output-invalid",
       "metadata.html-invalid",
       "metadata.article-json-ld-missing",
       "redirect.legacy-fallback-missing",
@@ -692,19 +767,28 @@ describe("build verifier helpers", () => {
       "asset.client-script-unexpected",
       "route.dated-page-unexpected",
     ]);
-    expect(diagnostics[10]).toMatchObject({
+    expect(diagnostics[12]).toMatchObject({
       location: { outputPath: "feed.xml" },
       moduleId: "build.routes",
       owner: "generated-output",
       severity: "error",
     });
     expect(report.summary).toMatchObject({
-      errors: 16,
-      total: 16,
+      errors: 18,
+      total: 18,
       warnings: 0,
     });
     expect(report.articlePageCount).toBe(2);
     expect(report.astroClientScriptCount).toBe(1);
+    const expected = parseDiagnosticReportFingerprint(
+      await readFile(
+        path.join(
+          "tests/fixtures/build-verifier/golden-diagnostic-report.json",
+        ),
+        "utf8",
+      ),
+    );
+    expect(diagnosticReportFingerprint(report)).toEqual(expected);
   });
 
   test("verifies built output against source articles and categories", async () =>

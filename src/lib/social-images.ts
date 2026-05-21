@@ -1,16 +1,22 @@
 import type { ImageMetadata } from "astro";
 
+import {
+  socialPreviewMediaPolicy,
+  type SocialPreviewMediaTransform,
+  socialPreviewMediaTransform,
+} from "./media-policy";
+
 export const socialPreviewImageSpec = {
-  fit: "cover",
-  format: "jpg",
-  height: 630,
-  position: "center",
-  quality: 82,
-  width: 1200,
+  fit: socialPreviewMediaPolicy.fit,
+  format: socialPreviewMediaPolicy.format,
+  height: socialPreviewMediaPolicy.height,
+  position: socialPreviewMediaPolicy.position,
+  quality: socialPreviewMediaPolicy.quality,
+  width: socialPreviewMediaPolicy.width,
 } as const;
 
-export const socialPreviewImageMimeType = "image/jpeg";
-export const maxSocialPreviewImageBytes = 500 * 1024;
+export const socialPreviewImageMimeType = socialPreviewMediaPolicy.mimeType;
+export const maxSocialPreviewImageBytes = socialPreviewMediaPolicy.maxBytes;
 
 /** Generated social preview image metadata for Open Graph, Twitter, and JSON-LD. */
 export interface SocialPreviewImage {
@@ -22,15 +28,7 @@ export interface SocialPreviewImage {
 }
 
 /** Transform contract passed to Astro's image optimizer for social previews. */
-export interface SocialPreviewImageTransform {
-  fit: typeof socialPreviewImageSpec.fit;
-  format: typeof socialPreviewImageSpec.format;
-  height: typeof socialPreviewImageSpec.height;
-  position: typeof socialPreviewImageSpec.position;
-  quality: typeof socialPreviewImageSpec.quality;
-  src: ImageMetadata;
-  width: typeof socialPreviewImageSpec.width;
-}
+export type SocialPreviewImageTransform = SocialPreviewMediaTransform;
 
 /** Minimal optimizer adapter shape needed by the social preview pipeline. */
 export type SocialPreviewImageOptimizer = (
@@ -55,15 +53,7 @@ export async function socialPreviewImageViewModel(
   input: SocialPreviewImageViewModelInput,
 ): Promise<SocialPreviewImage> {
   const image = input.source ?? input.fallback;
-  const optimized = await input.optimize({
-    fit: socialPreviewImageSpec.fit,
-    format: socialPreviewImageSpec.format,
-    height: socialPreviewImageSpec.height,
-    position: socialPreviewImageSpec.position,
-    quality: socialPreviewImageSpec.quality,
-    src: image,
-    width: socialPreviewImageSpec.width,
-  });
+  const optimized = await input.optimize(socialPreviewMediaTransform(image));
   const alt = input.alt?.trim();
 
   return {

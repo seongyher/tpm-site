@@ -1,0 +1,198 @@
+{
+  "articlePageCount": 2,
+  "astroClientScriptCount": 1,
+  "diagnostics": [
+    {
+      "category": "pdf",
+      "code": "pdf.article-output-invalid",
+      "location": { "outputPath": "articles/post/post.pdf" },
+      "message": "articles/post/post.pdf: missing PDF title metadata",
+      "moduleId": "build.article-pdf",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "cache",
+      "code": "cache.immutable-asset-policy-missing",
+      "location": { "outputPath": "_headers" },
+      "message": "_headers: missing /_astro/* immutable cache header block",
+      "moduleId": "build.assets",
+      "owner": "site-config",
+      "severity": "error"
+    },
+    {
+      "category": "content",
+      "code": "content.article-count-mismatch",
+      "message": "expected 1 article page, found 2",
+      "moduleId": "build.article-pages",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "link",
+      "code": "link.internal-target-missing",
+      "location": { "outputPath": "index.html" },
+      "message": "index.html -> /missing/",
+      "moduleId": "build.links",
+      "owner": "content",
+      "severity": "error"
+    },
+    {
+      "category": "build",
+      "code": "build.catalog-leak",
+      "location": { "outputPath": "catalog/" },
+      "message": "catalog/",
+      "moduleId": "build.catalog",
+      "owner": "platform",
+      "severity": "error"
+    },
+    {
+      "category": "content",
+      "code": "content.draft-leak",
+      "location": { "outputPath": "feed.xml" },
+      "message": "feed.xml -> draft-post",
+      "moduleId": "build.drafts",
+      "owner": "content",
+      "severity": "error"
+    },
+    {
+      "category": "redirect",
+      "code": "redirect.legacy-fallback-invalid",
+      "location": { "outputPath": "2022/01/01/post/index.html" },
+      "message": "2022/01/01/post/index.html: invalid",
+      "moduleId": "build.redirects",
+      "owner": "site-config",
+      "severity": "error"
+    },
+    {
+      "category": "html",
+      "code": "html.image-alt-missing",
+      "location": { "outputPath": "articles/post/index.html" },
+      "message": "articles/post/index.html: /image.webp is missing alt",
+      "moduleId": "build.html",
+      "owner": "content",
+      "severity": "error"
+    },
+    {
+      "category": "html",
+      "code": "html.media-output-invalid",
+      "location": { "outputPath": "articles/post/index.html" },
+      "message": "articles/post/index.html: /raw.png is not an optimized Astro asset",
+      "moduleId": "build.html",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "metadata",
+      "code": "metadata.html-invalid",
+      "location": { "outputPath": "index.html" },
+      "message": "index.html: missing meta description",
+      "moduleId": "build.metadata",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "metadata",
+      "code": "metadata.article-json-ld-missing",
+      "location": { "outputPath": "articles/post/index.html" },
+      "message": "articles/post/index.html",
+      "moduleId": "build.metadata",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "redirect",
+      "code": "redirect.legacy-fallback-missing",
+      "location": { "route": "/2022/01/01/post/" },
+      "message": "/2022/01/01/post/ -> /articles/post/",
+      "moduleId": "build.redirects",
+      "owner": "site-config",
+      "severity": "error"
+    },
+    {
+      "category": "route",
+      "code": "route.required-output-missing",
+      "location": { "outputPath": "feed.xml" },
+      "message": "feed.xml",
+      "moduleId": "build.routes",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "asset",
+      "code": "asset.source-map-leak",
+      "location": { "outputPath": "_astro/index.js.map" },
+      "message": "_astro/index.js.map",
+      "moduleId": "build.assets",
+      "owner": "platform",
+      "severity": "error"
+    },
+    {
+      "category": "metadata",
+      "code": "metadata.social-preview-invalid",
+      "location": { "outputPath": "articles/post/index.html" },
+      "message": "articles/post/index.html: social image invalid",
+      "moduleId": "build.social-preview",
+      "owner": "generated-output",
+      "severity": "error"
+    },
+    {
+      "category": "html",
+      "code": "html.hydration-boundary-unexpected",
+      "location": { "outputPath": "articles/post/index.html" },
+      "message": "articles/post/index.html",
+      "moduleId": "build.html",
+      "owner": "platform",
+      "severity": "error"
+    },
+    {
+      "category": "asset",
+      "code": "asset.client-script-unexpected",
+      "location": { "outputPath": "index.html" },
+      "message": "index.html -> /_astro/index.js",
+      "moduleId": "build.assets",
+      "owner": "platform",
+      "severity": "error"
+    },
+    {
+      "category": "route",
+      "code": "route.dated-page-unexpected",
+      "location": { "outputPath": "2022/01/01/post/index.html" },
+      "message": "2022/01/01/post/index.html",
+      "moduleId": "build.routes",
+      "owner": "generated-output",
+      "severity": "error"
+    }
+  ],
+  "summary": {
+    "byCategory": {
+      "asset": 2,
+      "build": 1,
+      "cache": 1,
+      "content": 2,
+      "html": 3,
+      "link": 1,
+      "metadata": 3,
+      "pdf": 1,
+      "redirect": 2,
+      "route": 2
+    },
+    "byModule": {
+      "build.article-pages": 1,
+      "build.article-pdf": 1,
+      "build.assets": 3,
+      "build.catalog": 1,
+      "build.drafts": 1,
+      "build.html": 3,
+      "build.links": 1,
+      "build.metadata": 2,
+      "build.redirects": 2,
+      "build.routes": 2,
+      "build.social-preview": 1
+    },
+    "errors": 18,
+    "info": 0,
+    "total": 18,
+    "warnings": 0
+  }
+}

@@ -4,11 +4,9 @@ import { render } from "astro:content";
 import BibliographyPage from "../components/bibliography/BibliographyPage.astro";
 import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { bibliographyEntriesFromArticleReferences } from "../lib/bibliography";
+import { bibliographyRouteViewModel } from "../lib/content-route-view-models";
 import { getArticles } from "../lib/content";
 import { itemListJsonLd } from "../lib/metadata";
-import { bibliographyUrl, SITE_TITLE } from "../lib/routes";
-import { titleWithSite } from "../lib/site-config";
 import { articleReferencesFromFrontmatter } from "../remark-plugins/articleReferences";
 
 const articles = await getArticles();
@@ -22,24 +20,19 @@ const articleReferences = await Promise.all(
     };
   }),
 );
-const entries = bibliographyEntriesFromArticleReferences(articleReferences);
-const bibliographyItems = entries.map((entry) => ({
-  description: entry.display.authors,
-  href: `${bibliographyUrl()}#${entry.id}`,
-  title: entry.display.title ?? entry.sourceText,
-}));
+const model = bibliographyRouteViewModel(articleReferences);
 ---
 
 <BaseLayout
-  title={titleWithSite("Bibliography")}
-  description={`Sources cited by articles in ${SITE_TITLE}.`}
-  canonicalPath={bibliographyUrl()}
-  kind="bibliography"
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
   structuredData={[
-    itemListJsonLd(bibliographyUrl(), bibliographyItems, Astro.site),
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >
   <BrowsingBody>
-    <BibliographyPage entries={entries} />
+    <BibliographyPage entries={model.entries} />
   </BrowsingBody>
 </BaseLayout>

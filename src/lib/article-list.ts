@@ -1,5 +1,12 @@
 import type { ArticleArchiveItem } from "./archive";
-import type { PublishableListItem } from "./publishable";
+import {
+  publishableFromArticleArchive,
+  type PublishableListItem,
+  publishableListItem,
+  publishableListItems,
+  type PublishableVisibilitySurface,
+  visiblePublishables,
+} from "./publishable";
 
 /** Compatibility name for the generic publishable-entry list item. */
 export type ArticleListItem = PublishableListItem;
@@ -14,32 +21,21 @@ export type { PublishableListItem };
 export function articleListItemFromArchive(
   item: ArticleArchiveItem,
 ): ArticleListItem {
-  return {
-    author: item.author,
-    authors: item.authors,
-    category:
-      item.category === undefined
-        ? undefined
-        : {
-            href: item.category.url,
-            title: item.category.title,
-          },
-    date: item.date,
-    description: item.description,
-    href: item.url,
-    image: item.image,
-    title: item.title,
-  };
+  return publishableListItem(publishableFromArticleArchive(item));
 }
 
 /**
  * Converts archive items into shared article-list item props.
  *
  * @param items Archive items from content helpers.
+ * @param surface Visibility surface required for each item.
  * @returns Component-ready article list items.
  */
 export function articleListItemsFromArchive(
   items: readonly ArticleArchiveItem[],
+  surface: PublishableVisibilitySurface = "directory",
 ): ArticleListItem[] {
-  return items.map(articleListItemFromArchive);
+  return publishableListItems(
+    visiblePublishables(items.map(publishableFromArticleArchive), surface),
+  );
 }

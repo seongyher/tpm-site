@@ -13,22 +13,38 @@ incidental TPM implementation details.
   entries and editorial metadata. Current modules: `announcements`, `archive`,
   `article-compiler`, `article-continuity`, `article-list`,
   `article-page-view-model`,
-  `article-view`, `authors`, `collections`, `content`, `content-schemas`,
-  `feed`, `home`, `publishable`, and `tags`.
+  `article-view`, `authors`, `collections`, `content`,
+  `content-route-view-models`,
+  `content-schemas`, `feed`, `home`, `listing-route-view-models`,
+  `publishable`, and `tags`.
+  The publishable-entry contract is documented in
+  [`PUBLISHABLE_ENTRY_MODEL.md`](./PUBLISHABLE_ENTRY_MODEL.md).
 - Routes and features
   Owns URL construction, static path helpers, optional feature routes,
   navigation, metadata contracts, SEO, social previews, share targets, support
   CTAs, site config, site instance paths, and redirects. Current modules:
-  `feature-routes`, `metadata`, `navigation`, `platform-context`,
+  `feature-routes`, `metadata`, `metadata-graph`, `navigation`,
+  `platform-context`, `semantic-profile-kinds`,
   `route-registry`, `routes`, `semantic-metadata`, `seo`, `share-targets`,
   `site-config`,
   `site-config-defaults`, `site-instance`, `site-redirects`,
-  `source-artifacts`, `social-images`, `static-paths`, and `support`.
+  `source-artifacts`, `static-paths`, and `support`.
+  Route view-model responsibilities are documented in
+  [`ROUTE_VIEW_MODELS.md`](./ROUTE_VIEW_MODELS.md).
+  Metadata graph and semantic profile responsibilities are documented in
+  [`METADATA_GRAPH_AND_SEMANTIC_PROFILES.md`](./METADATA_GRAPH_AND_SEMANTIC_PROFILES.md).
 - Article rendering
   Owns prose-adjacent article view helpers such as embed media layout, image
   policy, title fitting, and table-of-contents data. Current modules:
   `article-image-policy`, `article-list-title-fit`, `article-toc`, and
   `embed-media`.
+- Media policy
+  Owns cross-surface media roles, provider adapters, output policies,
+  fallbacks, media diagnostics, and generated media artifact expectations.
+  Current modules: `media-policy` and `social-images`. Related article image,
+  embed, PDF, and publishable media helpers consume or will consume the same
+  policy contracts; the target contract is documented in
+  [`MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md`](./MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md).
 - PDF and scholarly output
   Owns article PDF compatibility, PDF output metadata, and PDF generation
   inputs. Current modules: `article-pdf` and `article-pdf-compatibility`.
@@ -40,6 +56,8 @@ incidental TPM implementation details.
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:
   `article-references/*`, `bibliography`, and `citations/article-citation`.
+  The target citation normalization contract is documented in
+  [`CITATION_SOURCE_MODEL.md`](./CITATION_SOURCE_MODEL.md).
 - Interaction primitives
   Owns browser-independent positioning/disclosure logic shared by navigation,
   popovers, and hover/tap surfaces. Current modules: `anchored-disclosure` and

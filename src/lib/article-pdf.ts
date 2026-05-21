@@ -1,5 +1,6 @@
 import { articleCompilerArtifact } from "./article-compiler";
 import type { ArticleReferenceData } from "./article-references/model";
+import { normalizedCitationSource } from "./article-references/source";
 import type { AuthorSummary } from "./authors";
 import { routeOutputBasePath } from "./route-registry";
 import { type ArticleEntry, authorName } from "./routes";
@@ -194,13 +195,16 @@ function scholarCitationReferences(
   }
 
   return articleReferences.citations
-    .map((citation) =>
-      citation.definition.children
-        .map((block) => block.text)
-        .join(" ")
+    .map((citation) => {
+      const source = normalizedCitationSource(citation.bibtex);
+
+      return (
+        source.fields["citation"] ??
+        citation.definition.children.map((block) => block.text).join(" ")
+      )
         .replace(/\s+/gu, " ")
-        .trim(),
-    )
+        .trim();
+    })
     .filter((reference) => reference.length > 0)
     .filter(
       (reference, index, references) => references.indexOf(reference) === index,

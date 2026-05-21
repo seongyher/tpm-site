@@ -3,30 +3,27 @@ import TermOverviewBlock from "../../components/blocks/TermOverviewBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getTags } from "../../lib/content";
+import { tagsIndexRouteViewModel } from "../../lib/listing-route-view-models";
 import { itemListJsonLd } from "../../lib/metadata";
-import { tagsIndexUrl } from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
 
-const tagItems = (await getTags()).map((tag) => ({
-  count: tag.articles.length,
-  href: tag.href,
-  title: tag.label,
-}));
+const model = tagsIndexRouteViewModel(await getTags());
 ---
 
 <BaseLayout
-  title={titleWithSite("Tags")}
-  description="Browse articles by tag."
-  canonicalPath={tagsIndexUrl()}
-  kind="tag-index"
-  structuredData={[itemListJsonLd(tagsIndexUrl(), tagItems, Astro.site)]}
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
+  structuredData={[
+    itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <TermOverviewBlock
-      title="Tags"
-      description="Browse articles by recurring topics, references, and motifs."
-      items={tagItems}
-      emptyLabel="No article tags are available yet."
+      title={model.overviewTitle}
+      description={model.overviewDescription}
+      items={model.items}
+      emptyLabel={model.emptyLabel}
     />
   </BrowsingBody>
 </BaseLayout>

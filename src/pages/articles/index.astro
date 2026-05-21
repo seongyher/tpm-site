@@ -6,47 +6,41 @@ import PageHeader from "../../components/pages/PageHeader.astro";
 import LinkButton from "../../components/ui/LinkButton.astro";
 import TextLink from "../../components/ui/TextLink.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { articleListItemsFromArchive } from "../../lib/article-list";
-import { articleArchiveItems } from "../../lib/archive";
 import { getAuthorEntries } from "../../lib/authors";
 import { getArticles, getCategories } from "../../lib/content";
+import { articlesIndexRouteViewModel } from "../../lib/listing-route-view-models";
 import { itemListJsonLd } from "../../lib/metadata";
-import { sectionNavigationItems } from "../../lib/navigation";
-import {
-  articlesArchiveUrl,
-  articlesIndexUrl,
-  SITE_TITLE,
-} from "../../lib/routes";
-import { titleWithSite } from "../../lib/site-config";
+import { articlesIndexUrl } from "../../lib/routes";
 
-const articles = await getArticles();
-const categories = await getCategories();
-const authors = await getAuthorEntries();
-const archiveItems = articleArchiveItems(articles, categories, authors);
-const latestItems = articleListItemsFromArchive(archiveItems.slice(0, 8));
-const categoryItems = sectionNavigationItems(categories, articlesIndexUrl());
+const model = articlesIndexRouteViewModel({
+  articles: await getArticles(),
+  authors: await getAuthorEntries(),
+  categories: await getCategories(),
+});
 ---
 
 <BaseLayout
-  title={titleWithSite("Articles")}
-  description={`Browse ${SITE_TITLE} by category, recent writing, and full archive.`}
-  canonicalPath={articlesIndexUrl()}
-  kind="articles-index"
-  structuredData={[itemListJsonLd(articlesIndexUrl(), latestItems, Astro.site)]}
+  title={model.document.title}
+  description={model.document.description}
+  canonicalPath={model.document.canonicalPath}
+  kind={model.document.kind}
+  structuredData={[
+    itemListJsonLd(articlesIndexUrl(), model.latestItems, Astro.site),
+  ]}
 >
   <BrowsingBody>
     <section class="grid gap-4">
       <PageHeader headingId="articles-heading" title="Articles">
         <Fragment slot="description">
           Browse articles by category, start with recent writing, or go straight
-          to the <TextLink href={articlesArchiveUrl()} prefetch="hover"
+          to the <TextLink href={model.archiveHref} prefetch="hover"
             >complete article archive</TextLink
           >.
         </Fragment>
       </PageHeader>
       <div class="flex flex-wrap gap-3">
         <LinkButton
-          href={articlesArchiveUrl()}
+          href={model.archiveHref}
           variant="outline"
           tone="neutral"
           prefetch="hover"
@@ -58,15 +52,15 @@ const categoryItems = sectionNavigationItems(categories, articlesIndexUrl());
     <CategoryRailBlock
       aria-label="Article categories"
       data-articles-category-rail
-      items={categoryItems}
+      items={model.categoryItems}
       railId="articles-categories-rail"
       title="Categories"
     />
     <ArchiveListBlock
-      title="Latest Articles"
+      title={model.latestTitle}
       description="Recent writing from the archive."
       headingLevel={2}
-      items={latestItems}
+      items={model.latestItems}
       pagefindIgnore
     />
   </BrowsingBody>

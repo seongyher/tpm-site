@@ -116,8 +116,22 @@ export function collectionDirectoryListItems(
   entry: EditorialCollectionEntry,
   publishables: ReadonlyMap<string, PublishableEntry>,
 ): PublishableListItem[] {
+  return collectionListItems(entry, publishables);
+}
+
+/**
+ * Converts a collection into collection-visible compact list items.
+ *
+ * @param entry Editorial collection entry.
+ * @param publishables Publishable lookup by global slug.
+ * @returns Collection-visible items in manual collection order.
+ */
+export function collectionListItems(
+  entry: EditorialCollectionEntry,
+  publishables: ReadonlyMap<string, PublishableEntry>,
+): PublishableListItem[] {
   return resolvePublishableCollection(entry, publishables)
-    .items.filter((item) => publishableVisibleOn(item.entry, "directory"))
+    .items.filter((item) => publishableVisibleOn(item.entry, "collections"))
     .map(({ entry: publishable, note }) => ({
       ...publishableListItem(publishable),
       description: note ?? publishable.description,

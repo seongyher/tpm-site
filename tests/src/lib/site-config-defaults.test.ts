@@ -47,10 +47,15 @@ describe("site config defaults", () => {
     expect(defaultFeatureConfig.support).toBe(true);
     expect(defaultFeatureConfig.pdf).toBe(true);
     expect(defaultPublishableVisibilityConfig).toEqual({
+      collections: true,
       directory: true,
+      external: true,
       feed: true,
       homepage: true,
+      pdf: true,
+      related: true,
       search: true,
+      sitemap: true,
     });
     expect(defaultContentDefaultsConfig.articles.pdf.enabled).toBe(true);
     expect(defaultContentDefaultsConfig.announcements.visibility).toEqual(

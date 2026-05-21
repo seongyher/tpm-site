@@ -1,11 +1,11 @@
-import type { ArticleArchiveItem } from "./archive";
+import { type ArticleArchiveItem, articleArchiveItems } from "./archive";
 import {
   editorialCollectionById,
   type EditorialCollectionEntry,
   resolvePublishableCollection,
 } from "./collections";
 import { optionalFeatureRouteEntries } from "./feature-routes";
-import type { SectionNavItem } from "./navigation";
+import { sectionNavigationItems, type SectionNavItem } from "./navigation";
 import {
   type PublishableEntry,
   publishableFromAnnouncement,
@@ -16,7 +16,13 @@ import {
   publishableListItems,
   visiblePublishables,
 } from "./publishable";
-import type { AnnouncementEntry, PageEntry } from "./routes";
+import type {
+  AnnouncementEntry,
+  ArticleEntry,
+  AuthorEntry,
+  CategorySummary,
+  PageEntry,
+} from "./routes";
 import type { SiteConfig, SiteRouteKey } from "./site-config";
 import {
   type SupportActionsViewModel,
@@ -90,8 +96,12 @@ interface HomeHeroViewModel {
 }
 
 /** Inputs required to build the full homepage route view model. */
-interface HomePageRouteViewModelInput extends HomePageViewModelInput {
-  categoryItems: readonly SectionNavItem[];
+interface HomePageRouteViewModelInput {
+  announcements: readonly AnnouncementEntry[];
+  articles: readonly ArticleEntry[];
+  authors: readonly AuthorEntry[];
+  categories: CategorySummary[];
+  collections: readonly EditorialCollectionEntry[];
   config: SiteConfig;
   home: Pick<PageEntry, "data">;
 }
@@ -104,6 +114,12 @@ interface HomePageRouteViewModel {
   description: string;
   discovery: {
     links: HomeDiscoveryLink[];
+    title: string;
+  };
+  document: {
+    canonicalPath: "/";
+    description: string;
+    kind: "home";
     title: string;
   };
   featured: HomeFeaturedCarouselViewModel;
@@ -184,16 +200,23 @@ export function homePageViewModel({
  * Builds the complete homepage route view model from config and content.
  *
  * @param input Homepage page entry, configured labels, and loaded content.
- * @param input.categoryItems Display-ready category navigation items.
+ * @param input.announcements Published announcements.
+ * @param input.articles Published articles.
+ * @param input.authors Author metadata entries.
+ * @param input.categories Category summaries.
+ * @param input.collections Active editor-owned collections.
  * @param input.config Validated site-owner config.
  * @param input.home Homepage content entry.
  * @returns Display-ready props for the homepage route blocks.
  */
 export function homePageRouteViewModel({
-  categoryItems,
+  announcements,
+  articles,
+  authors,
+  categories,
+  collections,
   config,
   home,
-  ...contentInput
 }: HomePageRouteViewModelInput): HomePageRouteViewModel {
   const hero = home.data.hero;
 
@@ -204,13 +227,17 @@ export function homePageRouteViewModel({
   }
 
   const viewModel = homePageViewModel({
-    ...contentInput,
     announcementLimit: config.homepage.announcementLimit,
+    announcements,
+    archiveItems: articleArchiveItems(articles, categories, authors),
+    collections,
     featuredCollectionId: config.homepage.featuredCollection,
     recentLimit: config.homepage.recentLimit,
     startHereCollectionId: config.homepage.startHereCollection,
   });
   const fallbackLabel = config.identity.shortTitle ?? config.identity.title;
+  const description = home.data.description ?? config.identity.description;
+  const title = titleWithConfig(home.data.title, config);
 
   return {
     announcements: {
@@ -225,11 +252,17 @@ export function homePageRouteViewModel({
     categories: config.features.categories
       ? {
           emptyText: config.homepage.emptyText.categories,
-          items: categoryItems,
+          items: sectionNavigationItems(categories, "/"),
           title: config.homepage.labels.categories,
         }
       : undefined,
-    description: home.data.description ?? config.identity.description,
+    description,
+    document: {
+      canonicalPath: "/",
+      description,
+      kind: "home",
+      title,
+    },
     discovery: {
       links: homepageDiscoveryLinks(config),
       title: config.homepage.labels.read,
@@ -263,7 +296,7 @@ export function homePageRouteViewModel({
           )
         : undefined,
     },
-    title: titleWithConfig(home.data.title, config),
+    title,
   };
 }
 

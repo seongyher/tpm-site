@@ -1,6 +1,6 @@
 # Citation BibTeX Audit
 
-Generated from repository content on May 18, 2026.
+Generated from repository content on May 21, 2026.
 
 This report inventories every article `[^cite-*]` marker and every hidden
 `tpm-bibtex` entry under `site/content/articles/`. It is a structural
@@ -25,6 +25,7 @@ ledger lives in `docs/CITATION_CANONICAL_VERIFICATION_LEDGER.md`.
 - Bibliography-only BibTeX entries: 38
 - Missing BibTeX entries for inline markers: 0
 - Parser diagnostics: 0
+- Citation audit diagnostics: 568
 - Duplicate candidate clusters: 39
 
 Coverage is complete when the scanned article count matches the article
@@ -51,12 +52,34 @@ the missing-entry table, and parser diagnostics are zero.
 
 - 204 entries still use the transitional `citation` field.
 - 0 entries are effectively literal citation strings rather than structured BibTeX.
+- 0 entries use unsupported source types.
 - 5 entries are `@misc`; many probably need a more specific type after verification.
+- 0 entries appear to attach usage-specific locator data to source records.
 - 1 entries lack a structured contributor field such as `author`, `editor`, or `organization`.
 - 16 entries lack a structured date field.
 - 26 entries lack a structured identifier such as `url`, `doi`, `isbn`, or `issn`.
 - 39 probable duplicate clusters need manual comparison before sitewide bibliography aggregation can be trusted.
 - 0 inline citation keys have no matching BibTeX entry.
+
+## Citation Diagnostics
+
+- Error diagnostics: 0
+- Review diagnostics: 568
+
+- `citation-field-transitional`: 204
+- `duplicate-candidate`: 46
+- `generic-misc-type`: 5
+- `missing-contributor`: 1
+- `missing-date`: 16
+- `missing-structured-identifier`: 26
+- `missing-url-field`: 22
+- `needs-external-verification`: 246
+- `possible-entry-type-upgrade`: 2
+
+Detailed diagnostics are available from
+`bun run references:bibtex:audit -- --json`; the inventory table below
+keeps per-entry review flags beside the source records authors need to
+repair.
 
 ## Required Cleanup Strategy
 

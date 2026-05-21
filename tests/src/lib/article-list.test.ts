@@ -62,6 +62,7 @@ describe("article list helpers", () => {
         alt: "Article preview image",
         src: sampleImage,
       },
+      kind: "article",
       title: "Article Title",
     });
   });
@@ -91,8 +92,29 @@ describe("article list helpers", () => {
           alt: "Article preview image",
           src: sampleImage,
         },
+        kind: "article",
         title: "Article Title",
       },
     ]);
+  });
+
+  test("filters article-list items through the requested publishable surface", () => {
+    const hidden = {
+      ...archiveItem,
+      article: articleEntry({
+        data: {
+          visibility: {
+            ...archiveItem.article.data.visibility,
+            directory: false,
+            related: true,
+          },
+        },
+        id: "hidden",
+      }),
+      url: "/articles/hidden/",
+    } satisfies ArticleArchiveItem;
+
+    expect(articleListItemsFromArchive([archiveItem, hidden])).toHaveLength(1);
+    expect(articleListItemsFromArchive([hidden], "related")).toHaveLength(1);
   });
 });

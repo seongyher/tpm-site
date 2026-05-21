@@ -7,6 +7,10 @@ import {
   siteShareTargetIds,
   titleWithSite,
 } from "../../../src/lib/site-config";
+import {
+  defaultMetadataConfig,
+  defaultPublishableVisibilityConfig,
+} from "../../../src/lib/site-config-defaults";
 
 const validConfig = {
   identity: {
@@ -116,6 +120,11 @@ describe("site config", () => {
     expect(parsed.identity.publisherType).toBe("organization");
     expect(parsed.identity.sameAs).toEqual([]);
     expect(parsed.share).toEqual({ targets: Array.from(siteShareTargetIds) });
+    expect(parsed.metadata).toEqual({
+      semanticProfiles: {
+        enabled: Array.from(defaultMetadataConfig.semanticProfiles.enabled),
+      },
+    });
     expect(parsed.features.search).toBe(true);
     expect(parsed.homepage.discoveryLinks).toEqual([
       { label: "Articles", route: "articles" },
@@ -127,19 +136,14 @@ describe("site config", () => {
     expect(parsed.contentDefaults.articles).toEqual({
       draft: false,
       pdf: { enabled: true },
-      visibility: {
-        directory: true,
-        feed: true,
-        homepage: true,
-        search: true,
-      },
+      visibility: defaultPublishableVisibilityConfig,
     });
     expect(parsed.navigation.footer).toEqual([
       { href: "/feed.xml", label: "RSS" },
     ]);
   });
 
-  test("parses homepage discovery links and ordered share target overrides", () => {
+  test("parses homepage discovery links, metadata, and ordered share target overrides", () => {
     const parsed = parseSiteConfig({
       ...validConfig,
       homepage: {
@@ -150,6 +154,11 @@ describe("site config", () => {
         ],
         labels: {
           read: "Explore",
+        },
+      },
+      metadata: {
+        semanticProfiles: {
+          enabled: ["review", "event"],
         },
       },
       share: {
@@ -165,6 +174,10 @@ describe("site config", () => {
       categories: "Categories",
       read: "Explore",
     });
+    expect(parsed.metadata.semanticProfiles.enabled).toEqual([
+      "review",
+      "event",
+    ]);
     expect(parsed.share.targets).toEqual(["reddit", "x"]);
   });
 
@@ -189,6 +202,17 @@ describe("site config", () => {
         },
       }),
     ).toThrow(/share\.targets/u);
+
+    expect(() =>
+      parseSiteConfig({
+        ...validConfig,
+        metadata: {
+          semanticProfiles: {
+            enabled: ["review", "review"],
+          },
+        },
+      }),
+    ).toThrow(/metadata\.semanticProfiles\.enabled/u);
   });
 
   test("parses webmaster-owned feature and content defaults", () => {
@@ -223,7 +247,7 @@ describe("site config", () => {
     expect(parsed.contentDefaults.announcements).toEqual({
       draft: false,
       visibility: {
-        directory: true,
+        ...defaultPublishableVisibilityConfig,
         feed: true,
         homepage: true,
         search: false,
@@ -233,7 +257,7 @@ describe("site config", () => {
       draft: false,
       pdf: { enabled: false },
       visibility: {
-        directory: true,
+        ...defaultPublishableVisibilityConfig,
         feed: false,
         homepage: true,
         search: true,

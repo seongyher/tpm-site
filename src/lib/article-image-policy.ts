@@ -1,5 +1,9 @@
-/** Explicit author/developer override for article image height handling. */
-export type ArticleImageHeightPolicy = "auto" | "natural";
+import {
+  type ArticleImageHeightPolicy,
+  articleImageRolePolicy,
+} from "./media-policy";
+
+export type { ArticleImageHeightPolicy } from "./media-policy";
 
 /** Stable presentation data consumed by components and the rehype plugin. */
 interface ArticleImagePresentation {
@@ -13,8 +17,6 @@ interface ArticleImagePresentation {
   previewSizes: string;
 }
 
-const previewSizes = "(min-width: 48rem) 48rem, calc(100vw - 2rem)";
-const squareHeightCeilingClass = "max-h-[min(70svh,34rem)]";
 const baseFigureClass =
   "not-prose mx-auto my-8 grid max-w-full gap-2 text-center first:mt-0";
 const boundedFrameClass =
@@ -25,7 +27,7 @@ const boundedImageClass = [
   "mx-auto",
   "block",
   "h-auto",
-  squareHeightCeilingClass,
+  articleImageRolePolicy().maxHeightClass,
   "w-auto",
   "max-w-full",
   "rounded-sm",
@@ -65,8 +67,8 @@ export const articleImagePolicyCacheKey = JSON.stringify({
   inspectionClass,
   naturalFrameClass,
   naturalImageClass,
-  previewSizes,
-  squareHeightCeilingClass,
+  previewSizes: articleImageRolePolicy().previewSizes,
+  squareHeightCeilingClass: articleImageRolePolicy().maxHeightClass,
 });
 
 /**
@@ -83,6 +85,8 @@ export const articleImagePolicyCacheKey = JSON.stringify({
 export function articleImagePresentation(
   heightPolicy: ArticleImageHeightPolicy = "auto",
 ): ArticleImagePresentation {
+  const rolePolicy = articleImageRolePolicy(heightPolicy);
+
   if (heightPolicy === "natural") {
     return {
       captionClass,
@@ -90,9 +94,9 @@ export function articleImagePresentation(
       frameClass: naturalFrameClass,
       imageClass: naturalImageClass,
       inspectionClass,
-      isInspectable: false,
-      policy: "natural",
-      previewSizes,
+      isInspectable: rolePolicy.isInspectable,
+      policy: rolePolicy.policy,
+      previewSizes: rolePolicy.previewSizes,
     };
   }
 
@@ -102,8 +106,8 @@ export function articleImagePresentation(
     frameClass: boundedFrameClass,
     imageClass: boundedImageClass,
     inspectionClass,
-    isInspectable: true,
-    policy: "bounded",
-    previewSizes,
+    isInspectable: rolePolicy.isInspectable,
+    policy: rolePolicy.policy,
+    previewSizes: rolePolicy.previewSizes,
   };
 }

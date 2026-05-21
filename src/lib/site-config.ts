@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { z } from "astro/zod";
 
+import { semanticProfileKinds } from "./semantic-profile-kinds";
 import {
   defaultContentDefaultsConfig,
   defaultFeatureConfig,
@@ -9,6 +10,7 @@ import {
   defaultHomepageDiscoveryLinksConfig,
   defaultHomepageEmptyTextConfig,
   defaultHomepageLabelsConfig,
+  defaultMetadataConfig,
   defaultPublishableVisibilityConfig,
   siteRouteKeys,
   siteShareTargetIds,
@@ -34,6 +36,7 @@ const navigationLinkSchema = z
   .strict();
 const siteRouteKeySchema = z.enum(siteRouteKeys);
 const siteShareTargetIdSchema = z.enum(siteShareTargetIds);
+const semanticProfileKindSchema = z.enum(semanticProfileKinds);
 const homepageDiscoveryLinkSchema = z
   .object({
     href: pathOrUrlSchema.optional(),
@@ -150,14 +153,45 @@ const featureConfigSchema = z
   })
   .strict()
   .default(defaultFeatureConfig);
+const metadataConfigSchema = z
+  .object({
+    semanticProfiles: z
+      .object({
+        enabled: z
+          .array(semanticProfileKindSchema)
+          .refine(hasUniqueValues, {
+            message: "Expected unique semantic profile kinds.",
+          })
+          .default(() =>
+            Array.from(defaultMetadataConfig.semanticProfiles.enabled),
+          ),
+      })
+      .strict()
+      .default(() => ({
+        enabled: Array.from(defaultMetadataConfig.semanticProfiles.enabled),
+      })),
+  })
+  .strict()
+  .default(() => ({
+    semanticProfiles: {
+      enabled: Array.from(defaultMetadataConfig.semanticProfiles.enabled),
+    },
+  }));
 const publishableVisibilityConfigSchema = z
   .object({
+    collections: z
+      .boolean()
+      .default(defaultPublishableVisibilityConfig.collections),
     directory: z
       .boolean()
       .default(defaultPublishableVisibilityConfig.directory),
+    external: z.boolean().default(defaultPublishableVisibilityConfig.external),
     feed: z.boolean().default(defaultPublishableVisibilityConfig.feed),
     homepage: z.boolean().default(defaultPublishableVisibilityConfig.homepage),
+    pdf: z.boolean().default(defaultPublishableVisibilityConfig.pdf),
+    related: z.boolean().default(defaultPublishableVisibilityConfig.related),
     search: z.boolean().default(defaultPublishableVisibilityConfig.search),
+    sitemap: z.boolean().default(defaultPublishableVisibilityConfig.sitemap),
   })
   .strict()
   .default(defaultPublishableVisibilityConfig);
@@ -214,6 +248,7 @@ export const siteConfigSchema = z
         url: z.string().url(),
       })
       .strict(),
+    metadata: metadataConfigSchema,
     navigation: z
       .object({
         footer: z.array(navigationLinkSchema).default([]),
