@@ -1421,3 +1421,92 @@ tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
       client-script allowlist so the intentional `ArticleShareMenu` script is
       explicitly allowed only on article pages, then reran
       `bun --silent run check:release` successfully.
+
+### Milestone 245: IRK-97 Author Diagnostic Taxonomy Design
+
+- [x] Re-read the site-doctor, generated-output verifier, source-contract,
+      documentation lifecycle, and author-facing docs to ground the diagnostic
+      taxonomy in existing contracts.
+- [x] Design author/site-owner diagnostic categories, ownership, source
+      mapping, severity, remediation, related-docs, and JSON/human output
+      expectations without expanding site-doctor checks from `IRK-98`.
+- [x] Critique and iterate on the diagnostic design until it is specific
+      enough to guide implementation and future GUI/CLI/MCP consumers.
+      Added `docs/AUTHOR_DIAGNOSTICS.md` as the current diagnostic taxonomy
+      contract. The design keeps generated-output diagnostics as a lower-level
+      source, maps existing verifier categories into author-facing categories,
+      separates repair ownership from fixability, and leaves site-doctor check
+      expansion to `IRK-98`.
+
+### Milestone 246: IRK-97 Diagnostic Taxonomy Contract And Verification
+
+- [x] Implement the diagnostic taxonomy as a typed platform contract that can
+      map current site-doctor and generated-output diagnostics without creating
+      a parallel diagnostic model.
+- [x] Add focused tests proving representative validator/verifier diagnostics
+      map into author-facing categories, ownership, severity, remediation, and
+      source references.
+- [x] Update docs and verify the taxonomy is understandable to non-technical
+      authors while still preserving developer/platform ownership.
+      Added `src/lib/author-diagnostics.ts`,
+      `docs/AUTHOR_DIAGNOSTICS.md`, and focused tests for generated-output and
+      site-doctor mapping. Existing `site:doctor` human output is unchanged;
+      `siteDoctorAuthorDiagnostics()` now exposes the JSON-ready taxonomy for
+      future author tooling. Verified with
+      `bun test tests/src/lib/author-diagnostics.test.ts tests/scripts/site/site-doctor.test.ts --reporter=dots`
+      and `bun --silent run typecheck:tools`.
+
+### Milestone 247: IRK-102 Generated Reference Design
+
+- [x] Re-read the documentation lifecycle, source contracts, route registry,
+      site config schema, metadata profile, media policy, and script registry
+      sources to identify generated-reference owners.
+- [x] Design generated/checkable references for site config, frontmatter,
+      routes, features, visibility, metadata profiles, media/PDF policy,
+      extension points, and script registry where current source contracts are
+      mature enough.
+- [x] Critique and iterate on the generated-reference design so it avoids
+      stale parallel truth and does not pull in blocked public docs IA or docs
+      drift work from `IRK-103`/`IRK-104`.
+      Added `docs/GENERATED_REFERENCES.md` as the generated-reference contract.
+      The design creates one generated platform reference under
+      `docs/generated/`, adds write/check commands, and keeps public docs IA and
+      broader docs link/drift verification scoped to later issues.
+
+### Milestone 248: IRK-102 Generated Reference Implementation
+
+- [x] Implement generated or checked reference output from source-of-truth
+      schemas/registries with readable author-facing material where relevant.
+- [x] Add focused tests or check commands proving generated references match
+      the current platform contracts and fail when stale.
+- [x] Update docs and package-script references for the generated-reference
+      workflow.
+      Added `scripts/docs/generate-platform-references.ts`,
+      `docs/generated/platform-reference.md`, `docs:references`, and
+      `docs:references:check`. The generated reference now derives site-config
+      fields, content frontmatter fields, routes/features/output surfaces,
+      visibility surfaces, semantic profiles, media/PDF policy vocabulary,
+      source artifacts, and QA command domains from current source contracts.
+      The drift check is part of `check:fast`, and focused generator/QA/package
+      tests prove stale output fails. Verified with
+      `bun test tests/scripts/docs/generate-platform-references.test.ts tests/src/lib/author-diagnostics.test.ts tests/scripts/site/site-doctor.test.ts tests/config/package-scripts.test.ts tests/scripts/quality/qa-command-registry.test.ts --reporter=dots`,
+      `bun --silent run docs:references:check -- --quiet`,
+      `bun --silent run typecheck:tools`, `bun --silent run platform:check`,
+      and `bun --silent run check:fast`.
+
+### Milestone 249: IRK-97/IRK-102 Final Verification And Handoff
+
+- [x] Run focused diagnostic/reference/docs tests and fix any issues.
+- [x] Run release checks and fix any issues.
+- [x] Update the checklist with verification notes and record the remaining
+      Milestone 4 blocker state after `IRK-97` and `IRK-102` are complete.
+      Verified with focused diagnostic/reference tests, `typecheck:tools`,
+      `lint`, `deadcode`, `docs:references:check`, `platform:check`,
+      `check:fast`, and full `bun --silent run check:release`. Fixed release
+      findings for import ordering, stricter object-index safety, generated
+      reference formatting, and public export accountability before the final
+      release gate passed. `IRK-97` and `IRK-102` are complete locally. The
+      next Milestone 4 implementation work can start from the issues unblocked
+      by the diagnostic taxonomy and generated-reference contracts; previously
+      blocked observability and studio-readiness work should still respect
+      their specific Linear blockers.

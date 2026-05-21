@@ -2,6 +2,13 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import {
+  type AuthorDiagnostic,
+  type AuthorDiagnosticCategory,
+  type AuthorDiagnosticCode,
+  type AuthorDiagnosticRepairOwner,
+  createAuthorDiagnostic,
+} from "../../src/lib/author-diagnostics";
+import {
   createPlatformContext,
   type PlatformContext,
 } from "../../src/lib/platform-context";
@@ -65,6 +72,19 @@ export function siteDoctorIssues(
     ...homepageCollectionIssues(context.paths, config, exists),
     ...disabledFeatureNavigationIssues(config),
   ];
+}
+
+/**
+ * Converts current site-doctor issues into the shared author-diagnostic
+ * taxonomy without changing the existing CLI output contract.
+ *
+ * @param options Site doctor dependencies.
+ * @returns JSON-ready author-facing diagnostics.
+ */
+export function siteDoctorAuthorDiagnostics(
+  options: SiteDoctorOptions = {},
+): AuthorDiagnostic[] {
+  return siteDoctorIssues(options).map(siteDoctorIssueToAuthorDiagnostic);
 }
 
 /**
@@ -154,6 +174,86 @@ function siteInstancePathIssues(
           },
         ],
   );
+}
+
+function siteDoctorIssueToAuthorDiagnostic(
+  issue: SiteDoctorIssue,
+): AuthorDiagnostic {
+  const classification = classifySiteDoctorIssue(issue);
+
+  return createAuthorDiagnostic({
+    category: classification.category,
+    code: classification.code,
+    fixability: "source-edit",
+    location: issue.path === undefined ? undefined : { sourcePath: issue.path },
+    relatedDocs: classification.relatedDocs,
+    remediation: issue.repair,
+    repairOwner: classification.repairOwner,
+    severity: issue.severity,
+    source: "site-doctor",
+    summary: issue.message,
+  });
+}
+
+function classifySiteDoctorIssue(issue: SiteDoctorIssue): {
+  category: AuthorDiagnosticCategory;
+  code: AuthorDiagnosticCode;
+  relatedDocs: readonly string[];
+  repairOwner: AuthorDiagnosticRepairOwner;
+} {
+  const message = issue.message.toLowerCase();
+
+  if (issue.message.startsWith("Missing ")) {
+    return {
+      category: "config",
+      code: "config.site-source-missing",
+      relatedDocs: ["docs/SITE_ANATOMY.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  if (message.includes("homepage")) {
+    return {
+      category: "config",
+      code: "config.homepage-collection-missing",
+      relatedDocs: ["docs/HOMEPAGE_CONTENT_MODEL.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  if (message.includes("disabled feature")) {
+    return {
+      category: "config",
+      code: "config.disabled-feature-linked",
+      relatedDocs: ["docs/SITE_ANATOMY.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  if (message.includes("routes ")) {
+    return {
+      category: "routes",
+      code: "routes.duplicate-configured-path",
+      relatedDocs: ["docs/SOURCE_CONTRACTS.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  if (message.includes("route")) {
+    return {
+      category: "routes",
+      code: "routes.configured-shape-invalid",
+      relatedDocs: ["docs/SOURCE_CONTRACTS.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  return {
+    category: "config",
+    code: "config.site-doctor-issue",
+    relatedDocs: ["docs/SITE_ANATOMY.md"],
+    repairOwner: "site-owner",
+  };
 }
 
 function routeShapeIssues(config: SiteConfig): SiteDoctorIssue[] {

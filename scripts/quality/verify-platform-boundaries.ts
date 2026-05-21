@@ -99,6 +99,7 @@ const libDomainFiles = {
     "article-pdf.ts",
   ],
   "output-verification": [
+    "author-diagnostics.ts",
     "output-verification.ts",
     "performance-budgets.ts",
     "performance-workbench.ts",

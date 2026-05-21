@@ -50,10 +50,11 @@ incidental TPM implementation details.
   inputs. Current modules: `article-pdf` and `article-pdf-compatibility`.
 - Output verification
   Owns shared generated-output diagnostic types, verifier module contracts,
-  diagnostic aggregation, route-class performance budgets, cache policy
-  evidence, performance workbench policy, and machine-readable release-report
-  shapes. Current modules: `output-verification`, `performance-budgets`, and
-  `performance-workbench`.
+  author-facing diagnostic taxonomy and source mapping, diagnostic aggregation,
+  route-class performance budgets, cache policy evidence, performance workbench
+  policy, and machine-readable release-report shapes.
+  Current modules: `author-diagnostics`, `output-verification`,
+  `performance-budgets`, and `performance-workbench`.
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:

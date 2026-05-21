@@ -1,32 +1,40 @@
 import type { ImageMetadata } from "astro";
 
+/** Output roles that explain why media is being rendered. */
+export const mediaRoles = [
+  "article-image",
+  "download",
+  "embed",
+  "fallback",
+  "generated-artifact",
+  "hover-image",
+  "inline-image",
+  "list-thumbnail",
+  "pdf-image",
+  "social-image",
+] as const;
+
 /** Output role that explains why one media item is being rendered. */
-type MediaRole =
-  | "article-image"
-  | "download"
-  | "embed"
-  | "fallback"
-  | "generated-artifact"
-  | "hover-image"
-  | "inline-image"
-  | "list-thumbnail"
-  | "pdf-image"
-  | "social-image";
+export type MediaRole = (typeof mediaRoles)[number];
+
+/** Output surfaces that consume media policies. */
+export const mediaSurfaces = [
+  "article-html",
+  "catalog",
+  "download",
+  "feed",
+  "generated-output-verifier",
+  "home-html",
+  "listing-html",
+  "metadata",
+  "no-js",
+  "pdf",
+  "print",
+  "search",
+] as const;
 
 /** Output surface that consumes one media policy. */
-type MediaSurface =
-  | "article-html"
-  | "catalog"
-  | "download"
-  | "feed"
-  | "generated-output-verifier"
-  | "home-html"
-  | "listing-html"
-  | "metadata"
-  | "no-js"
-  | "pdf"
-  | "print"
-  | "search";
+export type MediaSurface = (typeof mediaSurfaces)[number];
 
 /** Severity for media diagnostics surfaced to checks and future tooling. */
 type MediaDiagnosticSeverity = "error" | "info" | "warning";
