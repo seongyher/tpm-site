@@ -16,6 +16,8 @@ const articleCitationMenuScriptPattern =
   /^\/_astro\/ArticleCitationMenu\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
 const articleReferencePreviewScriptPattern =
   /^\/_astro\/ArticleReferences\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
+const articleShareMenuScriptPattern =
+  /^\/_astro\/ArticleShareMenu\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
 const astroPrefetchPageScriptPattern = /^\/_astro\/page\.[\w-]+\.js$/u;
 const astroPrefetchChunkImportPattern =
   /from\s*["'`]\.\/(_astro_prefetch\.[\w-]+\.js)["'`]/u;
@@ -208,7 +210,8 @@ async function isAllowedStaticClientScript(
     isArticleHtmlPath(relativeHtmlPath) &&
     (articleImageInspectorScriptPattern.test(source) ||
       articleCitationMenuScriptPattern.test(source) ||
-      articleReferencePreviewScriptPattern.test(source))
+      articleReferencePreviewScriptPattern.test(source) ||
+      articleShareMenuScriptPattern.test(source))
   ) {
     return true;
   }

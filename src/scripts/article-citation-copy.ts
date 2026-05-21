@@ -1,3 +1,9 @@
+import {
+  type ClipboardStatusTarget,
+  copyTextWithStatus,
+  parseJsonStringPayload,
+} from "../lib/browser-clipboard";
+
 /** Browser dependencies used by the article citation copy enhancement. */
 export interface ArticleCitationCopyRuntime {
   document: Document;
@@ -126,21 +132,16 @@ async function copyCitation(
       : (citationCopyText(target) ??
         fallbackCitationText(target, textareaConstructor));
 
-  if (text.trim().length === 0) {
-    reportCopyStatus(button, "Citation text was not found.", "error");
-    return;
-  }
-
-  try {
-    await runtime.navigator.clipboard.writeText(text);
-    reportCopyStatus(button, "Copied.", "copied");
-  } catch {
-    reportCopyStatus(
-      button,
-      "Copy failed. Select the citation text manually.",
-      "error",
-    );
-  }
+  await copyTextWithStatus(
+    runtime.navigator,
+    text,
+    citationStatusTarget(button),
+    {
+      empty: "Citation text was not found.",
+      failure: "Copy failed. Select the citation text manually.",
+      success: "Copied.",
+    },
+  );
 }
 
 function fallbackCitationText(
@@ -154,36 +155,22 @@ function fallbackCitationText(
 }
 
 function citationCopyText(target: HTMLElement): string | undefined {
-  return parseCitationPayload(target.dataset["articleCitationCopyText"]);
+  return parseJsonStringPayload(target.dataset["articleCitationCopyText"]);
 }
 
 function parseCitationPayload(encoded: string | undefined): string | undefined {
-  if (encoded === undefined) {
-    return undefined;
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(encoded);
-
-    return typeof parsed === "string" ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
+  return parseJsonStringPayload(encoded);
 }
 
-function reportCopyStatus(
+function citationStatusTarget(
   button: HTMLButtonElement,
-  message: string,
-  state: "copied" | "error",
-): void {
-  const root = button.closest<HTMLElement>(rootSelector);
-  const status = root?.querySelector<HTMLElement>(statusSelector);
-
-  if (status !== undefined && status !== null) {
-    status.textContent = message;
-  }
-
-  button.dataset["articleCitationCopyState"] = state;
+): ClipboardStatusTarget {
+  return {
+    button,
+    rootSelector,
+    stateDatasetKey: "articleCitationCopyState",
+    statusSelector,
+  };
 }
 
 function browserRuntime(): ArticleCitationCopyRuntime | undefined {

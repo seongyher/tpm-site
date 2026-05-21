@@ -326,6 +326,16 @@ export const qaCommandGroups = [
   },
   {
     ciUsage: "blocking",
+    class: "release",
+    domain: "payload",
+    mutation: "none",
+    runtime: "medium",
+    scope:
+      "Deterministic route-class payload, PDF, and cache-header budget gate.",
+    scripts: ["payload:check"],
+  },
+  {
+    ciUsage: "blocking",
     class: "focused",
     domain: "platform",
     mutation: "none",
@@ -720,11 +730,10 @@ export const qaDomainCoverageRegistry = [
   {
     ciJobs: ["lighthouse"],
     domain: "payload",
-    exception:
-      "Payload workbench is investigation evidence until budgets are stable.",
     focusedScripts: ["payload:report"],
-    purpose: "Payload measurement and optimization experiments.",
-    releaseScripts: [],
+    purpose:
+      "Payload measurement, deterministic route-class budgets, and optimization experiments.",
+    releaseScripts: ["payload:check", "check:release"],
   },
   {
     ciJobs: ["quality"],

@@ -6,10 +6,13 @@ component has a matching one-pager in this directory.
 ## UI Primitives
 
 - `src/components/ui/ActionCluster.astro`
+- `src/components/ui/ActionMenuItem.astro`
+- `src/components/ui/ActionPopover.astro`
 - `src/components/ui/AnchoredPanel.astro`
 - `src/components/ui/AnchoredRoot.astro`
 - `src/components/ui/AnchoredTrigger.astro`
 - `src/components/ui/Badge.astro`
+- `src/components/ui/BrandButton.astro`
 - `src/components/ui/Button.astro`
 - `src/components/ui/Card.astro`
 - `src/components/ui/Container.astro`
@@ -18,7 +21,9 @@ component has a matching one-pager in this directory.
 - `src/components/ui/Input.astro`
 - `src/components/ui/LinkButton.astro`
 - `src/components/ui/PatreonButton.astro`
+- `src/components/ui/ScrollRail.astro`
 - `src/components/ui/Section.astro`
+- `src/components/ui/SectionHeader.astro`
 - `src/components/ui/Separator.astro`
 - `src/components/ui/TextLink.astro`
 - `src/components/ui/YouTubeButton.astro`
@@ -60,11 +65,16 @@ component has a matching one-pager in this directory.
 
 - `src/components/articles/ArticleBibliography.astro`
 - `src/components/articles/ArticleCard.astro`
+- `src/components/articles/ArticleCardBody.astro`
 - `src/components/articles/ArticleCitationMenu.astro`
 - `src/components/articles/ArticleEndcap.astro`
 - `src/components/articles/ArticleFootnotes.astro`
 - `src/components/articles/ArticleHeader.astro`
+- `src/components/articles/ArticleHeaderActionLink.astro`
+- `src/components/articles/ArticleHeaderActionRow.astro`
+- `src/components/articles/ArticleHeaderActionTrigger.astro`
 - `src/components/articles/ArticleImage.astro`
+- `src/components/articles/ArticleImageFrame.astro`
 - `src/components/articles/ArticleImageInspectorScript.astro`
 - `src/components/articles/ArticleList.astro`
 - `src/components/articles/ArticleMeta.astro`
@@ -77,6 +87,9 @@ component has a matching one-pager in this directory.
 - `src/components/articles/ArticleShareMenu.astro`
 - `src/components/articles/ArticleTableOfContents.astro`
 - `src/components/articles/ArticleTags.astro`
+- `src/components/articles/CompactEntryList.astro`
+- `src/components/articles/CompactEntryRow.astro`
+- `src/components/articles/EntryMetaLine.astro`
 - `src/components/articles/FlatArticleList.astro`
 - `src/components/articles/FlatArticleTeaser.astro`
 - `src/components/articles/HoverImageCard.astro`
@@ -84,7 +97,9 @@ component has a matching one-pager in this directory.
 - `src/components/articles/HoverImageParagraph.astro`
 - `src/components/articles/MoreInCategoryBlock.astro`
 - `src/components/articles/NextArticleBlock.astro`
+- `src/components/articles/PublishableMediaFrame.astro`
 - `src/components/articles/RelatedArticlesBlock.astro`
+- `src/components/articles/SemanticDetails.astro`
 - `src/components/articles/TableOfContentsItem.astro`
 - `src/components/articles/TableOfContentsToggle.astro`
 
@@ -123,8 +138,10 @@ component has a matching one-pager in this directory.
 
 ## SEO Components
 
+- `src/components/seo/AnnouncementJsonLd.astro`
 - `src/components/seo/ArticleJsonLd.astro`
 - `src/components/seo/ArticleScholarMeta.astro`
+- `src/components/seo/PublishableOpenGraphMeta.astro`
 - `src/components/seo/SiteHead.astro`
 
 ## Homepage And Page Blocks
@@ -132,12 +149,14 @@ component has a matching one-pager in this directory.
 - `src/components/blocks/ArchiveListBlock.astro`
 - `src/components/blocks/CategoryOverviewBlock.astro`
 - `src/components/blocks/CategoryRailBlock.astro`
+- `src/components/blocks/CompactEntryPanel.astro`
 - `src/components/blocks/HomeAnnouncementBlock.astro`
 - `src/components/blocks/HomeArchiveLinksBlock.astro`
 - `src/components/blocks/HomeCategoryOverviewBlock.astro`
 - `src/components/blocks/HomeCurrentPanel.astro`
 - `src/components/blocks/HomeDiscoveryLinksBlock.astro`
 - `src/components/blocks/HomeFeaturedCarousel.astro`
+- `src/components/blocks/HomeFeaturedCarouselControls.astro`
 - `src/components/blocks/HomeFeaturedArticlesBlock.astro`
 - `src/components/blocks/HomeFeaturedSlide.astro`
 - `src/components/blocks/HomeHeroBlock.astro`
@@ -147,4 +166,7 @@ component has a matching one-pager in this directory.
 - `src/components/blocks/HomeStartHerePanel.astro`
 - `src/components/blocks/SearchResultsBlock.astro`
 - `src/components/blocks/SupportBlock.astro`
+- `src/components/blocks/TermCard.astro`
 - `src/components/blocks/TermOverviewBlock.astro`
+- `src/components/blocks/TermRailBlock.astro`
+- `src/components/blocks/TermRailCard.astro`

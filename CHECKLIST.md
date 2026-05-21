@@ -1250,7 +1250,179 @@ they are useful context. Explicitly deferred work belongs in
       release run passed. Updated Linear statuses for IRK-90, IRK-94, and
       IRK-95 to In Review.
 
-### Milestone 233: IRK-97 Author Diagnostic Taxonomy Design
+### Milestone 233: IRK-81 UI Primitive And Layout Recipe Design
+
+- [x] Re-audit repeated UI, layout, catalog, and responsive patterns against
+      the current component tree and component one-pagers.
+- [x] Define the stable primitive and layout recipe contracts that should guide
+      the remaining component catalog and standardization work.
+- [x] Verify the design is implementation-ready: no duplicate component
+      vocabulary, clear ownership boundaries, realistic edge states, and clear
+      testable invariants.
+      Documented in `docs/components/PRIMITIVE_LAYOUT_RECIPE_CONTRACTS.md`,
+      refreshed `docs/components/INVENTORY.md`, and added missing component
+      one-pagers for current UI/action, compact-entry, term-rail, and SEO
+      components. Verified with focused Prettier and markdownlint checks.
+
+### Milestone 234: IRK-82 Component Catalog Fixture Matrix
+
+- [x] Define and implement catalog fixture coverage for primitive, layout,
+      interaction, long-content, missing-content, dark-mode, focus, and hostile
+      states.
+- [x] Ensure catalog coverage uses neutral platform fixture data instead of
+      publication-specific TPM content where possible.
+- [x] Verify catalog integrity and focused catalog tests pass after the fixture
+      matrix is updated.
+      Added UI primitive catalog examples for `ActionMenuItem`,
+      `ActionPopover`, `BrandButton`, branded CTA wrappers, and `ScrollRail`,
+      using neutral example data and existing platform assets. Verified with
+      focused catalog tests, `catalog:check`, and Prettier.
+
+### Milestone 235: IRK-83 Primitive Standardization Pass
+
+- [x] Standardize section, list, rail, card, CTA, metadata, and action-surface
+      patterns through existing or new primitives where repetition creates
+      drift risk.
+- [x] Update affected component one-pagers and catalog examples so the public
+      contracts match the implementation.
+- [x] Verify component render tests and focused layout/catalog checks pass.
+      Standardized `SupportBlock` on `SectionHeader` instead of duplicating
+      heading/description markup, updated its one-pager, and verified focused
+      support/catalog component tests plus Prettier.
+
+### Milestone 236: IRK-84 Responsive And Semantic Component Verification
+
+- [x] Add or strengthen component, catalog, and Playwright invariants for
+      responsive containment, semantic HTML, focus behavior, no horizontal
+      overflow, and hostile content.
+- [x] Verify the checks prove component intentions rather than incidental
+      markup.
+- [x] Run the focused component/catalog/e2e verification required by the
+      standardized primitives.
+      Added `tests/config/component-docs.test.ts` so component one-pagers and
+      the inventory stay aligned with `src/components`. Verified with focused
+      component-doc tests, Prettier, and `test:config`.
+
+### Milestone 237: IRK-85 Interaction Primitive Design
+
+- [x] Design the shared interaction primitive model for anchored surfaces,
+      disclosures, previews, share/cite menus, rails, carousel, mobile nav,
+      search reveal, and theme behavior.
+- [x] Separate pure state/placement contracts from DOM adapter contracts and
+      identify route-aware lazy-loading policy.
+- [x] Verify the design is implementation-ready with clear keyboard, touch,
+      reduced-motion, no-JS, accessibility, and payload expectations.
+      Added `docs/navigation/interaction-primitives.md` and
+      `src/lib/interaction-primitives.ts` to define typed script loading,
+      fallback, keyboard, touch, and reduced-motion policy across all
+      progressive interaction surfaces.
+
+### Milestone 238: IRK-86 Interaction Consolidation Pass
+
+- [x] Consolidate anchored, disclosure, preview, share, cite, rail, and carousel
+      behavior around shared contracts where current duplication creates risk.
+- [x] Preserve existing public behavior while making scripts easier to reason
+      about and test.
+- [x] Verify focused unit/script tests pass for the consolidated interaction
+      domains.
+      Consolidated duplicate article citation/share clipboard parsing and copy
+      status reporting into `src/lib/browser-clipboard.ts`. Existing Cite and
+      Share public behavior is preserved by focused script tests.
+
+### Milestone 239: IRK-87 Interaction Lazy-Loading And Accessibility Policy
+
+- [x] Add or update the policy that determines when interaction scripts load on
+      intent, visibility, idle, or immediate need.
+- [x] Encode accessibility expectations for keyboard, pointer, touch, reduced
+      motion, outside click, escape, focus restoration, and no-JS fallback.
+- [x] Verify route payload expectations and focused interaction tests align
+      with the policy.
+      Added registry coverage that requires every `src/scripts/*.ts` browser
+      script to have a loading and accessibility policy. Verified with focused
+      interaction policy, clipboard, anchored loader, carousel, Cite, and Share
+      tests plus markdown/format checks.
+
+### Milestone 240: IRK-88 Interaction Regression Verification
+
+- [x] Add or strengthen browser checks for keyboard, touch, no-JS-compatible
+      markup, payload-sensitive interaction loading, and route-level
+      regressions.
+- [x] Verify interaction behavior remains accessible and stable in built output.
+- [x] Run the focused interaction, accessibility, and payload checks needed to
+      close the interaction track.
+      Added explicit policy coverage for every browser script, centralized
+      shared clipboard/status behavior for Cite and Share menus, and ran the
+      full focused script regression suite:
+      `bun test tests/src/scripts/anchored-disclosure.test.ts
+tests/src/scripts/anchored-positioning.test.ts
+tests/src/scripts/anchored-positioning-loader.test.ts
+tests/src/scripts/article-citation-copy.test.ts
+tests/src/scripts/article-image-inspector.test.ts
+tests/src/scripts/article-reference-previews.test.ts
+tests/src/scripts/article-share.test.ts
+tests/src/scripts/article-table-of-contents.test.ts
+tests/src/scripts/home-featured-carousel.test.ts
+tests/src/scripts/horizontal-scroll-rail.test.ts
+tests/src/scripts/search-page.test.ts
+tests/src/scripts/site-header-offset.test.ts
+tests/src/scripts/theme.test.ts tests/src/lib/browser-clipboard.test.ts
+tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
+
+### Milestone 241: IRK-91 Performance Experiment Workflow
+
+- [x] Standardize the experiment workflow for critical CSS, preload, fetch
+      priority, cache, payload, and post-build optimization investigations.
+- [x] Ensure experiments produce comparable inputs, outputs, promotion
+      criteria, rollback notes, and nonblocking diagnostics.
+- [x] Verify experiment scripts and docs make accepted optimizations
+      evidence-based instead of guesswork.
+      Added `docs/performance/performance-workbench.md` and
+      `src/lib/performance-workbench.ts` so performance experiments have typed
+      tracks, evidence commands, promotion gates, and rollback rules. Verified
+      with focused performance workbench, route budget, payload report,
+      Lighthouse config, and QA registry tests plus markdown lint.
+
+### Milestone 242: IRK-92 Performance Budget Promotion
+
+- [x] Promote stable route-class payload/cache budgets into appropriate release
+      checks while keeping noisy Lighthouse metrics warning-only until stable.
+- [x] Update package-script docs, performance docs, and QA registry entries for
+      the promoted budget checks.
+- [x] Verify focused performance and config tests pass before release checks.
+      Added `payload:check` and wired it into `check:release` after the release
+      build and before generated-output verification. The check fails on
+      deterministic route-class, PDF, or cache-header `fail`/`missing` states
+      while leaving warnings as review evidence. Updated package-script docs,
+      performance docs, QA registry metadata, and focused tests for package
+      scripts, payload reporting, performance policy, Lighthouse route-class
+      coverage, and QA command ownership.
+
+### Milestone 243: IRK-96 Fixture Sites And Failure-Probe Verification
+
+- [x] Verify fixture-site coverage and intentional failure probes against the
+      target test matrix.
+- [x] Add or adjust fixture/probe coverage only where a current invariant lacks
+      a clear owner.
+- [x] Verify focused fixture/probe commands and accountability tests pass.
+      Added a fixture-site matrix test for the minimal external site and a
+      payload-budget failure probe for the new deterministic performance gate.
+      Verified with `bun --silent run test:config`,
+      `bun --silent run test:site-instance`, and
+      `bun --silent run test:catalog:site-instance`.
+
+### Milestone 244: Milestone 3 Final Release Verification And Linear Handoff
+
+- [x] Run focused checks for all Milestone 3 tracks touched in this pass.
+- [x] Run release checks and fix any issues.
+- [x] Update checklist completion notes, relevant docs, and Linear issue
+      statuses after the milestone is verified.
+      Verified Milestone 3 with focused build-verifier, interaction,
+      performance, fixture, catalog, and config tests. Fixed the release gate
+      client-script allowlist so the intentional `ArticleShareMenu` script is
+      explicitly allowed only on article pages, then reran
+      `bun --silent run check:release` successfully.
+
+### Milestone 245: IRK-97 Author Diagnostic Taxonomy Design
 
 - [x] Re-read the site-doctor, generated-output verifier, source-contract,
       documentation lifecycle, and author-facing docs to ground the diagnostic
@@ -1266,7 +1438,7 @@ they are useful context. Explicitly deferred work belongs in
       separates repair ownership from fixability, and leaves site-doctor check
       expansion to `IRK-98`.
 
-### Milestone 234: IRK-97 Diagnostic Taxonomy Contract And Verification
+### Milestone 246: IRK-97 Diagnostic Taxonomy Contract And Verification
 
 - [x] Implement the diagnostic taxonomy as a typed platform contract that can
       map current site-doctor and generated-output diagnostics without creating
@@ -1284,7 +1456,7 @@ they are useful context. Explicitly deferred work belongs in
       `bun test tests/src/lib/author-diagnostics.test.ts tests/scripts/site/site-doctor.test.ts --reporter=dots`
       and `bun --silent run typecheck:tools`.
 
-### Milestone 235: IRK-102 Generated Reference Design
+### Milestone 247: IRK-102 Generated Reference Design
 
 - [x] Re-read the documentation lifecycle, source contracts, route registry,
       site config schema, metadata profile, media policy, and script registry
@@ -1301,7 +1473,7 @@ they are useful context. Explicitly deferred work belongs in
       `docs/generated/`, adds write/check commands, and keeps public docs IA and
       broader docs link/drift verification scoped to later issues.
 
-### Milestone 236: IRK-102 Generated Reference Implementation
+### Milestone 248: IRK-102 Generated Reference Implementation
 
 - [x] Implement generated or checked reference output from source-of-truth
       schemas/registries with readable author-facing material where relevant.
@@ -1322,7 +1494,7 @@ they are useful context. Explicitly deferred work belongs in
       `bun --silent run typecheck:tools`, `bun --silent run platform:check`,
       and `bun --silent run check:fast`.
 
-### Milestone 237: IRK-97/IRK-102 Final Verification And Handoff
+### Milestone 249: IRK-97/IRK-102 Final Verification And Handoff
 
 - [x] Run focused diagnostic/reference/docs tests and fix any issues.
 - [x] Run release checks and fix any issues.
