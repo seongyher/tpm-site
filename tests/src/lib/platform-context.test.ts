@@ -2,7 +2,10 @@ import { describe, expect, test } from "bun:test";
 
 import {
   createPlatformContext,
+  platformArticleCompilerContext,
+  platformArtifactContext,
   platformContext,
+  platformRouteContext,
 } from "../../../src/lib/platform-context";
 import { siteConfig } from "../../../src/lib/site-config";
 import { resolveSiteInstancePaths } from "../../../src/lib/site-instance";
@@ -16,6 +19,9 @@ describe("platform context", () => {
     expect(
       platformContext.sourceArtifacts.entries.map((entry) => entry.key),
     ).toContain("config.site");
+    expect(
+      platformContext.routeRegistry.map((entry) => entry.routeKey),
+    ).toContain("articles");
   });
 
   test("composes explicit paths and config for fixture-style callers", () => {
@@ -32,11 +38,26 @@ describe("platform context", () => {
     expect(context.paths.root).toBe(
       "/repo/platform/tests/fixtures/site-instance",
     );
-    expect(context.sourceArtifacts.generatedOutputs).toEqual([
-      expect.objectContaining({
-        key: "output.dist",
-        relativePath: "dist/fixture",
-      }),
-    ]);
+    const generatedOutputPaths = new Map(
+      context.sourceArtifacts.generatedOutputs.map((entry) => [
+        entry.key,
+        entry.relativePath,
+      ]),
+    );
+
+    expect(generatedOutputPaths.get("output.dist")).toBe("dist/fixture");
+    expect(generatedOutputPaths.get("output.routes")).toBe("dist/fixture");
+    expect(generatedOutputPaths.get("output.searchIndex")).toBe(
+      "dist/fixture/pagefind",
+    );
+    expect(platformRouteContext(context).enabledRoutes.length).toBeGreaterThan(
+      0,
+    );
+    expect(platformArtifactContext(context).paths.root).toBe(
+      context.paths.root,
+    );
+    expect(platformArticleCompilerContext(context).config.features.pdf).toBe(
+      siteConfig.features.pdf,
+    );
   });
 });

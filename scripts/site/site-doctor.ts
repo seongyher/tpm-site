@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
 import {
   createPlatformContext,
   type PlatformContext,
 } from "../../src/lib/platform-context";
+import { routeRegistryEntries } from "../../src/lib/route-registry";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import {
   projectRelativePath,
@@ -58,12 +58,11 @@ export function siteDoctorIssues(
     });
   const config = context.config;
   const exists = options.exists ?? existsSync;
-  const paths = context.paths;
 
   return [
-    ...siteInstancePathIssues(paths, config, exists),
+    ...siteInstancePathIssues(context, exists),
     ...routeShapeIssues(config),
-    ...homepageCollectionIssues(paths, config, exists),
+    ...homepageCollectionIssues(context.paths, config, exists),
     ...disabledFeatureNavigationIssues(config),
   ];
 }
@@ -135,58 +134,26 @@ export function formatSiteDoctorIssues(
 }
 
 function siteInstancePathIssues(
-  paths: SiteInstancePaths,
-  config: SiteConfig,
+  context: PlatformContext,
   exists: (targetPath: string) => boolean,
 ): SiteDoctorIssue[] {
-  const requiredPaths = [
-    { label: "site root", path: paths.root },
-    { label: "site config", path: paths.config.site },
-    { label: "site theme", path: paths.theme },
-    { label: "redirect config", path: paths.config.redirects },
-    { label: "article content directory", path: paths.content.articles },
-    { label: "page content directory", path: paths.content.pages },
-    { label: "site public directory", path: paths.public },
-    ...featureDirectoryRequirements(paths, config),
-  ];
+  const requiredSources = context.sourceArtifacts.siteEditableSources.filter(
+    (entry) => entry.required,
+  );
 
-  return requiredPaths.flatMap((entry) =>
-    exists(entry.path)
+  return requiredSources.flatMap((entry) =>
+    exists(entry.absolutePath)
       ? []
       : [
           {
-            message: `Missing ${entry.label}.`,
-            path: entry.path,
+            message: `Missing ${entry.description}.`,
+            path: entry.absolutePath,
             repair:
               "Create this file or directory in the active site instance, or update SITE_INSTANCE_ROOT to point at the intended site.",
             severity: "error" as const,
           },
         ],
   );
-}
-
-function featureDirectoryRequirements(
-  paths: SiteInstancePaths,
-  config: SiteConfig,
-) {
-  return [
-    config.features.announcements && {
-      label: "announcement content directory",
-      path: paths.content.announcements,
-    },
-    config.features.authors && {
-      label: "author content directory",
-      path: paths.content.authors,
-    },
-    config.features.categories && {
-      label: "category metadata directory",
-      path: paths.content.categories,
-    },
-    {
-      label: "collection content directory",
-      path: paths.content.collections,
-    },
-  ].filter((entry) => entry !== false);
 }
 
 function routeShapeIssues(config: SiteConfig): SiteDoctorIssue[] {
@@ -311,8 +278,11 @@ function disabledFeatureNavigationIssues(
       location: "homepage discovery",
     })),
   ];
-  const disabledFeatureRoutes = optionalFeatureRouteEntries(config).filter(
-    (entry) => !entry.enabled,
+  const disabledFeatureRoutes = routeRegistryEntries(config).filter(
+    (entry) =>
+      entry.feature !== undefined &&
+      !entry.enabled &&
+      entry.surfaces.includes("disabled-feature-diagnostic"),
   );
 
   return links.flatMap((link) => {
@@ -324,7 +294,9 @@ function disabledFeatureNavigationIssues(
       ? []
       : [
           {
-            message: `${link.location} link "${link.label}" points to disabled feature "${disabledTarget.feature}".`,
+            message: `${link.location} link "${link.label}" points to disabled feature "${
+              disabledTarget.feature ?? disabledTarget.routeKey
+            }".`,
             repair:
               "Either enable the feature or remove this link from site/config/site.json.",
             severity: "error" as const,
@@ -334,19 +306,10 @@ function disabledFeatureNavigationIssues(
 }
 
 function routeEntriesForConfig(config: SiteConfig): Array<[RouteKey, string]> {
-  return [
-    ["allArticles", config.routes.allArticles],
-    ["announcements", config.routes.announcements],
-    ["articles", config.routes.articles],
-    ["authors", config.routes.authors],
-    ["bibliography", config.routes.bibliography],
-    ["categories", config.routes.categories],
-    ["collections", config.routes.collections],
-    ["feed", config.routes.feed],
-    ["home", config.routes.home],
-    ["search", config.routes.search],
-    ["tags", config.routes.tags],
-  ];
+  return routeRegistryEntries(config).map((entry) => [
+    entry.routeKey,
+    entry.route,
+  ]);
 }
 
 function collectionSourcePath(

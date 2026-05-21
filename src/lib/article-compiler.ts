@@ -8,9 +8,12 @@ import {
   type PublishableVisibility,
 } from "./publishable";
 import {
+  routeChildIndexOutputPath,
+  routeOutputBasePath,
+} from "./route-registry";
+import {
   type ArticleEntry,
   articleSlug,
-  articleUrl,
   authorName,
   categorySlug,
   entryDate,
@@ -32,9 +35,40 @@ export interface ArticleCompilerArtifact {
   readonly id: string;
   readonly image: ArticleEntry["data"]["image"];
   readonly imageAlt?: string | undefined;
+  readonly imageFacts: {
+    readonly alt?: string | undefined;
+    readonly source: ArticleEntry["data"]["image"];
+  };
+  readonly outputs: {
+    readonly html: {
+      readonly path: string;
+    };
+    readonly pdf?: {
+      readonly href: string;
+      readonly path: string;
+    };
+  };
   readonly pdfEnabled: boolean;
   readonly references?: ArticleReferenceData | undefined;
+  readonly route: {
+    readonly path: string;
+    readonly root: string;
+    readonly routeKey: "articles";
+  };
   readonly slug: string;
+  readonly source: {
+    readonly collection: "articles";
+    readonly filePath?: string | undefined;
+    readonly format: "markdown" | "mdx" | "unknown";
+  };
+  readonly surfaces: {
+    readonly directory: boolean;
+    readonly feed: boolean;
+    readonly homepage: boolean;
+    readonly pdf: boolean;
+    readonly search: boolean;
+    readonly sitemap: boolean;
+  };
   readonly tableOfContents: {
     readonly headings: readonly ArticleTableOfContentsHeading[];
     readonly useful: boolean;
@@ -45,9 +79,18 @@ export interface ArticleCompilerArtifact {
   readonly visibility: PublishableVisibility;
 }
 
+/** Site policy slice accepted by article compiler consumers. */
+export type ArticleCompilerConfigInput = Partial<Pick<SiteConfig, "routes">> &
+  Pick<SiteConfig, "contentDefaults" | "features">;
+
+type ArticleCompilerConfig = Pick<
+  SiteConfig,
+  "contentDefaults" | "features" | "routes"
+>;
+
 interface ArticleCompilerOptions {
   readonly articleReferences?: ArticleReferenceData | undefined;
-  readonly config?: Pick<SiteConfig, "contentDefaults" | "features">;
+  readonly config?: ArticleCompilerConfigInput | undefined;
   readonly tableOfContentsHeadings?:
     | readonly ArticleTableOfContentsHeading[]
     | undefined;
@@ -65,13 +108,20 @@ export function articleCompilerArtifact(
   article: ArticleEntry,
   options: ArticleCompilerOptions = {},
 ): ArticleCompilerArtifact {
-  const config = options.config ?? siteConfig;
+  const config = articleCompilerConfig(options.config);
   const date = entryDate(article);
   const slug = articleSlug(article);
+  const canonicalPath = articleCanonicalPath(slug, config);
+  const visibility = normalizePublishableVisibility(
+    article.data.visibility,
+    config.contentDefaults.articles.visibility,
+  );
+  const pdfEnabled = articlePdfEnabledFromArtifactInput(article, config);
+  const surfaces = articleSurfaces(article, visibility, pdfEnabled);
 
   return {
     author: authorName(article),
-    canonicalPath: articleUrl(slug),
+    canonicalPath,
     categorySlug: categorySlug(article),
     date,
     description: excerpt(article),
@@ -80,9 +130,37 @@ export function articleCompilerArtifact(
     id: article.id,
     image: article.data.image,
     imageAlt: article.data.imageAlt,
-    pdfEnabled: articlePdfEnabledFromArtifactInput(article, config),
+    imageFacts: {
+      alt: article.data.imageAlt,
+      source: article.data.image,
+    },
+    outputs: {
+      html: {
+        path: routeChildIndexOutputPath(config.routes.articles, slug),
+      },
+      ...(surfaces.pdf
+        ? {
+            pdf: {
+              href: articlePdfHrefFromRoute(slug, config.routes.articles),
+              path: articlePdfOutputPathFromRoute(slug, config.routes.articles),
+            },
+          }
+        : {}),
+    },
+    pdfEnabled,
     references: options.articleReferences,
+    route: {
+      path: canonicalPath,
+      routeKey: "articles",
+      root: config.routes.articles,
+    },
     slug,
+    source: {
+      collection: "articles",
+      filePath: article.filePath,
+      format: articleSourceFormat(article.filePath),
+    },
+    surfaces,
     tableOfContents: {
       headings: options.tableOfContentsHeadings ?? [],
       useful: hasUsefulTableOfContents(options.tableOfContentsHeadings ?? []),
@@ -90,10 +168,17 @@ export function articleCompilerArtifact(
     tags: article.data.tags,
     title: entryTitle(article),
     updated: article.data.updated,
-    visibility: normalizePublishableVisibility(
-      article.data.visibility,
-      config.contentDefaults.articles.visibility,
-    ),
+    visibility,
+  };
+}
+
+function articleCompilerConfig(
+  config: ArticleCompilerConfigInput | undefined,
+): ArticleCompilerConfig {
+  return {
+    contentDefaults: config?.contentDefaults ?? siteConfig.contentDefaults,
+    features: config?.features ?? siteConfig.features,
+    routes: config?.routes ?? siteConfig.routes,
   };
 }
 
@@ -108,4 +193,60 @@ function articlePdfEnabledFromArtifactInput(
   return "pdf" in article.data
     ? article.data.pdf
     : config.contentDefaults.articles.pdf.enabled;
+}
+
+function articleCanonicalPath(
+  slug: string,
+  config: Pick<SiteConfig, "routes">,
+): string {
+  const root = articleRouteRoot(config.routes.articles);
+
+  return `${root}${slug}/`;
+}
+
+function articlePdfHrefFromRoute(slug: string, route: string): string {
+  return `${articleRouteRoot(route)}${slug}/${slug}.pdf`;
+}
+
+function articlePdfOutputPathFromRoute(slug: string, route: string): string {
+  const basePath = routeOutputBasePath(route);
+
+  return basePath === ""
+    ? `${slug}/${slug}.pdf`
+    : `${basePath}/${slug}/${slug}.pdf`;
+}
+
+function articleRouteRoot(route: string): string {
+  return route.endsWith("/") ? route : `${route}/`;
+}
+
+function articleSourceFormat(
+  filePath: string | undefined,
+): ArticleCompilerArtifact["source"]["format"] {
+  if (filePath?.endsWith(".mdx") === true) {
+    return "mdx";
+  }
+
+  if (filePath?.endsWith(".md") === true) {
+    return "markdown";
+  }
+
+  return "unknown";
+}
+
+function articleSurfaces(
+  article: ArticleEntry,
+  visibility: PublishableVisibility,
+  pdfEnabled: boolean,
+): ArticleCompilerArtifact["surfaces"] {
+  const published = !article.data.draft;
+
+  return {
+    directory: published && visibility.directory,
+    feed: published && visibility.feed,
+    homepage: published && visibility.homepage,
+    pdf: published && pdfEnabled,
+    search: published && visibility.search,
+    sitemap: published && visibility.directory,
+  };
 }

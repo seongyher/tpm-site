@@ -135,7 +135,7 @@ export async function articlePageViewModel({
     config,
     tableOfContentsHeadings,
   });
-  const articleView = articleViewModel(article);
+  const articleView = articleViewModel(article, { config });
   const [allArticles, authorEntries, categories, fallbackSocialPreviewImage] =
     await Promise.all([
       content?.allArticles ?? getArticles(),
@@ -144,10 +144,10 @@ export async function articlePageViewModel({
       content?.fallbackSocialPreviewImage ?? getSiteSocialFallbackImage(),
     ]);
   const socialPreviewImage = await socialPreviewImageViewModel({
-    alt: artifact.imageAlt ?? artifact.title,
+    alt: artifact.imageFacts.alt ?? artifact.title,
     fallback: fallbackSocialPreviewImage,
     optimize: optimizeImage,
-    source: artifact.image,
+    source: artifact.imageFacts.source,
   });
   const canonicalUrl = absoluteUrl(artifact.canonicalPath, site ?? origin);
   const authors = authorSummariesForArticle(article, authorEntries);
@@ -208,7 +208,7 @@ export async function articlePageViewModel({
     profileLinksEnabled: config.features.authors,
     readingNavigationLinks: homepageDiscoveryLinks(config),
     scholarMeta,
-    searchable: config.features.search && artifact.visibility.search,
+    searchable: config.features.search && artifact.surfaces.search,
     semanticDetails: semanticDetailsViewModel(article.data.semantic),
     share: articleShareMenuViewModel({
       articleUrl: canonicalUrl,

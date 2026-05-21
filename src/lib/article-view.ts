@@ -1,4 +1,7 @@
-import { articleCompilerArtifact } from "./article-compiler";
+import {
+  articleCompilerArtifact,
+  type ArticleCompilerConfigInput,
+} from "./article-compiler";
 import type { ArticleEntry } from "./routes";
 
 /** Display and metadata fields needed by the article layout. */
@@ -13,14 +16,24 @@ export interface ArticleViewModel {
   title: string;
 }
 
+interface ArticleViewModelOptions {
+  readonly config?: ArticleCompilerConfigInput | undefined;
+}
+
 /**
  * Builds the article layout model from a content collection entry.
  *
  * @param article Article content entry.
+ * @param options Optional article compiler policy overrides.
  * @returns Display-ready article metadata.
  */
-export function articleViewModel(article: ArticleEntry): ArticleViewModel {
-  const artifact = articleCompilerArtifact(article);
+export function articleViewModel(
+  article: ArticleEntry,
+  options: ArticleViewModelOptions = {},
+): ArticleViewModel {
+  const artifact = articleCompilerArtifact(article, {
+    config: options.config,
+  });
 
   return {
     author: artifact.author,

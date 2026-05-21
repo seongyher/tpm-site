@@ -21,6 +21,11 @@ import {
   type OutputDiagnosticOwner,
   type OutputVerificationReport,
 } from "../../src/lib/output-verification";
+import {
+  routeChildIndexOutputPath,
+  routeIndexOutputPath,
+  routeOutputBasePath,
+} from "../../src/lib/route-registry";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import {
@@ -610,7 +615,9 @@ export function requiredPathsForSource(
     ),
     ...articlePublication.publishedArticles
       .filter((article) => article.pdfEnabled)
-      .map((article) => articlePdfOutputPath(article.slug)),
+      .map((article) =>
+        articlePdfOutputPath(article.slug, config.routes.articles),
+      ),
     ...(config.features.categories
       ? categorySlugs.map((slug) =>
           routeChildIndexOutputPath(config.routes.categories, slug),
@@ -777,29 +784,6 @@ function optionalFeatureBaseOutputPath(
   return entry.outputKind === "directory"
     ? `${entry.outputPath}/index.html`
     : entry.outputPath;
-}
-
-function routeChildIndexOutputPath(route: string, child: string): string {
-  const basePath = routeOutputBasePath(route);
-
-  return basePath === ""
-    ? `${child}/index.html`
-    : `${basePath}/${child}/index.html`;
-}
-
-function routeIndexOutputPath(route: string): string {
-  const basePath = routeOutputBasePath(route);
-
-  return basePath === "" ? "index.html" : `${basePath}/index.html`;
-}
-
-function routeOutputBasePath(route: string): string {
-  return (
-    route
-      .split("#")[0]
-      ?.split("?")[0]
-      ?.replace(/^\/+|\/+$/gu, "") ?? ""
-  );
 }
 
 /**

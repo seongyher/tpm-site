@@ -15,6 +15,66 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+### Milestone 220: IRK-9-IRK-12 Source Contracts Closeout Design
+
+- [x] Re-read the current source-contract implementation against the Milestone
+      1 Linear goals for source/artifact ownership, platform context, route
+      registry, and article compiler artifacts.
+- [x] Update `docs/SOURCE_CONTRACTS.md` so it describes the implemented
+      closeout contracts, invariants, diagnostics, tests, and remaining
+      boundaries without relying on earlier "first implementation target"
+      language.
+- [x] Verify the design is implementation-ready: no public URL churn, no
+      reader-facing layout changes, explicit compatibility shims for current
+      pages/scripts, and clear test ownership for every contract.
+
+### Milestone 221: IRK-9 Source And Artifact Lifecycle Closeout
+
+- [x] Expand the source/artifact manifest so source roots, generated outputs,
+      ownership, required/optional placement, and verifier-facing artifact
+      roles share one typed vocabulary.
+- [x] Use the manifest in site/admin diagnostics or release-facing code where
+      ownership rules were still duplicated.
+- [x] Add focused coverage for default, fixture, and generated-output artifact
+      contracts before marking this milestone complete.
+
+### Milestone 222: IRK-10 Platform Context Closeout
+
+- [x] Add narrow platform-context slices for source artifacts, route registry,
+      and article compiler consumers while preserving singleton compatibility.
+- [x] Normalize explicit context creation so fixture and future multi-site tools
+      can compose config, paths, source artifacts, and routes without implicit
+      filesystem/process reads.
+- [x] Add focused coverage for default and injected contexts.
+
+### Milestone 223: IRK-11 Route, Feature, And Entity Registry Closeout
+
+- [x] Promote route/entity/feature/output metadata into the registry, including
+      generated-output roles, route patterns, discovery surfaces, and disabled
+      feature diagnostics.
+- [x] Migrate route-output path helpers and optional-feature consumers away
+      from duplicated route-shape logic where practical.
+- [x] Add focused coverage for configured routes, disabled features, route
+      ownership, generated output paths, and verifier/site-doctor integration.
+
+### Milestone 224: IRK-12 Article Compiler Artifact Closeout
+
+- [x] Expand the article compiler artifact to include source facts, canonical
+      route facts, generated output facts, discovery/surface eligibility, PDF
+      eligibility, references, and table-of-contents facts.
+- [x] Move downstream article view, Scholar/PDF, and page view model consumers
+      onto the artifact for those facts without changing reader-facing output.
+- [x] Add focused coverage for content defaults, frontmatter overrides,
+      references, table of contents, output paths, and surface eligibility.
+
+### Milestone 225: Milestone 1 Verification And Linear Handoff
+
+- [x] Run focused tests for source artifacts, platform context, route registry,
+      article compiler, site doctor, and build verifier.
+- [x] Run release checks and fix any regressions.
+- [x] Update all completed Milestone 1 Linear issues to `In Review` after local
+      verification passes.
+
 ### Milestone 179: Engineering Philosophy Synthesis
 
 - [x] Synthesize the repo's long-term code-health philosophy across platform
@@ -646,6 +706,7 @@ they are useful context. Explicitly deferred work belongs in
       policy, with acceptance criteria for future implementation.
       Verified with `bunx prettier --check docs/performance/route-class-performance-budgets.md --log-level warn`
       and `bunx markdownlint-cli2 docs/performance/route-class-performance-budgets.md`.
+
 ### Milestone 179: IRK-65 Verifier Diagnostic Design And Inventory
 
 - [x] Inventory current generated-output verifier issue buckets,

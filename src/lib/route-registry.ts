@@ -1,4 +1,5 @@
 import type { SiteConfig, SiteRouteKey } from "./site-config";
+import type { SourceArtifactKey } from "./source-artifacts";
 
 /** Optional feature keys that own generated route surfaces. */
 export type RouteRegistryFeatureKey =
@@ -12,7 +13,7 @@ export type RouteRegistryFeatureKey =
   | "tags";
 
 /** Publishable or generated entity kind represented by a route surface. */
-type RouteRegistryEntityKind =
+export type RouteRegistryEntityKind =
   | "announcement"
   | "article"
   | "author"
@@ -27,43 +28,193 @@ type RouteRegistryEntityKind =
 /** Generated-output kind for a registered route surface. */
 export type RouteRegistryOutputKind = "directory" | "file";
 
+/** Cardinality/pattern class for a registered route surface. */
+export type RouteRegistryPattern = "entry-root" | "file" | "index" | "root";
+
+/** Public/generated surfaces a route participates in. */
+export type RouteRegistrySurface =
+  | "disabled-feature-diagnostic"
+  | "feed"
+  | "html"
+  | "metadata"
+  | "navigation"
+  | "redirect-fallback"
+  | "search"
+  | "sitemap"
+  | "validation";
+
 /** Canonical route, entity, feature, and output metadata. */
 export interface RouteRegistryEntry {
+  readonly artifactKey: SourceArtifactKey;
   readonly enabled: boolean;
   readonly entity: RouteRegistryEntityKind;
   readonly feature?: RouteRegistryFeatureKey | undefined;
   readonly outputKind: RouteRegistryOutputKind;
   readonly outputPath: string;
+  readonly pattern: RouteRegistryPattern;
   readonly route: string;
   readonly routeKey: SiteRouteKey;
+  readonly surfaces: readonly RouteRegistrySurface[];
 }
 
 interface RouteRegistryDefinition {
   readonly entity: RouteRegistryEntityKind;
   readonly feature?: RouteRegistryFeatureKey | undefined;
+  readonly pattern: RouteRegistryPattern;
   readonly routeKey: SiteRouteKey;
+  readonly surfaces: readonly RouteRegistrySurface[];
 }
 
 const routeRegistryDefinitions = [
-  { entity: "home", routeKey: "home" },
-  { entity: "article", routeKey: "articles" },
-  { entity: "article", routeKey: "allArticles" },
+  {
+    entity: "home",
+    pattern: "root",
+    routeKey: "home",
+    surfaces: [
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
+  {
+    entity: "article",
+    pattern: "entry-root",
+    routeKey: "articles",
+    surfaces: [
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
+  {
+    entity: "article",
+    pattern: "index",
+    routeKey: "allArticles",
+    surfaces: [
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
   {
     entity: "announcement",
     feature: "announcements",
+    pattern: "entry-root",
     routeKey: "announcements",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
   },
-  { entity: "author", feature: "authors", routeKey: "authors" },
+  {
+    entity: "author",
+    feature: "authors",
+    pattern: "entry-root",
+    routeKey: "authors",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
   {
     entity: "bibliography",
     feature: "bibliography",
+    pattern: "index",
     routeKey: "bibliography",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
   },
-  { entity: "category", feature: "categories", routeKey: "categories" },
-  { entity: "collection", feature: "collections", routeKey: "collections" },
-  { entity: "feed", feature: "feed", routeKey: "feed" },
-  { entity: "search", feature: "search", routeKey: "search" },
-  { entity: "tag", feature: "tags", routeKey: "tags" },
+  {
+    entity: "category",
+    feature: "categories",
+    pattern: "entry-root",
+    routeKey: "categories",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
+  {
+    entity: "collection",
+    feature: "collections",
+    pattern: "entry-root",
+    routeKey: "collections",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
+  {
+    entity: "feed",
+    feature: "feed",
+    pattern: "file",
+    routeKey: "feed",
+    surfaces: ["disabled-feature-diagnostic", "feed", "metadata", "validation"],
+  },
+  {
+    entity: "search",
+    feature: "search",
+    pattern: "index",
+    routeKey: "search",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "search",
+      "validation",
+    ],
+  },
+  {
+    entity: "tag",
+    feature: "tags",
+    pattern: "entry-root",
+    routeKey: "tags",
+    surfaces: [
+      "disabled-feature-diagnostic",
+      "html",
+      "metadata",
+      "navigation",
+      "search",
+      "sitemap",
+      "validation",
+    ],
+  },
 ] as const satisfies readonly RouteRegistryDefinition[];
 
 /**
@@ -76,6 +227,58 @@ export function routeRegistryEntries(config: SiteConfig): RouteRegistryEntry[] {
   return routeRegistryDefinitions.map((definition) =>
     routeRegistryEntry(definition, config),
   );
+}
+
+/**
+ * Looks up one route registry entry by configured site route key.
+ *
+ * @param config Validated site configuration.
+ * @param routeKey Site route key to read.
+ * @returns Matching route registry entry.
+ */
+export function routeRegistryEntryForKey(
+  config: SiteConfig,
+  routeKey: SiteRouteKey,
+): RouteRegistryEntry {
+  const entry = routeRegistryEntries(config).find(
+    (candidate) => candidate.routeKey === routeKey,
+  );
+
+  if (entry === undefined) {
+    throw new Error(`Missing route registry entry "${routeKey}".`);
+  }
+
+  return entry;
+}
+
+/**
+ * Builds a concrete generated index path below a configured route root.
+ *
+ * @param route Configured route root.
+ * @param child Child route segment.
+ * @returns Build-output-relative child index path.
+ */
+export function routeChildIndexOutputPath(
+  route: string,
+  child: string,
+): string {
+  const basePath = routeOutputBasePath(route);
+
+  return basePath === ""
+    ? `${child}/index.html`
+    : `${basePath}/${child}/index.html`;
+}
+
+/**
+ * Builds a concrete generated index path for a configured route root.
+ *
+ * @param route Configured route root.
+ * @returns Build-output-relative route index path.
+ */
+export function routeIndexOutputPath(route: string): string {
+  const basePath = routeOutputBasePath(route);
+
+  return basePath === "" ? "index.html" : `${basePath}/index.html`;
 }
 
 /**
@@ -128,7 +331,29 @@ export function routeOutputPath(route: string): string {
     : relativePath;
 }
 
-function featureEnabled(
+/**
+ * Normalizes a configured route root into its build-output base path.
+ *
+ * @param route Configured route path.
+ * @returns Directory/file path without leading or trailing slashes.
+ */
+export function routeOutputBasePath(route: string): string {
+  return (
+    route
+      .split("#")[0]
+      ?.split("?")[0]
+      ?.replace(/^\/+|\/+$/gu, "") ?? ""
+  );
+}
+
+/**
+ * Checks whether a route-owning feature is enabled for a site config.
+ *
+ * @param config Validated site configuration.
+ * @param feature Optional feature key from a route registry entry.
+ * @returns True when the route has no feature gate or its feature is enabled.
+ */
+export function routeFeatureEnabled(
   config: SiteConfig,
   feature: RouteRegistryFeatureKey | undefined,
 ): boolean {
@@ -176,12 +401,36 @@ function routeRegistryEntry(
   const route = config.routes[definition.routeKey];
 
   return {
+    artifactKey: routeArtifactKey(definition),
     enabled: featureEnabled(config, definition.feature),
     entity: definition.entity,
     feature: definition.feature,
     outputKind: routeOutputKind(route),
     outputPath: routeOutputPath(route),
+    pattern: definition.pattern,
     route,
     routeKey: definition.routeKey,
+    surfaces: definition.surfaces,
   };
+}
+
+function featureEnabled(
+  config: SiteConfig,
+  feature: RouteRegistryFeatureKey | undefined,
+): boolean {
+  return routeFeatureEnabled(config, feature);
+}
+
+function routeArtifactKey(
+  definition: RouteRegistryDefinition,
+): SourceArtifactKey {
+  if (definition.routeKey === "feed") {
+    return "output.feed";
+  }
+
+  if (definition.routeKey === "search") {
+    return "output.searchIndex";
+  }
+
+  return "output.routes";
 }

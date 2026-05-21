@@ -1,7 +1,8 @@
 import { articleCompilerArtifact } from "./article-compiler";
 import type { ArticleReferenceData } from "./article-references/model";
 import type { AuthorSummary } from "./authors";
-import { type ArticleEntry, articleUrl, authorName } from "./routes";
+import { routeOutputBasePath } from "./route-registry";
+import { type ArticleEntry, authorName } from "./routes";
 import { absoluteUrl } from "./seo";
 import { type SiteConfig, siteConfig } from "./site-config";
 
@@ -59,29 +60,30 @@ export function articleScholarMetaViewModel({
   site,
 }: ArticlePdfViewModelInput): ArticleScholarMetaViewModel {
   const artifact = articleCompilerArtifact(article, { config });
-  const slug = artifact.slug;
   const authorNames = articlePdfAuthorNames(article, authors);
   const publicationDate = artifact.date;
   const publicationDateForScholar = scholarPublicationDate(publicationDate);
   const title = artifact.title;
+  const pdfOutput = artifact.outputs.pdf;
 
   return {
     abstract: artifact.description,
     authors: authorNames,
     keywords: artifact.tags,
     language: config.identity.language,
-    pdf: artifact.pdfEnabled
-      ? {
-          articleUrl: absoluteUrl(articleUrl(slug), site),
-          authors: authorNames,
-          citationPdfUrl: absoluteUrl(articlePdfHref(slug), site),
-          pdfHref: articlePdfHref(slug),
-          pdfOutputPath: articlePdfOutputPath(slug),
-          publicationDate,
-          publicationDateForScholar,
-          title,
-        }
-      : undefined,
+    pdf:
+      pdfOutput === undefined
+        ? undefined
+        : {
+            articleUrl: absoluteUrl(artifact.canonicalPath, site),
+            authors: authorNames,
+            citationPdfUrl: absoluteUrl(pdfOutput.href, site),
+            pdfHref: pdfOutput.href,
+            pdfOutputPath: pdfOutput.path,
+            publicationDate,
+            publicationDateForScholar,
+            title,
+          },
     publicationDate,
     publicationDateForScholar,
     references: scholarCitationReferences(articleReferences),
@@ -119,20 +121,28 @@ export function articlePdfEnabled(
  * Builds the public href for an article's generated PDF.
  *
  * @param slug Public article slug.
+ * @param route Configured article route root.
  * @returns Same-directory public PDF path.
  */
-export function articlePdfHref(slug: string): string {
-  return `${articleUrl(slug)}${slug}.pdf`;
+export function articlePdfHref(
+  slug: string,
+  route = siteConfig.routes.articles,
+): string {
+  return `${articleRouteRoot(route)}${slug}/${slug}.pdf`;
 }
 
 /**
  * Builds the generated `dist` path for an article PDF.
  *
  * @param slug Public article slug.
+ * @param route Configured article route root.
  * @returns Relative path inside `dist`.
  */
-export function articlePdfOutputPath(slug: string): string {
-  return `articles/${slug}/${slug}.pdf`;
+export function articlePdfOutputPath(
+  slug: string,
+  route = siteConfig.routes.articles,
+): string {
+  return articlePdfOutputPathForRoute(slug, route);
 }
 
 /**
@@ -147,6 +157,18 @@ export function scholarPublicationDate(date: Date): string {
   const day = date.getUTCDate().toString().padStart(2, "0");
 
   return `${year}/${month}/${day}`;
+}
+
+function articlePdfOutputPathForRoute(slug: string, route: string): string {
+  const basePath = routeOutputBasePath(route);
+
+  return basePath === ""
+    ? `${slug}/${slug}.pdf`
+    : `${basePath}/${slug}/${slug}.pdf`;
+}
+
+function articleRouteRoot(route: string): string {
+  return route.endsWith("/") ? route : `${route}/`;
 }
 
 function articlePdfAuthorNames(

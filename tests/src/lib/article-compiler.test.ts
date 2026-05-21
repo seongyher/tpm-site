@@ -90,7 +90,34 @@ describe("article compiler artifact", () => {
       draft: false,
       formattedDate: "January 2, 2022",
       id: "a-and-b",
+      outputs: {
+        html: {
+          path: "articles/a-and-b/index.html",
+        },
+        pdf: {
+          href: "/articles/a-and-b/a-and-b.pdf",
+          path: "articles/a-and-b/a-and-b.pdf",
+        },
+      },
+      route: {
+        path: "/articles/a-and-b/",
+        routeKey: "articles",
+        root: "/articles/",
+      },
       slug: "a-and-b",
+      source: {
+        collection: "articles",
+        filePath: "/repo/site/content/articles/culture/a-and-b.md",
+        format: "markdown",
+      },
+      surfaces: {
+        directory: true,
+        feed: true,
+        homepage: true,
+        pdf: true,
+        search: true,
+        sitemap: true,
+      },
       title: "A & B",
     });
   });
@@ -109,7 +136,10 @@ describe("article compiler artifact", () => {
       homepage: false,
       search: true,
     });
+    expect(artifact.canonicalPath).toBe("/writing/a-and-b/");
+    expect(artifact.outputs.html.path).toBe("writing/a-and-b/index.html");
     expect(artifact.pdfEnabled).toBe(false);
+    expect(artifact.outputs.pdf).toBeUndefined();
   });
 
   test("lets frontmatter visibility and PDF policy override defaults", () => {
@@ -133,6 +163,11 @@ describe("article compiler artifact", () => {
       search: false,
     });
     expect(artifact.pdfEnabled).toBe(true);
+    expect(artifact.surfaces).toMatchObject({
+      homepage: true,
+      pdf: true,
+      search: false,
+    });
   });
 
   test("carries reference and table-of-contents facts for downstream consumers", () => {

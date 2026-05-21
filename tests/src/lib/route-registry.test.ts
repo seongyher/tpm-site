@@ -1,10 +1,17 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  routeChildIndexOutputPath,
+  routeFeatureEnabled,
+  routeIndexOutputPath,
   routeOutputKind,
   routeOutputPath,
   routeOwnsPathname,
+  type RouteRegistryEntityKind,
   routeRegistryEntries,
+  routeRegistryEntryForKey,
+  type RouteRegistryPattern,
+  type RouteRegistrySurface,
 } from "../../../src/lib/route-registry";
 import { parseSiteConfig } from "../../../src/lib/site-config";
 
@@ -61,20 +68,86 @@ describe("route registry", () => {
         entry.entity,
         entry.feature,
         entry.enabled,
+        entry.artifactKey,
         entry.outputPath,
+        entry.pattern,
       ]),
     ).toEqual([
-      ["home", "home", undefined, true, "index.html"],
-      ["articles", "article", undefined, true, "writing"],
-      ["allArticles", "article", undefined, true, "articles/all"],
-      ["announcements", "announcement", "announcements", false, "updates"],
-      ["authors", "author", "authors", true, "authors"],
-      ["bibliography", "bibliography", "bibliography", true, "sources"],
-      ["categories", "category", "categories", true, "topics"],
-      ["collections", "collection", "collections", true, "collections"],
-      ["feed", "feed", "feed", false, "rss.xml"],
-      ["search", "search", "search", true, "search"],
-      ["tags", "tag", "tags", false, "tags"],
+      ["home", "home", undefined, true, "output.routes", "index.html", "root"],
+      [
+        "articles",
+        "article",
+        undefined,
+        true,
+        "output.routes",
+        "writing",
+        "entry-root",
+      ],
+      [
+        "allArticles",
+        "article",
+        undefined,
+        true,
+        "output.routes",
+        "articles/all",
+        "index",
+      ],
+      [
+        "announcements",
+        "announcement",
+        "announcements",
+        false,
+        "output.routes",
+        "updates",
+        "entry-root",
+      ],
+      [
+        "authors",
+        "author",
+        "authors",
+        true,
+        "output.routes",
+        "authors",
+        "entry-root",
+      ],
+      [
+        "bibliography",
+        "bibliography",
+        "bibliography",
+        true,
+        "output.routes",
+        "sources",
+        "index",
+      ],
+      [
+        "categories",
+        "category",
+        "categories",
+        true,
+        "output.routes",
+        "topics",
+        "entry-root",
+      ],
+      [
+        "collections",
+        "collection",
+        "collections",
+        true,
+        "output.routes",
+        "collections",
+        "entry-root",
+      ],
+      ["feed", "feed", "feed", false, "output.feed", "rss.xml", "file"],
+      [
+        "search",
+        "search",
+        "search",
+        true,
+        "output.searchIndex",
+        "search",
+        "index",
+      ],
+      ["tags", "tag", "tags", false, "output.routes", "tags", "entry-root"],
     ]);
   });
 
@@ -84,6 +157,10 @@ describe("route registry", () => {
     expect(routeOutputPath("/")).toBe("index.html");
     expect(routeOutputPath("/articles/")).toBe("articles");
     expect(routeOutputPath("/feed.xml")).toBe("feed.xml");
+    expect(routeIndexOutputPath("/articles/")).toBe("articles/index.html");
+    expect(routeChildIndexOutputPath("/articles/", "post")).toBe(
+      "articles/post/index.html",
+    );
   });
 
   test("matches pathnames owned by directory and file routes", () => {
@@ -92,5 +169,24 @@ describe("route registry", () => {
     expect(routeOwnsPathname("/updates-ish/", "/updates/")).toBe(false);
     expect(routeOwnsPathname("/rss.xml", "/rss.xml")).toBe(true);
     expect(routeOwnsPathname("/rss.xml/extra/", "/rss.xml")).toBe(false);
+  });
+
+  test("exposes route surfaces for diagnostics and generated output consumers", () => {
+    const feed = routeRegistryEntryForKey(config, "feed");
+    const tags = routeRegistryEntryForKey(config, "tags");
+    const entity: RouteRegistryEntityKind = "feed";
+    const pattern: RouteRegistryPattern = "file";
+    const surface: RouteRegistrySurface = "feed";
+
+    expect(feed.artifactKey).toBe("output.feed");
+    expect(feed.entity).toBe(entity);
+    expect(feed.outputKind).toBe("file");
+    expect(feed.pattern).toBe(pattern);
+    expect(feed.surfaces).toContain(surface);
+    expect(feed.surfaces).toContain("validation");
+    expect(routeFeatureEnabled(config, feed.feature)).toBe(false);
+    expect(routeFeatureEnabled(config, undefined)).toBe(true);
+    expect(tags.enabled).toBe(false);
+    expect(tags.surfaces).toContain("disabled-feature-diagnostic");
   });
 });

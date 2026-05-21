@@ -4,8 +4,12 @@ import { describe, expect, test } from "bun:test";
 
 import { resolveSiteInstancePaths } from "../../../src/lib/site-instance";
 import {
+  sourceArtifactEntriesByRole,
   sourceArtifactEntry,
+  type SourceArtifactKind,
   sourceArtifactManifest,
+  type SourceArtifactOwner,
+  type SourceArtifactRole,
 } from "../../../src/lib/source-artifacts";
 
 describe("source artifact manifest", () => {
@@ -14,12 +18,19 @@ describe("source artifact manifest", () => {
     const manifest = sourceArtifactManifest(paths, { cwd: "/repo/platform" });
 
     expect(sourceArtifactEntry(manifest, "site.root")).toMatchObject({
+      description: "Active site instance root",
       kind: "site-root",
+      owner: "site-owner",
       relativePath: "site",
+      required: true,
+      role: "site-root",
     });
     expect(sourceArtifactEntry(manifest, "assets.root")).toMatchObject({
       kind: "processed-asset",
+      owner: "site-owner",
       relativePath: "site/assets",
+      required: false,
+      role: "asset-source",
     });
     expect(sourceArtifactEntry(manifest, "public.root")).toMatchObject({
       kind: "public-static",
@@ -31,8 +42,21 @@ describe("source artifact manifest", () => {
     });
     expect(sourceArtifactEntry(manifest, "output.dist")).toMatchObject({
       kind: "generated-output",
+      owner: "platform",
       relativePath: "dist",
+      required: true,
+      role: "generated-route",
     });
+    expect(sourceArtifactEntry(manifest, "output.searchIndex")).toMatchObject({
+      kind: "generated-output",
+      relativePath: "dist/pagefind",
+      role: "generated-search",
+    });
+    expect(
+      sourceArtifactEntriesByRole(manifest, "generated-search").map(
+        (entry) => entry.key,
+      ),
+    ).toEqual(["output.searchIndex"]);
   });
 
   test("tracks external site roots and isolated output directories", () => {
@@ -62,6 +86,16 @@ describe("source artifact manifest", () => {
 
     expect(manifest.generatedOutputs.map((entry) => entry.key)).toEqual([
       "output.dist",
+      "output.routes",
+      "output.assets",
+      "output.socialImages",
+      "output.articlePdfs",
+      "output.feed",
+      "output.sitemapIndex",
+      "output.searchIndex",
+      "output.redirectFallbacks",
+      "output.headers",
+      "output.wellKnown",
     ]);
     expect(manifest.parkedLegacyAssets.map((entry) => entry.key)).toEqual([
       "unusedAssets.root",
@@ -86,5 +120,17 @@ describe("source artifact manifest", () => {
     expect(() =>
       sourceArtifactEntry({ ...manifest, entries: [] }, "assets.root"),
     ).toThrow('Missing source artifact manifest entry "assets.root".');
+  });
+
+  test("exports the source/artifact contract type vocabulary", () => {
+    const kind: SourceArtifactKind = "generated-output";
+    const owner: SourceArtifactOwner = "platform";
+    const role: SourceArtifactRole = "generated-route";
+
+    expect([kind, owner, role]).toEqual([
+      "generated-output",
+      "platform",
+      "generated-route",
+    ]);
   });
 });

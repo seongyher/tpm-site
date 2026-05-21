@@ -1,175 +1,161 @@
 # Source Contracts
 
-This document tracks the Milestone 1 source-contract work. The goal is to make
-the platform's core inputs, generated outputs, routes, feature ownership, and
-article render facts explicit enough for tests, scripts, future examples, CLI
-tools, MCP tools, and a future CMS studio to consume safely.
+This document defines the Milestone 1 source-contract layer for the platform.
+The goal is to make the platform's core inputs, generated outputs, routes,
+feature ownership, and article render facts explicit enough for tests, scripts,
+future example sites, CLI tools, MCP tools, and a future CMS studio to consume
+safely.
 
-## Local Planning Notes
-
-Linear contains the detailed Milestone 1 breakdown. The local roadmap currently
-lives at `docs/PLATFORM_ROADMAP.md`; some Linear descriptions still reference
-the older `agent-docs/PLATFORM_ROADMAP.md` path. `AGENTS.md` is the active
-repo engineering policy in this checkout.
-
-Implementation should update this document, `CHECKLIST.md`, and any affected
-public docs as contracts become real code.
+The contracts are intentionally behavior-preserving. They do not redesign public
+URLs, article rendering, route pruning, or reader-facing layout. They make the
+current behavior explicit, typed, testable, and reusable.
 
 ## Principles
 
-- Keep site-instance choices in `site/` and platform contracts in `src/` or
-  `scripts/`.
-- Prefer typed values over repeated strings for source roots, feature routes,
-  generated artifacts, and article render facts.
-- Keep compatibility singleton exports while adding explicit context seams.
+- Keep site-instance choices in `site/` and reusable platform contracts in
+  `src/` or `scripts/`.
+- Prefer typed values over repeated strings for source roots, generated
+  artifacts, feature routes, and article render facts.
+- Preserve compatibility singleton exports while adding explicit context seams
+  for tests, scripts, future multi-site tooling, and future GUI tooling.
 - Characterize current behavior before moving data behind a new boundary.
 - Make invalid locations, disabled-feature links, duplicate routes, missing
   outputs, and article metadata drift fail with specific diagnostics.
-- Do not change public URLs or reader-facing output as part of contract
-  extraction unless a later milestone explicitly approves it.
+- Keep source contracts static-first and framework-light. The same contracts
+  should be usable by Bun scripts without an Astro runtime.
 
 ## Contract 1: Source And Artifact Manifest
 
-The source/artifact manifest names the repository locations the platform knows
-how to read or write.
+The source/artifact manifest names the repository locations and generated output
+families the platform knows how to read, write, verify, or expose.
 
-### Source Kinds
+Each manifest entry has:
 
-- `site-root`: active site instance root.
-- `site-config`: editable JSON config for one site instance.
-- `site-theme`: editable CSS theme contract for one site instance.
-- `content-collection`: editable Markdown, MDX, or data collection roots.
-- `processed-asset`: source assets that should pass through Astro's asset
-  pipeline.
-- `public-static`: files copied directly to the site root without image
-  processing.
-- `parked-legacy-asset`: intentionally unused or preserved source material.
-- `generated-output`: build output owned by the platform.
+- a stable `key`;
+- a lifecycle `kind`;
+- an owner: `author`, `site-owner`, or `platform`;
+- a role such as `content`, `config`, `processed-asset`, `public-static`,
+  `generated-route`, `generated-feed`, `generated-search`, or `generated-pdf`;
+- an absolute path and project-relative path;
+- whether the location is required for a valid site instance;
+- whether the entry is editable source, parked source, generated output, or
+  copied public static output.
 
-### Required Ownership Rules
+Required invariants:
 
 - Editable author/site-owner files live under the active site instance.
 - Processed images and reusable visual assets live under `site/assets/`.
 - Public files are only for root files that must be copied untouched.
 - `dist` and alternate `SITE_OUTPUT_DIR` values are generated outputs.
+- Generated output families are declared even when their concrete files are
+  feature-dependent.
 - Parked assets are source-owned but excluded from normal asset optimization.
-- Build verifiers and release reports should use the same manifest vocabulary
+- Build verifiers, site doctor, and release reports use this manifest vocabulary
   instead of re-declaring ownership rules.
-
-### First Implementation Target
-
-Add a small `src/lib/source-artifacts.ts` module that builds a manifest from
-`SiteInstancePaths`. It should be pure, testable, and usable by scripts without
-Astro runtime assumptions. The first integration should replace duplicated
-asset-root logic in `scripts/assets/verify-image-asset-locations.ts`.
-
-Implemented in `src/lib/source-artifacts.ts`. The image asset location verifier
-now reads the processed asset root from the manifest instead of duplicating the
-site path policy.
 
 ## Contract 2: Platform Context
 
-The platform context makes the active site explicit while preserving existing
+The platform context makes one active site explicit while preserving current
 default imports for Astro pages and scripts.
 
-### Context Values
+The full context contains:
 
-- `paths`: resolved `SiteInstancePaths`.
-- `config`: parsed `SiteConfig`.
-- `routes`: route helpers derived from `config`.
+- resolved `SiteInstancePaths`;
+- normalized `SiteConfig`;
+- a source/artifact manifest for those paths and config;
+- a route registry for that config.
 
-### Boundary Rules
+Narrow context slices exist so modules can depend only on what they need:
 
-- Platform helpers should accept explicit context inputs when used by tests,
-  scripts, or future multi-site tooling.
-- Default singleton exports can remain as compatibility shims for current Astro
-  pages.
-- New domain helpers should avoid reading process environment or filesystem
-  state directly when the caller can provide context.
+- source/artifact consumers receive paths plus manifest data;
+- route consumers receive config plus route registry entries;
+- article compiler consumers receive article defaults, feature flags, and route
+  facts rather than reading global state directly.
 
-### First Implementation Target
+Required invariants:
 
-Add a typed context helper that can compose paths and config in tests without
-re-reading global state. Use it in new registry and manifest helpers first;
-deeper singleton migration should be incremental.
-
-Implemented in `src/lib/platform-context.ts`. The default `platformContext`
-keeps current Astro pages and scripts stable, while `createPlatformContext()`
-allows tests and future tools to inject paths and config explicitly.
+- Tests and tooling can compose contexts from explicit paths/config without
+  re-reading process state.
+- Default singleton exports remain compatibility shims for current Astro routes
+  and scripts.
+- New reusable helpers should accept explicit context or narrow config inputs
+  instead of importing singleton config when practical.
 
 ## Contract 3: Route, Entity, And Feature Registry
 
-The registry is the canonical place to describe public route surfaces and their
-owning features.
+The route registry is the canonical place to describe public route surfaces and
+their owning features.
 
-### Registry Values
+Each registry entry has:
 
-- site route key;
-- entity kind, when a route indexes or renders a publishable entity;
-- optional feature key, when disabling a feature should prune the route;
+- the site route key;
+- the entity kind represented by the route;
+- an optional feature key when disabling a feature should prune or hide the
+  route;
+- whether the route is enabled for the current config;
 - configured route path;
-- generated output kind: directory or file;
-- generated output path relative to the build output root.
+- route pattern/cardinality;
+- generated output kind and output path;
+- generated artifact family;
+- discovery surfaces such as HTML, navigation, sitemap, feed, search, metadata,
+  validation, redirect fallback, and disabled-feature diagnostics.
 
-### Required Consumers
+Required consumers:
 
-- URL helpers;
-- optional route pruning;
+- URL helpers and route-output helpers;
+- optional route pruning and disabled-feature diagnostics;
 - sitemap, feed, search, Pagefind, and HTML validation targets;
 - generated-output verification;
-- historical permalink and disabled-feature diagnostics.
+- historical permalink and configured-link diagnostics.
 
-### First Implementation Target
-
-Promote the route metadata currently embedded in `feature-routes.ts` into a
-registry module with tests. Keep existing public helper names where practical
-so pages do not churn.
-
-Implemented in `src/lib/route-registry.ts`. `feature-routes.ts` is now a
-compatibility wrapper over the canonical registry.
+The registry does not mean every configured route path is already a dynamic
+Astro route. It records the platform's current route contract and gives later
+route-pruning and route-renaming work one source of truth.
 
 ## Contract 4: Article Compiler Artifact
 
-The article compiler artifact should represent the single compiled fact set for
-an article after content schema validation and Markdown/MDX processing inputs
-are known.
+The article compiler artifact is the single compiled fact set for one article
+after content schema validation and Markdown/MDX processing inputs are known.
 
-### Artifact Facts
+The artifact contains:
 
-- stable article ID and canonical path;
-- normalized title, description, date, category, author text, and visibility;
-- resolved image/social image facts;
+- stable article ID, slug, source path, source format, and source collection;
+- normalized title, description, date, category, author text, tags, draft state,
+  and visibility;
+- canonical article path, route key, HTML output path, and optional PDF output
+  path;
+- resolved image/social image facts that downstream components need;
 - table-of-contents facts;
 - reference and bibliography facts;
-- PDF/scholarly metadata eligibility;
-- search/feed/sitemap eligibility;
-- downstream related-content and support/endcap facts where they are derived
-  from article identity.
+- PDF and scholarly metadata eligibility;
+- discovery/surface eligibility for directory, feed, homepage, search, sitemap,
+  and PDF output.
 
-### First Implementation Target
+Required invariants:
 
-Start by characterizing the facts already produced by `articleViewModel()` and
-`articlePageViewModel()`. Introduce a typed artifact only after tests prove the
-current facts and optional-feature behavior are stable.
-
-Implemented in `src/lib/article-compiler.ts` for stable article identity,
-display metadata, visibility, PDF eligibility, reference data, and
-table-of-contents facts. `article-view`, `article-page-view-model`, and
-`article-pdf` now consume the artifact for those facts.
+- Downstream article page, layout, Scholar/PDF, search/feed/sitemap, and
+  verifier code should consume the artifact for facts it owns.
+- The artifact should not do rendering IO or parse generated HTML.
+- Source facts and generated-output facts must be explicit so future GUI/CLI/MCP
+  tools can explain what one article will produce.
+- Optional features and frontmatter overrides must be represented as typed facts
+  rather than scattered boolean checks.
 
 ## Verification Policy
 
-Each contract milestone should include focused unit tests first. Release-level
-checks are required after integration milestones:
+Each contract has focused unit coverage. Release-level checks are required
+after integration changes.
 
-- source/artifact manifest: default and fixture site paths, asset location
-  checks, platform-boundary check;
-- platform context: default and injected context tests, fixture config tests;
-- registry: configured route tests, optional feature tests, generated-output
-  path tests;
-- article artifact: article view-model characterization tests, reference/PDF
-  fixture tests, downstream verifier tests.
+Required focused coverage:
 
-Final verification should use `bun --silent run check` and, when build-output
-logic changes, `bun --silent run build:release`, `bun --silent run verify`, and
-`bun --silent run validate:html`.
+- source/artifact manifest: default and fixture site paths, generated output
+  families, required/optional placement, and site-doctor integration;
+- platform context: default and injected contexts, route registry context, and
+  fixture config/path composition;
+- registry: configured routes, optional features, route ownership, generated
+  output paths, route surfaces, and disabled-feature diagnostics;
+- article artifact: article view-model characterization, reference/PDF/table of
+  contents fixtures, visibility/default policy, and downstream output facts.
+
+Final verification should use focused tests first, then `bun --silent run
+check:release` before Linear status handoff.
