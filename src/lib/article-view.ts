@@ -1,13 +1,5 @@
-import {
-  type ArticleEntry,
-  articleUrl,
-  authorName,
-  categorySlug,
-  entryDate,
-  entryTitle,
-  excerpt,
-  formatDate,
-} from "./routes";
+import { articleCompilerArtifact } from "./article-compiler";
+import type { ArticleEntry } from "./routes";
 
 /** Display and metadata fields needed by the article layout. */
 export interface ArticleViewModel {
@@ -28,16 +20,16 @@ export interface ArticleViewModel {
  * @returns Display-ready article metadata.
  */
 export function articleViewModel(article: ArticleEntry): ArticleViewModel {
-  const date = entryDate(article);
+  const artifact = articleCompilerArtifact(article);
 
   return {
-    author: authorName(article),
-    canonicalPath: articleUrl(article.id),
-    categorySlug: categorySlug(article),
-    date,
-    description: excerpt(article),
-    formattedDate: formatDate(date),
-    imageAlt: article.data.imageAlt,
-    title: entryTitle(article),
+    author: artifact.author,
+    canonicalPath: artifact.canonicalPath,
+    categorySlug: artifact.categorySlug,
+    date: artifact.date,
+    description: artifact.description,
+    formattedDate: artifact.formattedDate,
+    imageAlt: artifact.imageAlt,
+    title: artifact.title,
   };
 }

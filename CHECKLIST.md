@@ -646,5 +646,61 @@ they are useful context. Explicitly deferred work belongs in
       policy, with acceptance criteria for future implementation.
       Verified with `bunx prettier --check docs/performance/route-class-performance-budgets.md --log-level warn`
       and `bunx markdownlint-cli2 docs/performance/route-class-performance-budgets.md`.
+### Milestone 179: IRK-65 Verifier Diagnostic Design And Inventory
+
+- [x] Inventory current generated-output verifier issue buckets,
+      `site:doctor` diagnostics, and release-check expectations.
+- [x] Define the shared diagnostic model, verifier module API, diagnostic
+      identity, and JSON/human-output expectations without weakening current
+      release checks.
+- [x] Update platform documentation with the verifier contract and any module
+      boundary changes before implementation begins.
+      Documented in `docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md`.
+
+### Milestone 180: IRK-65 Diagnostic Model And Module API
+
+- [x] Add the typed reusable diagnostic model and verifier module runner with
+      stable categories, severities, locations, remediation, evidence, and
+      machine-readable report helpers.
+- [x] Add an adapter from the current build verifier issue buckets into the
+      shared diagnostic model so existing diagnostics can map into the new
+      contract without losing useful information.
+- [x] Preserve existing human-readable verifier CLI output while adding
+      machine-readable JSON output suitable for future site doctor, GUI, CLI,
+      and MCP consumers.
+      Implemented `src/lib/output-verification.ts`, mapped current
+      `verify-build` buckets into structured diagnostics, and added
+      `bun run verify -- --json` support while preserving the existing default
+      human report.
+
+### Milestone 181: IRK-65 Focused Verification Coverage
+
+- [x] Add unit coverage for diagnostic creation, module aggregation, blocking
+      severity detection, diagnostic identities, and report formatting.
+- [x] Add build-verifier coverage proving every current issue bucket maps to a
+      structured diagnostic and JSON output does not replace the existing human
+      report.
+- [x] Verify the new diagnostic API is pure/testable and does not introduce
+      site-specific coupling into reusable platform modules.
+      Verified with
+      `bun test tests/config/package-scripts.test.ts tests/src/lib/output-verification.test.ts tests/scripts/build/build-verifier.test.ts tests/scripts/quality/verify-platform-boundaries.test.ts`,
+      `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet`, `bun --silent run format`, and
+      `bun --silent run format:markdown`.
+
+### Milestone 182: IRK-65 Release Verification And Handoff
+
+- [x] Run focused tests and relevant repository checks for the new verifier
+      contract.
+- [x] Fix any issues, update docs/checklist completion notes, and record the
+      remaining blockers for the later verifier module split work.
+      Verified with
+      `bun test tests/config/package-scripts.test.ts tests/src/lib/output-verification.test.ts tests/scripts/build/build-verifier.test.ts tests/scripts/quality/verify-platform-boundaries.test.ts`,
+      `bun --silent run check:fast`, `bun --silent run typecheck`,
+      `bun --silent run lint -- --quiet`, `bun --silent run deadcode`,
+      `bun --silent run format`, `bun --silent run format:markdown`,
+      `git diff --check`, and `bun --silent run check`. Later verifier module
+      splits remain blocked on the route/entity registry and article compiler
+      artifact contracts.
 - [x] Run the agreed preflight verification set and update Linear/checklist
       status after the milestone is verified.

@@ -2,10 +2,11 @@ import { spawn } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import {
-  projectRelativePath,
-  resolveSiteInstancePaths,
-} from "../../src/lib/site-instance";
+  sourceArtifactEntry,
+  sourceArtifactManifest,
+} from "../../src/lib/source-artifacts";
 
 const defaultIgnoreFile = "scripts/image-asset-location-ignore.json";
 const imageExtensionPattern =
@@ -177,10 +178,12 @@ export async function verifyImageAssetLocations({
 }
 
 function defaultSrcAssetsDir(rootDir: string): string {
-  return projectRelativePath(
-    resolveSiteInstancePaths({ cwd: rootDir }).assets.root,
-    rootDir,
-  );
+  return sourceArtifactEntry(
+    sourceArtifactManifest(resolveSiteInstancePaths({ cwd: rootDir }), {
+      cwd: rootDir,
+    }),
+    "assets.root",
+  ).relativePath;
 }
 
 function hasDotPathSegment(relativePath: string) {

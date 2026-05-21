@@ -71,6 +71,7 @@ const libDomainFiles = {
   "content-model": [
     "announcements.ts",
     "archive.ts",
+    "article-compiler.ts",
     "article-continuity.ts",
     "article-list.ts",
     "article-page-view-model.ts",
@@ -92,6 +93,7 @@ const libDomainFiles = {
     "article-pdf-compatibility.ts",
     "article-pdf.ts",
   ],
+  "output-verification": ["output-verification.ts"],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",
@@ -106,6 +108,8 @@ const libDomainFiles = {
     "feature-routes.ts",
     "metadata.ts",
     "navigation.ts",
+    "platform-context.ts",
+    "route-registry.ts",
     "routes.ts",
     "semantic-metadata.ts",
     "seo.ts",
@@ -114,6 +118,7 @@ const libDomainFiles = {
     "site-config.ts",
     "site-instance.ts",
     "site-redirects.ts",
+    "source-artifacts.ts",
     "social-images.ts",
     "static-paths.ts",
     "support.ts",
