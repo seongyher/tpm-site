@@ -12,26 +12,26 @@ integration behavior that lower layers cannot prove.
 
 ### Current Check Layers
 
-| Layer                                | Current command or source                                                                          | Current role                                                                                                           |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Content verification                 | `bun run verify:content`, `bun run tags:check`, `bun run site:doctor`, `bun run site:schema:check` | Fast source and authoring contract checks before expensive builds.                                                     |
-| Platform boundary checks             | `bun run platform:check`                                                                           | Fast architectural check for site/platform separation.                                                                 |
-| Asset checks                         | `bun run assets:locations`, `bun run assets:shared`, `bun run review:assets`                       | Fast required asset policy plus review-only duplicate/unused asset reports.                                            |
-| Package and config tests             | `bun run lint:packages`, `bun run test:config`                                                     | Fast package ordering and tool/config contract checks.                                                                 |
-| Unit tests                           | `bun run test:unit`                                                                                | Pure logic, helper, script, route helper, and source-contract tests.                                                   |
-| Astro component tests                | `bun run test:astro`                                                                               | Rendered component markup, slots, variants, data hooks, and compile-time Astro contracts.                              |
-| Test accountability                  | `bun run test:accountability`, `bun run test:accountability:release`                               | Ensures test files are covered by the expected command layer and blocks broad untracked test drift.                    |
-| Component catalog checks             | `bun run catalog:check`, `bun run test:catalog`, `bun run test:catalog:site-instance`              | Verifies catalog coverage, catalog examples, and private catalog behavior against a non-TPM site instance.             |
-| Build checks                         | `bun run build`, `bun run build:release`                                                           | Produces static output, PDFs, optimized assets, and Cloudflare redirect output.                                        |
-| Generated-output verification        | `bun run verify`, `bun run validate:html`                                                          | Checks built files, generated routes, metadata, assets, links, and HTML validity.                                      |
-| Browser invariants                   | `bun run test:e2e`, `bun run test:e2e:built`                                                       | Built-site layout, routing, interaction, and browser-only integration checks.                                          |
-| Accessibility checks                 | `bun run test:a11y`, `bun run test:a11y:built`                                                     | Axe/Playwright accessibility scans over built output.                                                                  |
-| Lighthouse checks                    | `bun run test:perf`, `bun run test:perf:built`                                                     | Lighthouse CI assertions and resource budgets over representative built routes.                                        |
-| Docs-site checks                     | `bun run test:docs-site`                                                                           | Validates and builds the public documentation example site as a separate site instance.                                |
-| Fixture site checks                  | `bun run test:site-instance`                                                                       | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                                           |
-| Coverage checks                      | `bun run coverage`, `bun run coverage:check`                                                       | Review and enforcement surface for unit-level coverage expectations.                                                   |
-| Quality dispatcher                   | `bun run quality`, `bun run quality:release`                                                       | Sequential blocking checks followed by nonblocking review checks.                                                      |
-| Payload and optimization experiments | `bun run payload:*`                                                                                | Investigation-only tooling for payload size, critical CSS, HTML minification, and post-build optimization experiments. |
+| Layer                              | Current command or source                                                                          | Current role                                                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Content verification               | `bun run verify:content`, `bun run tags:check`, `bun run site:doctor`, `bun run site:schema:check` | Fast source and authoring contract checks before expensive builds.                                         |
+| Platform boundary checks           | `bun run platform:check`                                                                           | Fast architectural check for site/platform separation.                                                     |
+| Asset checks                       | `bun run assets:locations`, `bun run assets:shared`, `bun run review:assets`                       | Fast required asset policy plus review-only duplicate/unused asset reports.                                |
+| Package and config tests           | `bun run lint:packages`, `bun run test:config`                                                     | Fast package ordering and tool/config contract checks.                                                     |
+| Unit tests                         | `bun run test:unit`                                                                                | Pure logic, helper, script, route helper, and source-contract tests.                                       |
+| Astro component tests              | `bun run test:astro`                                                                               | Rendered component markup, slots, variants, data hooks, and compile-time Astro contracts.                  |
+| Test accountability                | `bun run test:accountability`, `bun run test:accountability:release`                               | Ensures test files are covered by the expected command layer and blocks broad untracked test drift.        |
+| Component catalog checks           | `bun run catalog:check`, `bun run test:catalog`, `bun run test:catalog:site-instance`              | Verifies catalog coverage, catalog examples, and private catalog behavior against a non-TPM site instance. |
+| Build checks                       | `bun run build`, `bun run build:release`                                                           | Produces static output, PDFs, optimized assets, and Cloudflare redirect output.                            |
+| Generated-output verification      | `bun run verify`, `bun run validate:html`                                                          | Checks built files, generated routes, metadata, assets, links, and HTML validity.                          |
+| Browser invariants                 | `bun run test:e2e`, `bun run test:e2e:built`                                                       | Built-site layout, routing, interaction, and browser-only integration checks.                              |
+| Accessibility checks               | `bun run test:a11y`, `bun run test:a11y:built`                                                     | Axe/Playwright accessibility scans over built output.                                                      |
+| Lighthouse checks                  | `bun run test:perf`, `bun run test:perf:built`                                                     | Lighthouse CI assertions and resource budgets over representative built routes.                            |
+| Docs-site checks                   | `bun run test:docs-site`                                                                           | Validates and builds the public documentation example site as a separate site instance.                    |
+| Fixture site checks                | `bun run test:site-instance`                                                                       | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                               |
+| Coverage checks                    | `bun run coverage`, `bun run coverage:check`                                                       | Review and enforcement surface for unit-level coverage expectations.                                       |
+| Quality dispatcher                 | `bun run quality`, `bun run quality:release`                                                       | Sequential blocking checks followed by nonblocking review checks.                                          |
+| Payload and optimization workbench | `bun run payload:check`, `bun run payload:*`                                                       | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments. |
 
 ### Current Fixture Surfaces
 
@@ -51,9 +51,9 @@ integration behavior that lower layers cannot prove.
 | Fast local           | `check:fast`, focused `bun test`, focused `test:astro`                                                    | Cheap validation while editing; catches schema, source, and platform-contract failures early.     |
 | Normal local         | `check`                                                                                                   | Default pre-handoff gate for most code changes.                                                   |
 | Focused built output | `build`, `verify`, `validate:html`, focused `test:e2e:built`                                              | Used when a change touches output, layout, metadata, links, browser behavior, or generated files. |
-| Release blocking     | `check:release`                                                                                           | Full release gate for platform/site changes that need deploy confidence.                          |
+| Release blocking     | `check:release`, `payload:check`                                                                          | Full release gate for platform/site changes plus deterministic route-class payload/cache budgets. |
 | Review-only release  | `quality:release` review steps: assets, markdown, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.     |
-| Investigation-only   | `payload:*`, full-site Unlighthouse scans, ad hoc browser profiling                                       | Data collection for future budgets, experiments, and roadmap planning.                            |
+| Investigation-only   | `payload:*:experiment`, full-site Unlighthouse scans, ad hoc browser profiling                            | Data collection for future budgets, experiments, and roadmap planning.                            |
 
 ## Target Ownership Principles
 
@@ -144,6 +144,12 @@ The command ownership manifest is implemented in
   evidence, or a documented exception for investigation-only/manual domains.
 - `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
   aligned with `package.json` and CI workflows.
+- `tests/config/fixture-site-matrix.test.ts` keeps the minimal external site
+  fixture aligned with its required content, asset, public-file, redirect, and
+  theme coverage.
+- `scripts/quality/qa-failure-probes.ts` records intentional bad-input probes
+  for source, generated-output, layout, citation, config, and payload budget
+  failure classes without leaking bad fixtures into production content.
 
 The remaining implementation work should:
 

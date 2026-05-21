@@ -1325,6 +1325,11 @@ describe("build verifier helpers", () => {
       );
       await writeText(
         root,
+        "dist/_astro/ArticleShareMenu.astro_astro_type_script_index_0_lang.Abc123.js",
+        "",
+      );
+      await writeText(
+        root,
         "dist/_astro/AnchoredRoot.astro_astro_type_script_index_0_lang.Abc123.js",
         "",
       );
@@ -1339,7 +1344,7 @@ describe("build verifier helpers", () => {
       await writeText(
         root,
         "dist/articles/published/index.html",
-        '<script type="module" src="/_astro/ArticleImageInspectorScript.astro_astro_type_script_index_0_lang.Abc123.js"></script><script type="module" src="/_astro/ArticleReferences.astro_astro_type_script_index_0_lang.Abc123.js"></script><a href="#local">Article without JSON-LD</a>',
+        '<script type="module" src="/_astro/ArticleImageInspectorScript.astro_astro_type_script_index_0_lang.Abc123.js"></script><script type="module" src="/_astro/ArticleReferences.astro_astro_type_script_index_0_lang.Abc123.js"></script><script type="module" src="/_astro/ArticleShareMenu.astro_astro_type_script_index_0_lang.Abc123.js"></script><a href="#local">Article without JSON-LD</a>',
       );
       await writeText(root, "dist/articles/extra/index.html", "");
       await writeText(root, "dist/categories/index.html", "");

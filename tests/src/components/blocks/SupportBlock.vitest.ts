@@ -35,7 +35,7 @@ describe("SupportBlock", () => {
     expect(view).toContain("patreon-lockup-white");
     expect(view).toContain("discord-logo-white");
     expect(view).toContain("w-full");
-    expect(view).not.toContain("max-w-3xl");
+    expect(view).toContain("text-xl font-semibold");
   });
 
   test("renders nothing when support is disabled upstream", async () => {

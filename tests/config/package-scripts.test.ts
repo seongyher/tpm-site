@@ -18,6 +18,7 @@ const expectedScriptEntrypoints = [
   ["build:raw", "scripts/build/build-raw.ts"],
   ["catalog:check", "scripts/quality/verify-component-catalog.ts"],
   ["coverage:verify", "scripts/testing/verify-test-coverage.ts"],
+  ["payload:check", "scripts/payload/report-payload.ts"],
   [
     "payload:minify-html:experiment",
     "scripts/payload/minify-html-experiment.ts",
@@ -140,10 +141,17 @@ describe("package scripts", () => {
 
     expect(normalCheck.startsWith("bun --silent run check:fast &&")).toBe(true);
     expect(releaseCheck).toContain("bun --silent run build:release");
+    expect(releaseCheck).toContain("bun --silent run payload:check");
     expect(releaseCheck).toContain("bun --silent run test:e2e:built");
     expect(releaseCheck).not.toContain("bun --silent run test:e2e &&");
     expect(releaseCheck.indexOf("bun --silent run test:catalog")).toBeLessThan(
       releaseCheck.indexOf("bun --silent run build:release"),
+    );
+    expect(
+      releaseCheck.indexOf("bun --silent run payload:check"),
+    ).toBeGreaterThan(releaseCheck.indexOf("bun --silent run build:release"));
+    expect(releaseCheck.indexOf("bun --silent run payload:check")).toBeLessThan(
+      releaseCheck.indexOf("bun --silent run verify"),
     );
     expect(
       releaseCheck.indexOf("bun --silent run test:e2e:built"),

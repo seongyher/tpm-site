@@ -90,13 +90,19 @@ const libDomainFiles = {
   "interaction-primitives": [
     "anchored-disclosure.ts",
     "anchored-positioning.ts",
+    "browser-clipboard.ts",
+    "interaction-primitives.ts",
   ],
   "media-policy": ["media-policy.ts", "social-images.ts"],
   "pdf-and-scholarly-output": [
     "article-pdf-compatibility.ts",
     "article-pdf.ts",
   ],
-  "output-verification": ["output-verification.ts", "performance-budgets.ts"],
+  "output-verification": [
+    "output-verification.ts",
+    "performance-budgets.ts",
+    "performance-workbench.ts",
+  ],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",
