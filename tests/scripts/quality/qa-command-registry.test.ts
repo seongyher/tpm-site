@@ -6,6 +6,8 @@ import {
   qaCiJobRegistry,
   qaCommandGroups,
   qaCommandRegistry,
+  type QaDomainCoverageEntry,
+  qaDomainCoverageRegistry,
 } from "../../../scripts/quality/qa-command-registry";
 
 interface PackageJson {
@@ -107,6 +109,40 @@ describe("QA command registry", () => {
       expect(entry.class.trim()).not.toBe("");
       expect(entry.ciUsage.trim()).not.toBe("");
       expect(entry.mutation.trim()).not.toBe("");
+    }
+  });
+
+  test("accounts for every command domain with focused and release evidence or an exception", () => {
+    const domainCoverage: readonly QaDomainCoverageEntry[] =
+      qaDomainCoverageRegistry;
+    const commandDomains = Array.from(
+      new Set(qaCommandGroups.map((group) => group.domain)),
+    ).sort(compareStrings);
+    const coverageDomains = domainCoverage
+      .map((entry) => entry.domain)
+      .sort(compareStrings);
+    const packageScripts = new Set(Object.keys(qaCommandRegistry));
+    const ciJobs: ReadonlySet<string> = new Set(
+      qaCiJobRegistry.map((entry) => entry.job),
+    );
+
+    expect(duplicateValues(coverageDomains)).toEqual([]);
+    expect(coverageDomains).toEqual(commandDomains);
+
+    for (const entry of domainCoverage) {
+      expect(entry.purpose.trim()).not.toBe("");
+
+      for (const script of [...entry.focusedScripts, ...entry.releaseScripts]) {
+        expect(packageScripts.has(script)).toBe(true);
+      }
+
+      for (const job of entry.ciJobs) {
+        expect(ciJobs.has(job)).toBe(true);
+      }
+
+      if (entry.releaseScripts.length === 0 && entry.ciJobs.length === 0) {
+        expect(entry.exception?.trim()).toBeTruthy();
+      }
     }
   });
 

@@ -20,6 +20,15 @@ describe("article PDF helpers", () => {
     );
   });
 
+  test("derives PDF paths from configurable article route roots", () => {
+    expect(articlePdfHref("post", "/writing")).toBe("/writing/post/post.pdf");
+    expect(articlePdfOutputPath("post", "/writing")).toBe(
+      "writing/post/post.pdf",
+    );
+    expect(articlePdfHref("post", "/")).toBe("/post/post.pdf");
+    expect(articlePdfOutputPath("post", "/")).toBe("post/post.pdf");
+  });
+
   test("formats Scholar publication dates with UTC calendar fields", () => {
     expect(scholarPublicationDate(new Date("2021-11-30T23:58:10.000Z"))).toBe(
       "2021/11/30",

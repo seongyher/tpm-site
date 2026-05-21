@@ -131,18 +131,28 @@ the correct fixture whenever a new domain needs proof.
 - Do not make accessibility or performance tests depend on unrelated editorial
   content churn when a fixture can provide a stable route.
 
-## Implementation Handoff
+## Current Implementation Status
 
-The follow-up implementation work should:
+The command ownership manifest is implemented in
+`scripts/quality/qa-command-registry.ts`:
 
-1. Add a small manifest or documentation table that maps commands to ownership
-   layers, so `test:accountability` and package-script docs can stay aligned.
-2. Add or extend fixture sites only when an implementation issue needs that
+- `qaCommandGroups` classifies every package script by command class, domain,
+  runtime, mutation behavior, CI usage, and purpose.
+- `qaCiJobRegistry` maps CI jobs back to local commands or documented CI-only
+  reasons.
+- `qaDomainCoverageRegistry` maps every command domain to focused/release/CI
+  evidence, or a documented exception for investigation-only/manual domains.
+- `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
+  aligned with `package.json` and CI workflows.
+
+The remaining implementation work should:
+
+1. Add or extend fixture sites only when an implementation issue needs that
    proof.
-3. Add a feature-disabled fixture before broad route-pruning or GUI work relies
+2. Add a feature-disabled fixture before broad route-pruning or GUI work relies
    on optional modules.
-4. Add a scholarly fixture before expanding citation/PDF/metadata features.
-5. Add a media-heavy fixture before making broad image, embed, PDF fallback, or
+3. Add a scholarly fixture before expanding citation/PDF/metadata features.
+4. Add a media-heavy fixture before making broad image, embed, PDF fallback, or
    social-image budget changes.
 
 ## Verification
