@@ -4,6 +4,7 @@ import {
   routeChildIndexOutputPath,
   routeFeatureEnabled,
   routeIndexOutputPath,
+  routeOutputBasePath,
   routeOutputKind,
   routeOutputPath,
   routeOwnsPathname,
@@ -14,6 +15,7 @@ import {
   type RouteRegistrySurface,
 } from "../../../src/lib/route-registry";
 import { parseSiteConfig } from "../../../src/lib/site-config";
+import { siteRouteKeys } from "../../../src/lib/site-config-defaults";
 
 const config = parseSiteConfig({
   features: {
@@ -61,6 +63,22 @@ const config = parseSiteConfig({
 });
 
 describe("route registry", () => {
+  test("keeps route registry definitions in parity with site config route keys", () => {
+    const entries = routeRegistryEntries(config);
+    const routeKeys = entries.map((entry) => entry.routeKey);
+    const outputPaths = entries.map((entry) => entry.outputPath);
+
+    expect(routeKeys.toSorted()).toEqual(Array.from(siteRouteKeys).toSorted());
+    expect(new Set(routeKeys).size).toBe(routeKeys.length);
+    expect(new Set(outputPaths).size).toBe(outputPaths.length);
+
+    for (const entry of entries) {
+      expect(entry.surfaces).toContain("validation");
+      expect(entry.outputKind).toBe(routeOutputKind(entry.route));
+      expect(entry.enabled).toBe(routeFeatureEnabled(config, entry.feature));
+    }
+  });
+
   test("registers configured routes with entity and feature ownership", () => {
     expect(
       routeRegistryEntries(config).map((entry) => [
@@ -153,10 +171,13 @@ describe("route registry", () => {
 
   test("normalizes output kinds and generated output paths", () => {
     expect(routeOutputKind("/feed.xml")).toBe("file");
+    expect(routeOutputKind("/feed.xml?download=1#latest")).toBe("file");
     expect(routeOutputKind("/articles/")).toBe("directory");
     expect(routeOutputPath("/")).toBe("index.html");
     expect(routeOutputPath("/articles/")).toBe("articles");
+    expect(routeOutputPath("/articles?preview=1#top")).toBe("articles");
     expect(routeOutputPath("/feed.xml")).toBe("feed.xml");
+    expect(routeOutputBasePath("/articles?preview=1#top")).toBe("articles");
     expect(routeIndexOutputPath("/articles/")).toBe("articles/index.html");
     expect(routeChildIndexOutputPath("/articles/", "post")).toBe(
       "articles/post/index.html",
@@ -166,8 +187,12 @@ describe("route registry", () => {
   test("matches pathnames owned by directory and file routes", () => {
     expect(routeOwnsPathname("/updates/", "/updates/")).toBe(true);
     expect(routeOwnsPathname("/updates/site-news/", "/updates/")).toBe(true);
+    expect(
+      routeOwnsPathname("/updates/site-news/?preview=1#comments", "/updates"),
+    ).toBe(true);
     expect(routeOwnsPathname("/updates-ish/", "/updates/")).toBe(false);
     expect(routeOwnsPathname("/rss.xml", "/rss.xml")).toBe(true);
+    expect(routeOwnsPathname("/rss.xml?refresh=1", "/rss.xml")).toBe(true);
     expect(routeOwnsPathname("/rss.xml/extra/", "/rss.xml")).toBe(false);
   });
 

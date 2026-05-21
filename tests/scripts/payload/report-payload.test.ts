@@ -26,6 +26,10 @@ function withBuildOutput<T>(run: (distDir: string) => T): T {
       "<!doctype html><html><body><article>Long article text ".repeat(20),
     );
     writeFileSync(
+      path.join(distDir, "_headers"),
+      "/_astro/*\n  Cache-Control: public, max-age=31556952, immutable\n",
+    );
+    writeFileSync(
       path.join(distDir, "assets", "site.css"),
       "body { color: red; }",
     );
@@ -33,6 +37,10 @@ function withBuildOutput<T>(run: (distDir: string) => T): T {
     writeFileSync(
       path.join(distDir, "assets", "image.png"),
       Buffer.from([1, 2, 3]),
+    );
+    writeFileSync(
+      path.join(distDir, "articles", "sample", "sample.pdf"),
+      Buffer.alloc(3 * 1024 * 1024 + 1),
     );
 
     return run(distDir);
@@ -51,8 +59,12 @@ describe("payload reporter", () => {
       const imageGroup = report.byExtension.find(
         (group) => group.extension === ".png",
       );
+      const pdfRole = report.byAssetRole.find((group) => group.role === "pdf");
+      const homeClass = report.routeClasses.find(
+        (group) => group.id === "home",
+      );
 
-      expect(report.allFiles.files).toBe(5);
+      expect(report.allFiles.files).toBe(7);
       expect(report.htmlFiles.files).toBe(2);
       expect(report.topHtmlByRaw).toHaveLength(1);
       expect(report.topHtmlByGzip).toHaveLength(1);
@@ -61,6 +73,17 @@ describe("payload reporter", () => {
       expect(htmlGroup?.brotliBytes).toBeGreaterThan(0);
       expect(imageGroup?.gzipBytes).toBeUndefined();
       expect(imageGroup?.brotliBytes).toBeUndefined();
+      expect(pdfRole?.files).toBe(1);
+      expect(report.pdfs.status).toBe("warn");
+      expect(report.cacheHeaders).toEqual([
+        {
+          expectedHeader: "Cache-Control: public, max-age=31556952, immutable",
+          headersPath: "_headers",
+          pathPattern: "/_astro/*",
+          status: "pass",
+        },
+      ]);
+      expect(homeClass?.status).toBe("pass");
     });
   });
 
@@ -76,6 +99,10 @@ describe("payload reporter", () => {
       expect(output).toContain("Largest HTML by Brotli:");
       expect(output).toContain("Largest HTML by gzip:");
       expect(output).toContain("articles/sample/index.html");
+      expect(output).toContain("By asset role:");
+      expect(output).toContain("Route classes:");
+      expect(output).toContain("Generated PDFs:");
+      expect(output).toContain("Cache headers:");
     });
   });
 

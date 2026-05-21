@@ -86,9 +86,12 @@ Implemented outputs:
 - The same registry maps every CI job in `.github/workflows/ci.yml` and
   `.github/workflows/security.yml` to exact local scripts, approximate local
   scripts, or a documented CI-only reason.
+- The registry also maps every command domain to focused/release/CI evidence,
+  or an explicit exception for investigation-only/manual domains.
 - `tests/scripts/quality/qa-command-registry.test.ts` verifies package script
-  coverage, duplicate registry entries, actionable metadata, CI snippets, local
-  script references, and complete CI job coverage.
+  coverage, duplicate registry entries, actionable metadata, domain
+  accountability, CI snippets, local script references, and complete CI job
+  coverage.
 - `test:config` runs the registry test so `check:fast` catches registry and CI
   parity drift before full lint/test stages.
 - `PACKAGE_SCRIPTS.md` points maintainers to the registry as the command

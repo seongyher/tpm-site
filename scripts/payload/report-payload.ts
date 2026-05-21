@@ -2,6 +2,18 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 
+import {
+  type ByteBudgetResult,
+  evaluateByteBudget,
+  immutableAstroAssetCachePolicy,
+  type PayloadBudgetStatus,
+  pdfPayloadBudget,
+  routeClassHtmlOutputPath,
+  type RouteClassPerformanceBudget,
+  routeClassPerformanceBudgets,
+  type RoutePerformanceClassId,
+} from "../../src/lib/performance-budgets";
+
 /** One measured file from built output. */
 export interface PayloadFile {
   brotliBytes: number | undefined;
@@ -10,6 +22,19 @@ export interface PayloadFile {
   path: string;
   rawBytes: number;
 }
+
+/** Asset role used by route-class payload reports. */
+export type PayloadAssetRole =
+  | "feed"
+  | "font"
+  | "html"
+  | "image"
+  | "metadata"
+  | "other"
+  | "pdf"
+  | "script"
+  | "search"
+  | "stylesheet";
 
 /** Aggregated payload data for a group of files. */
 export interface PayloadGroup {
@@ -20,12 +45,56 @@ export interface PayloadGroup {
   rawBytes: number;
 }
 
+/** Aggregated payload data for one semantic asset role. */
+export interface PayloadAssetRoleGroup extends Omit<PayloadGroup, "extension"> {
+  role: PayloadAssetRole;
+}
+
+/** Payload and budget data for one representative route. */
+export interface PayloadRouteReport {
+  budget: ByteBudgetResult | undefined;
+  file: PayloadFile | undefined;
+  htmlPath: string;
+  route: string;
+  status: PayloadBudgetStatus;
+}
+
+/** Payload and budget data for one route class. */
+export interface PayloadRouteClassReport {
+  description: string;
+  id: RoutePerformanceClassId;
+  label: string;
+  routes: PayloadRouteReport[];
+  status: PayloadBudgetStatus;
+}
+
+/** Generated PDF payload budget data. */
+export interface PayloadPdfReport {
+  failureBytes: number;
+  files: PayloadFile[];
+  status: PayloadBudgetStatus;
+  targetBytes: number;
+  warningBytes: number;
+}
+
+/** Cache-header policy result for generated output. */
+export interface PayloadCacheHeaderReport {
+  expectedHeader: string;
+  headersPath: string;
+  pathPattern: string;
+  status: PayloadBudgetStatus;
+}
+
 /** Complete generated-output payload report. */
 export interface PayloadReport {
   allFiles: PayloadGroup;
+  byAssetRole: PayloadAssetRoleGroup[];
   byExtension: PayloadGroup[];
+  cacheHeaders: PayloadCacheHeaderReport[];
   gzipEligibleFiles: PayloadGroup;
   htmlFiles: PayloadGroup;
+  pdfs: PayloadPdfReport;
+  routeClasses: PayloadRouteClassReport[];
   topHtmlByBrotli: PayloadFile[];
   topHtmlByGzip: PayloadFile[];
   topHtmlByRaw: PayloadFile[];
@@ -79,12 +148,19 @@ export function collectPayloadReport({
       gzipBytes: number;
     } => file.gzipBytes !== undefined && file.brotliBytes !== undefined,
   );
+  const fileByPath = new Map(files.map((file) => [file.path, file]));
 
   return {
     allFiles: groupFiles("*", files),
+    byAssetRole: groupByAssetRole(files),
     byExtension: groupByExtension(files),
+    cacheHeaders: [cacheHeaderReport(distDir)],
     gzipEligibleFiles: groupFiles("gzip-eligible", gzipEligibleFiles),
     htmlFiles: groupFiles(".html", htmlFiles),
+    pdfs: pdfReport(files),
+    routeClasses: routeClassPerformanceBudgets.map((budget) =>
+      routeClassReport(fileByPath, budget),
+    ),
     topHtmlByBrotli: Array.from(htmlFiles)
       .sort(compareBrotliDescending)
       .slice(0, topCount),
@@ -123,6 +199,20 @@ export function formatPayloadReport(report: PayloadReport): string {
     "",
     "Largest HTML by raw size:",
     ...formatFileList(report.topHtmlByRaw),
+    "",
+    "By asset role:",
+    ...report.byAssetRole.map(
+      (group) => `- ${group.role}: ${formatGroup(group)}`,
+    ),
+    "",
+    "Route classes:",
+    ...formatRouteClassReports(report.routeClasses),
+    "",
+    "Generated PDFs:",
+    ...formatPdfReport(report.pdfs),
+    "",
+    "Cache headers:",
+    ...formatCacheHeaderReports(report.cacheHeaders),
   ];
 
   return lines.join("\n");
@@ -189,6 +279,43 @@ function extensionForFile(filePath: string): string {
   return extension === "" ? "[none]" : extension;
 }
 
+function assetRoleForFile(file: PayloadFile): PayloadAssetRole {
+  if (file.path.startsWith("pagefind/")) {
+    return "search";
+  }
+
+  switch (file.extension) {
+    case ".avif":
+    case ".gif":
+    case ".jpeg":
+    case ".jpg":
+    case ".png":
+    case ".svg":
+    case ".webp":
+      return "image";
+    case ".css":
+      return "stylesheet";
+    case ".html":
+      return "html";
+    case ".js":
+    case ".mjs":
+      return "script";
+    case ".json":
+    case ".webmanifest":
+      return "metadata";
+    case ".pdf":
+      return "pdf";
+    case ".ttf":
+    case ".woff":
+    case ".woff2":
+      return "font";
+    case ".xml":
+      return "feed";
+    default:
+      return "other";
+  }
+}
+
 function formatBytes(bytes: number | undefined): string {
   if (bytes === undefined) {
     return "n/a";
@@ -208,8 +335,85 @@ function formatFileList(files: PayloadFile[]): string[] {
   );
 }
 
-function formatGroup(group: PayloadGroup): string {
+function formatGroup(group: Omit<PayloadGroup, "extension">): string {
   return `${group.files} files, ${formatBytes(group.rawBytes)} raw, ${formatBytes(group.gzipBytes)} gzip, ${formatBytes(group.brotliBytes)} Brotli`;
+}
+
+function formatBudgetResult(result: ByteBudgetResult | undefined): string {
+  if (result === undefined) {
+    return "no route HTML budget";
+  }
+
+  return `${result.status}, ${formatBytes(result.measuredBytes)} measured, ${formatBytes(result.warningBytes)} warning, ${formatBytes(result.failureBytes)} failure`;
+}
+
+function formatCacheHeaderReports(
+  reports: PayloadCacheHeaderReport[],
+): string[] {
+  if (reports.length === 0) {
+    return ["- none"];
+  }
+
+  return reports.map(
+    (report) =>
+      `- ${report.pathPattern}: ${report.status}, expected "${report.expectedHeader}" in ${report.headersPath}`,
+  );
+}
+
+function formatPdfReport(report: PayloadPdfReport): string[] {
+  if (report.files.length === 0) {
+    return [
+      `- status: ${report.status}, 0 files, target ${formatBytes(report.targetBytes)}, warning ${formatBytes(report.warningBytes)}, failure ${formatBytes(report.failureBytes)}`,
+    ];
+  }
+
+  const oversizedFiles = report.files.filter(
+    (file) => file.rawBytes > report.warningBytes,
+  );
+
+  return [
+    `- status: ${report.status}, ${report.files.length} files, target ${formatBytes(report.targetBytes)}, warning ${formatBytes(report.warningBytes)}, failure ${formatBytes(report.failureBytes)}`,
+    ...(oversizedFiles.length === 0
+      ? ["- no PDFs above the review warning threshold"]
+      : oversizedFiles.map(
+          (file) => `- ${file.path}: ${formatBytes(file.rawBytes)} raw`,
+        )),
+  ];
+}
+
+function formatRouteClassReports(reports: PayloadRouteClassReport[]): string[] {
+  if (reports.length === 0) {
+    return ["- none"];
+  }
+
+  return reports.flatMap((report) => [
+    `- ${report.label}: ${report.status}`,
+    ...report.routes.map(
+      (route) =>
+        `  - ${route.route} (${route.htmlPath}): ${formatBudgetResult(route.budget)}`,
+    ),
+  ]);
+}
+
+function groupByAssetRole(files: PayloadFile[]): PayloadAssetRoleGroup[] {
+  const roles = Array.from(new Set(files.map(assetRoleForFile))).sort(
+    (left, right) => left.localeCompare(right),
+  );
+
+  return roles.map((role) => {
+    const group = groupFiles(
+      role,
+      files.filter((file) => assetRoleForFile(file) === role),
+    );
+
+    return {
+      brotliBytes: group.brotliBytes,
+      files: group.files,
+      gzipBytes: group.gzipBytes,
+      rawBytes: group.rawBytes,
+      role,
+    };
+  });
 }
 
 function groupByExtension(files: PayloadFile[]): PayloadGroup[] {
@@ -248,6 +452,22 @@ function groupFiles(extension: string, files: PayloadFile[]): PayloadGroup {
   };
 }
 
+function highestStatus(
+  statuses: readonly PayloadBudgetStatus[],
+): PayloadBudgetStatus {
+  if (statuses.includes("fail")) {
+    return "fail";
+  }
+  if (statuses.includes("missing")) {
+    return "missing";
+  }
+  if (statuses.includes("warn")) {
+    return "warn";
+  }
+
+  return "pass";
+}
+
 function listFiles(rootDir: string): string[] {
   return readdirSync(rootDir, { withFileTypes: true }).flatMap((entry) => {
     const absolutePath = path.join(rootDir, entry.name);
@@ -281,6 +501,99 @@ function measureFile(rootDir: string, absolutePath: string): PayloadFile {
       : undefined,
     path: relativePath,
     rawBytes: contents.byteLength,
+  };
+}
+
+function cacheHeaderPresent(headersText: string): boolean {
+  const lines = headersText.split(/\r?\n/u);
+
+  return lines.some((line, index) => {
+    if (line.trim() !== immutableAstroAssetCachePolicy.pathPattern) {
+      return false;
+    }
+
+    const headerLines: string[] = [];
+
+    for (const candidate of lines.slice(index + 1)) {
+      if (!/^\s+\S/u.test(candidate)) {
+        break;
+      }
+
+      headerLines.push(candidate.trim());
+    }
+
+    return headerLines.includes(immutableAstroAssetCachePolicy.expectedHeader);
+  });
+}
+
+function cacheHeaderReport(distDir: string): PayloadCacheHeaderReport {
+  const headersPath = "_headers";
+  const absolutePath = path.join(distDir, headersPath);
+  const present =
+    existsSync(absolutePath) &&
+    cacheHeaderPresent(readFileSync(absolutePath, "utf8"));
+
+  return {
+    expectedHeader: immutableAstroAssetCachePolicy.expectedHeader,
+    headersPath,
+    pathPattern: immutableAstroAssetCachePolicy.pathPattern,
+    status: present ? "pass" : "missing",
+  };
+}
+
+function pdfReport(files: PayloadFile[]): PayloadPdfReport {
+  const pdfFiles = files
+    .filter((file) => file.extension === ".pdf")
+    .sort((left, right) => right.rawBytes - left.rawBytes);
+  const statuses = pdfFiles.map(
+    (file) =>
+      evaluateByteBudget("PDF raw bytes", file.rawBytes, pdfPayloadBudget)
+        .status,
+  );
+
+  return {
+    failureBytes: pdfPayloadBudget.failureBytes,
+    files: pdfFiles,
+    status: pdfFiles.length === 0 ? "missing" : highestStatus(statuses),
+    targetBytes: pdfPayloadBudget.targetBytes,
+    warningBytes: pdfPayloadBudget.warningBytes,
+  };
+}
+
+function routeClassReport(
+  files: ReadonlyMap<string, PayloadFile>,
+  routeClass: RouteClassPerformanceBudget,
+): PayloadRouteClassReport {
+  const routes = routeClass.routes.map((route) => {
+    const htmlPath = routeClassHtmlOutputPath(route);
+    const file = files.get(htmlPath);
+    const budget =
+      routeClass.htmlBrotliBudget === undefined
+        ? undefined
+        : evaluateByteBudget(
+            "HTML Brotli bytes",
+            file?.brotliBytes,
+            routeClass.htmlBrotliBudget,
+          );
+
+    return {
+      budget,
+      file,
+      htmlPath,
+      route,
+      status: budget?.status ?? (file === undefined ? "missing" : "pass"),
+    };
+  });
+
+  return {
+    description: routeClass.description,
+    id: routeClass.id,
+    label: routeClass.label,
+    routes,
+    status:
+      routes.length === 0
+        ? "pass"
+        : highestStatus(routes.map((route) => route.status)),
   };
 }
 

@@ -56,6 +56,16 @@ export interface QaCiJobEntry {
   workflow: string;
 }
 
+/** Domain-level QA ownership for choosing focused and release checks. */
+export interface QaDomainCoverageEntry {
+  ciJobs: readonly string[];
+  domain: string;
+  exception?: string;
+  focusedScripts: readonly string[];
+  purpose: string;
+  releaseScripts: readonly string[];
+}
+
 export const qaCommandGroups = [
   {
     ciUsage: "review",
@@ -583,3 +593,170 @@ export const qaCiJobRegistry = [
     workflow: ".github/workflows/security.yml",
   },
 ] as const satisfies readonly QaCiJobEntry[];
+
+export const qaDomainCoverageRegistry = [
+  {
+    ciJobs: ["quality", "asset-review"],
+    domain: "assets",
+    focusedScripts: ["assets:locations", "assets:shared", "review:assets"],
+    purpose: "Source asset placement, shared asset policy, and asset review.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "authoring",
+    focusedScripts: ["author:check"],
+    purpose: "Author-facing source validation convenience wrapper.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["build"],
+    domain: "build",
+    focusedScripts: ["build", "build:release"],
+    purpose: "Production build, optimization, PDF, and deploy artifact output.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["catalog"],
+    domain: "catalog",
+    focusedScripts: ["catalog:check", "test:catalog"],
+    purpose: "Component catalog accountability, builds, and fixture coverage.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "orchestration",
+    focusedScripts: ["check:fast", "check", "quality"],
+    purpose: "Local and release QA command orchestration.",
+    releaseScripts: ["check:release", "quality:release"],
+  },
+  {
+    ciJobs: ["coverage-review"],
+    domain: "coverage",
+    focusedScripts: ["coverage:check", "coverage:verify"],
+    purpose: "LCOV and broad source coverage accountability.",
+    releaseScripts: ["quality:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "dead-code",
+    focusedScripts: ["deadcode"],
+    purpose: "Unused file, export, dependency, binary, and script detection.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: [],
+    domain: "diagnostics",
+    exception:
+      "Investigation-only diagnostic snapshots are run when QA scope changes.",
+    focusedScripts: ["diagnostics:diff"],
+    purpose: "Structured diagnostic snapshot comparison.",
+    releaseScripts: [],
+  },
+  {
+    ciJobs: ["deploy-cloudflare"],
+    domain: "deploy",
+    focusedScripts: ["deploy:cloudflare"],
+    purpose: "Cloudflare Workers Static Assets deployment.",
+    releaseScripts: ["build:release"],
+  },
+  {
+    ciJobs: [],
+    domain: "development-server",
+    exception:
+      "Local server commands are manual inspection tools, not QA gates.",
+    focusedScripts: ["dev", "preview", "preview:release:fresh"],
+    purpose: "Local development and preview servers.",
+    releaseScripts: [],
+  },
+  {
+    ciJobs: [],
+    domain: "docs-site",
+    exception:
+      "Docs-site checks run when documentation platform changes until promoted.",
+    focusedScripts: ["test:docs-site"],
+    purpose: "Public documentation/example site validation.",
+    releaseScripts: [],
+  },
+  {
+    ciJobs: ["quality", "markdown-review"],
+    domain: "formatting",
+    focusedScripts: ["format", "format:code", "format:markdown"],
+    purpose: "Code/config formatting and Markdown review.",
+    releaseScripts: ["check:release", "quality:release"],
+  },
+  {
+    ciJobs: ["quality", "markdown-review"],
+    domain: "lint",
+    focusedScripts: ["lint", "lint:packages", "lint:markdown", "lint:mdx"],
+    purpose: "ESLint, package ordering, Markdown, and MDX review.",
+    releaseScripts: ["check:release", "quality:release"],
+  },
+  {
+    ciJobs: ["lighthouse"],
+    domain: "payload",
+    exception:
+      "Payload workbench is investigation evidence until budgets are stable.",
+    focusedScripts: ["payload:report"],
+    purpose: "Payload measurement and optimization experiments.",
+    releaseScripts: [],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "platform",
+    focusedScripts: ["platform:check"],
+    purpose: "Platform/site boundary contract checks.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: [],
+    domain: "references",
+    exception:
+      "Citation audits are manual review tools run during reference work.",
+    focusedScripts: ["references:audit", "references:bibtex:audit"],
+    purpose: "Citation, reference, and bibliography maintenance.",
+    releaseScripts: [],
+  },
+  {
+    ciJobs: ["audit", "audit-review", "dependency-review", "secrets"],
+    domain: "security",
+    focusedScripts: ["audit", "secrets"],
+    purpose: "Dependency audit, dependency review, and secrets scanning.",
+    releaseScripts: ["check:release", "quality:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "site-config",
+    focusedScripts: ["site:doctor", "site:schema:check"],
+    purpose: "Site configuration validation and schema drift checks.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "content",
+    focusedScripts: ["verify:content", "tags:check"],
+    purpose: "Content source, tag, and author-facing data invariants.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["accessibility", "browser", "catalog", "lighthouse", "quality"],
+    domain: "tests",
+    focusedScripts: ["test", "test:unit", "test:astro", "test:config"],
+    purpose: "Unit, component, config, browser, accessibility, and perf tests.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "typecheck",
+    focusedScripts: ["typecheck", "typecheck:astro", "typecheck:tools"],
+    purpose: "Astro and tooling TypeScript checks.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["build", "browser"],
+    domain: "generated-output",
+    focusedScripts: ["build", "verify", "validate:html", "test:e2e:built"],
+    purpose: "Generated routes, links, metadata, HTML, and browser output.",
+    releaseScripts: ["check:release"],
+  },
+] as const satisfies readonly QaDomainCoverageEntry[];

@@ -18,9 +18,13 @@ maintainable component architecture.
 
 - `/`
 - `/articles/`
+- `/articles/all/`
 - `/articles/gamergate-as-metagaming/`
+- `/articles/what-is-a-meme/`
+- `/articles/kandinsky-and-loss/`
 - `/articles/misattributed-plato-quote-is-real-now/`
 - `/categories/history/`
+- `/bibliography/`
 - `/about/`
 
 Current assertions:
@@ -303,6 +307,20 @@ Secondary profiles:
    they are stable enough to fail release reliably.
 7. Record every budget increase with a reason. Prefer making payload smaller
    before increasing a threshold.
+
+Current implementation status:
+
+- `src/lib/performance-budgets.ts` owns the typed route-class manifest,
+  representative routes, HTML Brotli warning/failure budgets, generated PDF
+  budget policy, and immutable Astro asset cache policy.
+- `payload:report` emits machine-readable and human-readable evidence for
+  extension totals, asset-role totals, route-class HTML budget states, generated
+  PDF warning/failure states, and `_headers` cache policy presence.
+- `lighthouserc.json` samples at least one route from each route class marked
+  for Lighthouse measurement.
+- These payload and Lighthouse metrics are still review/workbench evidence; the
+  existing release gates continue to own deterministic generated-output failures
+  until the route-class budgets have stable baselines.
 
 ## Acceptance Criteria For Implementation
 

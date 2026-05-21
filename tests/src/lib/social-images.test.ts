@@ -2,6 +2,7 @@ import type { ImageMetadata } from "astro";
 import { describe, expect, test } from "bun:test";
 
 import {
+  maxSocialPreviewImageBytes,
   socialPreviewImageMimeType,
   socialPreviewImageSpec,
   type SocialPreviewImageTransform,
@@ -61,5 +62,17 @@ describe("social preview image helpers", () => {
     });
 
     expect(received?.src).toBe(fallbackImage);
+  });
+
+  test("omits empty alt text and exposes a conservative size budget", async () => {
+    const result = await socialPreviewImageViewModel({
+      alt: "   ",
+      fallback: fallbackImage,
+      optimize: async () =>
+        Promise.resolve({ src: "/_astro/fallback.hash.jpg" }),
+    });
+
+    expect("alt" in result).toBe(false);
+    expect(maxSocialPreviewImageBytes).toBe(500 * 1024);
   });
 });

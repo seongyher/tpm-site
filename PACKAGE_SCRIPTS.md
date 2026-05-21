@@ -2,9 +2,10 @@
 
 Run scripts with `bun run <script>`. The package scripts are the executable
 source of truth for local checks and GitHub Actions. The typed QA registry in
-`scripts/quality/qa-command-registry.ts` classifies every script and records CI
-parity expectations; `test:config` fails when the registry drifts from
-`package.json` or CI workflows.
+`scripts/quality/qa-command-registry.ts` classifies every script, records CI
+parity expectations, and maps command domains to focused/release/CI evidence or
+a documented exception; `test:config` fails when the registry drifts from
+`package.json`, CI workflows, or domain-coverage accountability.
 
 Script sources are grouped by responsibility:
 
@@ -70,7 +71,7 @@ Script sources are grouped by responsibility:
 | `payload:minify-html:experiment`  | Runs one named `minify-html` configuration against copied build output and reports raw/gzip/Brotli deltas without changing `dist/`.                                                                                             |
 | `payload:minify-html:experiments` | Rebuilds raw output, then runs the reproducible minify-html scenario suite, validates each copied output, measures raw/gzip/Brotli deltas, and writes a Markdown report.                                                        |
 | `payload:postbuild:experiments`   | Rebuilds raw output, then runs standalone post-build JS/CSS/SVG optimization scenarios against copied build output and reports gate results plus raw/gzip/Brotli deltas.                                                        |
-| `payload:report`                  | Reports raw, gzip, and Brotli sizes for generated `dist/` assets, including focused HTML totals for minification experiments.                                                                                                   |
+| `payload:report`                  | Reports raw, gzip, and Brotli sizes for generated `dist/` assets, including route-class HTML budgets, asset roles, generated PDF warnings, and cache-header evidence.                                                           |
 | `payload:vite:experiments`        | Builds temporary Astro/Vite configuration scenarios, runs Pagefind, HTML validation, and build verification, then reports raw/gzip/Brotli deltas for optimization decisions.                                                    |
 | `platform:check`                  | Verifies platform module boundaries: every `src/lib` file has a domain owner, core platform files avoid TPM-specific literals, and unsupported site-instance imports fail.                                                      |
 | `preview`                         | Serves the built `dist/` output locally with Astro preview.                                                                                                                                                                     |

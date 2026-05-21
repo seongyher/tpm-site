@@ -128,6 +128,18 @@ describe("article share targets", () => {
     ]);
   });
 
+  test("fails loudly if a caller bypasses config validation with an unsupported target", () => {
+    expect(() =>
+      articleShareMenuViewModel({
+        articleUrl,
+        description,
+        // @ts-expect-error: Intentionally bypass config validation to exercise the runtime guard.
+        targetIds: ["unsupported-target"],
+        title,
+      }),
+    ).toThrow("Unsupported article share target: unsupported-target");
+  });
+
   test("builds email with the article title, URL, and site attribution", () => {
     const share = articleShareMenuViewModel({
       articleUrl,

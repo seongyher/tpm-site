@@ -765,3 +765,113 @@ they are useful context. Explicitly deferred work belongs in
       artifact contracts.
 - [x] Run the agreed preflight verification set and update Linear/checklist
       status after the milestone is verified.
+
+### Milestone 226: IRK-90/94/95 Milestone 3 Execution Design
+
+- [x] Re-read the active Linear issues, performance budget design, test-matrix
+      strategy, QA preflight docs, package scripts, and engineering philosophy
+      against the current branch.
+- [x] Define the concrete implementation sequence for performance reporting,
+      invariant tests, and QA command/accountability updates without adding
+      fake precision or hard-gating noisy metrics.
+- [x] Verify the design is implementation-ready: no public route changes,
+      deterministic report contracts, explicit test ownership, and clear
+      release-check expectations. Existing design docs are sufficient:
+      `docs/performance/route-class-performance-budgets.md`,
+      `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`, `agent-docs/QA_PREFLIGHT.md`,
+      `agent-docs/ENGINEERING_PHILOSOPHY.md`, and `PACKAGE_SCRIPTS.md`.
+
+### Milestone 227: IRK-90 Route-Class Payload Report Contract
+
+- [x] Add typed route-class and budget-report data for representative route
+      classes, generated artifacts, payload metrics, and cache-policy results.
+- [x] Extend `payload:report` so it emits machine-readable and human-readable
+      route-class payload, asset, PDF, and cache-header evidence from built
+      output.
+      Implemented with `src/lib/performance-budgets.ts` and
+      `scripts/payload/report-payload.ts`.
+- [x] Add focused tests for the report contract, route classification, cache
+      policy checks, PDF warning thresholds, and CLI output.
+      Verified with
+      `bun test tests/src/lib/performance-budgets.test.ts tests/scripts/payload/report-payload.test.ts tests/scripts/payload/run-post-build-optimization-experiments.test.ts tests/config/lighthouserc.test.ts --reporter=dots`
+      and `bun --silent run test:config`.
+
+### Milestone 228: IRK-90 Performance Workbench Documentation And Verification
+
+- [x] Update performance documentation and package-script docs so the payload
+      workbench explains hard budgets, warning-only measurements, investigation
+      outputs, and current release placement.
+      Updated `docs/performance/route-class-performance-budgets.md` and
+      `PACKAGE_SCRIPTS.md`.
+- [x] Run focused payload/report checks on fixture build output and a local
+      build where needed.
+      Verified on generated output with `bun --silent run build` and
+      `bun --silent run payload:report -- --top 1 --json`.
+- [x] Verify the workbench reports actionable route/class/metric evidence
+      without promoting noisy Lighthouse metrics into hard failures.
+
+### Milestone 229: IRK-94 Core Platform Invariant Test Expansion
+
+- [x] Inventory stable pure domains that can gain non-brittle property/table
+      coverage without test-only exports.
+- [x] Add or strengthen tests for route/slug behavior, visibility or surface
+      policy, metadata defaults, citation normalization, media/cache policy,
+      share targets, redirects, config defaults, and generated report
+      contracts where practical.
+- [x] Refactor only where a real production seam makes the logic cleaner and
+      more testable.
+      Added focused invariant coverage to route-registry, redirect, share
+      target, social-image, article-PDF, performance-budget, and payload-report
+      tests without adding test-only exports. No production refactor was needed
+      beyond the performance-budget module already introduced for IRK-90.
+
+### Milestone 230: IRK-94 Invariant Test Verification
+
+- [x] Run focused unit/config tests for each touched invariant domain.
+- [x] Verify the new tests fail invalid states or contract drift rather than
+      incidental implementation details.
+- [x] Update any changed docs or accountability rules caused by new production
+      seams.
+      Verified with
+      `bun test tests/src/lib/route-registry.test.ts tests/src/lib/site-redirects.test.ts tests/src/lib/share-targets.test.ts tests/src/lib/social-images.test.ts tests/src/lib/article-pdf.test.ts tests/src/lib/performance-budgets.test.ts tests/scripts/payload/report-payload.test.ts tests/config/lighthouserc.test.ts --reporter=dots`.
+      No additional docs/accountability changes were needed for these
+      invariant-only test additions.
+
+### Milestone 231: IRK-95 QA Command Taxonomy And Coverage Accountability
+
+- [x] Update the QA command registry, accountability docs, and package-script
+      documentation so each major domain has a fast/focused and release/CI
+      check or a documented exception.
+- [x] Add tests proving package scripts, CI parity, command classes, mutation
+      categories, and domain coverage remain aligned.
+- [x] Verify the command taxonomy helps developers choose the right check while
+      preserving the stronger release gate.
+      Added `qaDomainCoverageRegistry` to
+      `scripts/quality/qa-command-registry.ts`, updated
+      `PACKAGE_SCRIPTS.md`, `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`, and
+      `agent-docs/QA_PREFLIGHT.md`, and extended registry tests so package
+      scripts, CI jobs, command domains, and documented exceptions stay
+      aligned. Verified with
+      `bun test tests/scripts/quality/qa-command-registry.test.ts tests/config/package-scripts.test.ts --reporter=dots`
+      and `bun --silent run test:config`.
+
+### Milestone 232: Milestone 3 Release Verification And Handoff
+
+- [x] Run focused checks for payload reporting, command taxonomy,
+      accountability, and invariant tests.
+- [x] Run the release check suite and fix any issues.
+- [x] Update checklist and Linear statuses after all Milestone 3 work is
+      verified.
+      Verified with focused suites for route registry, redirects, share
+      targets, social images, article PDFs, performance budgets, payload
+      reports, Lighthouse route config, QA command registry, and package-script
+      documentation; `bun --silent run test:config`;
+      `bun --silent run platform:check`;
+      `bun --silent run typecheck:tools`;
+      `bun --silent run lint -- --quiet`;
+      `bun --silent run deadcode`;
+      `git diff --check`; and `bun --silent run check:release`.
+      Fixed release-gate findings for platform-boundary ownership, tooling
+      type safety, import/order linting, and dead-code exports before the final
+      release run passed. Updated Linear statuses for IRK-90, IRK-94, and
+      IRK-95 to In Review.

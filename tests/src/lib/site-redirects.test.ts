@@ -6,6 +6,19 @@ import {
 } from "../../../src/lib/site-redirects";
 
 describe("site redirects", () => {
+  test("keeps current site redirects normalized, unique, and non-recursive", () => {
+    const entries = Object.entries(siteRedirects);
+    const sources = entries.map(([source]) => source);
+
+    expect(new Set(sources).size).toBe(sources.length);
+
+    for (const [source, target] of entries) {
+      expect(source).toMatch(/^\//u);
+      expect(target).toMatch(/^(?:\/|https?:\/\/)/u);
+      expect(target).not.toBe(source);
+    }
+  });
+
   test("loads current TPM legacy redirects from the site instance", () => {
     expect(siteRedirects["/2021/05/16/gamergate-as-metagaming/"]).toBe(
       "/articles/gamergate-as-metagaming/",
