@@ -51,8 +51,9 @@ incidental TPM implementation details.
 - Output verification
   Owns shared generated-output diagnostic types, verifier module contracts,
   diagnostic aggregation, route-class performance budgets, cache policy
-  evidence, and machine-readable release-report shapes. Current modules:
-  `output-verification` and `performance-budgets`.
+  evidence, performance workbench policy, and machine-readable release-report
+  shapes. Current modules: `output-verification`, `performance-budgets`, and
+  `performance-workbench`.
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:
@@ -61,8 +62,9 @@ incidental TPM implementation details.
   [`CITATION_SOURCE_MODEL.md`](./CITATION_SOURCE_MODEL.md).
 - Interaction primitives
   Owns browser-independent positioning/disclosure logic shared by navigation,
-  popovers, and hover/tap surfaces. Current modules: `anchored-disclosure` and
-  `anchored-positioning`.
+  popovers, clipboard surfaces, and hover/tap surfaces. Current modules:
+  `anchored-disclosure`, `anchored-positioning`, `browser-clipboard`, and
+  `interaction-primitives`.
 - Shared utilities
   Owns small generic helpers that do not own domain behavior. Current modules:
   `html` and `utils`.

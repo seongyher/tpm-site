@@ -118,6 +118,17 @@ export const qaFailureProbes = [
     testPaths: ["tests/scripts/build/validate-html.test.ts"],
   },
   {
+    bugClass: "performance",
+    expectedSignal:
+      "deterministic route-class payload, PDF, or cache-header budget failures block release",
+    fixturePaths: [],
+    fixtureStrategy: "generated-output",
+    id: "payload-budget-regression",
+    intendedScripts: ["payload:check"],
+    leakPrevention: "temporary dist shell, not the real production output",
+    testPaths: ["tests/scripts/payload/report-payload.test.ts"],
+  },
+  {
     bugClass: "citations",
     expectedSignal:
       "malformed or repeated article-reference labels fail before publication",

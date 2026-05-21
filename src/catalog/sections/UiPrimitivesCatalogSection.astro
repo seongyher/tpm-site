@@ -2,20 +2,28 @@
 import { Search } from "lucide-astro";
 
 import ActionCluster from "../../components/ui/ActionCluster.astro";
+import ActionMenuItem from "../../components/ui/ActionMenuItem.astro";
+import ActionPopover from "../../components/ui/ActionPopover.astro";
 import AnchoredPanel from "../../components/ui/AnchoredPanel.astro";
 import AnchoredRoot from "../../components/ui/AnchoredRoot.astro";
 import AnchoredTrigger from "../../components/ui/AnchoredTrigger.astro";
 import Badge from "../../components/ui/Badge.astro";
+import BrandButton from "../../components/ui/BrandButton.astro";
 import Button from "../../components/ui/Button.astro";
 import Card from "../../components/ui/Card.astro";
 import Container from "../../components/ui/Container.astro";
+import DiscordButton from "../../components/ui/DiscordButton.astro";
 import IconButton from "../../components/ui/IconButton.astro";
 import Input from "../../components/ui/Input.astro";
 import LinkButton from "../../components/ui/LinkButton.astro";
+import PatreonButton from "../../components/ui/PatreonButton.astro";
+import ScrollRail from "../../components/ui/ScrollRail.astro";
 import Section from "../../components/ui/Section.astro";
 import SectionHeader from "../../components/ui/SectionHeader.astro";
 import Separator from "../../components/ui/Separator.astro";
 import TextLink from "../../components/ui/TextLink.astro";
+import YouTubeButton from "../../components/ui/YouTubeButton.astro";
+import discordLogoWhite from "../../components/ui/assets/discord-logo-white.svg";
 import type { AnchoredPreset } from "../../lib/anchored-positioning";
 import CatalogExample from "../CatalogExample.astro";
 import CatalogSection from "../CatalogSection.astro";
@@ -60,6 +68,53 @@ const { anchoredPresetMatrix, catalogSupportUrl } = Astro.props;
       <Button variant="outline" tone="neutral">Neutral</Button>
       <Button variant="ghost" tone="danger">Danger</Button>
     </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ActionMenuItem"
+    description="Icon plus label rows for action menus."
+    componentPath="src/components/ui/ActionMenuItem.astro"
+  >
+    <div class="border-border bg-popover max-w-xs rounded-sm border p-2">
+      <ActionMenuItem as="button">
+        <Search slot="icon" class="size-4" aria-hidden="true" />
+        Search
+      </ActionMenuItem>
+      <ActionMenuItem as="a" href="/articles/">
+        <Search slot="icon" class="size-4" aria-hidden="true" />
+        Browse articles
+      </ActionMenuItem>
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ActionPopover"
+    description="Anchored action menu surface with native popover behavior."
+    componentPath="src/components/ui/ActionPopover.astro"
+  >
+    <ActionPopover
+      popoverId="catalog-action-popover"
+      panelLabel="Catalog action menu"
+      preset="inline-hover-preview"
+    >
+      <AnchoredTrigger
+        slot="trigger"
+        as="button"
+        type="button"
+        popovertarget="catalog-action-popover"
+        class="border-border bg-background text-foreground rounded-sm border px-3 py-2 text-sm"
+      >
+        Open actions
+      </AnchoredTrigger>
+      <ActionMenuItem as="button">
+        <Search slot="icon" class="size-4" aria-hidden="true" />
+        Copy
+      </ActionMenuItem>
+      <ActionMenuItem as="a" href="/articles/">
+        <Search slot="icon" class="size-4" aria-hidden="true" />
+        Articles
+      </ActionMenuItem>
+    </ActionPopover>
   </CatalogExample>
 
   <CatalogExample
@@ -162,6 +217,33 @@ const { anchoredPresetMatrix, catalogSupportUrl } = Astro.props;
   </CatalogExample>
 
   <CatalogExample
+    title="BrandButton"
+    description="Shared branded external CTA frame used by platform wrappers."
+    componentPath="src/components/ui/BrandButton.astro"
+  >
+    <BrandButton
+      href="https://example.com/community"
+      label="Join the example community"
+      logo={discordLogoWhite}
+      backgroundClass="bg-[#5865F2]"
+      hoverBackgroundClass="hover:bg-[#4752C4]"
+      target="_blank"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="Branded CTA Wrappers"
+    description="Patreon, Discord, and YouTube wrappers share the BrandButton sizing contract."
+    componentPath="src/components/ui/BrandButton.astro"
+  >
+    <div class="flex min-w-0 flex-wrap gap-3">
+      <PatreonButton href="https://example.com/patreon" target="_blank" />
+      <DiscordButton href="https://example.com/discord" target="_blank" />
+      <YouTubeButton href="https://example.com/youtube" target="_blank" />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
     title="LinkButton"
     description="Navigation and support CTAs that remain links."
     componentPath="src/components/ui/LinkButton.astro"
@@ -172,6 +254,29 @@ const { anchoredPresetMatrix, catalogSupportUrl } = Astro.props;
         Browse Articles
       </LinkButton>
     </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ScrollRail"
+    description="One-row horizontal scroll viewport with edge controls."
+    componentPath="src/components/ui/ScrollRail.astro"
+  >
+    <ScrollRail
+      railId="catalog-scroll-rail"
+      previousLabel="Scroll catalog cards left"
+      nextLabel="Scroll catalog cards right"
+      listClass="auto-cols-[minmax(9rem,1fr)]"
+    >
+      {
+        ["Culture", "Metamemetics", "Aesthetics", "Long Category Name"].map(
+          (label) => (
+            <li class="border-border bg-card grid min-h-24 min-w-36 place-items-center rounded-sm border p-3 text-center text-sm font-semibold">
+              {label}
+            </li>
+          ),
+        )
+      }
+    </ScrollRail>
   </CatalogExample>
 
   <CatalogExample

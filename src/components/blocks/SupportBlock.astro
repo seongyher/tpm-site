@@ -3,6 +3,7 @@ import type { HTMLAttributes } from "astro/types";
 
 import DiscordButton from "../ui/DiscordButton.astro";
 import PatreonButton from "../ui/PatreonButton.astro";
+import SectionHeader from "../ui/SectionHeader.astro";
 import type { SupportBlockViewModel } from "../../lib/support";
 
 interface Props extends HTMLAttributes<"section"> {
@@ -29,17 +30,13 @@ const {
       ]}
       aria-labelledby={headingId}
     >
-      <div class="grid min-w-0 gap-1">
-        <h2
-          id={headingId}
-          class="text-foreground m-0 min-w-0 text-xl font-semibold tracking-normal break-words"
-        >
-          {support.title}
-        </h2>
-        <p class="text-muted-foreground min-w-0 text-sm break-words">
-          {support.body}
-        </p>
-      </div>
+      <SectionHeader
+        headingId={headingId}
+        title={support.title}
+        description={support.body}
+        layout="stacked"
+        size="subsection"
+      />
       <div class="flex min-w-0 flex-wrap items-center gap-3">
         <PatreonButton
           href={support.patreon.href}

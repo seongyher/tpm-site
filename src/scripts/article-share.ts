@@ -1,3 +1,9 @@
+import {
+  type ClipboardStatusTarget,
+  copyTextWithStatus,
+  parseJsonStringPayload,
+} from "../lib/browser-clipboard";
+
 /** Browser dependencies used by the article share enhancement. */
 export interface ArticleShareRuntime {
   document: Document;
@@ -74,50 +80,29 @@ async function copyArticleLink(
 ): Promise<void> {
   const text = parseSharePayload(button.dataset["articleShareCopyText"]);
 
-  if (text === undefined || text.trim().length === 0) {
-    reportCopyStatus(button, "Article URL was not found.", "error");
-    return;
-  }
-
-  try {
-    await runtime.navigator.clipboard.writeText(text);
-    reportCopyStatus(button, "Copied.", "copied");
-  } catch {
-    reportCopyStatus(
-      button,
-      "Copy failed. Copy the URL from your address bar.",
-      "error",
-    );
-  }
+  await copyTextWithStatus(
+    runtime.navigator,
+    text ?? "",
+    shareStatusTarget(button),
+    {
+      empty: "Article URL was not found.",
+      failure: "Copy failed. Copy the URL from your address bar.",
+      success: "Copied.",
+    },
+  );
 }
 
 function parseSharePayload(encoded: string | undefined): string | undefined {
-  if (encoded === undefined) {
-    return undefined;
-  }
-
-  try {
-    const parsed: unknown = JSON.parse(encoded);
-
-    return typeof parsed === "string" ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
+  return parseJsonStringPayload(encoded);
 }
 
-function reportCopyStatus(
-  button: HTMLButtonElement,
-  message: string,
-  state: "copied" | "error",
-): void {
-  const root = button.closest<HTMLElement>(rootSelector);
-  const status = root?.querySelector<HTMLElement>(statusSelector);
-
-  if (status !== undefined && status !== null) {
-    status.textContent = message;
-  }
-
-  button.dataset["articleShareCopyState"] = state;
+function shareStatusTarget(button: HTMLButtonElement): ClipboardStatusTarget {
+  return {
+    button,
+    rootSelector,
+    stateDatasetKey: "articleShareCopyState",
+    statusSelector,
+  };
 }
 
 function browserRuntime(): ArticleShareRuntime | undefined {

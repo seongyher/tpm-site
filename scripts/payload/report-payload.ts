@@ -100,6 +100,12 @@ export interface PayloadReport {
   topHtmlByRaw: PayloadFile[];
 }
 
+/** One deterministic payload budget failure that should block release. */
+export interface PayloadReportBlockingFailure {
+  readonly message: string;
+  readonly owner: "cache" | "pdf" | "route-class";
+}
+
 /** Options for collecting payload data. */
 export interface PayloadReportOptions {
   distDir: string;
@@ -219,6 +225,53 @@ export function formatPayloadReport(report: PayloadReport): string {
 }
 
 /**
+ * Returns deterministic payload failures that should block release.
+ *
+ * @param report Payload report.
+ * @returns Blocking failure descriptions.
+ */
+export function payloadReportBlockingFailures(
+  report: PayloadReport,
+): PayloadReportBlockingFailure[] {
+  return [
+    ...report.routeClasses.flatMap((routeClass) =>
+      routeClass.routes.flatMap((route) => {
+        if (route.status !== "fail" && route.status !== "missing") {
+          return [];
+        }
+
+        return [
+          {
+            message: `${routeClass.label} route ${route.route} ${route.status}: ${formatBudgetResult(route.budget)}`,
+            owner: "route-class" as const,
+          },
+        ];
+      }),
+    ),
+    ...(report.pdfs.status === "fail" || report.pdfs.status === "missing"
+      ? [
+          {
+            message: `Generated PDFs ${report.pdfs.status}: target ${formatBytes(report.pdfs.targetBytes)}, warning ${formatBytes(report.pdfs.warningBytes)}, failure ${formatBytes(report.pdfs.failureBytes)}`,
+            owner: "pdf" as const,
+          },
+        ]
+      : []),
+    ...report.cacheHeaders.flatMap((cacheHeader) => {
+      if (cacheHeader.status !== "fail" && cacheHeader.status !== "missing") {
+        return [];
+      }
+
+      return [
+        {
+          message: `Cache header ${cacheHeader.status}: expected "${cacheHeader.expectedHeader}" under ${cacheHeader.pathPattern} in ${cacheHeader.headersPath}`,
+          owner: "cache" as const,
+        },
+      ];
+    }),
+  ];
+}
+
+/**
  * Runs the payload reporting command-line workflow.
  *
  * @param args Command-line arguments without the executable prefix.
@@ -230,13 +283,15 @@ export function runPayloadReportCli(
   cwd = process.cwd(),
 ): number {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run payload:report [--dist <path>] [--json] [--top <count>]
+    console.log(`Usage: bun run payload:report [--dist <path>] [--json] [--top <count>] [--check]
 
 Report raw, gzip, and Brotli sizes for generated static build output. Run bun
-run build first unless a custom --dist directory is supplied.`);
+run build first unless a custom --dist directory is supplied. Add --check to
+fail on deterministic route-class, PDF, or cache-header budget failures.`);
     return 0;
   }
 
+  const check = args.includes("--check");
   const json = args.includes("--json");
 
   try {
@@ -248,7 +303,20 @@ run build first unless a custom --dist directory is supplied.`);
     console.log(
       json ? JSON.stringify(report, null, 2) : formatPayloadReport(report),
     );
-    return 0;
+
+    const blockingFailures = check ? payloadReportBlockingFailures(report) : [];
+
+    if (blockingFailures.length === 0) {
+      return 0;
+    }
+
+    console.error("Payload budget check failed:");
+
+    for (const failure of blockingFailures) {
+      console.error(`- ${failure.owner}: ${failure.message}`);
+    }
+
+    return 1;
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     return 1;

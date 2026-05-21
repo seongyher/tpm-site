@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -7,8 +13,13 @@ import { describe, expect, spyOn, test } from "bun:test";
 import {
   collectPayloadReport,
   formatPayloadReport,
+  payloadReportBlockingFailures,
   runPayloadReportCli,
 } from "../../../scripts/payload/report-payload";
+import {
+  routeClassHtmlOutputPath,
+  routeClassPerformanceBudgets,
+} from "../../../src/lib/performance-budgets";
 
 function withBuildOutput<T>(run: (distDir: string) => T): T {
   const rootDir = mkdtempSync(path.join(tmpdir(), "tpm-payload-test-"));
@@ -106,6 +117,26 @@ describe("payload reporter", () => {
     });
   });
 
+  test("separates warnings from deterministic release-blocking failures", () => {
+    withBuildOutput((distDir) => {
+      writeRouteClassFixtureFiles(distDir);
+      const report = collectPayloadReport({ distDir, topCount: 2 });
+
+      expect(report.pdfs.status).toBe("warn");
+      expect(payloadReportBlockingFailures(report)).toEqual([]);
+
+      unlinkSync(path.join(distDir, "_headers"));
+
+      const brokenReport = collectPayloadReport({ distDir, topCount: 2 });
+
+      expect(payloadReportBlockingFailures(brokenReport)).toContainEqual({
+        message:
+          'Cache header missing: expected "Cache-Control: public, max-age=31556952, immutable" under /_astro/* in _headers',
+        owner: "cache",
+      });
+    });
+  });
+
   test.serial("prints JSON from the command-line workflow", () => {
     withBuildOutput((distDir) => {
       const log = spyOn(console, "log").mockImplementation(() => undefined);
@@ -122,6 +153,33 @@ describe("payload reporter", () => {
       }
     });
   });
+
+  test.serial(
+    "checks deterministic payload budgets from the command line",
+    () => {
+      withBuildOutput((distDir) => {
+        writeRouteClassFixtureFiles(distDir);
+        const log = spyOn(console, "log").mockImplementation(() => undefined);
+        const error = spyOn(console, "error").mockImplementation(
+          () => undefined,
+        );
+
+        try {
+          expect(runPayloadReportCli(["--dist", distDir, "--check"])).toBe(0);
+
+          unlinkSync(path.join(distDir, "_headers"));
+
+          expect(runPayloadReportCli(["--dist", distDir, "--check"])).toBe(1);
+          expect(String(error.mock.calls[0]?.[0])).toBe(
+            "Payload budget check failed:",
+          );
+        } finally {
+          error.mockRestore();
+          log.mockRestore();
+        }
+      });
+    },
+  );
 
   test.serial("prints command usage without reading dist", () => {
     const log = spyOn(console, "log").mockImplementation(() => undefined);
@@ -152,6 +210,19 @@ describe("payload reporter", () => {
     }
   });
 });
+
+function writeRouteClassFixtureFiles(distDir: string): void {
+  for (const route of routeClassPerformanceBudgets.flatMap((budget) =>
+    Array.from(budget.routes),
+  )) {
+    const outputPath = path.join(distDir, routeClassHtmlOutputPath(route));
+    mkdirSync(path.dirname(outputPath), { recursive: true });
+    writeFileSync(
+      outputPath,
+      `<!doctype html><html><body><main>${route}</main></body></html>`,
+    );
+  }
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

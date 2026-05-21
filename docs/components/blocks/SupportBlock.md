@@ -21,7 +21,7 @@ make invalid states harder to express.
 
 ## Composition Relationships
 
-It composes local components: `../ui/PatreonButton` and
+It composes `../ui/SectionHeader`, `../ui/PatreonButton`, and
 `../ui/DiscordButton`. Parent blocks should pass normalized props and slots
 rather than asking this component to fetch global content directly.
 

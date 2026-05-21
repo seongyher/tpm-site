@@ -316,11 +316,15 @@ Current implementation status:
 - `payload:report` emits machine-readable and human-readable evidence for
   extension totals, asset-role totals, route-class HTML budget states, generated
   PDF warning/failure states, and `_headers` cache policy presence.
+- `payload:check` runs the same report in release-gate mode. It fails only on
+  deterministic route-class, generated PDF, or cache-header `fail`/`missing`
+  states; `warn` remains review evidence.
 - `lighthouserc.json` samples at least one route from each route class marked
   for Lighthouse measurement.
-- These payload and Lighthouse metrics are still review/workbench evidence; the
-  existing release gates continue to own deterministic generated-output failures
-  until the route-class budgets have stable baselines.
+- Deterministic payload/cache failures are now release-gated through
+  `check:release`. Lighthouse performance scores and browser timing metrics
+  remain review/workbench evidence until route-class baselines are stable enough
+  to fail release reliably.
 
 ## Acceptance Criteria For Implementation
 
