@@ -4,11 +4,15 @@
     ".agents/skills/**",
     ".astro/**",
     ".lighthouseci/**",
+    ".unlighthouse/**",
+    ".wrangler/**",
     "coverage/**",
     "dist/**",
+    "dist-catalog/**",
     "node_modules/**",
     "playwright-report/**",
     "test-results/**",
+    "site/unused-assets/**",
     "unused-assets/**"
   ],
   "config": {

@@ -1,7 +1,10 @@
 # Package Scripts
 
-Run scripts with `bun run <script>`. The package scripts are the source of truth
-for local checks and GitHub Actions.
+Run scripts with `bun run <script>`. The package scripts are the executable
+source of truth for local checks and GitHub Actions. The typed QA registry in
+`scripts/quality/qa-command-registry.ts` classifies every script and records CI
+parity expectations; `test:config` fails when the registry drifts from
+`package.json` or CI workflows.
 
 Script sources are grouped by responsibility:
 
@@ -43,6 +46,7 @@ Script sources are grouped by responsibility:
 | `coverage:unit`                   | Generates Bun text and LCOV coverage for unit-level tests.                                                                                                                                                                      |
 | `coverage:verify`                 | Verifies the LCOV report against the broad coverage inventory, mirrored tests, and `scripts/coverage-exceptions.json`.                                                                                                          |
 | `deadcode`                        | Runs Knip to find unused files, exports, dependencies, binaries, and stale scripts.                                                                                                                                             |
+| `diagnostics:diff`                | Compares two normalized diagnostic JSON snapshots by tool, code, severity, file/route, message, and count so risky QA scope changes can be reviewed beyond exit-code parity.                                                    |
 | `deploy:cloudflare`               | Deploys the current `dist/` directory to Cloudflare Workers Static Assets through Wrangler. Requires Cloudflare credentials in the calling environment.                                                                         |
 | `dev`                             | Starts the Astro development server.                                                                                                                                                                                            |
 | `docs-site:build`                 | Builds the example documentation site into `dist/examples/docs-site` with the docs site instance config.                                                                                                                        |
@@ -96,7 +100,7 @@ Script sources are grouped by responsibility:
 | `test:astro`                      | Syncs Astro content for container tests, then runs component, layout, and page rendering tests through Vitest and the Astro container API.                                                                                      |
 | `test:catalog`                    | Builds the private component catalog into the isolated `dist-catalog/` output directory, then runs catalog-specific Playwright invariant tests against that output.                                                             |
 | `test:catalog:site-instance`      | Builds the external fixture site with the private component catalog enabled to prove the catalog does not depend on live-site assets.                                                                                           |
-| `test:config`                     | Runs cheap repository config contract tests used by `check:fast` to catch script, workflow, and tooling-contract drift before full lint/test stages.                                                                            |
+| `test:config`                     | Runs cheap repository config and QA registry contract tests used by `check:fast` to catch script, workflow, and tooling-contract drift before full lint/test stages.                                                            |
 | `test:docs-site`                  | Validates, builds, verifies, and HTML-validates the example documentation site with isolated `SITE_INSTANCE_ROOT` and `SITE_OUTPUT_DIR` settings.                                                                               |
 | `test:e2e`                        | Builds the production site, then runs Playwright browser smoke, responsive, navigation, theme, and search tests through `test:e2e:built`. Blocking browser gate.                                                                |
 | `test:e2e:built`                  | Runs Playwright browser smoke, responsive, navigation, theme, and search tests against an existing `dist/` output. CI uses this after downloading the verified build artifact.                                                  |

@@ -111,6 +111,31 @@ describe("coverage inventory verifier", () => {
       expect(result.missingFiles).toEqual([]);
     }));
 
+  test("ignores generated output roots even when they are passed explicitly", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "coverage/lcov.info", "");
+      await writeText(
+        root,
+        "dist-catalog/generated.ts",
+        "export const x = 1;\n",
+      );
+      await writeText(root, "dist/generated.ts", "export const x = 1;\n");
+      await writeText(
+        root,
+        "scripts/coverage-exceptions.json",
+        JSON.stringify([]),
+      );
+
+      const result = await verifyCoverageInventory({
+        exceptionFile: "scripts/coverage-exceptions.json",
+        rootDir: root,
+        roots: ["dist-catalog", "dist"],
+      });
+
+      expect(result.subjectFiles).toEqual([]);
+      expect(result.missingFiles).toEqual([]);
+    }));
+
   test("passes when all testable source files are represented", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "coverage/lcov.info", "SF:scripts/covered.ts\n");

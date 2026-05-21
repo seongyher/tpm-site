@@ -97,6 +97,22 @@ public/**
     );
   });
 
+  test("ignores generated output directories even when a file list includes them", async () => {
+    const result = await verifyTestAccountability({
+      files: [
+        ".test-accountability-ignore",
+        "dist-catalog/generated.ts",
+        "dist/generated.ts",
+        "node_modules/pkg/generated.ts",
+      ],
+      rootDir: process.cwd(),
+    });
+
+    expect(result.files).toEqual([".test-accountability-ignore"]);
+    expect(result.unaccountedFiles).toEqual([]);
+    expect(result.missingMirrors).toEqual([]);
+  });
+
   test("fails files that are neither mirrored nor explicitly accounted for", async () => {
     const result = await verifyTestAccountability({
       files: [".test-accountability-ignore", "src/lib/uncovered.ts"],
