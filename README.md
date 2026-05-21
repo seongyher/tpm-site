@@ -50,6 +50,8 @@ bun run verify
 ```
 
 For a short explanation of every package script, see `PACKAGE_SCRIPTS.md`.
+For documentation ownership, generated-reference, and drift-check planning,
+see `docs/DOCUMENTATION_LIFECYCLE.md`.
 
 Run the same local quality path with successful command output hidden:
 
