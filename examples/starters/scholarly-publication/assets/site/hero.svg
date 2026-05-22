@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Open Research Notes">
+  <rect width="1200" height="630" fill="#315f73"/>
+  <rect x="360" y="110" width="480" height="410" rx="18" fill="#fffdf7"/>
+  <path d="M440 220h320v24H440zm0 70h320v24H440zm0 70h220v24H440z" fill="#1f2930"/>
+</svg>

@@ -11,6 +11,7 @@ import {
   createAuthorDiagnostic,
   createAuthorDiagnosticReport,
 } from "../../src/lib/author-diagnostics";
+import { inclusiveDefaultIssues } from "../../src/lib/inclusive-defaults";
 import {
   createPlatformContext,
   type PlatformContext,
@@ -101,6 +102,10 @@ export function siteDoctorIssues(
     ...routeShapeIssues(config),
     ...homepageCollectionIssues(context.paths, config, exists),
     ...disabledFeatureNavigationIssues(config),
+    ...inclusiveDefaultIssues(config).map((issue) => ({
+      ...issue,
+      path: context.paths.config.site,
+    })),
     ...sourceRelationshipIssues(context, exists),
   ];
 }
@@ -296,6 +301,19 @@ function classifySiteDoctorIssue(issue: SiteDoctorIssue): {
       category: "config",
       code: "config.homepage-collection-draft",
       relatedDocs: ["docs/HOMEPAGE_CONTENT_MODEL.md"],
+      repairOwner: "site-owner",
+    };
+  }
+
+  if (
+    message.includes("site language") ||
+    message.includes("site locale") ||
+    message.includes("non-english")
+  ) {
+    return {
+      category: "config",
+      code: "config.inclusive-defaults-warning",
+      relatedDocs: ["docs/LOCALIZATION_CONTRACTS.md", "site/README.md"],
       repairOwner: "site-owner",
     };
   }

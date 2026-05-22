@@ -151,3 +151,43 @@ For `IRK-113`, implementation should add:
 For this design issue, the verification artifact is this matrix plus the
 readiness criteria above. It names what can be extracted, what cannot, and what
 proof is still missing.
+
+## IRK-113 Accepted Entrypoints
+
+The first internal entrypoint pass accepts only domains that can already be
+used without TPM content or concrete route files:
+
+- diagnostics;
+- interaction primitives;
+- media policy;
+- article references and citation source normalization;
+- route registry helpers.
+
+Active site config, current site instance paths, publishable entry loaders,
+article compilation, bibliography aggregation, and metadata head rendering are
+not exposed as platform entrypoints yet when doing so would import active-site
+singletons or Astro collection adapters. They remain valid extraction
+candidates, but they need an explicit context split before becoming internal
+public APIs.
+
+## IRK-114 Consumer Evidence
+
+`examples/platform-entrypoint-consumer/` is the first non-TPM consumer of the
+accepted entrypoints. It is not a starter template. It is a small package-seam
+proof that imports only `src/platform/*` and produces deterministic facts from
+diagnostics, interaction primitives, media policy, article references, and
+route helpers.
+
+This example gives each accepted candidate current evidence:
+
+| Entrypoint                  | Consumer evidence                                               | Portability target                                 | Remaining blockers                                                                   |
+| --------------------------- | --------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/platform/diagnostics`  | Example report emits a structured diagnostic identity.          | CLI, MCP, GUI diagnostics, verifier packages       | Broader diagnostic registry and release-report ownership in later milestones.        |
+| `src/platform/interactions` | Example report computes anchored placement without DOM runtime. | UI library core plus DOM/browser adapters          | Browser loader and custom element APIs stay adapter-owned.                           |
+| `src/platform/media`        | Example report resolves alt-text policy and embed provider.     | Media policy core plus Astro/PDF/provider adapters | Remote asset provider and provenance policy remain future extension/adapter work.    |
+| `src/platform/references`   | Example report parses BibTeX and emits a stable citation key.   | Scholarly reference core plus static-site adapters | Article rendering and bibliography aggregation still have collection-route adapters. |
+| `src/platform/routes`       | Example report maps a route to generated output path facts.     | Route registry core plus Astro route adapters      | Full page/file-route generation still belongs to Astro route files.                  |
+
+The example is covered by tests that execute it and scan it for accidental TPM
+imports or publication-specific literals. This keeps the package-boundary proof
+concrete without publishing external packages prematurely.

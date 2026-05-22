@@ -15,6 +15,376 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 5 Execution
+
+Milestone 5 is the distribution and ecosystem readiness layer. It should finish
+the platform seams needed before the static blog studio product work begins.
+Studio GUI/CLI/MCP product issues live in Milestone 6, not here.
+
+### Milestone 400: Milestone 5 Refresh And Execution Plan
+
+- [x] Re-read the Milestone 5 Linear issues, engineering philosophy, platform
+      roadmap, extension model, deployment adapter contract, import/export
+      policy, localization contract, and relevant source modules.
+- [x] Confirm the issue sequence and blockers after the studio issues were
+      moved to Milestone 6.
+- [x] Break the Milestone 5 issues into checklist milestones that can be
+      implemented and verified one at a time.
+
+### Milestone 401: IRK-113 Internal Entrypoints And Import Boundaries
+
+- [x] Select the internal entrypoint domains that are ready for real use based
+      on the extraction criteria design.
+- [x] Add internal entrypoints or workspace-style seams for accepted candidates
+      without leaking TPM content, active `site/`, cwd, or singleton config
+      assumptions into reusable cores.
+- [x] Add import-boundary and public-shape tests, then verify release checks
+      still pass after consumers use explicit entrypoints.
+      Added `src/platform/diagnostics.ts`, `src/platform/interactions.ts`,
+      `src/platform/media.ts`, `src/platform/references.ts`, and
+      `src/platform/routes.ts`. Platform checks now enforce owned
+      `src/platform` entrypoints and entrypoint import boundaries. Verified
+      with focused platform-boundary and entrypoint tests,
+      `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 402: IRK-114 Non-TPM Fixture And Example Consumers
+
+- [x] Build or update fixture/example consumers that import internal entrypoints
+      without TPM imports, copy, assets, or branding.
+- [x] Document candidate APIs, current consumers, portability target, remaining
+      blockers, and rejected extraction paths.
+- [x] Verify fixture/example builds and boundary checks prove real non-TPM use.
+      Added `examples/platform-entrypoint-consumer/` as a non-TPM consumer of
+      the accepted `src/platform/*` seams and documented candidate evidence in
+      `docs/PACKAGE_BOUNDARIES_AND_EXTRACTION_CRITERIA.md`. Verified with
+      focused example/entrypoint/platform-boundary tests,
+      `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 403: IRK-115 Typed Extension Manifest Design
+
+- [x] Re-read extension, adapter, roadmap, route registry, verifier, and
+      package-boundary docs before changing extension contracts.
+- [x] Define typed extension manifest, capability families, allowed extension
+      points, forbidden access, ordering, dependencies, conflicts,
+      disabled-state, deprecation, and migration rules.
+- [x] Add type-level positive and negative fixtures and docs that explain how
+      extension capabilities map to platform domains.
+      Added `src/lib/extensions.ts`, `src/platform/extensions.ts`,
+      `docs/EXTENSION_ARCHITECTURE.md`, and extension manifest fixtures for
+      runtime validation, platform entrypoint use, and type-level rejection of
+      invalid enum values. Verified with focused extension/platform-boundary
+      tests, `bun --silent run platform:check`, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 404: IRK-116 Fixture Extensions And Disabled-State Tests
+
+- [x] Add at least two site-agnostic fixture extensions across different
+      extension-point types.
+- [x] Verify enabled, disabled, missing dependency, incompatible feature flag,
+      and conflicting output states.
+- [x] Ensure extension-owned artifacts and diagnostics are declared and cleanly
+      removed when disabled.
+      Added site-agnostic fixture manifests for PDF artifacts, UI components,
+      metadata profiles, dependency states, and conflicting generated outputs.
+      Added `resolveExtensionManifests()` so disabled extensions drop active
+      capabilities/artifacts and missing dependency, feature, and generated
+      artifact conflicts are diagnostic states. Verified with focused extension
+      tests, `bun --silent run typecheck`, `bun --silent run review:markdown`,
+      `bun --silent run platform:check`, and `git diff --check`.
+
+### Milestone 405: IRK-117 Extension Boundary Enforcement
+
+- [x] Enforce forbidden imports, forbidden layer access, undeclared generated
+      outputs, undeclared routes, incompatible capabilities, and missing docs
+      hooks for extensions.
+- [x] Route extension diagnostics through the shared verifier/site-doctor/report
+      diagnostic model where appropriate.
+- [x] Verify boundary and generated-output tests fail with actionable extension
+      diagnostics.
+      Extended `platform:check` with future `extensions/` and
+      `site/extensions/` import-boundary checks. Added extension diagnostics for
+      undeclared generated outputs/routes, missing docs hooks, and conversion
+      into generated-output diagnostics. Verified with focused extension and
+      platform-boundary tests, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, `bun --silent run platform:check`,
+      and `git diff --check`.
+
+### Milestone 406: IRK-145 Extension Catalog And Lifecycle
+
+- [x] Define extension classes, lifecycle states, bundled/default boundaries,
+      safe-disable, uninstall, migration, config ownership, generated-output
+      ownership, docs generation, diagnostic ownership, and trust-boundary
+      rules.
+- [x] Classify concrete defaults and optional capabilities such as Cloudflare,
+      local source/history/media, metadata, RSS, sitemap, PDF, citations, CTAs,
+      embeds, share targets, importers, and advanced metadata profiles.
+- [x] Verify catalog fixtures and docs explain ownership, disabled states, and
+      upgrade paths.
+      Added extension catalog entries/reference rows over the manifest
+      resolver, lifecycle and trust-boundary classifications, safe-disable
+      fields, generated-output/docs/diagnostic ownership fields, and
+      fixture-backed coverage for bundled, optional official, site, third-party,
+      disabled, incompatible, migration, installable, unavailable, removed, and
+      deprecated states. Documented default/core boundaries and product-surface
+      rules in `docs/EXTENSION_ARCHITECTURE.md`. Verified with focused
+      extension/platform-boundary tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 407: IRK-119 Cloudflare Deployment Adapter
+
+- [x] Re-read deployment, source/artifact, redirect, header/cache, release, and
+      Cloudflare configuration docs before implementation.
+- [x] Implement Cloudflare Workers Static Assets as the reference deployment
+      adapter around redirects, headers, cache policy, static assets, generated
+      outputs, preview/production metadata, and release reports.
+- [x] Verify adapter tests preserve current TPM deployment behavior while
+      keeping Cloudflare-specific logic out of generic platform code.
+      Added provider-neutral deployment adapter contracts,
+      `src/lib/deployment-adapters.ts`, and `src/platform/deployment.ts`.
+      The Cloudflare Workers Static Assets adapter parses `wrangler.toml`,
+      `_headers`, and generated `_redirects`; reports capabilities, provider
+      facts, URLs, manual steps, and diagnostics; preserves dry-run behavior;
+      and blocks execute deploys without credential references. Updated
+      deployment and platform-module docs. Verified with focused deployment,
+      platform-boundary, Wrangler, static-public-file, and redirect-generator
+      tests, `bun --silent run typecheck`, `bun --silent run platform:check`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 408: IRK-120 Second Deployment Adapter Fixture
+
+- [x] Compare candidate non-Cloudflare adapter capabilities and choose the
+      smallest fixture that proves portability.
+- [x] Add a second adapter path or static-folder fixture with explicit
+      diagnostics for unsupported or degraded capabilities.
+- [x] Verify header, redirect, cache, canonical, and artifact expectations
+      across at least two adapter outputs.
+      Added the generic static-folder adapter as the provider-free portability
+      fixture. It shares the deployment result contract with Cloudflare while
+      reporting manual or unsupported capabilities for headers, redirects,
+      immutable cache policy, production upload, custom domains, preview
+      deploys, cache purge, and rollback. Added explicit diagnostics for
+      manual publish steps, unsupported preview, degraded redirects, degraded
+      headers, degraded cache policy, and manual rollback. Verified with
+      focused deployment tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 409: IRK-121 Release Governance And Launch Reports
+
+- [x] Define versioning, changelog, migration, deprecation, and compatibility
+      policy for platform APIs, site config, frontmatter, output, routes, and
+      adapters.
+- [x] Generate or model release health sections for routes, redirects,
+      metadata, payload, dependency/security, launch steps, deploy status,
+      rollback, cache invalidation, and provider diagnostics.
+- [x] Verify stable release report snapshots and breaking-change/migration
+      fixtures.
+      Added `src/lib/release-governance.ts`, `src/platform/release.ts`, and
+      `docs/RELEASE_GOVERNANCE.md`. Release reports now model compatibility
+      changes, breaking-change migration/compatibility/rollback requirements,
+      deprecation notes, deployment adapter statuses, manual launch checklist
+      items, generated-output summaries, and blocked deployment diagnostics.
+      Verified with focused release-governance, deployment-adapter,
+      platform-entrypoint, and platform-boundary tests,
+      `bun --silent run typecheck`, `bun --silent run platform:check`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 410: IRK-122 Static Output Trust Boundary Design
+
+- [x] Inventory current headers, CSP posture, embeds, raw HTML,
+      Markdown/MDX escape hatches, JSON-LD, citation URLs, external CTAs,
+      share links, downloaded assets, analytics, and third-party scripts.
+- [x] Define static-output trust boundaries, secure defaults, site-owner
+      overrides, documented escape hatches, and verifier-facing policy states.
+- [x] Verify policy fixtures cover accepted, warned, rejected, and intentionally
+      relaxed states.
+      Added static-output trust-boundary policy, global security headers,
+      platform security entrypoint coverage, and
+      `docs/STATIC_OUTPUT_SECURITY.md`. Verified with focused security and
+      boundary tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 411: IRK-123 Third-Party Origin And Provenance Diagnostics
+
+- [x] Add diagnostics for new third-party origins, remote embeds, raw HTML,
+      external scripts, downloaded assets, citation URLs, analytics imports,
+      and asset provenance.
+- [x] Report whether each origin is required, optional, user-triggered,
+      passive, blocked by CSP, or privacy-sensitive.
+- [x] Verify source mappings, site-doctor output, and security verifier checks
+      explain origin risks in author/site-owner language.
+      Added `src/lib/third-party-origins.ts` and platform security exports for
+      source-mapped third-party origin classification, CSP mismatch checks,
+      privacy-sensitive passive-origin warnings, disallowed-origin errors,
+      external-script errors, raw-HTML warnings, and downloaded-asset provenance
+      warnings. Updated `docs/STATIC_OUTPUT_SECURITY.md`. Verified with focused
+      origin/security/boundary tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 412: IRK-124 Dependency, Lockfile, Secret, And Supply-Chain Policy
+
+- [x] Inventory dependency audit commands, lockfile behavior, ignored files,
+      secret-scanning coverage, third-party script policy, asset provenance,
+      and environment-variable use.
+- [x] Document which checks belong in local, PR, release, and future package or
+      starter-template workflows.
+- [x] Verify release checks include the intended security posture without
+      slowing normal local iteration unnecessarily.
+      Added `src/lib/supply-chain-policy.ts` and platform security exports for
+      dependency audit, lockfile, ignored secret env, `PUBLIC_*` secret-name,
+      generated-output secret redaction, third-party script, and asset
+      provenance policy. Added `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md` and
+      linked it from `PACKAGE_SCRIPTS.md`. Verified with focused
+      supply-chain/security/boundary tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 413: IRK-127 Migration Fixtures For Legacy And External Sources
+
+- [x] Add fixture inputs for WordPress exports, old TPM permalinks/assets,
+      Substack-like archives, plain Markdown folders, and static HTML archives.
+- [x] Include redirects, historical metadata, remote assets, citation edge
+      cases, embeds, taxonomy, authors, migrated frontmatter, and explicit
+      human-review states.
+- [x] Verify deterministic migration fixture outputs, source maps, public URL
+      preservation, and review diagnostics.
+      Added preservation-aware migration fixture contracts in
+      `src/lib/migration-fixtures.ts`, exposed them through
+      `src/platform/import-export.ts`, and added representative fixtures for
+      WordPress, legacy TPM, Substack-like, Markdown-folder, and static HTML
+      imports. Updated `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`.
+      Verified with focused migration fixture, platform entrypoint, and
+      boundary tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 414: IRK-128 Round-Trip Migration Diagnostics And Docs
+
+- [x] Add native round-trip tests for import/export where preservation is
+      expected.
+- [x] Add diagnostics for lossy conversions, inferred metadata, missing assets,
+      weak citations, invalid redirects, unsupported embeds, and source-record
+      mappings.
+- [x] Document migration reports, human-review queues, supported sources, and
+      limits without promising perfect conversion.
+      Added migration review report generation, round-trip status modeling,
+      stable Markdown report output, unsupported-case diagnostics for missing
+      assets and invalid redirects, and platform entrypoint coverage. Updated
+      `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`. Verified with focused
+      migration/report/platform tests, `bun --silent run typecheck`,
+      `bun --silent run platform:check`, `bun --silent run review:markdown`,
+      and `git diff --check`.
+
+### Milestone 415: IRK-130 Locale, Long-String, And RTL Fixtures
+
+- [x] Add English-only, non-English, multilingual, long-string, and RTL fixture
+      coverage for route, metadata, feed, search, PDF, docs, and layout
+      behavior where current contracts can support it.
+- [x] Add formatting, label, and alternate-language snapshots where practical.
+- [x] Verify high-risk component/layout behavior catches overflow, overlap,
+      direction, and missing-label diagnostics.
+      Added localization fixture contracts, representative fixtures, snapshots,
+      missing-label/missing-translation/long-string/RTL/prefix diagnostics, and
+      the platform localization entrypoint. Documented the fixture limits in
+      `docs/LOCALIZATION_CONTRACTS.md` and `docs/PLATFORM_MODULES.md`.
+      Verified with focused localization/platform/boundary tests,
+      `bun --silent run typecheck`, `bun --silent run platform:check`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 416: IRK-131 Inclusive Defaults Documentation And Hardening
+
+- [x] Update author/developer docs and component/layout guidance for locale
+      defaults, long strings, RTL, localized labels, language metadata, and
+      no-overflow expectations.
+- [x] Feed localization findings into generated references, site doctor, and
+      component/catalog guidance where appropriate.
+- [x] Verify docs examples build and match schema behavior.
+      Added inclusive-default diagnostics for language/locale metadata and
+      non-English sites using default English platform labels, exposed the
+      helper through the localization platform seam, added catalog RTL and long
+      translated label fixtures, hardened shared button wrapping, and updated
+      author/component/localization docs. Verified with focused
+      inclusive-default/site-doctor/platform/catalog/button tests,
+      `bun --silent run typecheck`, `bun --silent run platform:check`,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 417: IRK-132 Starter Template Matrix
+
+- [x] Define starter personas, acceptance criteria, and feature matrix for
+      minimal blog, editorial magazine, scholarly publication, docs site, and
+      kitchen-sink demo.
+- [x] Specify expected content, config, theme, metadata, routes, media,
+      citations, collections, feeds, PDFs, deployment settings, diagnostics,
+      and intentionally absent capabilities per starter.
+- [x] Verify starter scope avoids TPM branding/content leakage and gives
+      implementation clear goals.
+      Added the canonical starter matrix in `src/lib/starter-templates.ts`,
+      exposed it through `src/platform/starters.ts`, and documented personas,
+      capability levels, acceptance checks, and intentionally absent surfaces in
+      `docs/STARTER_TEMPLATES.md`. Verified with starter matrix/platform tests
+      and the starter source verifier.
+
+### Milestone 418: IRK-133 Starter Template Implementation
+
+- [x] Build starter site instances for minimal blog, editorial magazine,
+      scholarly publication, docs site, and kitchen-sink demo.
+- [x] Keep starters small but representative, using shared platform APIs
+      instead of TPM shortcuts.
+- [x] Verify every starter builds and passes its declared generated-output
+      checks without TPM imports, copy, or branding.
+      Added maintained starter site instances under `examples/starters/` and
+      reused the existing docs-site starter. Verified source contracts with
+      `bun --silent run starters:check`, focused tests, and serial `build:raw`
+      smoke checks for minimal blog, editorial magazine, scholarly publication,
+      and kitchen-sink starters.
+
+### Milestone 419: IRK-134 Scaffold Workflow And Distribution Docs
+
+- [x] Define scaffold or documented copy workflows for choosing, customizing,
+      checking, and deploying a starter site instance.
+- [x] Document template selection, config, authoring, deployment adapter
+      choice, release checks, generated references, and migration/deprecation
+      expectations.
+- [x] Verify docs examples and starter structures remain in sync.
+      Documented the supported copy-based scaffold workflow, future CLI/MCP/
+      studio contract, starter update policy, and deprecation expectations in
+      `docs/STARTER_TEMPLATES.md`; cross-linked the starter platform seam in
+      platform/module and fixture strategy docs.
+
+### Milestone 420: IRK-135 Starter Release Compatibility
+
+- [x] Add starter builds to the appropriate release or fixture verification
+      layer.
+- [x] Verify starters against deployment adapters, security policy, metadata,
+      feeds, generated docs, diagnostics, and compatibility matrix.
+- [x] Verify release reports identify starter regressions clearly.
+      Added `bun run starters:check`, wired it into `check:fast`, added focused
+      verifier tests, and made raw builds clear Astro's content cache with
+      `astro build --force` so multi-site starter smoke checks do not inherit
+      stale content-store data.
+
+### Milestone 421: Milestone 5 Release Verification And Linear Handoff
+
+- [x] Run focused tests for every Milestone 5 domain and fix any failures.
+- [x] Run `bun --silent run check:release` and fix any issues.
+- [x] Attach relevant docs to Linear issues, add status comments where useful,
+      and move completed Milestone 5 issues to `In Review`.
+      Verified starter, localization, inclusive-default, platform-boundary,
+      accountability, lint, catalog, and release behavior with focused tests,
+      `bun --silent run check:fast`, `bun --silent run lint`,
+      `bun --silent run deadcode`, `bun --silent run test:catalog`,
+      `bun --silent run check:release`, and `git diff --check`. Fixed the
+      catalog invariant selector so the ArticleList test targets the intended
+      catalog example rather than the RTL companion example.
+      Attached starter/distribution handoff docs and review comments to
+      `IRK-33`, `IRK-132`, `IRK-133`, `IRK-134`, and `IRK-135`, then moved
+      those issues to `In Review`.
+
 ## Active Milestone 4 Execution
 
 ### Milestone 300: Milestone 4 Refresh And Dependency Plan

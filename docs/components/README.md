@@ -13,6 +13,13 @@ New component work should start here:
 4. Add render, invariant, accessibility, and interaction tests that match the
    documented intent.
 
+When a component renders user-facing copy, generated labels, metadata rows,
+actions, or prose-adjacent content, include long translated strings and
+right-to-left direction in the one-pager, catalog example, or tests where the
+component could plausibly encounter them. Single-locale English remains the
+default TPM case, but reusable components should not depend on English word
+length, slash-separated metadata, or left-to-right inline flow.
+
 One-pagers are design contracts, not implementation transcripts. If the current
 implementation is brittle or provisional, document that clearly in the
 component's follow-up notes instead of treating the brittle behavior as the

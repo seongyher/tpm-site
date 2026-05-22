@@ -3,6 +3,8 @@ import path from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
+import { starterTemplateMatrix } from "../../src/lib/starter-templates";
+
 const minimalFixtureRoot = path.join("tests", "fixtures", "site-instance");
 
 const requiredContentCollections = [
@@ -38,6 +40,16 @@ describe("fixture-site matrix", () => {
         filesUnder(path.join(minimalFixtureRoot, "content", collection)).length,
         `${collection} should have at least one fixture file`,
       ).toBeGreaterThan(0);
+    }
+  });
+
+  test("keeps starter templates outside the active TPM site instance", () => {
+    for (const template of starterTemplateMatrix()) {
+      expect(template.root).not.toBe("site");
+      expect(existsSync(template.root)).toBe(true);
+      expect(existsSync(path.join(template.root, "config", "site.json"))).toBe(
+        true,
+      );
     }
   });
 });

@@ -98,3 +98,8 @@ site/theme.css
 # exercised by test:docs-site and kept as author-facing documentation content,
 # config, and assets rather than mirrored source modules.
 examples/docs-site/**
+
+# Approved exception: Maintained starter site instances are source fixtures
+# exercised by starters:check, starter matrix tests, site doctor checks, and
+# starter build smoke checks rather than mirrored unit tests for each file.
+examples/starters/**

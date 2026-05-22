@@ -584,6 +584,27 @@ The `identity.sameAs` list should contain only official public profiles for
 the site or publication. These links are used for machine-readable publisher
 metadata and social/SEO context, not as ordinary footer links.
 
+For English-language sites, `identity.language` and `identity.locale` can stay
+simple:
+
+```json
+{
+  "identity": {
+    "language": "en",
+    "locale": "en_US"
+  }
+}
+```
+
+Use `language` for the web page language tag. It should use hyphens when it has
+a region, such as `fr-CA` or `ar-EG`. Use `locale` for social preview metadata.
+It should use Open Graph format, such as `fr_CA` or `ar_EG`.
+
+If you change the site to a non-English language, also translate homepage
+labels, homepage empty-state text, and homepage discovery-link labels. The site
+doctor will warn if a non-English site is still using the default English
+platform labels.
+
 Most omitted optional fields have safe defaults. For example, articles and
 announcements are visible in directories, search, RSS, and homepage surfaces by
 default unless their frontmatter or the site defaults say otherwise. PDFs are

@@ -175,6 +175,12 @@ The quality bar is simple: no horizontal overflow, no overlapping controls, no
 unreadable content, and no layout that only works at the viewport sizes where it
 was manually tested.
 
+Localization is part of responsive design, not a separate translation pass.
+Reusable components that render labels, metadata rows, actions, or prose-adjacent
+content should tolerate longer translated strings, non-Latin scripts, and
+right-to-left direction. English word length, slash-separated metadata, and
+left-to-right inline order are defaults, not invariants.
+
 ## Component Architecture
 
 Prefer this directory shape:

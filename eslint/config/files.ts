@@ -2,6 +2,7 @@ export const typedFiles = [
   "astro.config.ts",
   "eslint.config.ts",
   "eslint/**/*.ts",
+  "examples/platform-entrypoint-consumer/**/*.ts",
   "knip.ts",
   "src/**/*.{ts,tsx}",
   "scripts/**/*.ts",

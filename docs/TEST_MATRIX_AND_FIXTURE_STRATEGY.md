@@ -40,6 +40,7 @@ integration behavior that lower layers cannot prove.
 | TPM production site instance   | `site/`                                                               | The real publication content, config, assets, redirects, metadata, and generated output.                                     |
 | Minimal external site instance | `tests/fixtures/site-instance/`                                       | A small non-TPM site can build with independent config, content, assets, public files, theme, and redirects.                 |
 | Public docs/example site       | `examples/docs-site/`                                                 | A larger non-TPM site can use the platform while documenting authoring, configuration, operations, and reference workflows.  |
+| Starter templates              | `examples/starters/` plus `examples/docs-site/`                       | Maintained distribution examples for minimal, editorial, scholarly, docs, and broad demo adoption paths.                     |
 | Component catalog              | `src/catalog/`                                                        | Isolated component, block, hostile-content, and visual-state examples outside normal page routes.                            |
 | Reference parser fixtures      | `tests/fixtures/article-references*`                                  | Markdown/reference parser and migration behavior for notes, citations, and bibliography syntax.                              |
 | Invalid and hostile examples   | `src/catalog/examples/hostile-fixtures.ts` plus focused test fixtures | Long strings, hostile content, missing metadata, invalid references, and intentionally broken source examples used by tests. |
@@ -145,8 +146,10 @@ The command ownership manifest is implemented in
 - `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
   aligned with `package.json` and CI workflows.
 - `tests/config/fixture-site-matrix.test.ts` keeps the minimal external site
-  fixture aligned with its required content, asset, public-file, redirect, and
-  theme coverage.
+  fixture and maintained starter roots aligned with required content,
+  public-file, redirect, and theme coverage.
+- `bun run starters:check` verifies starter source files, parseable config,
+  site-doctor compatibility, declared checks, and TPM branding leakage.
 - `scripts/quality/qa-failure-probes.ts` records intentional bad-input probes
   for source, generated-output, layout, citation, config, and payload budget
   failure classes without leaking bad fixtures into production content.

@@ -83,7 +83,9 @@ import CatalogSection from "./CatalogSection.astro";
 import {
   catalogArticleItems,
   catalogNavigationItems,
+  catalogRtlArticleItems,
   catalogTags,
+  longTranslatedActionLabel,
 } from "./examples/hostile-fixtures";
 import UiPrimitivesCatalogSection from "./sections/UiPrimitivesCatalogSection.astro";
 import { getAuthorProfiles } from "../lib/authors";
@@ -871,6 +873,16 @@ if (primaryCatalogAuthor === undefined) {
       </CatalogExample>
 
       <CatalogExample
+        title="ArticleList RTL"
+        description="RTL localized article list fixture for direction and wrapping review."
+        componentPath="src/components/articles/ArticleList.astro"
+      >
+        <div dir="rtl" lang="ar">
+          <ArticleList items={catalogRtlArticleItems} />
+        </div>
+      </CatalogExample>
+
+      <CatalogExample
         title="MoreInCategoryBlock"
         description="Article-end same-category discovery."
         componentPath="src/components/articles/MoreInCategoryBlock.astro"
@@ -1434,7 +1446,7 @@ if (primaryCatalogAuthor === undefined) {
               href={catalogSupportUrl}
               class="min-h-8 px-3 py-1.5 text-sm"
             >
-              Support Us
+              {longTranslatedActionLabel}
             </LinkButton>
           </ActionCluster>
         </PriorityInlineRow>

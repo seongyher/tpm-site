@@ -332,6 +332,16 @@ function expectedMirrorTests(file: string): string[] {
   if (file === "wrangler.toml") {
     return ["tests/config/wrangler.config.test.ts"];
   }
+  if (file === "examples/platform-entrypoint-consumer/platform-consumer.ts") {
+    return ["tests/src/platform/example-consumer.test.ts"];
+  }
+  if (file.startsWith("src/platform/") && file.endsWith(".ts")) {
+    return [
+      `tests/${pathWithoutExtension}.test.ts`,
+      `tests/${pathWithoutExtension}-entrypoint.test.ts`,
+      "tests/src/platform/entrypoints.test.ts",
+    ];
+  }
 
   return [`tests/${pathWithoutExtension}.test.ts`];
 }

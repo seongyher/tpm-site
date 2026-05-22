@@ -211,6 +211,58 @@ When a legacy source has malformed data, the platform should keep the original
 value in the source map or preservation record and emit a normalized value only
 when the rule is explicit.
 
+## Migration Fixture Contract
+
+`src/lib/migration-fixtures.ts` provides the current deterministic fixture
+contract for downstream importer work. It is not a complete importer. It is the
+stable proof shape used to keep realistic migration cases small, reviewable,
+and source-mapped while the import pipeline matures.
+
+The representative fixture set covers:
+
+- WordPress-style exports;
+- legacy TPM permalink and asset migrations;
+- Substack-like post archives;
+- plain Markdown folder imports;
+- static HTML archives.
+
+Each fixture can include records, remote or local asset expectations, redirects,
+original source references, preservation states, citations, embeds, taxonomy,
+authors, migrated frontmatter, and explicit human-review states. Fixture output
+includes deterministic source text, source maps, redirect expectations, asset
+expectations, and author-facing diagnostics.
+
+The fixture helper intentionally marks inferred, lossy, manual-review, unknown,
+and unsupported fields as review-required instead of pretending the migration is
+complete. This keeps importer tests honest: public URLs can be preserved while
+ambiguous author intent remains visible.
+
+## Migration Reports And Round Trips
+
+`createMigrationReviewReport()` turns one or more fixture outputs into a
+site-doctor/studio-readable report with:
+
+- total migrated source count;
+- stable diagnostic summary by code;
+- human-review queue items with source references and concrete remediation;
+- round-trip status.
+
+Round-trip status is deliberately conservative:
+
+- `passed`: no migration diagnostics; semantic round-trip should be safe for
+  the supported fixture shape;
+- `review-required`: migration can materialize source files but has lossy,
+  inferred, ambiguous, weak citation, remote asset, redirect, or embed review
+  items;
+- `unsupported`: migration contains output that should not be materialized yet,
+  such as missing referenced assets or invalid redirect paths.
+
+`formatMigrationReviewMarkdownReport()` renders the same report as stable
+Markdown for CLI output, CI artifacts, docs, MCP tools, or future studio review
+panes. The report is intentionally clear about limits: it can prove when a
+fixture is safe to round-trip, but it does not promise perfect conversion for
+legacy archives.
+
 ## Asset Preservation
 
 Asset records should distinguish:

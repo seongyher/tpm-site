@@ -1,0 +1,83 @@
+{
+  "features": {
+    "announcements": false,
+    "authors": true,
+    "bibliography": true,
+    "categories": true,
+    "collections": true,
+    "feed": true,
+    "pdf": true,
+    "search": true,
+    "support": false,
+    "tags": true,
+    "themeToggle": true
+  },
+  "homepage": {
+    "featuredCollection": "featured",
+    "startHereCollection": "start-here"
+  },
+  "identity": {
+    "description": "A starter for research essays with citations and PDFs.",
+    "language": "en",
+    "locale": "en_US",
+    "publisherName": "Open Research Notes",
+    "publisherType": "organization",
+    "shortTitle": "Research Notes",
+    "themeColor": "#315f73",
+    "title": "Open Research Notes",
+    "url": "https://example.com"
+  },
+  "navigation": {
+    "footer": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/bibliography/",
+        "label": "Bibliography"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ],
+    "primary": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/bibliography/",
+        "label": "Bibliography"
+      }
+    ]
+  },
+  "routes": {
+    "allArticles": "/articles/all/",
+    "announcements": "/announcements/",
+    "articles": "/articles/",
+    "authors": "/authors/",
+    "bibliography": "/bibliography/",
+    "categories": "/categories/",
+    "collections": "/collections/",
+    "feed": "/feed.xml",
+    "home": "/",
+    "search": "/search/",
+    "tags": "/tags/"
+  },
+  "support": {
+    "block": {
+      "body": "Optional support copy can be enabled later.",
+      "title": "Support Research Notes"
+    },
+    "discord": {
+      "href": "https://example.com/community",
+      "label": "Community"
+    },
+    "patreon": {
+      "href": "https://example.com/support",
+      "label": "Support"
+    }
+  }
+}

@@ -11,10 +11,10 @@ export type ButtonVariant = "ghost" | "outline" | "solid";
 export type PrefetchValue = "hover" | "load" | "tap" | "viewport" | boolean;
 
 export const buttonControlBaseClasses =
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm border font-semibold tracking-normal transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-w-0 max-w-full items-center justify-center gap-2 break-words rounded-sm border text-center font-semibold tracking-normal transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60";
 
 export const buttonLinkBaseClasses =
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-sm border font-semibold tracking-normal no-underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-disabled:pointer-events-none aria-disabled:opacity-60";
+  "inline-flex min-w-0 max-w-full items-center justify-center gap-2 break-words rounded-sm border text-center font-semibold tracking-normal no-underline transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring aria-disabled:pointer-events-none aria-disabled:opacity-60";
 
 export const buttonSizeClasses = {
   lg: "min-h-12 px-5 py-3 text-base",

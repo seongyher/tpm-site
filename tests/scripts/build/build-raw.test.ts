@@ -97,7 +97,7 @@ describe("raw build runner", () => {
     expect(exitCode).toBe(0);
     expect(runs).toEqual([
       {
-        args: ["astro", "build"],
+        args: ["astro", "build", "--force"],
         command: "bunx",
         outputDir: path.join("dist", "docs"),
       },

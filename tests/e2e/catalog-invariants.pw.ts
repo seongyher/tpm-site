@@ -99,7 +99,7 @@ if (!catalogIsBuilt) {
     await page.goto("/catalog/");
 
     const example = page.locator(
-      '[data-catalog-component="src/components/articles/ArticleList.astro"]',
+      '[data-catalog-component="src/components/articles/ArticleList.astro"][data-catalog-example="ArticleList"]',
     );
     const rows = example.locator("[data-article-card]");
     const imageBackedRow = rows.nth(0);

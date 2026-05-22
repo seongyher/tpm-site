@@ -5,6 +5,10 @@ import type { SectionNavItem } from "../../lib/navigation";
 export const longUnbrokenWord =
   "metamemeticcountercounterinterpretationwithoutnaturalbreakpoints";
 
+/** Deliberately long translated label used to expose localized action overflow. */
+export const longTranslatedActionLabel =
+  "AkademischeLangformAktionOhneNatuerlicheTrennstellen";
+
 /** Tag set large enough to expose wrapping and density issues. */
 export const catalogTags = [
   "research",
@@ -103,5 +107,21 @@ export const catalogArticleItems = [
     description: `A hostile fixture with ${longUnbrokenWord} in ordinary prose.`,
     href: "/articles/hostile-article-card/",
     title: `A Very Long Article Title Containing ${longUnbrokenWord}`,
+  },
+] as const satisfies readonly ArticleListItem[];
+
+/** RTL article/list fixtures for catalog-only layout review. */
+export const catalogRtlArticleItems = [
+  {
+    author: "كاتب الفهرس",
+    category: {
+      href: "/categories/research/",
+      title: "بحث",
+    },
+    date: "١٢ يناير ٢٠٢٦",
+    description:
+      "مثال قصير لاختبار اتجاه النص العربي داخل بطاقات المقالات والقوائم.",
+    href: "/articles/rtl-catalog-example/",
+    title: "مثال عربي طويل نسبيا لاختبار التفاف العنوان في الواجهة",
   },
 ] as const satisfies readonly ArticleListItem[];

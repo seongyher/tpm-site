@@ -62,12 +62,22 @@ to the active milestone.
 - `site/assets/`: source assets that should go through Astro's asset pipeline.
 - `site/public/`: static files copied directly to build output.
 - `site/unused-assets/`: intentionally parked source assets.
+- `examples/`: site-neutral example instances and platform consumer examples
+  that exercise the platform without TPM-specific content.
+- `examples/starters/`: maintained starter site instances. Keep these
+  generic, author-friendly, and validated by the starter-template registry.
+- `examples/docs-site/`: documentation-site example instance.
+- `examples/platform-entrypoint-consumer/`: minimal consumer that verifies the
+  stable internal platform entrypoints can be imported without incidental app
+  coupling.
 - `src/pages/`: Astro file routes and endpoints.
 - `src/layouts/`: shared document, page, and article layouts.
 - `src/components/`: reusable Astro UI, layout, navigation, article, block, and
   island components.
 - `src/components/ui/`: shadcn/Radix-style primitives when useful.
 - `src/lib/`: content, route, metadata, validation, and domain helpers.
+- `src/platform/`: stable internal platform entrypoints for future studio,
+  CLI, MCP, examples, and package-boundary consumers.
 - `src/styles/`: global Tailwind entry, tokens, base styles, and prose styles.
   Keep this small.
 - `src/content.config.ts`: Astro content collection config that resolves the
@@ -76,6 +86,8 @@ to the active milestone.
 - `scripts/quality/`: QA orchestration helpers, the command/CI parity
   registry, diagnostic diff tooling, failure-probe metadata, and platform
   boundary checks.
+- `scripts/site/`: source-level site-instance tools such as site doctor and
+  starter-template verification.
 - `tests/`: unit, e2e, accessibility, and performance tests.
 - `dist/`: generated build output. Do not edit by hand.
 - `dist-catalog/`: generated private component catalog output. Do not edit by
@@ -101,6 +113,24 @@ to the active milestone.
   sequence.
 - `agent-docs/ASTRO_GUIDANCE.md`: expanded Astro notes.
 - `agent-docs/TAILWIND_GUIDANCE.md`: expanded Tailwind notes.
+- `docs/PLATFORM_MODULES.md`: map of current platform modules, entrypoints,
+  contracts, and package-boundary intent.
+- `docs/STARTER_TEMPLATES.md`: starter-template product contract, registry,
+  fixture matrix, and verification model.
+- `docs/EXTENSION_ARCHITECTURE.md`: extension manifest, lifecycle, security,
+  and compatibility planning.
+- `docs/DEPLOYMENT_ADAPTER_CONTRACT.md`: deploy target capability model and
+  adapter expectations.
+- `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`: import/export and content
+  preservation contracts.
+- `docs/LOCALIZATION_CONTRACTS.md`: locale and inclusive-defaults contracts.
+- `docs/RELEASE_GOVERNANCE.md`: versioning, compatibility, release-note, and
+  migration policy.
+- `docs/STATIC_OUTPUT_SECURITY.md`: generated-output security invariants.
+- `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`: dependency, lockfile, secret, and
+  provenance policy.
+- `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`: fixture matrix and test strategy
+  for platform/studio readiness.
 
 ## Project-Local Skills
 
@@ -174,6 +204,32 @@ Apply these rules when designing or changing code:
   Good abstractions should reduce what developers must remember, make
   intentional changes local and testable, and make subtle bugs difficult to
   introduce.
+
+## Platform Entrypoints And Starters
+
+Treat `src/platform/*` as the internal public seam for future studio, CLI, MCP,
+example consumers, and package-boundary work. These modules should expose
+domain-shaped contracts by re-exporting or composing stable `src/lib` modules;
+they should not import Astro pages, layouts, visual components, TPM site
+content, tests, scripts, or provider-specific deployment tooling.
+
+Keep platform seams site-neutral. TPM-specific wording, URLs, support links,
+social handles, theme choices, and content belong in `site/` or typed site
+configuration, not in platform entrypoints or starter examples.
+
+Starters are maintained distribution assets, not throwaway fixtures. When
+adding or changing starters:
+
+- update `src/lib/starter-templates.ts`, `docs/STARTER_TEMPLATES.md`, and any
+  affected examples together;
+- keep default copy generic, inclusive, and suitable for a new publication;
+- verify every starter uses only supported source contracts and no accidental
+  TPM-only assumptions;
+- run `bun run starters:check` or a broader check that includes it.
+
+When adding a new platform-facing domain, update `docs/PLATFORM_MODULES.md` and
+the relevant contract document before relying on the seam from examples,
+future studio code, CLI/MCP plans, or tests.
 
 ## Architecture Standard
 
@@ -1229,7 +1285,8 @@ Current baseline scripts:
 
 - `bun run dev`: start Astro dev server.
 - `bun run check:fast`: run cheap high-signal invariants for early feedback,
-  including command/config contract tests.
+  including starter-template, generated-reference, platform-boundary, and
+  command/config contract tests.
 - `bun run check`: run content validation, Astro and tooling typechecking,
   ESLint, asset validation, package ordering, code/config Prettier check, Knip,
   test-accountability verification, Bun unit tests, and Astro component tests.
@@ -1261,6 +1318,9 @@ Current baseline scripts:
 - `bun run test:perf`: run Lighthouse CI review.
 - `bun run diagnostics:diff`: compare normalized diagnostic snapshots for QA
   scope-change reviews.
+- `bun run starters:check`: verify starter templates and example site
+  instances stay aligned with the starter registry and supported source
+  contracts.
 - `bun run check:release`: run the blocking pre-release validation gate.
 - `bun run quality:release`: run the heavy pre-release gate quietly, printing
   only failures and review warnings.
@@ -1343,6 +1403,10 @@ without restating obvious code.
   them during handoff.
 - Update relevant user-facing or developer-facing docs when workflows,
   commands, public APIs, content conventions, or architecture change.
+- Update platform contract docs when changing platform entrypoints, starter
+  templates, generated-output invariants, extension/deployment seams,
+  localization/import-export/release policies, or security/supply-chain
+  expectations.
 - Use consistent project vocabulary such as article, page, category, asset,
   public file, component, block, and island.
 

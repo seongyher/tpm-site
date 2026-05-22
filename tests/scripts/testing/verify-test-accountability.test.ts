@@ -150,6 +150,16 @@ public/**
     expect(accountabilityMirrorTests("wrangler.toml")).toEqual([
       "tests/config/wrangler.config.test.ts",
     ]);
+    expect(
+      accountabilityMirrorTests(
+        "examples/platform-entrypoint-consumer/platform-consumer.ts",
+      ),
+    ).toEqual(["tests/src/platform/example-consumer.test.ts"]);
+    expect(accountabilityMirrorTests("src/platform/extensions.ts")).toEqual([
+      "tests/src/platform/extensions.test.ts",
+      "tests/src/platform/extensions-entrypoint.test.ts",
+      "tests/src/platform/entrypoints.test.ts",
+    ]);
   });
 
   test("formats all accountability failure sections", () => {

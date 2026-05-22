@@ -44,7 +44,7 @@ export function runBuildRawCli(
 
   const options = parseOptions(args, rootDir, config);
   const buildExitCode = runCommand({
-    args: ["astro", "build"],
+    args: ["astro", "build", "--force"],
     command: "bunx",
     env: {
       ...process.env,

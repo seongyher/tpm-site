@@ -1,0 +1,103 @@
+{
+  "features": {
+    "announcements": true,
+    "authors": true,
+    "bibliography": true,
+    "categories": true,
+    "collections": true,
+    "feed": true,
+    "pdf": true,
+    "search": true,
+    "support": true,
+    "tags": true,
+    "themeToggle": true
+  },
+  "homepage": {
+    "announcementLimit": 2,
+    "featuredCollection": "featured",
+    "recentLimit": 8,
+    "startHereCollection": "start-here"
+  },
+  "identity": {
+    "description": "A broad demo starter for platform evaluation.",
+    "language": "en",
+    "locale": "en_US",
+    "publisherName": "Platform Demo",
+    "publisherType": "organization",
+    "sameAs": ["https://example.com/social"],
+    "shortTitle": "Demo",
+    "themeColor": "#9a5a2f",
+    "title": "Platform Demo",
+    "url": "https://example.com"
+  },
+  "navigation": {
+    "footer": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/announcements/",
+        "label": "Announcements"
+      },
+      {
+        "href": "/collections/",
+        "label": "Collections"
+      },
+      {
+        "href": "/bibliography/",
+        "label": "Bibliography"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ],
+    "primary": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/collections/",
+        "label": "Collections"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ]
+  },
+  "routes": {
+    "allArticles": "/articles/all/",
+    "announcements": "/announcements/",
+    "articles": "/articles/",
+    "authors": "/authors/",
+    "bibliography": "/bibliography/",
+    "categories": "/categories/",
+    "collections": "/collections/",
+    "feed": "/feed.xml",
+    "home": "/",
+    "search": "/search/",
+    "tags": "/tags/"
+  },
+  "share": {
+    "targets": ["bluesky", "x", "threads", "facebook", "linkedin", "reddit"],
+    "threadsMention": "@example",
+    "xViaHandle": "example"
+  },
+  "support": {
+    "block": {
+      "body": "Demo support copy proves configurable CTAs.",
+      "title": "Support Platform Demo"
+    },
+    "discord": {
+      "href": "https://example.com/community",
+      "label": "Community"
+    },
+    "patreon": {
+      "href": "https://example.com/support",
+      "label": "Support"
+    }
+  }
+}

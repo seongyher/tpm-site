@@ -49,6 +49,13 @@ Document long titles, long words, missing images, missing excerpts, many tags,
 empty states, dense lists, one-item lists, unusual punctuation, and author
 content the component must tolerate.
 
+## Localization And Direction
+
+Document user-facing labels, generated labels, date/count formatting inputs,
+long translated strings, non-Latin scripts, right-to-left direction, and any
+icon or ordering behavior that changes with text direction. If the component is
+locale-neutral because it renders no text and inherits direction safely, say so.
+
 ## Theme Behavior
 
 Document light/dark mode requirements for readable text, visible borders,

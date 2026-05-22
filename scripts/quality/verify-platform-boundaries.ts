@@ -21,14 +21,20 @@ export interface PlatformBoundaryViolation {
 
 /** Result of platform boundary verification. */
 export interface PlatformBoundaryVerificationResult {
+  forbiddenEntrypointImports: PlatformBoundaryViolation[];
+  forbiddenExtensionImports: PlatformBoundaryViolation[];
   forbiddenImports: PlatformBoundaryViolation[];
   forbiddenLiterals: PlatformBoundaryViolation[];
   unownedLibFiles: string[];
+  unownedPlatformEntrypoints: string[];
 }
 
 const platformSourcePattern =
   /^src\/(?!(?:generated|components\/ui\/assets)\/).*\.(?:astro|ts|tsx)$/u;
+const extensionSourcePattern =
+  /^(?:extensions|site\/extensions)\/.*\.(?:astro|ts|tsx)$/u;
 const libFilePattern = /^src\/lib\/.*\.ts$/u;
+const platformEntrypointPattern = /^src\/platform\/.*\.ts$/u;
 const bareImportSpecifierPattern = /^\s*import\s*["']([^"']+)["']/gmu;
 const dynamicImportSpecifierPattern = /\bimport\(\s*["']([^"']+)["']\s*\)/gu;
 const fromImportSpecifierPattern = /\bfrom\s*["']([^"']+)["']/gu;
@@ -87,12 +93,16 @@ const libDomainFiles = {
     "publishable.ts",
     "tags.ts",
   ],
+  deployment: ["deployment-adapters.ts"],
+  "extension-architecture": ["extensions.ts"],
   "interaction-primitives": [
     "anchored-disclosure.ts",
     "anchored-positioning.ts",
     "browser-clipboard.ts",
     "interaction-primitives.ts",
   ],
+  "import-export": ["migration-fixtures.ts"],
+  localization: ["inclusive-defaults.ts", "localization-fixtures.ts"],
   "media-policy": ["media-policy.ts", "social-images.ts"],
   "pdf-and-scholarly-output": [
     "article-pdf-compatibility.ts",
@@ -103,6 +113,10 @@ const libDomainFiles = {
     "output-verification.ts",
     "performance-budgets.ts",
     "performance-workbench.ts",
+    "release-governance.ts",
+    "static-output-security.ts",
+    "supply-chain-policy.ts",
+    "third-party-origins.ts",
   ],
   observability: [
     "observability-diagnostics.ts",
@@ -114,6 +128,7 @@ const libDomainFiles = {
     "studio-models.ts",
     "studio-workflows.ts",
   ],
+  "starter-templates": ["starter-templates.ts"],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",
@@ -152,6 +167,25 @@ const ownedLibFiles: ReadonlySet<string> = new Set(
   Object.values(libDomainFiles).flat(),
 );
 
+const platformEntrypointDomainFiles = {
+  deployment: ["deployment.ts"],
+  diagnostics: ["diagnostics.ts"],
+  extensions: ["extensions.ts"],
+  "import-export": ["import-export.ts"],
+  interactions: ["interactions.ts"],
+  localization: ["localization.ts"],
+  media: ["media.ts"],
+  references: ["references.ts"],
+  release: ["release.ts"],
+  routes: ["routes.ts"],
+  security: ["security.ts"],
+  starters: ["starters.ts"],
+} as const;
+
+const ownedPlatformEntrypoints: ReadonlySet<string> = new Set(
+  Object.values(platformEntrypointDomainFiles).flat(),
+);
+
 /**
  * Verifies platform/module boundaries that should remain true for every site
  * instance.
@@ -173,10 +207,29 @@ export function verifyPlatformBoundaries({
     .map((file) => toPosix(file.path))
     .filter((file) => libFilePattern.test(file))
     .map((file) => file.replace(/^src\/lib\//u, ""));
+  const platformEntrypointFiles = boundaryFiles
+    .map((file) => toPosix(file.path))
+    .filter((file) => platformEntrypointPattern.test(file))
+    .map((file) => file.replace(/^src\/platform\//u, ""));
+  const platformEntrypoints = sourceFiles.filter((file) =>
+    platformEntrypointPattern.test(file.path),
+  );
+  const extensionFiles = boundaryFiles
+    .map((file) => ({ ...file, path: toPosix(file.path) }))
+    .filter((file) => extensionSourcePattern.test(file.path));
 
   return {
+    forbiddenExtensionImports: extensionFiles.flatMap(
+      unsupportedExtensionImports,
+    ),
+    forbiddenEntrypointImports: platformEntrypoints.flatMap(
+      unsupportedPlatformEntrypointImports,
+    ),
     forbiddenImports: sourceFiles.flatMap(unsupportedSiteImports),
     forbiddenLiterals: sourceFiles.flatMap(siteSpecificLiterals),
+    unownedPlatformEntrypoints: platformEntrypointFiles
+      .filter((file) => !ownedPlatformEntrypoints.has(file))
+      .sort((left, right) => left.localeCompare(right)),
     unownedLibFiles: libFiles
       .filter((file) => !ownedLibFiles.has(file))
       .sort((left, right) => left.localeCompare(right)),
@@ -198,6 +251,23 @@ export function formatPlatformBoundaryReport(
 
   const lines = ["Platform boundary check failed."];
 
+  if (result.unownedPlatformEntrypoints.length > 0) {
+    lines.push(
+      "Unowned src/platform entrypoints:",
+      ...result.unownedPlatformEntrypoints.map(
+        (file) =>
+          `- src/platform/${file} (assign this entrypoint in docs/PLATFORM_MODULES.md and scripts/quality/verify-platform-boundaries.ts)`,
+      ),
+    );
+  }
+
+  if (result.forbiddenExtensionImports.length > 0) {
+    lines.push(
+      "Unsupported extension imports:",
+      ...result.forbiddenExtensionImports.map(formatViolation),
+    );
+  }
+
   if (result.unownedLibFiles.length > 0) {
     lines.push(
       "Unowned src/lib modules:",
@@ -212,6 +282,13 @@ export function formatPlatformBoundaryReport(
     lines.push(
       "Unsupported site-instance imports:",
       ...result.forbiddenImports.map(formatViolation),
+    );
+  }
+
+  if (result.forbiddenEntrypointImports.length > 0) {
+    lines.push(
+      "Unsupported platform-entrypoint imports:",
+      ...result.forbiddenEntrypointImports.map(formatViolation),
     );
   }
 
@@ -259,6 +336,28 @@ Verify reusable platform modules do not regain site-specific coupling.`);
   return 0;
 }
 
+function unsupportedExtensionImports(
+  file: PlatformBoundaryFile,
+): PlatformBoundaryViolation[] {
+  return importSpecifiers(file.text)
+    .filter((specifier) => !isExtensionImport(specifier))
+    .map((specifier) => ({
+      file: file.path,
+      message: `Unsupported extension import "${specifier}". Extensions must use platform entrypoints instead of reaching into site, src/lib, components, pages, scripts, or tests directly.`,
+    }));
+}
+
+function unsupportedPlatformEntrypointImports(
+  file: PlatformBoundaryFile,
+): PlatformBoundaryViolation[] {
+  return importSpecifiers(file.text)
+    .filter((specifier) => !isPlatformEntrypointImport(specifier))
+    .map((specifier) => ({
+      file: file.path,
+      message: `Unsupported platform-entrypoint import "${specifier}". Entrypoints may only re-export local entrypoints or src/lib domain modules.`,
+    }));
+}
+
 function unsupportedSiteImports(
   file: PlatformBoundaryFile,
 ): PlatformBoundaryViolation[] {
@@ -292,6 +391,27 @@ function isSiteInstanceImport(specifier: string): boolean {
   );
 }
 
+function isPlatformEntrypointImport(specifier: string): boolean {
+  return specifier.startsWith("./") || specifier.startsWith("../lib/");
+}
+
+function isExtensionImport(specifier: string): boolean {
+  if (
+    specifier.startsWith("@/platform/") ||
+    specifier.includes("/src/platform/")
+  ) {
+    return true;
+  }
+
+  if (specifier.startsWith("./") || specifier.startsWith("../")) {
+    return !/(?:^|\/)(?:site|scripts|tests|src\/(?:components|layouts|lib|pages|scripts))(?:\/|$)/u.test(
+      specifier,
+    );
+  }
+
+  return false;
+}
+
 function importSpecifiers(text: string): string[] {
   return [
     ...Array.from(
@@ -313,7 +433,10 @@ function hasPlatformBoundaryViolations(
   result: PlatformBoundaryVerificationResult,
 ): boolean {
   return (
+    result.forbiddenExtensionImports.length > 0 ||
+    result.forbiddenEntrypointImports.length > 0 ||
     result.unownedLibFiles.length > 0 ||
+    result.unownedPlatformEntrypoints.length > 0 ||
     result.forbiddenImports.length > 0 ||
     result.forbiddenLiterals.length > 0
   );

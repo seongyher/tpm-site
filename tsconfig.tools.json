@@ -13,6 +13,7 @@
     "astro.config.ts",
     "eslint/**/*.ts",
     "eslint.config.ts",
+    "examples/platform-entrypoint-consumer/**/*.ts",
     "knip.ts",
     "playwright.config.ts",
     "scripts/**/*.ts",
