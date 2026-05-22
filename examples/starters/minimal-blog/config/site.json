@@ -1,0 +1,83 @@
+{
+  "features": {
+    "announcements": false,
+    "authors": true,
+    "bibliography": false,
+    "categories": true,
+    "collections": true,
+    "feed": true,
+    "pdf": true,
+    "search": true,
+    "support": false,
+    "tags": true,
+    "themeToggle": true
+  },
+  "homepage": {
+    "featuredCollection": "featured",
+    "startHereCollection": "start-here"
+  },
+  "identity": {
+    "description": "A concise personal blog starter.",
+    "language": "en",
+    "locale": "en_US",
+    "publisherName": "Minimal Blog",
+    "publisherType": "person",
+    "shortTitle": "Blog",
+    "themeColor": "#4f6f52",
+    "title": "Minimal Blog",
+    "url": "https://example.com"
+  },
+  "navigation": {
+    "footer": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      },
+      {
+        "href": "/feed.xml",
+        "label": "RSS"
+      }
+    ],
+    "primary": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ]
+  },
+  "routes": {
+    "allArticles": "/articles/all/",
+    "announcements": "/announcements/",
+    "articles": "/articles/",
+    "authors": "/authors/",
+    "bibliography": "/bibliography/",
+    "categories": "/categories/",
+    "collections": "/collections/",
+    "feed": "/feed.xml",
+    "home": "/",
+    "search": "/search/",
+    "tags": "/tags/"
+  },
+  "support": {
+    "block": {
+      "body": "Optional support copy can be enabled later.",
+      "title": "Support This Blog"
+    },
+    "discord": {
+      "href": "https://example.com/community",
+      "label": "Community"
+    },
+    "patreon": {
+      "href": "https://example.com/support",
+      "label": "Support"
+    }
+  }
+}

@@ -224,6 +224,39 @@ Cloudflare-specific details should stay inside the adapter. Platform code
 should ask for capabilities such as `customHeaders`, not inspect Wrangler
 syntax directly.
 
+Implementation status:
+
+- `src/lib/deployment-adapters.ts` now owns the provider-neutral deployment
+  result types and the Cloudflare Workers Static Assets reference adapter.
+- `src/platform/deployment.ts` exposes the deployment seam for future CLI, MCP,
+  studio, docs, and fixture consumers.
+- The Cloudflare adapter parses the current `wrangler.toml`, `_headers`, and
+  generated `_redirects` shapes into structured provider facts.
+- The adapter returns capability reports, provider reports, URL summaries,
+  manual steps, and diagnostics for config mismatches, missing credentials,
+  missing immutable Astro asset cache headers, redirect count mismatches,
+  domain follow-up, and manual rollback behavior.
+- The adapter does not run Wrangler or read secrets. Execute-mode publish and
+  preview actions require credential references with a `deploy.publish` scope,
+  but secret values stay outside release artifacts.
+
+Current TPM behavior represented by the adapter:
+
+| Provider fact               | Source                                               | Adapter interpretation                                   |
+| --------------------------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| Worker name                 | `wrangler.toml` `name = "tpm-site"`                  | Cloudflare target name and provider report row.          |
+| Static assets directory     | `wrangler.toml` `[assets].directory = "./dist"`      | Must match the verified release output root.             |
+| 404 handling                | `wrangler.toml` `not_found_handling = "404-page"`    | Provider report; confirms static 404-page behavior.      |
+| Immutable generated assets  | `site/public/_headers` `/_astro/*`                   | Required cache policy for hashed Astro assets.           |
+| Traffic advice content type | `site/public/_headers` `/.well-known/traffic-advice` | Explicit static header preserved as provider facts.      |
+| Legacy redirects            | generated `_redirects`                               | Redirect count must match release artifact expectations. |
+| Production URL              | release artifact canonical URL                       | Reported as the production deployment URL.               |
+| Preview URL                 | Worker preview convention                            | Reported for preview actions as a provider-derived URL.  |
+
+Cloudflare remains an optional official bundled adapter, not the deployment
+model itself. Product code should call the adapter contract and inspect
+capabilities rather than special-casing `wrangler.toml`.
+
 ### Static Folder Export
 
 Static export is the baseline adapter and should require no provider
@@ -241,6 +274,27 @@ Expected support:
 
 This is important for the simplest user journey and for debugging. A user
 should always be able to see what would be deployed.
+
+Implementation status:
+
+- `createStaticFolderDeploymentPlan()` is the second adapter fixture and the
+  provider-free baseline.
+- It shares the same `DeployAdapterRequest` and `DeployAdapterResult` shape as
+  Cloudflare.
+- It reports local output as supported, while headers, redirects, immutable
+  cache policy, production upload, custom domains, DNS, and rollback are manual
+  or unsupported.
+- Publish returns explicit manual-step diagnostics rather than pretending an
+  upload occurred.
+- Provider-hosted preview is blocked with `DEPLOY_PREVIEW_UNSUPPORTED`, because
+  a local folder export cannot create a remote preview URL.
+- Redirect and header support is modeled as degraded unless the exported folder
+  includes provider-specific files and the destination host is known to honor
+  them.
+
+This fixture is intentionally not a full GitHub Pages, Netlify, S3, or object
+storage adapter. It exists to prove the platform contract is portable and that
+unsupported provider capabilities become diagnostics instead of silent drops.
 
 ### GitHub Pages-Style Deployments
 
@@ -301,6 +355,12 @@ Release artifact fields should be grouped by stability:
 Stable fields may add optional data, but they should not change meaning without
 a schema version bump. Experimental fields must never be required by bundled
 deploy adapters.
+
+Release decision policy now lives in
+[`RELEASE_GOVERNANCE.md`](./RELEASE_GOVERNANCE.md). Deployment adapters provide
+the provider-specific status, diagnostics, URLs, and manual steps consumed by
+that report; release governance decides whether the overall release is
+adequately documented and safe to publish.
 
 ## Verification Plan
 

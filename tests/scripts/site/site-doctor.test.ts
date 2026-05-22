@@ -246,6 +246,41 @@ describe("site doctor", () => {
     });
   });
 
+  test("reports inclusive-default warnings for non-English site config", () => {
+    const config = parseSiteConfig({
+      ...validConfig,
+      identity: {
+        ...validConfig.identity,
+        language: "fr",
+        locale: "fr_FR",
+      },
+    });
+    const issues = siteDoctorIssues({
+      config,
+      exists: () => true,
+    });
+    const diagnostics = siteDoctorAuthorDiagnostics({
+      config,
+      exists: () => true,
+    });
+
+    expect(
+      issues.some(
+        (issue) =>
+          issue.message.includes("homepage.labels.read") &&
+          issue.severity === "warning",
+      ),
+    ).toBe(true);
+    expect(
+      diagnostics.some(
+        (diagnostic) =>
+          diagnostic.code === "config.inclusive-defaults-warning" &&
+          diagnostic.relatedDocs?.includes("docs/LOCALIZATION_CONTRACTS.md") ===
+            true,
+      ),
+    ).toBe(true);
+  });
+
   test("reports missing homepage collections and route collisions", () => {
     const config = parseSiteConfig({
       ...validConfig,

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Minimal Blog">
+  <rect width="1200" height="630" fill="#4f6f52"/>
+  <rect x="160" y="140" width="880" height="350" rx="24" fill="#fffdf7"/>
+  <path d="M250 250h700v32H250zm0 74h700v32H250zm0 74h420v32H250z" fill="#23251f"/>
+</svg>

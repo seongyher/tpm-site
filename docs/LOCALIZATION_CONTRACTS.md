@@ -138,6 +138,33 @@ The registry should provide:
 Site-specific copy such as TPM support text should remain site config or site
 content, not platform labels.
 
+## Inclusive Defaults Hardening
+
+Current single-locale English sites should stay quiet and simple. Non-English
+sites should get repairable warnings when the platform can see likely
+English-default leakage before full localization exists.
+
+The enforceable pre-localization checks are:
+
+- `identity.language` should be a BCP 47-style language tag for `<html lang>`
+  and generated metadata, such as `en`, `fr`, or `ar-EG`.
+- `identity.locale` should be an Open Graph locale value, such as `en_US`,
+  `fr_FR`, or `ar_EG`.
+- non-English `identity.language` should not silently keep the default
+  `identity.locale` of `en_US`;
+- non-English sites should localize homepage labels, homepage empty-state text,
+  and homepage discovery-link labels rather than inheriting default English
+  platform labels.
+
+These warnings are intentionally narrow. They do not attempt machine
+translation, infer editorial language from prose, or require multilingual
+configuration for a single-locale site. They exist so site owners and future
+studio tools can see when generated surfaces are mixing languages.
+
+Component and catalog guidance now treats long translated labels and
+right-to-left direction as standard resilience fixtures for reusable components
+that render text, actions, metadata rows, or prose-adjacent content.
+
 ## Formatting Policy
 
 Formatting helpers should own:
@@ -226,6 +253,26 @@ Implementation should define fixtures for:
 
 These fixtures should protect both product behavior and generated-output
 contracts.
+
+`src/lib/localization-fixtures.ts` now provides the first executable fixture
+contract for this plan. The representative fixture set covers:
+
+- single English output;
+- single non-English LTR output;
+- multilingual unprefixed-default output with alternate links;
+- RTL output with an explicitly unverified surface;
+- long untranslated labels and missing translations.
+
+`createLocalizationFixtureReport()` emits snapshots for HTML language and
+direction, Open Graph locale, JSON-LD language, feed language, search language,
+PDF language, route alternates, and diagnostics. The diagnostics currently
+cover missing labels, missing translations, long unbroken labels that can cause
+overflow, unverified RTL surfaces, and missing route prefixes.
+
+This is fixture coverage rather than full localization implementation. It gives
+future component, Playwright, metadata, feed, PDF, search, and studio work a
+shared data model to test against before localized routes are enabled in the
+live site.
 
 ## Diagnostics
 

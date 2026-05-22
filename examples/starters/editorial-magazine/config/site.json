@@ -1,0 +1,93 @@
+{
+  "features": {
+    "announcements": true,
+    "authors": true,
+    "bibliography": false,
+    "categories": true,
+    "collections": true,
+    "feed": true,
+    "pdf": true,
+    "search": true,
+    "support": true,
+    "tags": true,
+    "themeToggle": true
+  },
+  "homepage": {
+    "announcementLimit": 2,
+    "featuredCollection": "featured",
+    "recentLimit": 6,
+    "startHereCollection": "start-here"
+  },
+  "identity": {
+    "description": "A starter for a small editorial publication.",
+    "language": "en",
+    "locale": "en_US",
+    "publisherName": "Editorial Weekly",
+    "publisherType": "organization",
+    "shortTitle": "Weekly",
+    "themeColor": "#7b4f91",
+    "title": "Editorial Weekly",
+    "url": "https://example.com"
+  },
+  "navigation": {
+    "footer": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/announcements/",
+        "label": "Announcements"
+      },
+      {
+        "href": "/collections/",
+        "label": "Collections"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ],
+    "primary": [
+      {
+        "href": "/articles/",
+        "label": "Articles"
+      },
+      {
+        "href": "/collections/",
+        "label": "Collections"
+      },
+      {
+        "href": "/about/",
+        "label": "About"
+      }
+    ]
+  },
+  "routes": {
+    "allArticles": "/articles/all/",
+    "announcements": "/announcements/",
+    "articles": "/articles/",
+    "authors": "/authors/",
+    "bibliography": "/bibliography/",
+    "categories": "/categories/",
+    "collections": "/collections/",
+    "feed": "/feed.xml",
+    "home": "/",
+    "search": "/search/",
+    "tags": "/tags/"
+  },
+  "support": {
+    "block": {
+      "body": "Help fund reporting, editing, and archives.",
+      "title": "Support Editorial Weekly"
+    },
+    "discord": {
+      "href": "https://example.com/community",
+      "label": "Community"
+    },
+    "patreon": {
+      "href": "https://example.com/support",
+      "label": "Support"
+    }
+  }
+}

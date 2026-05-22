@@ -14,6 +14,8 @@ describe("button variant helpers", () => {
     expect(buttonLinkBaseClasses).toContain(
       "aria-disabled:pointer-events-none",
     );
+    expect(buttonControlBaseClasses).toContain("break-words");
+    expect(buttonLinkBaseClasses).toContain("max-w-full");
     expect(buttonSizeClasses.md).toContain("min-h-10");
     expect(buttonVariantClasses.primary.solid).toContain("bg-primary");
     expect(buttonVariantClasses.neutral.outline).toContain("border-border");

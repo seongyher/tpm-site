@@ -3,7 +3,9 @@ import { describe, expect, test } from "bun:test";
 import {
   catalogArticleItems,
   catalogNavigationItems,
+  catalogRtlArticleItems,
   catalogTags,
+  longTranslatedActionLabel,
   longUnbrokenWord,
 } from "../../../../src/catalog/examples/hostile-fixtures";
 
@@ -23,5 +25,11 @@ describe("catalog hostile fixtures", () => {
     expect(
       catalogNavigationItems.some((item) => item.articles.length === 1),
     ).toBe(true);
+  });
+
+  test("include localization fixtures for translated labels and RTL prose", () => {
+    expect(longTranslatedActionLabel.length).toBeGreaterThan(40);
+    expect(catalogRtlArticleItems[0].title).toContain("عربي");
+    expect(catalogRtlArticleItems[0].date).toContain("٢٠٢٦");
   });
 });

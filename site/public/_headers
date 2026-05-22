@@ -1,3 +1,9 @@
+/*
+  Content-Security-Policy: base-uri 'self'; connect-src 'self'; default-src 'self'; frame-ancestors 'none'; frame-src 'self' https://w.soundcloud.com https://www.youtube.com https://www.youtube-nocookie.com; img-src 'self' data: https:; media-src 'self' https:; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'
+  Permissions-Policy: camera=(), geolocation=(), microphone=()
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+
 /_astro/*
   Cache-Control: public, max-age=31556952, immutable
 

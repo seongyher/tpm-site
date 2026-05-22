@@ -203,6 +203,10 @@ tests
 The manifest is not just metadata. It is how the platform prevents accidental
 global patching.
 
+The current typed manifest contract is implemented in `src/lib/extensions.ts`,
+exposed through `src/platform/extensions.ts`, and documented in
+`docs/EXTENSION_ARCHITECTURE.md`.
+
 ## Capability Contracts
 
 Extensions should expose capabilities as data.

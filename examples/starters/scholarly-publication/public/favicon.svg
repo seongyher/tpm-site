@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Open Research Notes">
+  <rect width="64" height="64" rx="12" fill="#315f73"/>
+  <path d="M20 16h24v32H20z" fill="#fffdf7"/>
+  <path d="M25 25h14v3H25zm0 7h14v3H25zm0 7h10v3H25z" fill="#315f73"/>
+</svg>

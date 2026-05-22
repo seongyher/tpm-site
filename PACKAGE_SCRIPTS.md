@@ -7,6 +7,10 @@ parity expectations, and maps command domains to focused/release/CI evidence or
 a documented exception; `test:config` fails when the registry drifts from
 `package.json`, CI workflows, or domain-coverage accountability.
 
+Dependency audit, secret scan, lockfile, third-party script, and generated
+secret-output expectations are documented in
+[`docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`](docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md).
+
 Script sources are grouped by responsibility:
 
 - `scripts/assets/`: image and asset inventory checks.
@@ -41,7 +45,7 @@ Script sources are grouped by responsibility:
 | `catalog:preview`                 | Serves a previously built catalog-enabled `dist-catalog/` output.                                                                                                                                                               |
 | `catalog:preview:fresh`           | Builds the isolated catalog output, then previews it.                                                                                                                                                                           |
 | `check`                           | Runs `check:fast`, then the normal blocking quality gate for PR work: typecheck, lint, formatting, dead-code checks, and unit tests.                                                                                            |
-| `check:fast`                      | Runs cheap high-signal invariants for early feedback: content, tags, site config, generated references, platform boundaries, asset locations, catalog accountability, package ordering, and config contract tests.              |
+| `check:fast`                      | Runs cheap high-signal invariants for early feedback: content, tags, site config, starter templates, generated references, platform boundaries, asset locations, catalog accountability, package ordering, and config tests.    |
 | `check:release`                   | Runs release accountability, `check`, docs verification, catalog tests, one production build, build verification, HTML validation, browser tests against that build, high-severity audit, and secrets scan.                     |
 | `coverage`                        | Runs unit/script/component/page tests with LCOV output, then reports broad code-like source files missing LCOV coverage, mirrored tests, or approved exceptions.                                                                |
 | `coverage:check`                  | Runs the broad coverage review with concise test output. Review signal; not part of the normal blocking `check` gate.                                                                                                           |
@@ -96,6 +100,7 @@ Script sources are grouped by responsibility:
 | `site:doctor`                     | Validates site-instance config relationships that schema parsing alone cannot catch, with webmaster-readable repair guidance.                                                                                                   |
 | `site:schema`                     | Generates `site/config/site.schema.json` from the platform Zod config schema for editors and future GUI tooling.                                                                                                                |
 | `site:schema:check`               | Fails when the generated site config JSON Schema is stale. Blocking config-contract gate.                                                                                                                                       |
+| `starters:check`                  | Verifies maintained starter site instances for required source files, parseable config, site-doctor compatibility, declared checks, and TPM branding leakage.                                                                   |
 | `tags:check`                      | Dry-runs safe article tag normalization and fails if frontmatter needs normalization or manual repair.                                                                                                                          |
 | `tags:normalize`                  | Normalizes safe article tag frontmatter differences and fails on tags that need manual repair.                                                                                                                                  |
 | `test`                            | Runs test-accountability verification, then runs Bun unit/script/component/page tests and Astro container tests concurrently.                                                                                                   |

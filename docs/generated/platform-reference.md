@@ -532,6 +532,7 @@ Source: `package.json` and `scripts/quality/qa-command-registry.ts`.
 | site:doctor                     | site-config        | focused       | fast     | none             | blocking |
 | site:schema                     | site-config        | mutation      | fast     | source           | none     |
 | site:schema:check               | site-config        | focused       | fast     | none             | blocking |
+| starters:check                  | starters           | focused       | fast     | none             | blocking |
 | tags:check                      | content            | focused       | fast     | none             | blocking |
 | tags:normalize                  | authoring          | mutation      | fast     | source           | none     |
 | test                            | tests              | fast-local    | medium   | none             | blocking |
@@ -581,6 +582,7 @@ Source: `package.json` and `scripts/quality/qa-command-registry.ts`.
 | references         | references:audit, references:bibtex:audit      |                                |                                                      | Citation, reference, and bibliography maintenance.                                    |
 | security           | audit, secrets                                 | check:release, quality:release | audit, audit-review, dependency-review, secrets      | Dependency audit, dependency review, and secrets scanning.                            |
 | site-config        | site:doctor, site:schema:check                 | check:release                  | quality                                              | Site configuration validation and schema drift checks.                                |
+| starters           | starters:check                                 | check:release                  | quality                                              | Maintained starter template source and distribution contracts.                        |
 | content            | verify:content, tags:check                     | check:release                  | quality                                              | Content source, tag, and author-facing data invariants.                               |
 | tests              | test, test:unit, test:astro, test:config       | check:release                  | accessibility, browser, catalog, lighthouse, quality | Unit, component, config, browser, accessibility, and perf tests.                      |
 | typecheck          | typecheck, typecheck:astro, typecheck:tools    | check:release                  | quality                                              | Astro and tooling TypeScript checks.                                                  |

@@ -22,6 +22,10 @@ describe("platform boundary verifier", () => {
       files: [
         ...ownedLibFiles,
         {
+          path: "src/platform/routes.ts",
+          text: 'export { routeOutputPath } from "../lib/route-registry";\n',
+        },
+        {
           path: "src/layouts/BaseLayout.astro",
           text: '---\nimport "@site/theme.css";\n---\n<slot />\n',
         },
@@ -29,7 +33,10 @@ describe("platform boundary verifier", () => {
       rootDir: ".",
     });
 
+    expect(result.forbiddenEntrypointImports).toEqual([]);
+    expect(result.forbiddenExtensionImports).toEqual([]);
     expect(result.unownedLibFiles).toEqual([]);
+    expect(result.unownedPlatformEntrypoints).toEqual([]);
     expect(result.forbiddenImports).toEqual([]);
     expect(result.forbiddenLiterals).toEqual([]);
     expect(formatPlatformBoundaryReport(result)).toBe(
@@ -52,6 +59,76 @@ describe("platform boundary verifier", () => {
     expect(result.unownedLibFiles).toEqual(["mystery.ts"]);
     expect(formatPlatformBoundaryReport(result)).toContain(
       "Unowned src/lib modules:",
+    );
+  });
+
+  test("reports unowned src/platform entrypoints", () => {
+    const result = verifyPlatformBoundaries({
+      files: [
+        ...ownedLibFiles,
+        {
+          path: "src/platform/surprise.ts",
+          text: 'export { value } from "../lib/routes";\n',
+        },
+      ],
+      rootDir: ".",
+    });
+
+    expect(result.unownedPlatformEntrypoints).toEqual(["surprise.ts"]);
+    expect(formatPlatformBoundaryReport(result)).toContain(
+      "Unowned src/platform entrypoints:",
+    );
+  });
+
+  test("reports imports that bypass platform entrypoint seams", () => {
+    const result = verifyPlatformBoundaries({
+      files: [
+        ...ownedLibFiles,
+        {
+          path: "src/platform/routes.ts",
+          text: 'export { ArticleList } from "../components/articles/ArticleList.astro";\n',
+        },
+      ],
+      rootDir: ".",
+    });
+
+    expect(result.forbiddenEntrypointImports).toEqual([
+      {
+        file: "src/platform/routes.ts",
+        message:
+          'Unsupported platform-entrypoint import "../components/articles/ArticleList.astro". Entrypoints may only re-export local entrypoints or src/lib domain modules.',
+      },
+    ]);
+    expect(formatPlatformBoundaryReport(result)).toContain(
+      "Unsupported platform-entrypoint imports:",
+    );
+  });
+
+  test("reports extension imports that bypass platform entrypoints", () => {
+    const result = verifyPlatformBoundaries({
+      files: [
+        ...ownedLibFiles,
+        {
+          path: "extensions/example/index.ts",
+          text: 'import { routeOutputPath } from "../../src/lib/route-registry";\n',
+        },
+        {
+          path: "extensions/allowed/index.ts",
+          text: 'import { routeOutputPath } from "../../src/platform/routes";\n',
+        },
+      ],
+      rootDir: ".",
+    });
+
+    expect(result.forbiddenExtensionImports).toEqual([
+      {
+        file: "extensions/example/index.ts",
+        message:
+          'Unsupported extension import "../../src/lib/route-registry". Extensions must use platform entrypoints instead of reaching into site, src/lib, components, pages, scripts, or tests directly.',
+      },
+    ]);
+    expect(formatPlatformBoundaryReport(result)).toContain(
+      "Unsupported extension imports:",
     );
   });
 

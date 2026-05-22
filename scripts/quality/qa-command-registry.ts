@@ -407,6 +407,15 @@ export const qaCommandGroups = [
   {
     ciUsage: "blocking",
     class: "focused",
+    domain: "starters",
+    mutation: "none",
+    runtime: "fast",
+    scope: "Maintained starter template source and neutrality contracts.",
+    scripts: ["starters:check"],
+  },
+  {
+    ciUsage: "blocking",
+    class: "focused",
     domain: "content",
     mutation: "none",
     runtime: "fast",
@@ -773,6 +782,13 @@ export const qaDomainCoverageRegistry = [
     domain: "site-config",
     focusedScripts: ["site:doctor", "site:schema:check"],
     purpose: "Site configuration validation and schema drift checks.",
+    releaseScripts: ["check:release"],
+  },
+  {
+    ciJobs: ["quality"],
+    domain: "starters",
+    focusedScripts: ["starters:check"],
+    purpose: "Maintained starter template source and distribution contracts.",
     releaseScripts: ["check:release"],
   },
   {

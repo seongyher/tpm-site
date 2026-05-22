@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Platform Demo">
+  <rect width="1200" height="630" fill="#9a5a2f"/>
+  <rect x="260" y="170" width="260" height="120" rx="18" fill="#fffdf7"/>
+  <rect x="680" y="170" width="260" height="120" rx="18" fill="#fffdf7"/>
+  <rect x="260" y="350" width="260" height="120" rx="18" fill="#fffdf7"/>
+  <rect x="680" y="350" width="260" height="120" rx="18" fill="#fffdf7"/>
+</svg>
