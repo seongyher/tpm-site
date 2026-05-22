@@ -57,8 +57,7 @@ Pages with a generated social image should emit:
 - `twitter:card=summary_large_image`;
 - `twitter:image`;
 - `twitter:image:alt` when alt text is available;
-- article JSON-LD `image` using the same generated asset;
-- RSS `<enclosure>` image URLs using the same generated asset.
+- article JSON-LD `image` using the same generated asset.
 
 The generated URL should be absolute in metadata, but should resolve to a local
 optimized asset in the generated static site.
@@ -92,8 +91,10 @@ Build verification should fail when an article metadata image:
 - exceeds the project social-image size budget;
 - diverges between Open Graph, Twitter, and JSON-LD surfaces.
 
-Feed generation should use the same helper so feed enclosures do not keep raw
-frontmatter image assets alive accidentally.
+Feed generation intentionally does not emit RSS `<enclosure>` images. The
+canonical HTML page owns crawler-facing preview metadata through Open Graph,
+Twitter cards, and article JSON-LD. Build verification should fail if item
+enclosures reappear in RSS.
 
 The verifier should allow raw source image files in `dist` only when another
 surface intentionally links to them. The production post-build optimizer should

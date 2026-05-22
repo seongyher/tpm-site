@@ -78,6 +78,11 @@ export interface RouteMetadata extends RouteMetadataInput {
 /** Schema.org JSON-LD node used by metadata builders. */
 export type JsonLdNode = Record<string, unknown>;
 
+/** Optional route-level JSON-LD facts that complete route-specific schemas. */
+export interface WebPageJsonLdOptions {
+  mainEntity?: JsonLdNode | undefined;
+}
+
 const noindexRouteKinds = new Set<RouteMetadataKind>([
   "catalog",
   "not-found",
@@ -307,19 +312,25 @@ export function siteIdentityJsonLd(
  * @param metadata Normalized route metadata.
  * @param site Astro site URL when available.
  * @param config Site identity configuration.
+ * @param options Route-specific JSON-LD facts.
  * @returns Conservative `WebPage` JSON-LD node.
  */
 export function webPageJsonLd(
   metadata: RouteMetadata,
   site: string | undefined | URL,
   config: SiteConfig = siteConfig,
+  options: WebPageJsonLdOptions = {},
 ): JsonLdNode {
+  const schemaType = webPageSchemaType(metadata.kind);
+  const mainEntity = webPageMainEntity(metadata, schemaType, options);
+
   return compactJsonLdNode({
     "@id": webPageEntityId(metadata.canonicalPath, site),
-    "@type": webPageSchemaType(metadata.kind),
+    "@type": schemaType,
     description: metadata.description,
     inLanguage: config.identity.language,
     isPartOf: { "@id": websiteEntityId(site) },
+    mainEntity,
     name: metadata.title,
     publisher: { "@id": publisherEntityId(site) },
     url: absoluteUrl(metadata.canonicalPath, site),
@@ -500,6 +511,50 @@ function webPageSchemaType(kind: RouteMetadataKind): string {
     case "tag-index":
       return "CollectionPage";
   }
+}
+
+function webPageMainEntity(
+  metadata: RouteMetadata,
+  schemaType: string,
+  options: WebPageJsonLdOptions,
+): JsonLdNode | undefined {
+  if (schemaType !== "ProfilePage") {
+    return options.mainEntity;
+  }
+
+  const entity = options.mainEntity;
+  if (entity === undefined) {
+    throw new Error(
+      `${metadata.canonicalPath}: ProfilePage JSON-LD requires a mainEntity Person or Organization.`,
+    );
+  }
+
+  if (!isProfilePageMainEntity(entity)) {
+    throw new Error(
+      `${metadata.canonicalPath}: ProfilePage mainEntity must be a Person or Organization with a name.`,
+    );
+  }
+
+  return entity;
+}
+
+function isProfilePageMainEntity(entity: JsonLdNode): boolean {
+  const name = entity["name"];
+
+  return (
+    (jsonLdTypeIncludes(entity["@type"], "Person") ||
+      jsonLdTypeIncludes(entity["@type"], "Organization")) &&
+    typeof name === "string" &&
+    name.trim().length > 0
+  );
+}
+
+function jsonLdTypeIncludes(value: unknown, type: string): boolean {
+  return (
+    value === type ||
+    (Array.isArray(value) &&
+      value.some((entry) => typeof entry === "string" && entry === type))
+  );
 }
 
 function compactJsonLdNode(node: JsonLdNode): JsonLdNode {

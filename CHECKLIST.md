@@ -2021,3 +2021,18 @@ tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
       `git diff --check`. The four design docs stay at the contract/planning
       layer and leave implementation, packaging, adapters, migrations, and
       localization fixtures to downstream issues.
+
+### Milestone 264: Metadata Schema Contract Audit And Enforcement
+
+- [x] Audit every emitted metadata surface against authoritative contracts:
+      Schema.org JSON-LD, Google structured data, Google Scholar, Open Graph,
+      Twitter cards, RSS, sitemap, canonical URLs, and robots metadata.
+- [x] Document the metadata schema contracts in `docs/` with authoritative
+      source links, required fields, recommended fields, source data,
+      fallbacks, and enforcement strategy.
+- [x] Fix the known `ProfilePage.mainEntity` rich-result issue and any other
+      concrete metadata defects found during the audit.
+- [x] Add typed metadata builders, validators, verifier checks, or tests that
+      make documented metadata contracts difficult or impossible to violate.
+- [x] Run focused metadata verification and the relevant release checks before
+      marking the milestone complete.

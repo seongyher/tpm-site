@@ -73,6 +73,7 @@ interface RouteMetadataGraphInput {
   site: string | undefined | URL;
   structuredData?: ReadonlyArray<JsonLdNode | undefined> | undefined;
   type?: MetadataDocumentType | undefined;
+  webPageMainEntity?: JsonLdNode | undefined;
 }
 
 /**
@@ -86,6 +87,7 @@ interface RouteMetadataGraphInput {
  * @param input.site Astro site origin when available.
  * @param input.structuredData Optional route-specific JSON-LD nodes.
  * @param input.type Document-level Open Graph type.
+ * @param input.webPageMainEntity Optional route-specific WebPage main entity.
  * @returns Head metadata facts with canonical/social/JSON-LD output resolved.
  */
 export function routeMetadataGraphViewModel({
@@ -95,6 +97,7 @@ export function routeMetadataGraphViewModel({
   site,
   structuredData = [],
   type = "website",
+  webPageMainEntity,
 }: RouteMetadataGraphInput): RouteMetadataGraphViewModel {
   const canonicalUrl = absoluteUrl(metadata.canonicalPath, site);
   const socialImage =
@@ -109,7 +112,7 @@ export function routeMetadataGraphViewModel({
         };
   const graph = jsonLdGraph([
     ...siteIdentityJsonLd(site, config),
-    webPageJsonLd(metadata, site, config),
+    webPageJsonLd(metadata, site, config, { mainEntity: webPageMainEntity }),
     ...structuredData.filter((node): node is JsonLdNode => node !== undefined),
   ]);
 

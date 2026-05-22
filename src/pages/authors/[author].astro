@@ -34,6 +34,7 @@ const model = authorDetailRouteViewModel({
   categories: await getCategories(),
   profile,
 });
+const profileJsonLd = profileEntityJsonLd(model.profileEntity, Astro.site);
 ---
 
 <BaseLayout
@@ -41,13 +42,14 @@ const model = authorDetailRouteViewModel({
   description={model.document.description}
   canonicalPath={model.document.canonicalPath}
   kind={model.document.kind}
+  webPageMainEntity={profileJsonLd}
   structuredData={[
     breadcrumbListJsonLd(
       model.document.canonicalPath,
       model.breadcrumbs,
       Astro.site,
     ),
-    profileEntityJsonLd(model.profileEntity, Astro.site),
+    profileJsonLd,
     itemListJsonLd(model.document.canonicalPath, model.items, Astro.site),
   ]}
 >

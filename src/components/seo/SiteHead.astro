@@ -8,15 +8,23 @@ interface Props {
   metadata: RouteMetadata;
   structuredData?: readonly (JsonLdNode | undefined)[] | undefined;
   type?: "website" | "article";
+  webPageMainEntity?: JsonLdNode | undefined;
 }
 
-const { image, metadata, structuredData = [], type = "website" } = Astro.props;
+const {
+  image,
+  metadata,
+  structuredData = [],
+  type = "website",
+  webPageMainEntity,
+} = Astro.props;
 const head = routeMetadataGraphViewModel({
   image,
   metadata,
   site: Astro.site,
   structuredData,
   type,
+  webPageMainEntity,
 });
 ---
 

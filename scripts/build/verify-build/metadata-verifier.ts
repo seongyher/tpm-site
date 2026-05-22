@@ -17,6 +17,7 @@ import {
   htmlScriptTextsByType,
   htmlTags,
   htmlTitleText,
+  jsonLdNodesByType,
   metaContentValues,
   metaPropertyContentValues,
 } from "./html-inspection";
@@ -137,6 +138,7 @@ export function verifyHtmlMetadata({
       }),
     );
   }
+  diagnostics.push(...verifyProfilePageJsonLd({ html, relativeHtmlPath }));
 
   return diagnostics;
 }
@@ -426,6 +428,37 @@ function verifyShareableHtmlMetadata({
   return diagnostics;
 }
 
+function verifyProfilePageJsonLd({
+  html,
+  relativeHtmlPath,
+}: HtmlMetadataVerificationInput): OutputDiagnostic[] {
+  return jsonLdNodesByType(html, "ProfilePage").flatMap((node) =>
+    isProfilePageMainEntity(node["mainEntity"])
+      ? []
+      : [
+          metadataHtmlInvalidDiagnostic(
+            relativeHtmlPath,
+            "ProfilePage JSON-LD missing mainEntity Person or Organization",
+          ),
+        ],
+  );
+}
+
+function isProfilePageMainEntity(value: unknown): boolean {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const name = value["name"];
+
+  return (
+    (jsonLdTypeIncludes(value["@type"], "Person") ||
+      jsonLdTypeIncludes(value["@type"], "Organization")) &&
+    typeof name === "string" &&
+    name.trim().length > 0
+  );
+}
+
 function localGeneratedSocialImagePath(
   value: string,
   distDir: string,
@@ -491,6 +524,14 @@ function jsonLdValueContainsId(value: unknown, id: string): boolean {
   }
 
   return Object.values(record).some((item) => jsonLdValueContainsId(item, id));
+}
+
+function jsonLdTypeIncludes(value: unknown, type: string): boolean {
+  return (
+    value === type ||
+    (Array.isArray(value) &&
+      value.some((entry) => typeof entry === "string" && entry === type))
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
