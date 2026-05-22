@@ -1510,3 +1510,119 @@ tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
       by the diagnostic taxonomy and generated-reference contracts; previously
       blocked observability and studio-readiness work should still respect
       their specific Linear blockers.
+
+### Milestone 250: Studio Product Vision Documentation Scope
+
+- [x] Re-read the engineering philosophy, platform roadmap, current checklist,
+      and relevant product-planning context before changing Linear issues.
+- [x] Define the documentation outputs needed to clarify the studio/CMS product
+      vision, default author experience, TPM collaboration mode, complex
+      publisher mode, and provider/adapter boundaries.
+- [x] Verify the scope is documentation-only and leaves Linear issue updates
+      for a later pass.
+      This pass will add a focused studio product vision doc, update roadmap
+      and philosophy docs only where needed, and leave Linear issue creation or
+      edits for a later approval step.
+
+### Milestone 251: Studio Product Vision And Adapter Architecture Docs
+
+- [x] Write the product vision docs that describe target users, default UX,
+      power-user UX, complex publisher UX, media/source/workflow/deploy
+      boundaries, and end-product non-goals.
+- [x] Define the adapter architecture clearly enough to prevent GitHub,
+      repo-local assets, Cloudflare, or review workflows from becoming hidden
+      platform assumptions.
+- [x] Critique and iterate on the docs until the vision is concrete enough to
+      drive later issue updates without overplanning unknown publisher
+      workflows.
+      Added `agent-docs/STUDIO_PRODUCT_VISION.md` and
+      `agent-docs/STUDIO_ADAPTER_MODEL.md`. The docs define three product
+      modes, default editorial UX, provider-neutral adapter categories,
+      capability-driven UI/CLI/MCP behavior, media materialization, and a later
+      issue-translation checklist.
+
+### Milestone 252: Roadmap And Philosophy Alignment
+
+- [x] Update the platform roadmap so the long-term studio, CLI, MCP, media,
+      source, workflow, and deployment plans reflect the clarified product
+      model.
+- [x] Update the engineering philosophy only where needed so future agents
+      preserve the clarified product boundaries and adapter discipline.
+- [x] Verify the updated docs agree with each other and do not create stale
+      parallel sources of truth.
+      Updated `agent-docs/PLATFORM_ROADMAP.md`,
+      `agent-docs/ENGINEERING_PHILOSOPHY.md`, and `AGENTS.md` so the roadmap,
+      repo philosophy, and agent operating manual point to the new studio
+      vision. After review, the engineering philosophy keeps the general
+      "intent before mechanics" principle, while concrete GitHub, Cloudflare,
+      repo-local media, and review-workflow guidance lives in the studio docs.
+
+### Milestone 253: Studio Vision Documentation Verification
+
+- [x] Run focused documentation checks for the new and updated docs.
+- [x] Inspect the docs for ambiguity, bad assumptions, missing blockers, and
+      unclear sequencing before handoff.
+- [x] Update this checklist with completion notes and leave Linear issues
+      untouched until the user approves issue updates.
+      Verified with `bun --silent run review:markdown` and `git diff --check`.
+      The final pass replaced remaining physical `site/` assumptions with the
+      broader site workspace model, reframed older Git-backed workflow language
+      as provider-specific adapter work, and left Linear issue updates
+      untouched for the next planning step.
+
+### Milestone 254: Progressive Adoption And Extension Scope
+
+- [x] Re-read the studio vision, adapter model, roadmap extension section, and
+      current product-planning notes about default-to-enterprise user journeys.
+- [x] Define the documentation updates needed for progressive adoption, domain
+      setup boundaries, bundled extensions, custom UI components, and
+      extension/package seams.
+- [x] Verify this remains a documentation/design pass only, with no Linear
+      issue updates or implementation changes.
+      This pass will add a focused studio extension model doc, update the
+      studio product vision with the adoption ladder and domain boundaries, and
+      align the roadmap extension milestone around concrete bundled and custom
+      extension examples.
+
+### Milestone 255: Studio Extension Architecture Documentation
+
+- [x] Write or update docs that define core, official bundled extensions,
+      optional official extensions, site extensions, and third-party/custom
+      extensions.
+- [x] Capture extension contracts for UI components, deploy providers, media
+      providers, PDF generation, metadata profiles, importers, verifiers, and
+      diagnostics.
+- [x] Critique the model against concrete examples such as Patreon/Discord
+      buttons, PDF generation, Cloudflare deploy, GitHub Pages/CNAME, and
+      custom MDX/editor components.
+      Added `agent-docs/STUDIO_EXTENSION_MODEL.md` and linked it from
+      `AGENTS.md`. The model defines core, bundled default, optional official,
+      site, and third-party extension classes, plus manifest, capability,
+      UI-component, artifact, deploy/domain, migration, and trust contracts.
+
+### Milestone 256: Progressive Adoption Roadmap Alignment
+
+- [x] Update the studio product vision so the default journey can upgrade from
+      local one-click publishing to backup, external media, collaboration,
+      automated publishing, and complex publisher integrations.
+- [x] Update the platform roadmap and related docs so extension architecture,
+      adapters, domain setup, and migration tooling support the adoption ladder.
+- [x] Verify the docs explain what is core, what is bundled by default, and
+      what should remain replaceable.
+      Updated `agent-docs/STUDIO_PRODUCT_VISION.md`,
+      `agent-docs/STUDIO_ADAPTER_MODEL.md`, and
+      `agent-docs/PLATFORM_ROADMAP.md` with the adoption ladder, domain setup
+      boundary, extension linkages, concrete bundled-extension candidates, and
+      migration hooks for backup, media, collaboration, and automated publish.
+
+### Milestone 257: Extension Vision Documentation Verification
+
+- [x] Run focused documentation checks for the new and updated docs.
+- [x] Inspect the docs for overfitting, overgeneralization, ambiguous extension
+      boundaries, and missing migration paths.
+- [x] Update this checklist with completion notes and leave Linear issue
+      updates for the later planning pass.
+      Verified with `bun --silent run review:markdown` and `git diff --check`.
+      The final pass added the default Cloudflare launch scenario while keeping
+      Cloudflare as a bundled deploy extension, not core. Linear issue updates
+      remain intentionally untouched.

@@ -87,6 +87,12 @@ to the active milestone.
   strictness, modularity, type-driven design, and testing philosophy.
 - `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
   tooling, and productization roadmap.
+- `agent-docs/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
+  product modes, default author UX, and non-goals.
+- `agent-docs/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,
+  build, deploy, identity, and diagnostics adapter boundaries.
+- `agent-docs/STUDIO_EXTENSION_MODEL.md`: core, bundled, optional, site, and
+  third-party extension boundaries for the future studio.
 - `agent-docs/QA_PREFLIGHT.md`: QA command inventory, CI parity model,
   failure-probe plan, diagnostic-diff design, and scope-cleanup notes.
 - `agent-docs/DESIGN_PHILOSOPHY.md`: expanded design philosophy notes.

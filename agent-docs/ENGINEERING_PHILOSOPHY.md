@@ -92,6 +92,28 @@ That means:
 
 Strong code in this repo makes good behavior easy and bad behavior hard.
 
+## Intent Before Mechanics
+
+Good platform APIs expose domain intent before implementation mechanics. Users
+and developers should be able to say what outcome they need, while provider,
+storage, workflow, rendering, and deployment details stay behind narrow typed
+adapters.
+
+This is a general repo-health rule, not only a studio rule:
+
+- route callers should ask for canonical route intent, not concatenate paths;
+- metadata callers should ask for a semantic profile, not hand-author tag soup;
+- media callers should ask for a media role, not depend on a storage path;
+- workflow callers should request a state transition, not assume one provider's
+  review mechanics;
+- deploy callers should publish a verified artifact, not encode one host's CLI
+  steps into core logic.
+
+When a concrete implementation starts leaking upward, move the leak behind a
+typed capability, policy helper, view model, adapter, or diagnostic. The core
+domain model should remain stable enough that providers and interfaces can
+change without changing the meaning of the product or platform operation.
+
 ## Fearless Velocity
 
 The repo should let developers move at the natural speed of their ideas while

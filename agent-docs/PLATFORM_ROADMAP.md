@@ -19,11 +19,12 @@ machine-readable static output.
 
 The mature platform is a static-first publishing compiler.
 
-Site owners and authors express publication intent through a small site
-directory: content files, assets, redirects, theme tokens, and a typed site
-config. Platform code validates that intent, resolves routes and relationships,
-selects media and metadata policies, renders UI from reusable responsive
-primitives, and emits static artifacts with explicit contracts.
+Site owners and authors express publication intent through a site workspace:
+content, media references, redirects, theme tokens, and typed site config. That
+workspace may currently be a `site/` directory and may later be materialized by
+a source or media adapter. Platform code validates that intent, resolves routes
+and relationships, selects media and metadata policies, renders UI from reusable
+responsive primitives, and emits static artifacts with explicit contracts.
 
 The ideal author path is boring:
 
@@ -53,10 +54,18 @@ should eventually feel like implementation details behind clear product actions
 such as “Save draft,” “Preview,” “Submit for review,” “Publish,” and “Rollback.”
 
 That product must not become a separate CMS model. The studio should consume the
-same site directory, schemas, compiler artifacts, route registry, diagnostics,
-media policies, metadata profiles, deployment adapters, and generated-output
-contracts as the CLI, MCP server, and CI. The platform compiler is the source of
-truth; GUI, CLI, MCP, and CI are interfaces over it.
+same site workspace contracts, schemas, compiler artifacts, route registry,
+diagnostics, media policies, metadata profiles, deployment adapters, and
+generated-output contracts as the CLI, MCP server, and CI. The platform compiler
+is the source of truth; GUI, CLI, MCP, and CI are interfaces over it.
+
+The detailed product vision is owned by
+[STUDIO_PRODUCT_VISION.md](./STUDIO_PRODUCT_VISION.md). The provider and
+adapter architecture is owned by
+[STUDIO_ADAPTER_MODEL.md](./STUDIO_ADAPTER_MODEL.md). The extension model is
+owned by [STUDIO_EXTENSION_MODEL.md](./STUDIO_EXTENSION_MODEL.md). This roadmap
+summarizes their implications and sequences the work; it should not duplicate
+every product, adapter, or extension detail.
 
 The end-state user paths are:
 
@@ -75,6 +84,76 @@ The end-state user paths are:
 5. **Automation path:** use a CLI or MCP server to run the same diagnostics,
    previews, source edits, release reports, deploy proposals, and gated publish
    actions without creating a second implementation of studio behavior.
+
+## Studio Product Model
+
+The mature studio supports three product modes through the same compiler
+contracts.
+
+1. **Default local publisher:** a non-technical user writes, previews,
+   publishes, unpublishes, restores versions, and manages media without learning
+   Git, CI, frontmatter, build artifacts, or deploy-provider mechanics. This is
+   the baseline product experience, not a simplified afterthought.
+2. **Collaborative static publication:** a TPM-like publication can keep site
+   content in a separate repo or workspace, collaborate through GitHub or other
+   sync/review tools, store media in the repo or another provider, and deploy
+   through Cloudflare or another deploy adapter. Platform source remains
+   separate from site source.
+3. **Complex publisher:** a large publication, archive, institution, or
+   organization can connect its own source, media, identity, workflow, build,
+   deploy, and observability systems through adapter seams instead of being
+   forced into TPM's workflow.
+
+The product vocabulary should stay editorial: save draft, preview, check,
+publish, unpublish, roll back, restore version, add image, fix issue, and
+connect provider. Terms such as branch, commit, pull request, CI, build
+artifact, and cache invalidation belong in advanced details or provider-specific
+adapters.
+
+Publishing is a product action, not a Git action. Review is an optional
+workflow policy. Repo-local assets are one media adapter, not the media model.
+Cloudflare is one deploy adapter, not the deploy model. GitHub is one
+source/history/review provider, not the source of truth.
+
+The product should support a progressive adoption ladder: instant solo
+publishing, domain configuration, backup/history, media externalization,
+collaboration, automated publishing, and complex publisher integration. Each
+step should add or migrate one capability without forcing a site rebuild.
+
+The adapter model must cover:
+
+1. source adapters;
+2. history adapters;
+3. media adapters;
+4. workflow adapters;
+5. build adapters;
+6. deploy adapters;
+7. identity and credential adapters;
+8. diagnostics and observability adapters.
+
+Each adapter reports capabilities, required credentials, dry-run behavior,
+reversibility, source/output ownership, and diagnostics. GUI, CLI, MCP, and CI
+must use the same capabilities so unsupported operations are hidden, rejected
+early, or routed through explicit escape hatches.
+
+Milestone planning implication:
+
+1. Foundation milestones should define source, artifact, route, diagnostics,
+   docs, metadata, media, and verifier contracts before studio surfaces depend
+   on them.
+2. Product-tooling milestones should design the studio core, author
+   diagnostics, generated references, release reports, and provider capability
+   contracts before implementing a GUI, CLI, or MCP surface.
+3. Provider-specific milestones should follow provider-agnostic contracts.
+   Cloudflare, Git, GitHub, and repo-local media are important adapters, not
+   core assumptions.
+4. GUI, CLI, and MCP milestones should be treated as interfaces over the same
+   studio core. They should not create separate source, workflow, diagnostics,
+   or publish models.
+5. Extension milestones should make defaults replaceable. Cloudflare deploy,
+   Git/GitHub backup, GitHub Pages/CNAME, PDF generation, support CTAs,
+   provider embeds, and custom UI components should be modeled as bundled or
+   optional capabilities rather than global platform patches.
 
 ## Current Foundation
 
@@ -178,6 +257,7 @@ static editorial publishing platform
     -> identity, theme, config, redirects, public files
     -> content, authors, categories, tags, collections, assets
     -> author workflow and site-owner workflow
+    -> source workspace, media library, history, and provider credentials
   -> platform generator
     -> source/artifact lifecycle
     -> route, feature, and entity registry
@@ -197,8 +277,10 @@ static editorial publishing platform
     -> import/export and migration portability
     -> localization and inclusive defaults
     -> starter templates and distribution
-  -> studio/editor product, real-time preview, and publish orchestration
-  -> CLI and MCP adapters over the same studio core
+  -> studio core
+    -> source, media, history, workflow, build, deploy, identity, and diagnostics adapters
+    -> real-time preview, publish orchestration, rollback, and provider capability model
+  -> GUI, CLI, and MCP interfaces over the same studio core
 ```
 
 The target architecture should let a developer say “add a semantic metadata
@@ -241,6 +323,12 @@ domain: content editing, MDX-aware fallbacks, media, metadata, redirects,
 collections, homepage surfaces, previews, diagnostics, releases, deploys, and
 rollbacks. It should not broaden into arbitrary website construction unless the
 core platform deliberately expands beyond static blog publishing.
+
+The studio should also avoid overfitting to the current TPM operations model.
+Git-backed review, repo-local images, and Cloudflare deploys are important
+adapters because TPM needs them, but the platform should represent them as
+replaceable implementations of source, media, history, workflow, build, and
+deploy contracts.
 
 TPM should remain the production proving ground. Generality should be proven
 through the docs site, fixture sites, starter templates, and future second
@@ -1170,9 +1258,9 @@ Current evidence:
 
 Mature contract:
 
-- The GUI does not invent a parallel CMS model. It edits the same site instance
-  files and consumes the same schemas, diagnostics, route previews, and
-  generated-output contracts as CLI and CI.
+- The GUI does not invent a parallel CMS model. It edits the same site
+  workspace source model and consumes the same schemas, diagnostics, route
+  previews, and generated-output contracts as the CLI, MCP server, and CI.
 - The editor can round-trip Markdown and MDX without destroying author intent.
 - The studio can explain platform errors in author language and link each issue
   to a repairable field, file, asset, route, or generated artifact.
@@ -1187,10 +1275,14 @@ Work:
 - Define editor-facing models for articles, announcements, pages, collections,
   authors, categories, redirects, support links, social links, feature flags,
   theme tokens, and asset metadata.
-- Model draft, review, publish, unpublish, and scheduled-publish workflows as
-  typed states.
-- Design Git-backed submission workflows: branch creation, commit summary, PR
-  body, author diagnostics, and preview links.
+- Model draft, direct publish, optional review, unpublish, rollback, and
+  scheduled-publish workflows as typed states.
+- Design provider-neutral source, history, workflow, media, build, and deploy
+  capability contracts before provider-specific Git, GitHub, Cloudflare, or
+  repo-local media implementations.
+- Design Git and GitHub workflows only as adapters over those contracts:
+  branch creation, commit summary, pull request body, author diagnostics, and
+  preview links should be provider mechanics, not the studio product model.
 - Define a real-time preview contract that maps dirty editor state to route
   previews, article compiler artifacts, diagnostics, generated metadata, media
   fallbacks, and PDF eligibility without requiring a full production deploy.
@@ -1207,7 +1299,8 @@ Verification:
 - Fixture diagnostics proving GUI output matches CLI output.
 - Round-trip tests for Markdown, MDX, frontmatter, collections, redirects,
   media metadata, and site config.
-- Provider adapter tests with mocked Git/deploy providers.
+- Provider adapter tests with mocked source, history, workflow, media, build,
+  and deploy providers.
 
 ## Phase 5: Distribution And Ecosystem Readiness
 
@@ -1271,22 +1364,52 @@ points instead of patching global files.
 
 Mature contract:
 
+- Core compiles, validates, verifies, loads extensions, and owns trust
+  boundaries. Extensions add capabilities.
 - Extensions declare capabilities, dependencies, feature flags, diagnostics,
   generated outputs, docs hooks, and static-output constraints.
 - Extensions can add content kinds, metadata profiles, route modules, verifier
   modules, article compiler transforms, media policies, catalog fixtures,
-  deployment adapters, and author diagnostics.
+  deployment adapters, UI components, artifact generators, importers,
+  migrations, and author diagnostics.
+- Official bundled extensions provide tasteful defaults without becoming core
+  assumptions.
+- Optional official, site, and third-party extensions use the same manifest and
+  capability model with stricter permission boundaries as trust decreases.
+- Custom UI components declare editor schema, static render behavior, preview
+  behavior, PDF/search/feed fallbacks, accessibility expectations, hydration
+  policy, required assets, and diagnostics.
+- Artifact extensions such as PDF generation declare output ownership,
+  metadata, media fallback policy, size budgets, cache/crawler policy, and
+  verifier rules.
 
 Work:
 
 - Define typed extension manifests.
+- Classify existing feature domains as core, essential bundled extension,
+  optional official extension, site extension, or third-party/custom extension.
+- Shape current candidates around extension-like contracts before extraction:
+  Cloudflare deploy, GitHub Pages and `CNAME`, Git/GitHub source/history,
+  repo-local media, PDF generation, Google Scholar metadata, citations,
+  bibliography, support CTAs, Patreon/Discord/YouTube buttons, embeds, RSS,
+  sitemap, search, social images, and importers.
 - Add fixture extensions that prove enabled and disabled states.
 - Enforce import boundaries so extensions cannot reach forbidden layers.
+- Add extension migration hooks for adoption-ladder transitions such as local
+  source to Git backup, repo-local media to external media, direct publish to
+  review workflow, and local publish to automated publish.
 
 Verification:
 
 - Type tests and fixture builds.
 - Generated-output verifier asserts extension-owned artifacts are declared.
+- Capability-driven UI/CLI/MCP tests prove unsupported extension actions do not
+  appear as available.
+- Security and trust tests prove extensions cannot access undeclared
+  credentials, filesystem paths, generated artifacts, scripts, styles, or
+  external origins.
+- Migration dry-run tests prove extension migrations report affected source,
+  generated artifacts, diagnostics, and rollback guidance.
 
 ### 21. Deployment Adapters And Release Governance
 
@@ -1299,6 +1422,10 @@ Current evidence:
   and cache headers.
 - Future platform users may need Cloudflare Pages, GitHub Pages, Netlify, S3, or
   generic static-folder output.
+- Domain setup is partly external. The platform can store the intended
+  canonical domain, generate domain-dependent artifacts, and emit provider
+  files such as GitHub Pages `CNAME`, but DNS configuration remains external
+  unless the selected adapter explicitly supports it.
 
 Mature contract:
 
@@ -1309,17 +1436,22 @@ Mature contract:
   launch-step reports.
 - Future studio publish actions can call deployment adapters without exposing
   host-specific details to non-technical users.
+- Domain-related behavior is capability-driven: configured canonical domain,
+  provider-owned domain verification, DNS instructions, `CNAME` output,
+  preview URLs, and production URLs are separate concepts.
 
 Work:
 
 - Define deployment adapter interfaces.
 - Implement Cloudflare Workers Static Assets first as the reference adapter.
+- Implement GitHub Pages as a deploy adapter candidate with explicit `CNAME`
+  ownership when that provider is enabled.
 - Add host-portable adapters as fixture-backed platform work.
 - Define versioning, changelog, migration, deprecation, and compatibility
   policy for platform APIs, site config, frontmatter, output, and routes.
 - Model preview deploys, production deploys, rollback, cache invalidation,
-  publish status, provider diagnostics, and launch checklists as adapter
-  outputs.
+  publish status, provider diagnostics, domain status, DNS instructions, and
+  launch checklists as adapter outputs.
 
 Verification:
 
@@ -1496,9 +1628,9 @@ Work:
   hatches.
 - Add preview orchestration that can update route previews quickly while still
   using the platform compiler and diagnostics.
-- Add publish orchestration over Git and deploy adapters: save draft, create
-  preview, submit for review, merge/publish, deploy, rollback, and view release
-  health.
+- Add publish orchestration over source, history, workflow, build, and deploy
+  adapters: save draft, create preview, publish directly when policy allows,
+  submit for review when configured, deploy, rollback, and view release health.
 - Add product-level permission, audit, credential, and recovery models before
   supporting multi-user or hosted operation.
 
