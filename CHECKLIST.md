@@ -266,6 +266,66 @@ they are useful context. Explicitly deferred work belongs in
     workflows. Verified Milestone 4 with focused studio/observability tests
     and the full `bun --silent run check:release` gate.
 
+### Milestone 317: Comprehensive Coverage Baseline And Exception Audit
+
+- [x] Run the repository coverage and accountability gates to establish the
+      current missing-coverage baseline.
+- [x] Inspect approved coverage/accountability exceptions and identify any that
+      have become stale after the Milestone 4 refactor.
+- [x] Rank low-coverage files by genuine testable behavior rather than raw
+      percentages alone.
+  - Completed: `bun --silent run coverage` passes at 842 tests. The approved
+    CSS coverage exception remains valid because style behavior is enforced by
+    browser, accessibility, responsive, style-contract, and release checks.
+    Remaining low-coverage files are concentrated in process, browser, build,
+    and experimental-tooling seams.
+
+### Milestone 318: Coverage Improvements For Testable Seams
+
+- [x] Add or strengthen tests for genuine behavior gaps at public seams, with
+      no test-only exports or brittle import-only tests.
+- [x] Refactor only where coverage reveals a poor seam between pure logic and
+      browser/process/file-system edges.
+- [x] Keep process/browser/generated-output gaps documented only when they are
+      not worth modeling with unit fixtures.
+  - Completed: Expanded behavior coverage for anchored disclosures, studio
+    workflows, observability diagnostics, author diagnostics, tag
+    normalization, article reference previews, site config schema generation,
+    content route view models, route helpers, bibliography aggregation, article
+    citation formatting, article image frontmatter parsing, and article
+    reference display-label parsing. Narrowed observability diagnostics types
+    so author-repairable findings cannot carry unreachable owners.
+
+### Milestone 319: Coverage Verification And Handoff
+
+- [x] Re-run focused tests, coverage verification, accountability checks, and
+      release checks after coverage improvements.
+- [x] Report any remaining missing or low coverage with concrete
+      justifications so it can be inspected manually.
+  - Completed: Focused tests, `bun --silent run coverage`,
+    `bun --silent run typecheck`, and `bun --silent run check:release` pass
+    after coverage improvements.
+
+### Milestone 320: Remaining Coverage Gap Design Pass
+
+- [x] Re-examine remaining coverage gaps as possible design feedback, not just
+      percentage misses.
+- [x] Add focused tests for genuine behavior gaps at stable public seams.
+- [x] Refactor or simplify any uncovered branch that indicates dead code,
+      impossible state, or poor separation of concerns.
+- [x] Re-run coverage and quality checks, then document justified residual
+      gaps.
+      Completed: Removed the obsolete proof-only article-reference plugin,
+      narrowed anchored positioning to supported top/bottom placements,
+      preserved unknown block `value` text in article-reference serialization,
+      and added public-seam tests for disclosure fallback behavior, anchored
+      positioning lazy-loader scheduling, article image edge cases, reference
+      serialization, and reference preview fallback/close behavior. Remaining
+      low-coverage files are primarily process/browser orchestration scripts,
+      generated-output verifiers, payload experiments, and defensive no-op
+      branches where unit tests would be brittle or duplicate existing release
+      checks.
+
 ### Milestone 226: IRK-101 Documentation Lifecycle Design
 
 - [x] Re-read the Milestone 4 documentation roadmap, source-contract docs, docs

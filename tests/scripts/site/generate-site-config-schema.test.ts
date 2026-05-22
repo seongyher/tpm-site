@@ -29,6 +29,34 @@ async function withTempRoot<T>(callback: (root: string) => Promise<T> | T) {
 }
 
 describe("site config schema generator", () => {
+  test("prints usage and rejects missing output values", () => {
+    const output: string[] = [];
+    const io = {
+      stderr: {
+        write: (message: string) => {
+          output.push(message);
+
+          return true;
+        },
+      },
+      stdout: {
+        write: (message: string) => {
+          output.push(message);
+
+          return true;
+        },
+      },
+    };
+
+    expect(runGenerateSiteConfigSchemaCli(["--help"], io)).toBe(0);
+    expect(output.join("")).toContain(
+      "Usage: bun scripts/site/generate-site-config-schema.ts",
+    );
+    expect(() =>
+      runGenerateSiteConfigSchemaCli(["--output", "--check"], io),
+    ).toThrow("Missing value for --output.");
+  });
+
   test("builds an input JSON Schema from the site config schema", () => {
     const schema = siteConfigJsonSchema();
 

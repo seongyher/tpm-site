@@ -13,6 +13,17 @@ import type {
   RouteLinkedObservabilityReport,
 } from "./observability-reports";
 
+type AuthorRepairableObservabilityFinding = RouteLinkedObservabilityFinding & {
+  readonly disposition: "actionable";
+  readonly finding: ObservabilityFinding & {
+    readonly fixability: "source-edit";
+    readonly owner: "author" | "site-owner";
+  };
+  readonly routeMatch: RouteLinkedObservabilityFinding["routeMatch"] & {
+    readonly kind: "registered-route" | "unknown-internal-route";
+  };
+};
+
 /** One release-health delta for route-linked observability reports. */
 interface ObservabilityReleaseHealthDelta {
   readonly afterCount: number | undefined;
@@ -214,18 +225,11 @@ function authorCategoryForObservabilityCategory(
 }
 
 function authorRepairOwnerForObservabilityOwner(
-  owner: ObservabilityFinding["owner"],
+  owner: AuthorRepairableObservabilityFinding["finding"]["owner"],
 ): AuthorDiagnosticRepairOwner {
   switch (owner) {
     case "author":
       return "author";
-    case "developer":
-      return "developer";
-    case "external":
-      return "external";
-    case "platform":
-    case "unknown":
-      return "platform";
     case "site-owner":
       return "site-owner";
   }
@@ -352,7 +356,7 @@ function countLabel(value: number | undefined): string {
 
 function observabilityFindingIsAuthorDiagnostic(
   finding: RouteLinkedObservabilityFinding,
-): boolean {
+): finding is AuthorRepairableObservabilityFinding {
   return (
     finding.disposition === "actionable" &&
     finding.finding.fixability === "source-edit" &&

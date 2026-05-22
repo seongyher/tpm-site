@@ -6,8 +6,8 @@ export interface AnchorRect {
   readonly y: number;
 }
 
-/** Logical side for a floating surface relative to an anchor. */
-type AnchorSide = "bottom" | "left" | "right" | "top";
+/** Supported block-axis side for a floating surface relative to an anchor. */
+type AnchorSide = "bottom" | "top";
 
 /** Logical inline alignment for a floating surface relative to an anchor. */
 type AnchorAlignment = "center" | "end" | "start";
@@ -491,14 +491,6 @@ function placementSide(placement: AnchorPlacement): AnchorSide {
     return "bottom";
   }
 
-  if (placement.startsWith("left")) {
-    return "left";
-  }
-
-  if (placement.startsWith("right")) {
-    return "right";
-  }
-
   return "top";
 }
 
@@ -538,14 +530,6 @@ function oppositeSide(side: AnchorSide): AnchorSide {
   switch (side) {
     case "bottom": {
       return "top";
-    }
-
-    case "left": {
-      return "right";
-    }
-
-    case "right": {
-      return "left";
     }
 
     case "top": {
@@ -601,11 +585,7 @@ function blockCoordinate(
     return anchor.y - floatingHeight - options.offset;
   }
 
-  if (options.side === "bottom") {
-    return anchor.y + anchor.height + options.offset;
-  }
-
-  return anchor.y;
+  return anchor.y + anchor.height + options.offset;
 }
 
 function clamp(value: number, minimum: number, maximum: number): number {

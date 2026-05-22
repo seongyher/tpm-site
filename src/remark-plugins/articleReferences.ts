@@ -420,7 +420,10 @@ function serializeBlockContent(
   }
 
   const children = serializeInlineChildren(node.children ?? []);
-  const text = children.map((child) => child.text).join("");
+  const text =
+    typeof node.value === "string"
+      ? node.value
+      : children.map((child) => child.text).join("");
   const kind = blockKind(node.type);
 
   if (kind === "unknown") {

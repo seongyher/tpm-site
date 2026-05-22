@@ -4,6 +4,7 @@ import { Window } from "happy-dom";
 import {
   type AnchoredPositioningRuntime,
   installAnchoredPositioning,
+  scheduleAnchoredRootFromTarget,
 } from "../../../src/scripts/anchored-positioning";
 
 describe("anchored positioning browser script", () => {
@@ -70,6 +71,38 @@ describe("anchored positioning browser script", () => {
 
     expect(panelMeasureCount).toBe(0);
     expect(panel.style.getPropertyValue("--anchor-x")).toBe("");
+  });
+
+  test("schedules one root from lazy-loader targets through the public seam", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <header data-site-header>Header</header>
+      <button id="outside">Outside</button>
+      <details data-anchor-root data-anchor-preset="header-dropdown" open>
+        <summary data-anchor-trigger>Menu</summary>
+        <div data-anchor-panel>Panel</div>
+      </details>
+    `;
+
+    const header = requiredElement(window, "[data-site-header]");
+    const outside = requiredElement(window, "#outside");
+    const trigger = requiredElement(window, "[data-anchor-trigger]");
+    const panel = requiredElement(window, "[data-anchor-panel]");
+    setRect(header, { height: 96, width: 390, x: 0, y: 0 });
+    setRect(trigger, { height: 40, width: 80, x: 24, y: 24 });
+    setRect(panel, { height: 240, width: 320, x: 0, y: 0 });
+    installImmediateAnimationFrame(window);
+
+    expect(() => scheduleAnchoredRootFromTarget(null)).not.toThrow();
+    scheduleAnchoredRootFromTarget(null, runtimeFor(window));
+    scheduleAnchoredRootFromTarget(outside, runtimeFor(window));
+    expect(panel.style.getPropertyValue("--anchor-x")).toBe("");
+
+    scheduleAnchoredRootFromTarget(trigger, runtimeFor(window));
+    expect(panel.style.getPropertyValue("--anchor-x")).toBe("24px");
+    expect(panel.style.getPropertyValue("--anchor-y")).toBe("96px");
   });
 
   test("positions focus-owned search panels with visual viewport geometry", () => {

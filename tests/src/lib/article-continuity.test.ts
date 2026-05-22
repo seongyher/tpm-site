@@ -56,6 +56,10 @@ describe("article continuity", () => {
     expect(articleContinuitySelection(newest, [newest])).toBeUndefined();
   });
 
+  test("omits continuity when the current article is absent from the source list", () => {
+    expect(articleContinuitySelection(newest, [older, middle])).toBeUndefined();
+  });
+
   test("maps a selected neighbor to article-list props", () => {
     const selection = articleContinuitySelection(older, [
       newest,
