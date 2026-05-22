@@ -65,11 +65,11 @@ layout, and internal component layout remain simple CSS/Tailwind.
   constrained header-attached shell panel. It should use the shared mobile
   preset so it stays viewport-safe, scrolls on short screens, and does not
   depend on the sandwich trigger's horizontal position.
-- `src/components/articles/HoverImageCard.astro` and its Astro wrappers: must
+- `src/components/articles/media/HoverImageCard.astro` and its Astro wrappers: must
   migrate because article hover-image previews are inline trigger-attached
   floating previews. Native Astro markup plus the `inline-hover-preview` preset
   removes unnecessary hydration while preserving robust positioning.
-- `src/components/articles/ArticleCitationMenu.astro`: must use anchored
+- `src/components/articles/actions/ArticleCitationMenu.astro`: must use anchored
   positioning because it is a trigger-attached utility surface. The citation
   trigger lives in the article metadata row, but the menu must not reserve
   article-flow space or detach from the trigger when opened.

@@ -1,25 +1,25 @@
 ---
 import { getEntry } from "astro:content";
 
-import HomeCategoryOverviewBlock from "../components/blocks/HomeCategoryOverviewBlock.astro";
-import HomeDiscoveryLinksBlock from "../components/blocks/HomeDiscoveryLinksBlock.astro";
-import HomeFeaturedCarousel from "../components/blocks/HomeFeaturedCarousel.astro";
-import HomeFeaturedSlide from "../components/blocks/HomeFeaturedSlide.astro";
-import HomeHeroBlock from "../components/blocks/HomeHeroBlock.astro";
-import ArticleList from "../components/articles/ArticleList.astro";
-import FlatArticleList from "../components/articles/FlatArticleList.astro";
+import HomeCategoryOverviewBlock from "../components/blocks/home/HomeCategoryOverviewBlock.astro";
+import HomeDiscoveryLinksBlock from "../components/blocks/home/HomeDiscoveryLinksBlock.astro";
+import HomeFeaturedCarousel from "../components/blocks/home/HomeFeaturedCarousel.astro";
+import HomeFeaturedSlide from "../components/blocks/home/HomeFeaturedSlide.astro";
+import HomeHeroBlock from "../components/blocks/home/HomeHeroBlock.astro";
+import ArticleList from "../components/articles/lists/ArticleList.astro";
+import FlatArticleList from "../components/articles/lists/FlatArticleList.astro";
 import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../lib/authors";
+import { getAuthorEntries } from "../lib/content/authors";
 import {
   getAnnouncements,
   getArticles,
   getCategories,
   getEditorialCollections,
-} from "../lib/content";
-import { homePageRouteViewModel } from "../lib/home";
-import { itemListJsonLd } from "../lib/metadata";
-import { siteConfig } from "../lib/site-config";
+} from "../lib/content/content";
+import { homePageRouteViewModel } from "../lib/content/home";
+import { itemListJsonLd } from "../lib/metadata/metadata";
+import { siteConfig } from "../lib/site/site-config";
 
 const home = await getEntry("pages", "index");
 

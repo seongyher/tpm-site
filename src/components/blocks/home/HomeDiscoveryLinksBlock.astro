@@ -1,0 +1,22 @@
+---
+import ReadingNavigationLinks from "../../navigation/ReadingNavigationLinks.astro";
+
+interface DiscoveryLink {
+  href: string;
+  label: string;
+}
+
+interface Props {
+  links: readonly DiscoveryLink[];
+  title?: string;
+}
+
+const { links, title = "Read" } = Astro.props;
+---
+
+<ReadingNavigationLinks
+  aria-label="Homepage reading navigation"
+  data-home-discovery-links
+  links={links}
+  title={title}
+/>

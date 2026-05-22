@@ -1,0 +1,92 @@
+---
+import {
+  AtSign,
+  Facebook,
+  Hash,
+  Link,
+  Linkedin,
+  Mail,
+  MessageCircle,
+  Newspaper,
+  Pin,
+  Twitter,
+} from "lucide-astro";
+
+import type { ArticleShareAction } from "../../../lib/site/share-targets";
+import ActionMenuItem from "../../ui/ActionMenuItem.astro";
+
+interface Props {
+  action: ArticleShareAction;
+  copyText: string;
+  statusId: string;
+}
+
+const { action, copyText, statusId } = Astro.props;
+const iconClass = "size-3.5";
+const externalHref =
+  action.kind === "external" ? JSON.stringify(action.href) : undefined;
+---
+
+{
+  action.kind === "copy" ? (
+    <ActionMenuItem
+      aria-describedby={statusId}
+      data-article-share-copy-button
+      data-article-share-copy-text={copyText}
+    >
+      <Link slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      {action.label}
+    </ActionMenuItem>
+  ) : null
+}
+{
+  action.kind === "email" ? (
+    <ActionMenuItem
+      as="a"
+      href={action.href}
+      data-article-share-action={action.id}
+    >
+      <Mail slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      {action.label}
+    </ActionMenuItem>
+  ) : null
+}
+{
+  action.kind === "external" ? (
+    <ActionMenuItem
+      data-article-share-action={action.id}
+      data-article-share-open-button
+      data-article-share-open-url={externalHref}
+    >
+      {action.icon === "message" && (
+        <MessageCircle
+          slot="icon"
+          class:list={[iconClass]}
+          aria-hidden="true"
+        />
+      )}
+      {action.icon === "x" && (
+        <Twitter slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "at-sign" && (
+        <AtSign slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "facebook" && (
+        <Facebook slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "linkedin" && (
+        <Linkedin slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "reddit" && (
+        <Hash slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "hacker-news" && (
+        <Newspaper slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.icon === "pinterest" && (
+        <Pin slot="icon" class:list={[iconClass]} aria-hidden="true" />
+      )}
+      {action.label}
+    </ActionMenuItem>
+  ) : null
+}

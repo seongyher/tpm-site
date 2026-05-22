@@ -1,6 +1,6 @@
 import type { ImageMetadata } from "astro";
 
-import type { ArticleArchiveItem } from "../../src/lib/archive";
+import type { ArticleArchiveItem } from "../../src/lib/content/archive";
 import {
   defaultPublishableVisibility,
   type PublishableEntry,
@@ -8,8 +8,11 @@ import {
   publishableFromArticleArchive,
   type PublishableImage,
   type PublishableVisibility,
-} from "../../src/lib/publishable";
-import type { AnnouncementEntry, ArticleEntry } from "../../src/lib/routes";
+} from "../../src/lib/content/publishable";
+import type {
+  AnnouncementEntry,
+  ArticleEntry,
+} from "../../src/lib/routes/routes";
 import { announcementEntry, articleEntry } from "./content";
 
 /** Shared image metadata for publishable fixtures that need representative art. */

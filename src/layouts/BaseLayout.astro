@@ -7,19 +7,19 @@ import { getImage } from "astro:assets";
 
 import SiteShell from "../components/layout/SiteShell.astro";
 import SiteHead from "../components/seo/SiteHead.astro";
-import { getSiteSocialFallbackImage } from "../lib/content";
+import { getSiteSocialFallbackImage } from "../lib/content/content";
 import {
   normalizeRouteMetadata,
   type RobotsPolicy,
   type RouteMetadataKind,
   type JsonLdNode,
-} from "../lib/metadata";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../lib/routes";
-import { siteConfig } from "../lib/site-config";
+} from "../lib/metadata/metadata";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../lib/routes/routes";
+import { siteConfig } from "../lib/site/site-config";
 import {
   type SocialPreviewImage,
   socialPreviewImageViewModel,
-} from "../lib/social-images";
+} from "../lib/media/social-images";
 
 interface Props {
   title?: string;

@@ -6,26 +6,44 @@ describe("home catalog examples", () => {
   test("cover homepage blocks with stable component paths", () => {
     const paths = homeCatalogExamples.map((example) => example.componentPath);
 
-    expect(paths).toContain("src/components/blocks/CompactEntryPanel.astro");
-    expect(paths).toContain("src/components/articles/FlatArticleList.astro");
-    expect(paths).toContain("src/components/articles/FlatArticleTeaser.astro");
-    expect(paths).toContain("src/components/blocks/HomeHeroBlock.astro");
     expect(paths).toContain(
-      "src/components/blocks/HomeLatestArticleBlock.astro",
+      "src/components/blocks/shared/CompactEntryPanel.astro",
     );
     expect(paths).toContain(
-      "src/components/blocks/HomeCategoryOverviewBlock.astro",
+      "src/components/articles/lists/FlatArticleList.astro",
     );
-    expect(paths).toContain("src/components/blocks/HomeCurrentPanel.astro");
     expect(paths).toContain(
-      "src/components/blocks/HomeDiscoveryLinksBlock.astro",
+      "src/components/articles/lists/FlatArticleTeaser.astro",
     );
-    expect(paths).toContain("src/components/blocks/HomeFeaturedCarousel.astro");
-    expect(paths).toContain("src/components/blocks/HomeFeaturedSlide.astro");
-    expect(paths).toContain("src/components/blocks/HomeMastheadBlock.astro");
-    expect(paths).toContain("src/components/blocks/HomeRecentPostsBlock.astro");
-    expect(paths).toContain("src/components/blocks/HomeStartHerePanel.astro");
-    expect(paths).toContain("src/components/blocks/TermRailCard.astro");
+    expect(paths).toContain("src/components/blocks/home/HomeHeroBlock.astro");
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeLatestArticleBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeCategoryOverviewBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeCurrentPanel.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeDiscoveryLinksBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeFeaturedCarousel.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeFeaturedSlide.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeMastheadBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeRecentPostsBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/home/HomeStartHerePanel.astro",
+    );
+    expect(paths).toContain("src/components/blocks/terms/TermRailCard.astro");
     expect(new Set(paths).size).toBe(paths.length);
   });
 });

@@ -1,13 +1,16 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
-import { parseSiteConfig, type SiteConfig } from "../../src/lib/site-config";
+import {
+  parseSiteConfig,
+  type SiteConfig,
+} from "../../src/lib/site/site-config";
 import {
   projectRelativePath,
   resolveSiteInstancePaths,
   type SiteInstancePaths,
-} from "../../src/lib/site-instance";
-import { starterTemplateMatrix } from "../../src/lib/starter-templates";
+} from "../../src/lib/site/site-instance";
+import { starterTemplateMatrix } from "../../src/lib/starters/starter-templates";
 import { siteDoctorIssues } from "./site-doctor";
 
 interface StarterTemplateVerificationIssue {

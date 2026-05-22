@@ -5,7 +5,7 @@ import matter from "gray-matter";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 
 /** Options for the article-reference corpus audit. */
 export interface ArticleReferenceAuditOptions {

@@ -245,7 +245,7 @@ describe("content verifier", () => {
           "author: Author",
           "---",
           "",
-          'import HoverImageLink from "../../../components/articles/HoverImageLink.astro";',
+          'import HoverImageLink from "../../../components/articles/media/HoverImageLink.astro";',
           'import articleImage from "../../../assets/articles/example/image.png";',
           "",
           '<HoverImageLink image={articleImage} label="preview" />',
@@ -274,7 +274,7 @@ describe("content verifier", () => {
       });
 
       expect(result.issues).toContain(
-        'src/content/articles/history/unsupported.mdx: article MDX import "../../../components/articles/InteractiveWidget.astro" needs an explicit PDF fallback in src/lib/article-pdf-compatibility.ts',
+        'src/content/articles/history/unsupported.mdx: article MDX import "../../../components/articles/InteractiveWidget.astro" needs an explicit PDF fallback in src/lib/articles/article-pdf-compatibility.ts',
       );
       expect(
         result.issues.some((issue) => issue.includes("compatible.mdx")),

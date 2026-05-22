@@ -1,5 +1,5 @@
-import type { ArticleListItem } from "../../lib/article-list";
-import type { SectionNavItem } from "../../lib/navigation";
+import type { ArticleListItem } from "../../lib/content/article-list";
+import type { SectionNavItem } from "../../lib/site/navigation";
 
 /** Deliberately awkward text used to exercise wrapping behavior. */
 export const longUnbrokenWord =

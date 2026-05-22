@@ -1,12 +1,15 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../../lib/authors";
-import { getCategories, getTags } from "../../lib/content";
-import { tagDetailRouteViewModel } from "../../lib/listing-route-view-models";
-import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
-import { tagStaticPaths } from "../../lib/static-paths";
+import { getAuthorEntries } from "../../lib/content/authors";
+import { getCategories, getTags } from "../../lib/content/content";
+import { tagDetailRouteViewModel } from "../../lib/content/listing-route-view-models";
+import {
+  breadcrumbListJsonLd,
+  itemListJsonLd,
+} from "../../lib/metadata/metadata";
+import { tagStaticPaths } from "../../lib/routes/static-paths";
 
 /**
  * Generates one static tag route for each canonical public tag.

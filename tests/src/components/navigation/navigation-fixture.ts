@@ -1,4 +1,4 @@
-import type { SectionNavItem } from "../../../../src/lib/navigation";
+import type { SectionNavItem } from "../../../../src/lib/site/navigation";
 
 /** Category navigation fixture used by Astro component render tests. */
 export const navigationItems = [

@@ -289,7 +289,7 @@ PDF-eligibility blockers depending on surface.
 ## Implementation Sequence
 
 1. Introduce framework-neutral media source, policy, provider, and diagnostic
-   types in `src/lib/media-policy.ts`.
+   types in `src/lib/media/media-policy.ts`.
 2. Move existing article image, social preview, embed, hover image, publishable
    thumbnail, and PDF compatibility constants behind policy helpers without
    changing author syntax.
@@ -303,21 +303,22 @@ PDF-eligibility blockers depending on surface.
 
 ## Current Implementation Slice
 
-The first implementation slice introduces `src/lib/media-policy.ts` as the
+The first implementation slice introduces `src/lib/media/media-policy.ts` as the
 shared policy vocabulary and migrates existing helpers without changing author
 syntax or public page output.
 
 Current consumers:
 
-- `src/lib/article-image-policy.ts` consumes article image role policy for
-  bounded/natural display, inspectability, preview sizing, and cache-key facts.
-- `src/lib/social-images.ts` consumes social preview policy for dimensions,
+- `src/lib/articles/article-image-policy.ts` consumes article image role policy
+  for bounded/natural display, inspectability, preview sizing, and cache-key
+  facts.
+- `src/lib/media/social-images.ts` consumes social preview policy for dimensions,
   MIME type, transform options, quality, and byte budget.
-- `src/lib/embed-media.ts` consumes provider classification and layout classes
-  from the shared embed policy.
-- `src/lib/article-pdf-compatibility.ts` consumes MDX component PDF fallback
-  policy from the shared media policy layer.
-- `src/components/articles/PublishableMediaFrame.astro` consumes text fallback
+- `src/lib/articles/embed-media.ts` consumes provider classification and layout
+  classes from the shared embed policy.
+- `src/lib/articles/article-pdf-compatibility.ts` consumes MDX component PDF
+  fallback policy from the shared media policy layer.
+- `src/components/articles/media/PublishableMediaFrame.astro` consumes text fallback
   policy for image-less publishable media frames.
 - `scripts/build/generate-article-pdfs.ts` and
   `scripts/build/verify-build/pdf-verifier.ts` consume media diagnostics for

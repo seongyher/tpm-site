@@ -1,11 +1,11 @@
 ---
-import type { ArticleEntry, CategorySummary } from "../../lib/routes";
-import { articleUrl, authorName } from "../../lib/routes";
-import type { AuthorSummary } from "../../lib/authors";
-import { jsonLdGraph } from "../../lib/metadata";
-import { semanticMetadataJsonLd } from "../../lib/semantic-metadata";
-import { articleBlogPostingJsonLd, safeJsonLd } from "../../lib/seo";
-import type { SocialPreviewImage } from "../../lib/social-images";
+import type { ArticleEntry, CategorySummary } from "../../lib/routes/routes";
+import { articleUrl, authorName } from "../../lib/routes/routes";
+import type { AuthorSummary } from "../../lib/content/authors";
+import { jsonLdGraph } from "../../lib/metadata/metadata";
+import { semanticMetadataJsonLd } from "../../lib/metadata/semantic-metadata";
+import { articleBlogPostingJsonLd, safeJsonLd } from "../../lib/metadata/seo";
+import type { SocialPreviewImage } from "../../lib/media/social-images";
 
 interface Props {
   article: ArticleEntry;

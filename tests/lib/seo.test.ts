@@ -1,8 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import { defaultPublishableVisibility } from "../../src/lib/publishable";
-import type { ArticleEntry, CategorySummary } from "../../src/lib/routes";
-import { articleBlogPostingJsonLd, safeJsonLd } from "../../src/lib/seo";
+import { defaultPublishableVisibility } from "../../src/lib/content/publishable";
+import {
+  articleBlogPostingJsonLd,
+  safeJsonLd,
+} from "../../src/lib/metadata/seo";
+import type {
+  ArticleEntry,
+  CategorySummary,
+} from "../../src/lib/routes/routes";
 
 function article(): ArticleEntry {
   return {

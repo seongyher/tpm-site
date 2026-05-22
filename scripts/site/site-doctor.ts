@@ -10,20 +10,20 @@ import {
   type AuthorDiagnosticRepairOwner,
   createAuthorDiagnostic,
   createAuthorDiagnosticReport,
-} from "../../src/lib/author-diagnostics";
-import { inclusiveDefaultIssues } from "../../src/lib/inclusive-defaults";
+} from "../../src/lib/diagnostics/author-diagnostics";
+import { inclusiveDefaultIssues } from "../../src/lib/localization/inclusive-defaults";
+import { routeRegistryEntries } from "../../src/lib/routes/route-registry";
+import { parseSiteRedirects } from "../../src/lib/routes/site-redirects";
 import {
   createPlatformContext,
   type PlatformContext,
-} from "../../src/lib/platform-context";
-import { routeRegistryEntries } from "../../src/lib/route-registry";
-import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
+} from "../../src/lib/site/platform-context";
+import { type SiteConfig, siteConfig } from "../../src/lib/site/site-config";
 import {
   projectRelativePath,
   siteInstance,
   type SiteInstancePaths,
-} from "../../src/lib/site-instance";
-import { parseSiteRedirects } from "../../src/lib/site-redirects";
+} from "../../src/lib/site/site-instance";
 
 type RouteKey = keyof SiteConfig["routes"];
 

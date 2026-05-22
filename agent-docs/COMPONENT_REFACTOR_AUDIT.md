@@ -228,16 +228,16 @@ Slots:
 
 First migration targets:
 
-- `src/components/articles/NextArticleBlock.astro`
-- `src/components/articles/MoreInCategoryBlock.astro`
-- `src/components/articles/RelatedArticlesBlock.astro`
-- `src/components/articles/ArticleBibliography.astro`
+- `src/components/articles/endcap/NextArticleBlock.astro`
+- `src/components/articles/endcap/MoreInCategoryBlock.astro`
+- `src/components/articles/endcap/RelatedArticlesBlock.astro`
+- `src/components/articles/references/ArticleBibliography.astro`
 
 Leave these for a later migration:
 
-- `src/components/blocks/ArchiveListBlock.astro`
-- `src/components/blocks/TermOverviewBlock.astro`
-- `src/components/articles/FlatArticleList.astro`
+- `src/components/blocks/listing/ArchiveListBlock.astro`
+- `src/components/blocks/terms/TermOverviewBlock.astro`
+- `src/components/articles/lists/FlatArticleList.astro`
 - `src/components/pages/PageHeader.astro`
 
 Acceptance criteria:
@@ -333,14 +333,14 @@ Stop conditions:
 
 Create one or both:
 
-- `src/components/articles/ArticleActionRow.astro`
-- `src/components/articles/ArticleActionTrigger.astro`
+- `src/components/articles/actions/ArticleHeaderActionRow.astro`
+- `src/components/articles/actions/ArticleHeaderActionTrigger.astro`
 
 First migration targets:
 
-- the cite trigger in `src/components/articles/ArticleCitationMenu.astro`;
-- the share trigger in `src/components/articles/ArticleShareMenu.astro`;
-- the PDF link in `src/components/articles/ArticleHeader.astro`, only if the
+- the cite trigger in `src/components/articles/actions/ArticleCitationMenu.astro`;
+- the share trigger in `src/components/articles/actions/ArticleShareMenu.astro`;
+- the PDF link in `src/components/articles/header/ArticleHeader.astro`, only if the
   same trigger primitive can support link semantics cleanly.
 
 Acceptance criteria:
@@ -364,17 +364,17 @@ This is optional in the first pass. Start only if A1-A4 are clean.
 Create:
 
 - `src/components/ui/MetadataLine.astro` or
-  `src/components/articles/EntryMetaLine.astro`
+  `src/components/articles/lists/EntryMetaLine.astro`
 
 First migration targets:
 
-- `src/components/articles/FlatArticleTeaser.astro`
-- `src/components/blocks/HomeFeaturedSlide.astro`
+- `src/components/articles/lists/FlatArticleTeaser.astro`
+- `src/components/blocks/home/HomeFeaturedSlide.astro`
 
 Do not migrate first:
 
-- `src/components/articles/ArticleCard.astro`
-- `src/components/articles/ArticleMeta.astro`
+- `src/components/articles/lists/ArticleCard.astro`
+- `src/components/articles/header/ArticleMeta.astro`
 
 Acceptance criteria:
 
@@ -427,13 +427,13 @@ Risk: low.
 
 Evidence:
 
-- `src/components/articles/NextArticleBlock.astro`
-- `src/components/articles/MoreInCategoryBlock.astro`
-- `src/components/articles/RelatedArticlesBlock.astro`
-- `src/components/articles/ArticleBibliography.astro`
-- `src/components/articles/FlatArticleList.astro`
-- `src/components/blocks/ArchiveListBlock.astro`
-- `src/components/blocks/TermOverviewBlock.astro`
+- `src/components/articles/endcap/NextArticleBlock.astro`
+- `src/components/articles/endcap/MoreInCategoryBlock.astro`
+- `src/components/articles/endcap/RelatedArticlesBlock.astro`
+- `src/components/articles/references/ArticleBibliography.astro`
+- `src/components/articles/lists/FlatArticleList.astro`
+- `src/components/blocks/listing/ArchiveListBlock.astro`
+- `src/components/blocks/terms/TermOverviewBlock.astro`
 - `src/components/pages/PageHeader.astro`
 
 These components repeatedly solve the same job: render a title, optional
@@ -474,11 +474,11 @@ Risk: medium.
 
 Evidence:
 
-- `src/components/articles/FlatArticleList.astro`
-- `src/components/articles/FlatArticleTeaser.astro`
-- `src/components/blocks/HomeRecentPostsBlock.astro`
-- `src/components/blocks/HomeStartHerePanel.astro`
-- `src/components/blocks/HomeCurrentPanel.astro`
+- `src/components/articles/lists/FlatArticleList.astro`
+- `src/components/articles/lists/FlatArticleTeaser.astro`
+- `src/components/blocks/home/HomeRecentPostsBlock.astro`
+- `src/components/blocks/home/HomeStartHerePanel.astro`
+- `src/components/blocks/home/HomeCurrentPanel.astro`
 - `src/pages/index.astro`
 
 The site has several compact list variants for the same conceptual entity:
@@ -488,10 +488,10 @@ metadata, empty state, and optional panel description.
 
 Recommended shape:
 
-- `src/components/articles/CompactEntryList.astro`
-- `src/components/articles/CompactEntryRow.astro`
-- `src/components/articles/EntryMetaLine.astro`
-- Optional wrapper block: `src/components/blocks/CompactEntryPanel.astro`
+- `src/components/articles/lists/CompactEntryList.astro`
+- `src/components/articles/lists/CompactEntryRow.astro`
+- `src/components/articles/lists/EntryMetaLine.astro`
+- Optional wrapper block: `src/components/blocks/shared/CompactEntryPanel.astro`
 
 This should not become a giant article card. Keep the existing full-width
 `ArticleList` and `ArticleCard` for rich article rows. The compact family should
@@ -523,8 +523,8 @@ Risk: medium.
 
 Evidence:
 
-- `src/components/blocks/CategoryRailBlock.astro`
-- `src/components/blocks/HomeCategoryOverviewBlock.astro`
+- `src/components/blocks/terms/CategoryRailBlock.astro`
+- `src/components/blocks/home/HomeCategoryOverviewBlock.astro`
 - `src/pages/articles/index.astro`
 - `src/scripts/horizontal-scroll.ts`
 
@@ -537,7 +537,7 @@ Recommended shape:
 
 - `src/components/ui/ScrollRail.astro`
 - `src/components/ui/ScrollRailControls.astro` if needed.
-- `src/components/blocks/TermRailBlock.astro` or `CategoryRailBlock` composed
+- `src/components/blocks/terms/TermRailBlock.astro` or `CategoryRailBlock` composed
   from `ScrollRail`.
 
 The rail primitive should own:
@@ -581,9 +581,9 @@ Risk: medium.
 
 Evidence:
 
-- `src/components/articles/ArticleCitationMenu.astro`
-- `src/components/articles/ArticleShareMenu.astro`
-- `src/components/articles/ArticleShareActionRow.astro`
+- `src/components/articles/actions/ArticleCitationMenu.astro`
+- `src/components/articles/actions/ArticleShareMenu.astro`
+- `src/components/articles/actions/ArticleShareActionRow.astro`
 - `src/components/navigation/CategoryDropdown.astro`
 - `src/components/navigation/SearchReveal.astro`
 - `src/components/ui/AnchoredRoot.astro`
@@ -664,11 +664,11 @@ Risk: medium.
 
 Evidence:
 
-- `src/components/articles/ArticleMeta.astro`
-- `src/components/articles/ArticleCard.astro`
-- `src/components/articles/FlatArticleTeaser.astro`
-- `src/components/blocks/HomeFeaturedSlide.astro`
-- `src/components/blocks/HomeRecentPostsBlock.astro`
+- `src/components/articles/header/ArticleMeta.astro`
+- `src/components/articles/lists/ArticleCard.astro`
+- `src/components/articles/lists/FlatArticleTeaser.astro`
+- `src/components/blocks/home/HomeFeaturedSlide.astro`
+- `src/components/blocks/home/HomeRecentPostsBlock.astro`
 - `src/components/bibliography/BibliographySourceArticles.astro`
 
 The site repeatedly renders small metadata lines with category, date, author,
@@ -677,7 +677,7 @@ problem is the same.
 
 Recommended shape:
 
-- `src/components/articles/EntryMetaLine.astro` or
+- `src/components/articles/lists/EntryMetaLine.astro` or
   `src/components/ui/MetadataLine.astro`
 - Props for items, separator style, uppercase, muted/primary tone, wrapping,
   and optional link prefetch.
@@ -705,9 +705,9 @@ Risk: low to medium.
 
 Evidence:
 
-- `src/components/articles/ArticleHeader.astro`
-- `src/components/articles/ArticleCitationMenu.astro`
-- `src/components/articles/ArticleShareMenu.astro`
+- `src/components/articles/header/ArticleHeader.astro`
+- `src/components/articles/actions/ArticleCitationMenu.astro`
+- `src/components/articles/actions/ArticleShareMenu.astro`
 - PDF action link in the article header.
 
 The article header has several action affordances that should remain visually
@@ -718,9 +718,9 @@ sub-component opportunity.
 
 Recommended shape:
 
-- `src/components/articles/ArticleActionRow.astro`
-- `src/components/articles/ArticleActionTrigger.astro` or a UI-level
-  `InlineAction.astro`
+- `src/components/articles/actions/ArticleHeaderActionRow.astro`
+- `src/components/articles/actions/ArticleHeaderActionTrigger.astro` or a
+  UI-level `InlineAction.astro`
 - Use the existing citation/share menu components as children instead of
   merging their domain behavior.
 
@@ -749,10 +749,10 @@ Risk: low to medium.
 Evidence:
 
 - `src/components/ui/Card.astro`
-- `src/components/blocks/HomeCurrentPanel.astro`
-- `src/components/blocks/HomeStartHerePanel.astro`
-- `src/components/blocks/SupportBlock.astro`
-- `src/components/blocks/TermOverviewBlock.astro`
+- `src/components/blocks/home/HomeCurrentPanel.astro`
+- `src/components/blocks/home/HomeStartHerePanel.astro`
+- `src/components/blocks/shared/SupportBlock.astro`
+- `src/components/blocks/terms/TermOverviewBlock.astro`
 - `src/components/bibliography/BibliographyEmptyState.astro`
 - Repeated class fragment:
   `border-border bg-muted/30 grid min-w-0 content-start gap-4 rounded-sm border p-4`.
@@ -790,8 +790,8 @@ Evidence:
 
 - `src/components/ui/PatreonButton.astro`
 - `src/components/ui/DiscordButton.astro`
-- `src/components/blocks/SupportBlock.astro`
-- `src/components/blocks/HomeHeroBlock.astro`
+- `src/components/blocks/shared/SupportBlock.astro`
+- `src/components/blocks/home/HomeHeroBlock.astro`
 
 Patreon and Discord buttons now share almost identical dimensions, shape,
 focus, and asset behavior. The implementation should keep brand assets separate
@@ -879,7 +879,7 @@ Recommended shape:
 
 - First complete smaller UI extractions.
 - Then move pure data shaping into a typed helper such as
-  `src/lib/article-page-view-model.ts`.
+  `src/lib/content/article-page-view-model.ts`.
 - Keep the Astro layout focused on composing article header, body, references,
   and endcaps.
 
@@ -962,9 +962,9 @@ Some components import `siteConfig` directly:
 - `src/components/layout/SiteFooter.astro`
 - `src/components/navigation/SupportLink.astro`
 - `src/components/authors/AuthorLink.astro`
-- `src/components/articles/ArticleBibliography.astro`
-- `src/components/blocks/HomeHeroBlock.astro`
-- `src/components/blocks/SupportBlock.astro`
+- `src/components/articles/references/ArticleBibliography.astro`
+- `src/components/blocks/home/HomeHeroBlock.astro`
+- `src/components/blocks/shared/SupportBlock.astro`
 
 This is acceptable for application-level shell components such as header and
 footer. It is less ideal for reusable blocks. Long term, reusable blocks should
@@ -993,16 +993,16 @@ force components to know global feature policy.
 The current codebase contains components referenced only by the component
 catalog or docs, not by public routes:
 
-- `src/components/blocks/HomeRecentPostsBlock.astro`
-- `src/components/blocks/HomeAnnouncementBlock.astro`
-- `src/components/blocks/HomeLatestArticleBlock.astro`
-- `src/components/blocks/HomeFeaturedArticlesBlock.astro`
-- `src/components/blocks/HomeMastheadBlock.astro`
-- `src/components/blocks/HomeArchiveLinksBlock.astro`
+- `src/components/blocks/home/HomeRecentPostsBlock.astro`
+- `src/components/blocks/home/HomeAnnouncementBlock.astro`
+- `src/components/blocks/home/HomeLatestArticleBlock.astro`
+- `src/components/blocks/home/HomeFeaturedArticlesBlock.astro`
+- `src/components/blocks/home/HomeMastheadBlock.astro`
+- `src/components/blocks/home/HomeArchiveLinksBlock.astro`
 - `src/components/ui/YouTubeButton.astro`
 - `src/components/ui/Separator.astro`
 - `src/components/ui/Section.astro`
-- `src/components/articles/ArticleImage.astro`
+- `src/components/articles/media/ArticleImage.astro`
 - `src/components/navigation/SectionNav.astro`
 - `src/components/media/EmbedFrame.astro`
 - `src/components/media/YouTubeEmbed.astro`
@@ -1420,9 +1420,9 @@ Why this matters:
 markup in several places:
 
 - `src/pages/articles/index.astro`
-- `src/components/blocks/ArchiveListBlock.astro`
-- `src/components/blocks/TermOverviewBlock.astro`
-- `src/components/blocks/SearchResultsBlock.astro`
+- `src/components/blocks/listing/ArchiveListBlock.astro`
+- `src/components/blocks/terms/TermOverviewBlock.astro`
+- `src/components/blocks/listing/SearchResultsBlock.astro`
 - `src/components/authors/AuthorsIndexPage.astro`
 - `src/components/authors/AuthorProfileHeader.astro`
 - `src/components/pages/PageHeader.astro`
@@ -1505,13 +1505,13 @@ community/support CTA.
 #### 6. Share Target Registry Cleanup
 
 `ArticleShareActionRow` still hardcodes the icon mapping for every share target
-while `src/lib/share-targets.ts` owns URL construction. That split is okay, but
-it means adding a new share target requires updating both the URL registry and
-the renderer.
+while `src/lib/site/share-targets.ts` owns URL construction. That split is
+okay, but it means adding a new share target requires updating both the URL
+registry and the renderer.
 
 Recommended direction:
 
-- Keep URL construction in `src/lib/share-targets.ts`.
+- Keep URL construction in `src/lib/site/share-targets.ts`.
 - Add a small presentation registry for share target icon keys and labels, or
   make the action view model include an `icon` discriminant.
 - Keep the actual Lucide imports in the Astro component to avoid putting view
@@ -1521,7 +1521,7 @@ This is a low-risk developer-velocity refactor.
 
 #### 7. Site Config Schema Boundaries And Webmaster UX
 
-`src/lib/site-config.ts` now carries identity, routes, features, homepage,
+`src/lib/site/site-config.ts` now carries identity, routes, features, homepage,
 support, share, and content defaults in one file. That is still manageable, but
 it will become a bottleneck as the platform gets more configurable.
 
@@ -1646,8 +1646,8 @@ each should still be independently verifiable.
 
 - Design a typed homepage recipe/view-model boundary that can express the
   current TPM homepage without making the route own config plumbing.
-- Move homepage route data assembly into `src/lib/home` or a new route view
-  model helper.
+- Move homepage route data assembly into `src/lib/content/home` or a new route
+  view model helper.
 - Keep the Astro route declarative: load content, build the view model, render
   blocks.
 - Preserve the current layout unless a visible standardization is explicitly

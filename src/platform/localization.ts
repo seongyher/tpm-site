@@ -1,5 +1,5 @@
-export type { InclusiveDefaultIssue } from "../lib/inclusive-defaults";
-export { inclusiveDefaultIssues } from "../lib/inclusive-defaults";
+export type { InclusiveDefaultIssue } from "../lib/localization/inclusive-defaults";
+export { inclusiveDefaultIssues } from "../lib/localization/inclusive-defaults";
 export type {
   LocaleDirection,
   LocaleRouteMode,
@@ -9,5 +9,5 @@ export type {
   LocalizationFixtureReport,
   LocalizationFixtureRoute,
   LocalizationFixtureSnapshot,
-} from "../lib/localization-fixtures";
-export { createLocalizationFixtureReport } from "../lib/localization-fixtures";
+} from "../lib/localization/localization-fixtures";
+export { createLocalizationFixtureReport } from "../lib/localization/localization-fixtures";

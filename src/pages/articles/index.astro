@@ -1,16 +1,16 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
-import CategoryRailBlock from "../../components/blocks/CategoryRailBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
+import CategoryRailBlock from "../../components/blocks/terms/CategoryRailBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import PageHeader from "../../components/pages/PageHeader.astro";
 import LinkButton from "../../components/ui/LinkButton.astro";
 import TextLink from "../../components/ui/TextLink.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../../lib/authors";
-import { getArticles, getCategories } from "../../lib/content";
-import { articlesIndexRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
-import { articlesIndexUrl } from "../../lib/routes";
+import { getAuthorEntries } from "../../lib/content/authors";
+import { getArticles, getCategories } from "../../lib/content/content";
+import { articlesIndexRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
+import { articlesIndexUrl } from "../../lib/routes/routes";
 
 const model = articlesIndexRouteViewModel({
   articles: await getArticles(),

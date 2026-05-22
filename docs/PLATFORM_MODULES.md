@@ -10,53 +10,58 @@ incidental TPM implementation details.
 
 - Content model
   Owns loading, validating, normalizing, sorting, and aggregating publishable
-  entries and editorial metadata. Current modules: `announcements`, `archive`,
-  `article-compiler`, `article-continuity`, `article-list`,
-  `article-page-view-model`,
+  entries and editorial metadata. Current modules live under
+  `src/lib/content/`: `announcements`, `archive`, `article-compiler`,
+  `article-continuity`, `article-list`, `article-page-view-model`,
   `article-view`, `authors`, `collections`, `content`,
-  `content-route-view-models`,
-  `content-schemas`, `feed`, `home`, `listing-route-view-models`,
-  `publishable`, and `tags`.
+  `content-route-view-models`, `content-schemas`, `feed`, `home`,
+  `listing-route-view-models`, `publishable`, and `tags`.
   The publishable-entry contract is documented in
   [`PUBLISHABLE_ENTRY_MODEL.md`](./PUBLISHABLE_ENTRY_MODEL.md).
 - Routes and features
-  Owns URL construction, static path helpers, optional feature routes,
-  navigation, metadata contracts, SEO, social previews, share targets, support
-  CTAs, site config, site instance paths, and redirects. Current modules:
-  `feature-routes`, `metadata`, `metadata-graph`, `navigation`,
-  `platform-context`, `semantic-profile-kinds`,
-  `route-registry`, `routes`, `semantic-metadata`, `seo`, `share-targets`,
-  `site-config`,
-  `site-config-defaults`, `site-instance`, `site-redirects`,
-  `source-artifacts`, `static-paths`, and `support`.
+  Owns URL construction, static path helpers, optional feature routes, and
+  redirects. Current modules live under `src/lib/routes/`: `feature-routes`,
+  `route-registry`, `routes`, `site-redirects`, and `static-paths`.
   Route view-model responsibilities are documented in
   [`ROUTE_VIEW_MODELS.md`](./ROUTE_VIEW_MODELS.md).
+- Site configuration and site context
+  Owns navigation, share targets, support CTAs, site config defaults, active
+  site parsing, site instance paths, source artifacts, and platform context.
+  Current modules live under `src/lib/site/`: `navigation`,
+  `platform-context`, `share-targets`, `site-config`,
+  `site-config-defaults`, `site-instance`, `source-artifacts`, and `support`.
+- Metadata and machine readability
+  Owns metadata graphs, route metadata contracts, semantic profiles, Scholar,
+  SEO, and JSON-LD helpers. Current modules live under `src/lib/metadata/`:
+  `metadata`, `metadata-graph`, `semantic-metadata`,
+  `semantic-profile-kinds`, and `seo`.
   Metadata graph and semantic profile responsibilities are documented in
   [`METADATA_GRAPH_AND_SEMANTIC_PROFILES.md`](./METADATA_GRAPH_AND_SEMANTIC_PROFILES.md).
 - Article rendering
   Owns prose-adjacent article view helpers such as embed media layout, image
-  policy, title fitting, and table-of-contents data. Current modules:
-  `article-image-policy`, `article-list-title-fit`, `article-toc`, and
+  policy, title fitting, table-of-contents data, PDF compatibility, and PDF
+  output metadata. Current modules live under `src/lib/articles/`:
+  `article-image-policy`, `article-list-title-fit`,
+  `article-pdf-compatibility`, `article-pdf`, `article-toc`, and
   `embed-media`.
 - Media policy
   Owns cross-surface media roles, provider adapters, output policies,
   fallbacks, media diagnostics, and generated media artifact expectations.
-  Current modules: `media-policy` and `social-images`. Related article image,
-  embed, PDF, and publishable media helpers consume or will consume the same
-  policy contracts; the target contract is documented in
+  Current modules live under `src/lib/media/`: `media-policy` and
+  `social-images`. Related article image, embed, PDF, and publishable media
+  helpers consume or will consume the same policy contracts; the target
+  contract is documented in
   [`MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md`](./MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md).
-- PDF and scholarly output
-  Owns article PDF compatibility, PDF output metadata, and PDF generation
-  inputs. Current modules: `article-pdf` and `article-pdf-compatibility`.
 - Output verification
   Owns shared generated-output diagnostic types, verifier module contracts,
   author-facing diagnostic taxonomy and source mapping, diagnostic aggregation,
   route-class performance budgets, cache policy evidence, performance workbench
   policy, release governance, static-output security policy, supply-chain
   policy, and machine-readable release-report shapes.
-  Current modules: `author-diagnostics`, `output-verification`,
-  `performance-budgets`, `performance-workbench`, `release-governance`, and
-  `static-output-security`, `supply-chain-policy`, and `third-party-origins`.
+  Current modules live under `src/lib/diagnostics/` and `src/lib/release/`:
+  `author-diagnostics`, `output-verification`, `performance-budgets`,
+  `performance-workbench`, `release-governance`, `static-output-security`,
+  `supply-chain-policy`, and `third-party-origins`.
   Release governance is documented in
   [`RELEASE_GOVERNANCE.md`](./RELEASE_GOVERNANCE.md).
   Static-output trust boundaries and security headers are documented in
@@ -66,15 +71,16 @@ incidental TPM implementation details.
 - Deployment adapters
   Own provider-neutral deployment request/result contracts and provider-specific
   adapter implementations that consume release artifacts without leaking host
-  mechanics across the platform. Current module: `deployment-adapters`. The
-  adapter contract is documented in
+  mechanics across the platform. Current module:
+  `src/lib/deployment/deployment-adapters.ts`. The adapter contract is
+  documented in
   [`DEPLOYMENT_ADAPTER_CONTRACT.md`](./DEPLOYMENT_ADAPTER_CONTRACT.md).
 - Observability
   Owns provider-neutral webmaster, scanner, analytics, performance, security,
   and crawler finding models plus deterministic route-linked report helpers,
   author-diagnostic bridges, and release-health comparison helpers.
-  Current modules: `observability`, `observability-diagnostics`, and
-  `observability-reports`.
+  Current modules live under `src/lib/observability/`: `observability`,
+  `observability-diagnostics`, and `observability-reports`.
   The import and report contract is documented in
   [`OBSERVABILITY_AND_WEBMASTER_REPORTS.md`](./OBSERVABILITY_AND_WEBMASTER_REPORTS.md).
 - Studio readiness
@@ -83,46 +89,49 @@ incidental TPM implementation details.
   request/response shells, provider-neutral workflow capabilities, mocked
   workflow adapters, and future GUI/CLI/MCP contracts that must consume
   existing platform source contracts instead of a parallel CMS model. Current
-  modules: `studio-forms`, `studio-models`, and `studio-workflows`. The
-  readiness contract is documented in
+  modules live under `src/lib/studio/`: `studio-forms`, `studio-models`, and
+  `studio-workflows`. The readiness contract is documented in
   [`STUDIO_READINESS_CONTRACTS.md`](./STUDIO_READINESS_CONTRACTS.md).
 - Extension architecture
   Owns typed extension manifests, capability families, extension points,
   permission declarations, disabled behavior, dependency/conflict declarations,
   migration declarations, and manifest validation diagnostics. Current module:
-  `extensions`. The extension manifest contract is documented in
+  `src/lib/extensions/extensions.ts`. The extension manifest contract is
+  documented in
   [`EXTENSION_ARCHITECTURE.md`](./EXTENSION_ARCHITECTURE.md).
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
-  citations, and global bibliography data. Current modules:
-  `article-references/*`, `bibliography`, and `citations/article-citation`.
+  citations, and global bibliography data. Current modules live under
+  `src/lib/references/`: `article-references/*`, `bibliography`, and
+  `citations/article-citation`.
   The target citation normalization contract is documented in
   [`CITATION_SOURCE_MODEL.md`](./CITATION_SOURCE_MODEL.md).
 - Interaction primitives
   Owns browser-independent positioning/disclosure logic shared by navigation,
-  popovers, clipboard surfaces, and hover/tap surfaces. Current modules:
-  `anchored-disclosure`, `anchored-positioning`, `browser-clipboard`, and
-  `interaction-primitives`.
+  popovers, clipboard surfaces, and hover/tap surfaces. Current modules live
+  under `src/lib/interactions/`: `anchored-disclosure`,
+  `anchored-positioning`, `browser-clipboard`, and `interaction-primitives`.
 - Import/export
   Owns preservation-aware migration fixtures, source-map proof shapes, and
   future import/export contracts that let CLI, MCP, studio, and migration tools
-  share one source model. Current module: `migration-fixtures`. The import,
-  export, preservation, and fixture contract is documented in
+  share one source model. Current module:
+  `src/lib/import-export/migration-fixtures.ts`. The import, export,
+  preservation, and fixture contract is documented in
   [`IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`](./IMPORT_EXPORT_AND_PRESERVATION_POLICY.md).
 - Localization
   Owns locale, route-prefix, direction, long-string, label, metadata, feed,
   search, PDF, and diagnostic fixture contracts for future localization work.
-  Current modules: `inclusive-defaults` and `localization-fixtures`. The
-  localization contract is documented in
+  Current modules live under `src/lib/localization/`: `inclusive-defaults` and
+  `localization-fixtures`. The localization contract is documented in
   [`LOCALIZATION_CONTRACTS.md`](./LOCALIZATION_CONTRACTS.md).
 - Starter templates
   Owns maintained starter-template descriptors, personas, feature matrices,
   declared checks, and distribution-readiness source contracts.
-  Current module: `starter-templates`. The starter matrix is documented in
-  [`STARTER_TEMPLATES.md`](./STARTER_TEMPLATES.md).
+  Current module: `src/lib/starters/starter-templates.ts`. The starter matrix
+  is documented in [`STARTER_TEMPLATES.md`](./STARTER_TEMPLATES.md).
 - Shared utilities
-  Owns small generic helpers that do not own domain behavior. Current modules:
-  `html` and `utils`.
+  Owns small generic helpers that do not own domain behavior. Current modules
+  live under `src/lib/shared/`: `html` and `utils`.
 
 When a new `src/lib` module is added, it should either fit one of these domains
 or the domain map should be expanded deliberately. A file that cannot be named

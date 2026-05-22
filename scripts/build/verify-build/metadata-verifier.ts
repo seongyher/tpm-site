@@ -4,12 +4,12 @@ import path from "node:path";
 import {
   createOutputDiagnostic,
   type OutputDiagnostic,
-} from "../../../src/lib/output-verification";
+} from "../../../src/lib/diagnostics/output-verification";
 import {
   maxSocialPreviewImageBytes,
   socialPreviewImageMimeType,
   socialPreviewImageSpec,
-} from "../../../src/lib/social-images";
+} from "../../../src/lib/media/social-images";
 import {
   articleJsonLdImageValues,
   articleJsonLdNodes,

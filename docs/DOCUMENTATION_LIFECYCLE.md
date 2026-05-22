@@ -85,7 +85,7 @@ must be changed first when the contract changes.
 - Package-script purpose, QA class, CI parity, mutation behavior, and runtime
   expectations are owned by `package.json` plus the QA command registry.
 - Starter-template personas, supported feature matrices, source/build/release
-  checks, and adoption guidance are owned by `src/lib/starter-templates.ts`
+  checks, and adoption guidance are owned by `src/lib/starters/starter-templates.ts`
   plus the maintained roots under `examples/starters/` and
   `examples/docs-site/`.
 - Component public contracts are owned jointly by the component implementation,
@@ -286,7 +286,7 @@ change.
 - Document kind: author guide, product contract, and fixture strategy.
 - Current surfaces: `docs/STARTER_TEMPLATES.md`,
   `examples/starters/**/README.md`, and `examples/docs-site/README.md`.
-- Owning sources: `src/lib/starter-templates.ts`, maintained starter roots,
+- Owning sources: `src/lib/starters/starter-templates.ts`, maintained starter roots,
   and starter verification logic.
 - Update trigger: starter ID, persona, feature matrix, checks, required files,
   or starter source content changes.

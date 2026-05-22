@@ -1,4 +1,7 @@
-import type { AuthorProfile, AuthorSummary } from "../../../../src/lib/authors";
+import type {
+  AuthorProfile,
+  AuthorSummary,
+} from "../../../../src/lib/content/authors";
 import { articleEntry, authorEntry } from "../../../helpers/content";
 
 /** Structured author summary fixture used by component tests. */

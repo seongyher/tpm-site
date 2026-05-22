@@ -1,0 +1,53 @@
+---
+import type { ImageMetadata } from "astro";
+
+import HomeCurrentPanel from "./HomeCurrentPanel.astro";
+import HomeHeroBlock from "./HomeHeroBlock.astro";
+import HomeStartHerePanel from "./HomeStartHerePanel.astro";
+import type { ArticleListItem } from "../../../lib/content/article-list";
+import type { SupportActionsViewModel } from "../../../lib/site/support";
+
+interface HomeCurrentLink {
+  description?: string | undefined;
+  href: string;
+  label: string;
+}
+
+interface Props {
+  currentLinks: readonly HomeCurrentLink[];
+  darkImage: ImageMetadata;
+  headingTitle: string;
+  imageAlt: string;
+  lightImage: ImageMetadata;
+  startHereItems: readonly ArticleListItem[];
+  support?: SupportActionsViewModel | undefined;
+  tagline: string;
+}
+
+const {
+  currentLinks,
+  darkImage,
+  headingTitle,
+  imageAlt,
+  lightImage,
+  startHereItems,
+  support,
+  tagline,
+} = Astro.props;
+---
+
+<div
+  class="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,1.35fr)_minmax(0,1fr)] lg:items-stretch"
+  data-home-masthead
+>
+  <HomeStartHerePanel items={startHereItems} />
+  <HomeHeroBlock
+    lightImage={lightImage}
+    darkImage={darkImage}
+    headingTitle={headingTitle}
+    imageAlt={imageAlt}
+    support={support}
+    tagline={tagline}
+  />
+  <HomeCurrentPanel links={currentLinks} />
+</div>

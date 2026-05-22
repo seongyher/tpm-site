@@ -4,10 +4,10 @@ export type {
   StarterTemplateCapabilityLevel,
   StarterTemplateChecks,
   StarterTemplateId,
-} from "../lib/starter-templates";
+} from "../lib/starters/starter-templates";
 export {
   starterTemplateById,
   starterTemplateIds,
   starterTemplateMatrix,
   starterTemplates,
-} from "../lib/starter-templates";
+} from "../lib/starters/starter-templates";

@@ -6,7 +6,7 @@ import path from "node:path";
 import {
   projectRelativePath,
   resolveSiteInstancePaths,
-} from "../../src/lib/site-instance";
+} from "../../src/lib/site/site-instance";
 
 const defaultIgnoreFile = "scripts/duplicate-image-ignore.json";
 const imageExtensionPattern =

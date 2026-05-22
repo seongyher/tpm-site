@@ -4,7 +4,7 @@ import {
   projectRelativePath,
   resolveSiteInstancePaths,
   siteInstance,
-} from "../../src/lib/site-instance";
+} from "../../src/lib/site/site-instance";
 import {
   optimizeBuildOutput,
   productionBuildOutputTransforms,

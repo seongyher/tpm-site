@@ -29,22 +29,22 @@ describe("catalog config", () => {
       "src/components/authors/AuthorPage.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
-      "src/components/articles/ArticleHeader.astro",
+      "src/components/articles/header/ArticleHeader.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
       "src/components/bibliography/BibliographyPage.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
-      "src/components/blocks/SupportBlock.astro",
+      "src/components/blocks/shared/SupportBlock.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
       "src/components/pages/MarkdownPage.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
-      "src/components/blocks/HomeHeroBlock.astro",
+      "src/components/blocks/home/HomeHeroBlock.astro",
     );
     expect(catalogExampleComponentPaths).toContain(
-      "src/components/blocks/SearchResultsBlock.astro",
+      "src/components/blocks/listing/SearchResultsBlock.astro",
     );
     expect(
       componentCatalogIgnoreList.every((entry) => entry.reason.length > 24),

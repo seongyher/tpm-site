@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, test } from "bun:test";
 
-import { routeClassPerformanceBudgets } from "../../src/lib/performance-budgets";
+import { routeClassPerformanceBudgets } from "../../src/lib/release/performance-budgets";
 
 interface LighthouseConfig {
   ci: {

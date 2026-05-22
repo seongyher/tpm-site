@@ -1,7 +1,7 @@
 import {
   type AnchoredDisclosureRuntime,
   installAnchoredDisclosure,
-} from "../lib/anchored-disclosure";
+} from "../lib/interactions/anchored-disclosure";
 
 export { type AnchoredDisclosureRuntime, installAnchoredDisclosure };
 

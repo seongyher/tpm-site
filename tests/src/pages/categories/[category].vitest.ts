@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getCategories } from "../../../../src/lib/content";
+import { getCategories } from "../../../../src/lib/content/content";
 import CategoryPage from "../../../../src/pages/categories/[category].astro";
 import {
   createAstroTestContainer,

@@ -1,4 +1,4 @@
-import type { BibliographyEntry } from "../../../../src/lib/bibliography";
+import type { BibliographyEntry } from "../../../../src/lib/references/bibliography";
 
 /** Shared bibliography entry fixture for component render tests. */
 export const bibliographyEntryFixture = {

@@ -154,7 +154,7 @@ export const qaFailureProbes = [
     intendedScripts: ["site:doctor", "site:schema:check", "test:unit"],
     leakPrevention: "inline config objects or temporary site roots",
     testPaths: [
-      "tests/src/lib/site-config.test.ts",
+      "tests/src/lib/site/site-config.test.ts",
       "tests/scripts/site/site-doctor.test.ts",
     ],
   },

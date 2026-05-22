@@ -4,7 +4,7 @@ import path from "node:path";
 import {
   projectRelativePath,
   resolveSiteInstancePaths,
-} from "../../src/lib/site-instance";
+} from "../../src/lib/site/site-instance";
 import { findAssetReferences } from "./find-shared-assets";
 
 const defaultIgnoreFile = "scripts/unused-image-ignore.json";

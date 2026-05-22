@@ -1,6 +1,6 @@
 import sampleImage from "@site/assets/shared/tpm_defaultpic.jpg";
 
-import type { ArticleListItem } from "../../../../src/lib/article-list";
+import type { ArticleListItem } from "../../../../src/lib/content/article-list";
 
 /** Article-list fixture used by article component render tests. */
 export const articleItems = [

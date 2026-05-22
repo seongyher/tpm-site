@@ -1,10 +1,10 @@
 ---
-import CategoryOverviewBlock from "../../components/blocks/CategoryOverviewBlock.astro";
+import CategoryOverviewBlock from "../../components/blocks/terms/CategoryOverviewBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCategories } from "../../lib/content";
-import { categoriesIndexRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
+import { getCategories } from "../../lib/content/content";
+import { categoriesIndexRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
 
 const model = categoriesIndexRouteViewModel(await getCategories());
 ---

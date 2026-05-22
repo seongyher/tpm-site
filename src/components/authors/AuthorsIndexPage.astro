@@ -2,8 +2,8 @@
 import Card from "../ui/Card.astro";
 import TextLink from "../ui/TextLink.astro";
 import PageHeader from "../pages/PageHeader.astro";
-import type { AuthorProfile } from "../../lib/authors";
-import { SITE_TITLE } from "../../lib/routes";
+import type { AuthorProfile } from "../../lib/content/authors";
+import { SITE_TITLE } from "../../lib/routes/routes";
 
 interface Props {
   profiles: readonly AuthorProfile[];

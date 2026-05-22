@@ -1,4 +1,4 @@
-import type { MigrationFixture } from "../../src/lib/migration-fixtures";
+import type { MigrationFixture } from "../../src/lib/import-export/migration-fixtures";
 
 /** Representative migration fixtures for portability testing. */
 export const representativeMigrationFixtures: readonly MigrationFixture[] = [

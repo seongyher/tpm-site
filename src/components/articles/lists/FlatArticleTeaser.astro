@@ -1,0 +1,12 @@
+---
+import CompactEntryRow from "./CompactEntryRow.astro";
+import type { PublishableListItem } from "../../../lib/content/article-list";
+
+interface Props {
+  item: PublishableListItem;
+}
+
+const { item } = Astro.props;
+---
+
+<CompactEntryRow item={item} data-flat-article-teaser />

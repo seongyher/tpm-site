@@ -1,7 +1,7 @@
 import {
   createOutputDiagnostic,
   type OutputDiagnostic,
-} from "../../../src/lib/output-verification";
+} from "../../../src/lib/diagnostics/output-verification";
 import { htmlAttributeValue, htmlTags } from "./html-inspection";
 
 /** Inputs used to verify rendered HTML semantics. */

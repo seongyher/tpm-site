@@ -1,8 +1,8 @@
 import { getCollection } from "astro:content";
 import { describe, expect, test } from "vitest";
 
-import { getArticles } from "../../../../src/lib/content";
-import { articleSlug } from "../../../../src/lib/routes";
+import { getArticles } from "../../../../src/lib/content/content";
+import { articleSlug } from "../../../../src/lib/routes/routes";
 import ArticlePage from "../../../../src/pages/articles/[...slug].astro";
 import {
   createAstroTestContainer,

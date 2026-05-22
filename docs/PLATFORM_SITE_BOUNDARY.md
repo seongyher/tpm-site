@@ -90,7 +90,7 @@ platform code may read validated site data through one adapter
 site files must not import platform internals
 ```
 
-During the in-repo transition, the adapter is `src/lib/site-config.ts`. It is the
+During the in-repo transition, the adapter is `src/lib/site/site-config.ts`. It is the
 only platform module allowed to read `site/config/site.json` directly. Components
 and pages should import normalized config or helpers from the adapter, never read
 site files themselves.
@@ -336,8 +336,8 @@ Completed in the config-defaults tranche:
 1. Added `features` with conservative true defaults matching current TPM output.
 2. Added `contentDefaults` with current article and announcement behavior as the
    live site default.
-3. Split reusable defaults into `src/lib/site-config-defaults.ts` while keeping
-   `src/lib/site-config.ts` as the single parser/export boundary.
+3. Split reusable defaults into `src/lib/site/site-config-defaults.ts` while keeping
+   `src/lib/site/site-config.ts` as the single parser/export boundary.
 4. Wired content schemas, publishable normalization, PDF eligibility,
    feed/search exposure, and the highest-value UI seams through those defaults.
 5. Proved non-TPM fixtures can customize defaults without editing platform code.

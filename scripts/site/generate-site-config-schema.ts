@@ -3,8 +3,11 @@ import path from "node:path";
 
 import { toJSONSchema } from "astro/zod";
 
-import { siteConfigSchema } from "../../src/lib/site-config";
-import { projectRelativePath, siteInstance } from "../../src/lib/site-instance";
+import { siteConfigSchema } from "../../src/lib/site/site-config";
+import {
+  projectRelativePath,
+  siteInstance,
+} from "../../src/lib/site/site-instance";
 
 const defaultOutputPath = path.join(
   path.dirname(siteInstance.config.site),

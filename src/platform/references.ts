@@ -1,11 +1,11 @@
-export { parseBibtexEntries } from "../lib/article-references/bibtex";
-export { extractLeadingDisplayLabel } from "../lib/article-references/display-label";
+export { parseBibtexEntries } from "../lib/references/article-references/bibtex";
+export { extractLeadingDisplayLabel } from "../lib/references/article-references/display-label";
 export {
   articleReferenceBacklinkId,
   articleReferenceEntryId,
   articleReferenceMarkerDisplayText,
   articleReferenceMarkerId,
-} from "../lib/article-references/ids";
+} from "../lib/references/article-references/ids";
 export type {
   ArticleCitation,
   ArticleNote,
@@ -23,16 +23,16 @@ export type {
   ArticleReferenceOccurrenceInput,
   ArticleReferencesNormalizeResult,
   ParsedBibtexEntry,
-} from "../lib/article-references/model";
+} from "../lib/references/article-references/model";
 export {
   classifyArticleReferenceLabel,
   normalizeArticleReferences,
-} from "../lib/article-references/normalize";
+} from "../lib/references/article-references/normalize";
 export type {
   CitationSourceCslJson,
   CitationSourceIdentity,
   NormalizedCitationSource,
-} from "../lib/article-references/source";
+} from "../lib/references/article-references/source";
 export {
   citationSourceBibtexExport,
   citationSourceCslJson,
@@ -40,8 +40,8 @@ export {
   citationSourceIdentityKey,
   citationSourceRisExport,
   normalizedCitationSource,
-} from "../lib/article-references/source";
+} from "../lib/references/article-references/source";
 export {
   articleReferenceDiagnosticMessage,
   hasArticleReferenceDiagnostics,
-} from "../lib/article-references/validate";
+} from "../lib/references/article-references/validate";

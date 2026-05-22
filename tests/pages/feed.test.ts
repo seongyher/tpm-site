@@ -1,6 +1,6 @@
 import { describe, expect, mock, test } from "bun:test";
 
-import { defaultPublishableVisibility } from "../../src/lib/publishable";
+import { defaultPublishableVisibility } from "../../src/lib/content/publishable";
 
 await mock.module("astro:content", () => ({
   getCollection: async (collection: string) => {

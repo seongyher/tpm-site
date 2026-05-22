@@ -1,0 +1,51 @@
+---
+import TextLink from "../../ui/TextLink.astro";
+import type { SemanticDetailsViewModel } from "../../../lib/metadata/semantic-metadata";
+
+interface Props {
+  details?: SemanticDetailsViewModel | undefined;
+}
+
+const { details } = Astro.props;
+---
+
+{
+  details && details.items.length > 0 && (
+    <aside
+      class="border-border max-w-4xl min-w-0 border-y py-3 text-sm"
+      aria-label={details.heading}
+      data-semantic-details
+    >
+      <div class="grid min-w-0 gap-3">
+        <div class="grid min-w-0 gap-1">
+          <h2 class="text-foreground m-0 text-base font-semibold tracking-normal">
+            {details.heading}
+          </h2>
+          {details.description && (
+            <p class="text-muted-foreground m-0 leading-6">
+              {details.description}
+            </p>
+          )}
+        </div>
+        <dl class="grid min-w-0 gap-x-6 gap-y-2 sm:grid-cols-2">
+          {details.items.map((item) => (
+            <div class="grid min-w-0 gap-0.5">
+              <dt class="text-muted-foreground text-xs font-medium tracking-normal uppercase">
+                {item.label}
+              </dt>
+              <dd class="text-foreground m-0 min-w-0 break-words">
+                {item.href ? (
+                  <TextLink href={item.href} prefetch={false}>
+                    {item.value}
+                  </TextLink>
+                ) : (
+                  item.value
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </aside>
+  )
+}

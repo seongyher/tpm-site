@@ -276,7 +276,7 @@ but the shared vocabulary still keeps defaults and diagnostics consistent.
 
 ## Implementation Sequence
 
-1. Expand the type contract in `src/lib/publishable.ts`.
+1. Expand the type contract in `src/lib/content/publishable.ts`.
 2. Expand the content/schema visibility vocabulary.
 3. Update article and announcement conversion helpers.
 4. Migrate consumers to derived publishable shapes.

@@ -21,7 +21,7 @@ export type {
   ManualDeploymentStep,
   ProviderReport,
   StaticFolderDeploymentRequest,
-} from "../lib/deployment-adapters";
+} from "../lib/deployment/deployment-adapters";
 export {
   cloudflareWorkersStaticAssetsCapabilities,
   createCloudflareWorkersStaticAssetsDeploymentPlan,
@@ -30,4 +30,4 @@ export {
   parseCloudflareStaticRedirectRules,
   parseCloudflareWorkersStaticAssetsConfig,
   staticFolderDeploymentCapabilities,
-} from "../lib/deployment-adapters";
+} from "../lib/deployment/deployment-adapters";

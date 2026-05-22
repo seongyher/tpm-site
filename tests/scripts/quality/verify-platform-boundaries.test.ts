@@ -11,9 +11,9 @@ import {
 } from "../../../scripts/quality/verify-platform-boundaries";
 
 const ownedLibFiles = [
-  "src/lib/routes.ts",
-  "src/lib/site-config.ts",
-  "src/lib/utils.ts",
+  "src/lib/routes/routes.ts",
+  "src/lib/site/site-config.ts",
+  "src/lib/shared/utils.ts",
 ].map((path) => ({ path, text: "export const value = true;\n" }));
 
 describe("platform boundary verifier", () => {
@@ -23,7 +23,7 @@ describe("platform boundary verifier", () => {
         ...ownedLibFiles,
         {
           path: "src/platform/routes.ts",
-          text: 'export { routeOutputPath } from "../lib/route-registry";\n',
+          text: 'export { routeOutputPath } from "../lib/routes/route-registry";\n',
         },
         {
           path: "src/layouts/BaseLayout.astro",
@@ -68,7 +68,7 @@ describe("platform boundary verifier", () => {
         ...ownedLibFiles,
         {
           path: "src/platform/surprise.ts",
-          text: 'export { value } from "../lib/routes";\n',
+          text: 'export { value } from "../lib/routes/routes";\n',
         },
       ],
       rootDir: ".",
@@ -86,7 +86,7 @@ describe("platform boundary verifier", () => {
         ...ownedLibFiles,
         {
           path: "src/platform/routes.ts",
-          text: 'export { ArticleList } from "../components/articles/ArticleList.astro";\n',
+          text: 'export { ArticleList } from "../components/articles/lists/ArticleList.astro";\n',
         },
       ],
       rootDir: ".",
@@ -96,7 +96,7 @@ describe("platform boundary verifier", () => {
       {
         file: "src/platform/routes.ts",
         message:
-          'Unsupported platform-entrypoint import "../components/articles/ArticleList.astro". Entrypoints may only re-export local entrypoints or src/lib domain modules.',
+          'Unsupported platform-entrypoint import "../components/articles/lists/ArticleList.astro". Entrypoints may only re-export local entrypoints or src/lib domain modules.',
       },
     ]);
     expect(formatPlatformBoundaryReport(result)).toContain(
@@ -110,7 +110,7 @@ describe("platform boundary verifier", () => {
         ...ownedLibFiles,
         {
           path: "extensions/example/index.ts",
-          text: 'import { routeOutputPath } from "../../src/lib/route-registry";\n',
+          text: 'import { routeOutputPath } from "../../src/lib/routes/route-registry";\n',
         },
         {
           path: "extensions/allowed/index.ts",
@@ -124,7 +124,7 @@ describe("platform boundary verifier", () => {
       {
         file: "extensions/example/index.ts",
         message:
-          'Unsupported extension import "../../src/lib/route-registry". Extensions must use platform entrypoints instead of reaching into site, src/lib, components, pages, scripts, or tests directly.',
+          'Unsupported extension import "../../src/lib/routes/route-registry". Extensions must use platform entrypoints instead of reaching into site, src/lib, components, pages, scripts, or tests directly.',
       },
     ]);
     expect(formatPlatformBoundaryReport(result)).toContain(
@@ -209,17 +209,19 @@ describe("platform boundary verifier", () => {
     const rootDir = mkdtempSync(path.join(os.tmpdir(), "platform-boundary-"));
 
     try {
-      mkdirSync(path.join(rootDir, "src/lib"), { recursive: true });
+      mkdirSync(path.join(rootDir, "src/lib/routes"), { recursive: true });
+      mkdirSync(path.join(rootDir, "src/lib/site"), { recursive: true });
+      mkdirSync(path.join(rootDir, "src/lib/shared"), { recursive: true });
       writeFileSync(
-        path.join(rootDir, "src/lib/routes.ts"),
+        path.join(rootDir, "src/lib/routes/routes.ts"),
         "export const routes = true;\n",
       );
       writeFileSync(
-        path.join(rootDir, "src/lib/site-config.ts"),
+        path.join(rootDir, "src/lib/site/site-config.ts"),
         "export const config = true;\n",
       );
       writeFileSync(
-        path.join(rootDir, "src/lib/utils.ts"),
+        path.join(rootDir, "src/lib/shared/utils.ts"),
         "export const utils = true;\n",
       );
       writeFileSync(

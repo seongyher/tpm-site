@@ -79,7 +79,7 @@ await mock.module("astro:content", () => ({
 }));
 
 const { getArticles, getCategories, getCategory } =
-  await import("../../src/lib/content");
+  await import("../../src/lib/content/content");
 
 describe("content helpers", () => {
   test("returns published articles newest first", async () => {

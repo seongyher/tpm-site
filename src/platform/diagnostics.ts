@@ -5,7 +5,7 @@ export type {
   AuthorDiagnosticInput,
   AuthorDiagnosticRepairOwner,
   AuthorDiagnosticReport,
-} from "../lib/author-diagnostics";
+} from "../lib/diagnostics/author-diagnostics";
 export {
   authorDiagnosticCategories,
   authorDiagnosticFixabilities,
@@ -14,7 +14,7 @@ export {
   authorDiagnosticSources,
   createAuthorDiagnostic,
   createAuthorDiagnosticReport,
-} from "../lib/author-diagnostics";
+} from "../lib/diagnostics/author-diagnostics";
 export type {
   OutputDiagnostic,
   OutputDiagnosticCategory,
@@ -24,7 +24,7 @@ export type {
   OutputVerificationReport,
   OutputVerifierContext,
   OutputVerifierModule,
-} from "../lib/output-verification";
+} from "../lib/diagnostics/output-verification";
 export {
   createOutputDiagnostic,
   createOutputVerificationReport,
@@ -32,4 +32,4 @@ export {
   hasBlockingOutputDiagnostics,
   outputDiagnosticIdentity,
   runOutputVerifierModules,
-} from "../lib/output-verification";
+} from "../lib/diagnostics/output-verification";

@@ -4,14 +4,14 @@ import { render } from "astro:content";
 import AuthorPage from "../../components/authors/AuthorPage.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries, getAuthorProfiles } from "../../lib/authors";
-import { getCategories } from "../../lib/content";
-import { authorDetailRouteViewModel } from "../../lib/listing-route-view-models";
+import { getAuthorEntries, getAuthorProfiles } from "../../lib/content/authors";
+import { getCategories } from "../../lib/content/content";
+import { authorDetailRouteViewModel } from "../../lib/content/listing-route-view-models";
 import {
   breadcrumbListJsonLd,
   itemListJsonLd,
   profileEntityJsonLd,
-} from "../../lib/metadata";
+} from "../../lib/metadata/metadata";
 
 /**
  * Generates one static author route for each public author profile.

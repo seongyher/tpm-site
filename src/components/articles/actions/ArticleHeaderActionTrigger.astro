@@ -1,0 +1,29 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import { articleHeaderActionClasses } from "./article-header-actions";
+import AnchoredTrigger from "../../ui/AnchoredTrigger.astro";
+
+/** Internal anchored button trigger for article header actions. */
+interface Props extends HTMLAttributes<"button"> {
+  label: string;
+}
+
+const {
+  label,
+  type = "button",
+  class: className,
+  "aria-label": ariaLabel = label,
+  ...attrs
+} = Astro.props;
+---
+
+<AnchoredTrigger
+  {...attrs}
+  as="button"
+  type={type}
+  aria-label={ariaLabel}
+  class:list={[articleHeaderActionClasses, className]}
+>
+  <slot />
+</AnchoredTrigger>

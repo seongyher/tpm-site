@@ -54,15 +54,15 @@ blocked public docs IA milestone to land now.
 
 Generated sections should name their owning source.
 
-| Section              | Owning Source                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------- |
-| Site config fields   | `src/lib/site-config.ts` and generated JSON Schema                                                 |
-| Frontmatter fields   | `src/lib/content-schemas.ts`                                                                       |
-| Routes and features  | `src/lib/route-registry.ts`, `src/lib/site-config-defaults.ts`, and active `site/config/site.json` |
-| Visibility surfaces  | `src/lib/site-config-defaults.ts` and content schema visibility defaults                           |
-| Metadata profiles    | `src/lib/semantic-profile-kinds.ts`                                                                |
-| Media/PDF vocabulary | `docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md` until promoted to typed policy constants              |
-| QA commands          | `package.json` and `scripts/quality/qa-command-registry.ts`                                        |
+| Section              | Owning Source                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Site config fields   | `src/lib/site/site-config.ts` and generated JSON Schema                                                        |
+| Frontmatter fields   | `src/lib/content/content-schemas.ts`                                                                           |
+| Routes and features  | `src/lib/routes/route-registry.ts`, `src/lib/site/site-config-defaults.ts`, and active `site/config/site.json` |
+| Visibility surfaces  | `src/lib/site/site-config-defaults.ts` and content schema visibility defaults                                  |
+| Metadata profiles    | `src/lib/metadata/semantic-profile-kinds.ts`                                                                   |
+| Media/PDF vocabulary | `docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md` until promoted to typed policy constants                          |
+| QA commands          | `package.json` and `scripts/quality/qa-command-registry.ts`                                                    |
 
 When a source changes, the generated reference should change or the check
 command should prove no output change is needed.

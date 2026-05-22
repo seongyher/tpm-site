@@ -1,10 +1,10 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAnnouncements } from "../../lib/content";
-import { announcementsIndexRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
+import { getAnnouncements } from "../../lib/content/content";
+import { announcementsIndexRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
 
 const model = announcementsIndexRouteViewModel(await getAnnouncements());
 ---

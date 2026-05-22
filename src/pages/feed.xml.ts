@@ -1,11 +1,11 @@
 import rss from "@astrojs/rss";
 import type { APIContext } from "astro";
 
-import { getAuthorEntries } from "../lib/authors";
-import { getAnnouncements, getArticles } from "../lib/content";
-import { publishableFeedEntries } from "../lib/feed";
-import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../lib/routes";
-import { siteConfig } from "../lib/site-config";
+import { getAuthorEntries } from "../lib/content/authors";
+import { getAnnouncements, getArticles } from "../lib/content/content";
+import { publishableFeedEntries } from "../lib/content/feed";
+import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "../lib/routes/routes";
+import { siteConfig } from "../lib/site/site-config";
 
 type FeedContext = Pick<APIContext, "site">;
 

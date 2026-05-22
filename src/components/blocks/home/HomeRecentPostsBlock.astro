@@ -1,0 +1,32 @@
+---
+import CompactEntryList from "../../articles/lists/CompactEntryList.astro";
+import type { ArticleListItem } from "../../../lib/content/article-list";
+
+interface Props {
+  items: readonly ArticleListItem[];
+  title?: string;
+}
+
+const { items, title = "Most Recent" } = Astro.props;
+---
+
+<section
+  class="grid min-w-0 content-start gap-4"
+  aria-labelledby="home-recent-heading"
+  data-home-recent-posts
+>
+  <h2
+    id="home-recent-heading"
+    class="text-foreground m-0 text-2xl font-semibold tracking-normal"
+  >
+    {title}
+  </h2>
+  {
+    (
+      <CompactEntryList
+        items={items}
+        emptyText="Recent articles will appear here."
+      />
+    )
+  }
+</section>

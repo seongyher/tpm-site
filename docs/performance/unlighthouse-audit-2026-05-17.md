@@ -31,15 +31,15 @@ source files.
 
 Key source ownership:
 
-- Homepage carousel: `src/components/blocks/HomeFeaturedCarousel.astro`,
-  `src/components/blocks/HomeFeaturedSlide.astro`, and
+- Homepage carousel: `src/components/blocks/home/HomeFeaturedCarousel.astro`,
+  `src/components/blocks/home/HomeFeaturedSlide.astro`, and
   `src/scripts/home-featured-carousel.ts`.
-- Publishable/list media: `src/components/articles/PublishableMediaFrame.astro`
-  and `src/components/articles/ArticleCard.astro`.
+- Publishable/list media: `src/components/articles/media/PublishableMediaFrame.astro`
+  and `src/components/articles/lists/ArticleCard.astro`.
 - Branded CTA logo sizing: `src/components/ui/BrandButton.astro`, used by
   `src/components/ui/PatreonButton.astro`,
   `src/components/ui/DiscordButton.astro`, and
-  `src/components/blocks/SupportBlock.astro`.
+  `src/components/blocks/shared/SupportBlock.astro`.
 - Anchored-positioning request chain: `src/components/ui/AnchoredRoot.astro`
   and `src/scripts/anchored-positioning.ts`.
 - Global render-blocking CSS: `src/layouts/BaseLayout.astro`,
@@ -177,8 +177,8 @@ flags that it lacks `fetchpriority="high"`.
 
 Source:
 
-- `src/components/blocks/HomeFeaturedSlide.astro`
-- `src/components/articles/PublishableMediaFrame.astro`
+- `src/components/blocks/home/HomeFeaturedSlide.astro`
+- `src/components/articles/media/PublishableMediaFrame.astro`
 
 Recommended implementation:
 

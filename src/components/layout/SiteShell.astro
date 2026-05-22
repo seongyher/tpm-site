@@ -2,11 +2,11 @@
 import MainFrame from "./MainFrame.astro";
 import SiteFooter from "./SiteFooter.astro";
 import SiteHeader from "./SiteHeader.astro";
-import { getCategories } from "../../lib/content";
+import { getCategories } from "../../lib/content/content";
 import {
   primaryNavigationItems,
   sectionNavigationItems,
-} from "../../lib/navigation";
+} from "../../lib/site/navigation";
 
 const currentPath = Astro.url.pathname;
 const categoryItems = sectionNavigationItems(

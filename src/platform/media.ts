@@ -17,7 +17,7 @@ export type {
   PublishableMediaFallbackPolicy,
   SocialPreviewMediaPolicy,
   SocialPreviewMediaTransform,
-} from "../lib/media-policy";
+} from "../lib/media/media-policy";
 export {
   articleImageRolePolicy,
   articleMdxPdfCompatibilityPolicies,
@@ -35,4 +35,4 @@ export {
   publishableMediaFallbackPolicy,
   socialPreviewMediaPolicy,
   socialPreviewMediaTransform,
-} from "../lib/media-policy";
+} from "../lib/media/media-policy";

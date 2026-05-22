@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { parseSiteConfig } from "../../../src/lib/site-config";
+import { parseSiteConfig } from "../../../src/lib/site/site-config";
 import {
   createLocalizationFixtureReport,
   inclusiveDefaultIssues,

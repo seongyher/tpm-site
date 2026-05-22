@@ -1,10 +1,13 @@
 ---
-import type { AnnouncementEntry } from "../../lib/routes";
-import { announcementUrl } from "../../lib/routes";
-import { jsonLdGraph } from "../../lib/metadata";
-import { semanticMetadataJsonLd } from "../../lib/semantic-metadata";
-import { publishableBlogPostingJsonLd, safeJsonLd } from "../../lib/seo";
-import type { SocialPreviewImage } from "../../lib/social-images";
+import type { AnnouncementEntry } from "../../lib/routes/routes";
+import { announcementUrl } from "../../lib/routes/routes";
+import { jsonLdGraph } from "../../lib/metadata/metadata";
+import { semanticMetadataJsonLd } from "../../lib/metadata/semantic-metadata";
+import {
+  publishableBlogPostingJsonLd,
+  safeJsonLd,
+} from "../../lib/metadata/seo";
+import type { SocialPreviewImage } from "../../lib/media/social-images";
 
 interface Props {
   announcement: AnnouncementEntry;

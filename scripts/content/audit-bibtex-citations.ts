@@ -3,9 +3,9 @@ import path from "node:path";
 
 import matter from "gray-matter";
 
-import { parseBibtexEntries } from "../../src/lib/article-references/bibtex";
-import type { ParsedBibtexEntry } from "../../src/lib/article-references/model";
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { parseBibtexEntries } from "../../src/lib/references/article-references/bibtex";
+import type { ParsedBibtexEntry } from "../../src/lib/references/article-references/model";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 
 /** Options for the complete BibTeX citation audit. */
 export interface BibtexCitationAuditOptions {

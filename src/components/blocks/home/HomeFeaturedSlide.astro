@@ -1,0 +1,92 @@
+---
+import EntryMetaLine from "../../articles/lists/EntryMetaLine.astro";
+import PublishableMediaFrame from "../../articles/media/PublishableMediaFrame.astro";
+import TextLink from "../../ui/TextLink.astro";
+import type { HomeFeaturedItem } from "../../../lib/content/home";
+
+interface Props {
+  fallbackLabel?: string | undefined;
+  index: number;
+  item: HomeFeaturedItem;
+}
+
+const { fallbackLabel = "Blog", index, item } = Astro.props;
+const isActive = index === 0;
+const hasBody = Astro.slots.has("default");
+const metaParts = [item.category?.title, item.date].filter(
+  (part): part is string => part !== undefined && part !== "",
+);
+const linkPrefetch = item.href.startsWith("/") ? "hover" : undefined;
+const linkPrefetchAttrs =
+  linkPrefetch === undefined ? {} : { prefetch: linkPrefetch as "hover" };
+const mediaClasses = [
+  "order-first aspect-[4/3] md:order-last md:self-start",
+  item.image ? "bg-muted" : "bg-foreground text-background",
+].join(" ");
+---
+
+<article
+  class="col-start-1 row-start-1 grid h-full min-h-0 min-w-0 content-start gap-4 transition-opacity data-[home-featured-active=false]:pointer-events-none data-[home-featured-active=false]:invisible data-[home-featured-active=false]:opacity-0 md:grid-cols-[minmax(0,1fr)_minmax(9rem,14rem)] md:items-start"
+  data-home-featured-slide
+  data-home-featured-active={isActive ? "true" : "false"}
+  aria-hidden={isActive ? "false" : "true"}
+  hidden={!isActive}
+>
+  <div class="grid min-w-0 content-start gap-3" data-home-featured-copy>
+    <EntryMetaLine
+      as="div"
+      items={metaParts}
+      hideWhenEmpty={false}
+      class="min-h-4 leading-4 font-semibold uppercase"
+      data-home-featured-meta
+    />
+    <h2
+      class="text-foreground m-0 line-clamp-2 min-w-0 text-2xl leading-tight font-semibold tracking-normal"
+      data-home-featured-title
+    >
+      <TextLink
+        href={item.href}
+        variant="subtle"
+        tone="neutral"
+        {...linkPrefetchAttrs}
+      >
+        {item.title}
+      </TextLink>
+    </h2>
+    {
+      item.description && (
+        <p class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6">
+          {item.description}
+        </p>
+      )
+    }
+    {
+      item.note && (
+        <p class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6">
+          {item.note}
+        </p>
+      )
+    }
+    {
+      hasBody && (
+        <div class="text-muted-foreground line-clamp-3 text-sm leading-6">
+          <slot />
+        </div>
+      )
+    }
+  </div>
+  <PublishableMediaFrame
+    href={item.href}
+    label={`Read ${item.title}`}
+    image={item.image}
+    fallbackLabel={fallbackLabel}
+    renderWidth={480}
+    renderHeight={360}
+    fetchpriority={isActive ? "high" : undefined}
+    loading={isActive ? "eager" : "lazy"}
+    prefetch={linkPrefetch}
+    class:list={[mediaClasses]}
+    data-home-featured-media
+    data-home-featured-fallback-image={item.image ? undefined : true}
+  />
+</article>

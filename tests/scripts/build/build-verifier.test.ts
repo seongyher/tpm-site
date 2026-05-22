@@ -21,8 +21,8 @@ import {
   staticReadingPagesForSource,
   verifyBuild,
 } from "../../../scripts/build/verify-build";
-import { parseSiteConfig } from "../../../src/lib/site-config";
-import { maxSocialPreviewImageBytes } from "../../../src/lib/social-images";
+import { maxSocialPreviewImageBytes } from "../../../src/lib/media/social-images";
+import { parseSiteConfig } from "../../../src/lib/site/site-config";
 
 function publication(): ArticlePublication {
   return {

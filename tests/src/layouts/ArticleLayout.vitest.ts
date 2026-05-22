@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
 
 import ArticleLayout from "../../../src/layouts/ArticleLayout.astro";
-import { articleTableOfContentsHeadings } from "../../../src/lib/article-toc";
-import { getArticles } from "../../../src/lib/content";
-import { articleSlug } from "../../../src/lib/routes";
+import { articleTableOfContentsHeadings } from "../../../src/lib/articles/article-toc";
+import { getArticles } from "../../../src/lib/content/content";
+import { articleSlug } from "../../../src/lib/routes/routes";
 import {
   createAstroTestContainer,
   testSiteUrl,

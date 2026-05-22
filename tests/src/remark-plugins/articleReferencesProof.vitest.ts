@@ -2,8 +2,8 @@ import { getCollection, render } from "astro:content";
 import { describe, expect, test } from "vitest";
 
 import ArticleLayout from "../../../src/layouts/ArticleLayout.astro";
-import type { ArticleReferenceData } from "../../../src/lib/article-references/model";
-import { getArticles } from "../../../src/lib/content";
+import { getArticles } from "../../../src/lib/content/content";
+import type { ArticleReferenceData } from "../../../src/lib/references/article-references/model";
 import { articleReferencesFromFrontmatter } from "../../../src/remark-plugins/articleReferences";
 import {
   createAstroTestContainer,

@@ -1,7 +1,7 @@
 import type { Root } from "mdast";
 import { visit } from "unist-util-visit";
 
-import { parseBibtexEntries } from "../lib/article-references/bibtex";
+import { parseBibtexEntries } from "../lib/references/article-references/bibtex";
 import type {
   ArticleReferenceBlockContent,
   ArticleReferenceData,
@@ -10,12 +10,12 @@ import type {
   ArticleReferenceMarker,
   ArticleReferenceOccurrenceInput,
   ParsedBibtexEntry,
-} from "../lib/article-references/model";
+} from "../lib/references/article-references/model";
 import {
   classifyArticleReferenceLabel,
   normalizeArticleReferences,
-} from "../lib/article-references/normalize";
-import { articleReferenceDiagnosticMessage } from "../lib/article-references/validate";
+} from "../lib/references/article-references/normalize";
+import { articleReferenceDiagnosticMessage } from "../lib/references/article-references/validate";
 
 const frontmatterKey = "articleReferences";
 

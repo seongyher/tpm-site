@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import SiteHeader from "../../../../src/components/layout/SiteHeader.astro";
-import { primaryNavigationItems } from "../../../../src/lib/navigation";
+import { primaryNavigationItems } from "../../../../src/lib/site/navigation";
 import { createAstroTestContainer } from "../../../helpers/astro-container";
 import { navigationItems } from "../navigation/navigation-fixture";
 

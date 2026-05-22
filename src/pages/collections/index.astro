@@ -1,10 +1,10 @@
 ---
-import TermOverviewBlock from "../../components/blocks/TermOverviewBlock.astro";
+import TermOverviewBlock from "../../components/blocks/terms/TermOverviewBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getEditorialCollections } from "../../lib/content";
-import { collectionsIndexRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
+import { getEditorialCollections } from "../../lib/content/content";
+import { collectionsIndexRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
 
 const model = collectionsIndexRouteViewModel(await getEditorialCollections());
 ---

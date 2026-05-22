@@ -186,11 +186,11 @@ and tag pages line up with article preview images.
 
 The primary article-list source path was:
 
-- `src/lib/archive.ts` mapped preview images as
+- `src/lib/content/archive.ts` mapped preview images as
   `alt: article.data.imageAlt ?? ""`.
-- `src/components/articles/ArticleCard.astro:84` renders that value through
+- `src/components/articles/lists/ArticleCard.astro:84` renders that value through
   Astro's `<Image alt={image.alt} />`.
-- `src/lib/content-schemas.ts:144` allows `imageAlt` to be optional.
+- `src/lib/content/content-schemas.ts` allows `imageAlt` to be optional.
 
 That meant any article with `image` but without `imageAlt` produced an article
 preview image with empty alt text on archive, author, category, and tag pages.

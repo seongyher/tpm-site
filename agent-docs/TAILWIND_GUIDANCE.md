@@ -72,9 +72,9 @@ the class list looks long. Long utility lists are acceptable when they describe
 a real component once. Repeated utility lists should become reusable components,
 not global CSS.
 
-Use `src/lib/utils.ts` `cn()` for React class composition. It combines `clsx`
-with `tailwind-merge`, so conditional classes are readable and conflicts are
-resolved intentionally.
+Use `src/lib/shared/utils.ts` `cn()` for React class composition. It combines
+`clsx` with `tailwind-merge`, so conditional classes are readable and
+conflicts are resolved intentionally.
 
 ## Responsive Design
 

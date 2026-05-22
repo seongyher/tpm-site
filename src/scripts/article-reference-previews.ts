@@ -1,7 +1,7 @@
 import {
   anchoredPresetConfig,
   computeAnchoredPosition,
-} from "../lib/anchored-positioning";
+} from "../lib/interactions/anchored-positioning";
 
 const markerSelector = 'a[data-article-reference-marker="true"]';
 const backlinkSelector = 'a[data-article-reference-backlink="true"]';

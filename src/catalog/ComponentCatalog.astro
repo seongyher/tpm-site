@@ -14,36 +14,36 @@ import BibliographyEntry from "../components/bibliography/BibliographyEntry.astr
 import BibliographyList from "../components/bibliography/BibliographyList.astro";
 import BibliographyPage from "../components/bibliography/BibliographyPage.astro";
 import BibliographySourceArticles from "../components/bibliography/BibliographySourceArticles.astro";
-import ArticleCard from "../components/articles/ArticleCard.astro";
-import ArticleBibliography from "../components/articles/ArticleBibliography.astro";
-import ArticleCitationMenu from "../components/articles/ArticleCitationMenu.astro";
-import ArticleEndcap from "../components/articles/ArticleEndcap.astro";
-import ArticleFootnotes from "../components/articles/ArticleFootnotes.astro";
-import ArticleHeader from "../components/articles/ArticleHeader.astro";
-import ArticleShareMenu from "../components/articles/ArticleShareMenu.astro";
-import HoverImageCard from "../components/articles/HoverImageCard.astro";
-import ArticleImage from "../components/articles/ArticleImage.astro";
-import ArticleList from "../components/articles/ArticleList.astro";
-import ArticleMeta from "../components/articles/ArticleMeta.astro";
-import ArticleProse from "../components/articles/ArticleProse.astro";
-import ArticleReferenceBacklinks from "../components/articles/ArticleReferenceBacklinks.astro";
-import ArticleReferences from "../components/articles/ArticleReferences.astro";
-import ArticleTableOfContents from "../components/articles/ArticleTableOfContents.astro";
-import ArticleTags from "../components/articles/ArticleTags.astro";
-import ArchiveListBlock from "../components/blocks/ArchiveListBlock.astro";
-import CategoryOverviewBlock from "../components/blocks/CategoryOverviewBlock.astro";
-import CategoryRailBlock from "../components/blocks/CategoryRailBlock.astro";
-import HomeAnnouncementBlock from "../components/blocks/HomeAnnouncementBlock.astro";
-import HomeArchiveLinksBlock from "../components/blocks/HomeArchiveLinksBlock.astro";
-import HomeCategoryOverviewBlock from "../components/blocks/HomeCategoryOverviewBlock.astro";
-import HomeFeaturedArticlesBlock from "../components/blocks/HomeFeaturedArticlesBlock.astro";
-import HomeHeroBlock from "../components/blocks/HomeHeroBlock.astro";
-import HomeLatestArticleBlock from "../components/blocks/HomeLatestArticleBlock.astro";
-import MoreInCategoryBlock from "../components/articles/MoreInCategoryBlock.astro";
-import NextArticleBlock from "../components/articles/NextArticleBlock.astro";
-import RelatedArticlesBlock from "../components/articles/RelatedArticlesBlock.astro";
-import SearchResultsBlock from "../components/blocks/SearchResultsBlock.astro";
-import SupportBlock from "../components/blocks/SupportBlock.astro";
+import ArticleCard from "../components/articles/lists/ArticleCard.astro";
+import ArticleBibliography from "../components/articles/references/ArticleBibliography.astro";
+import ArticleCitationMenu from "../components/articles/actions/ArticleCitationMenu.astro";
+import ArticleEndcap from "../components/articles/endcap/ArticleEndcap.astro";
+import ArticleFootnotes from "../components/articles/references/ArticleFootnotes.astro";
+import ArticleHeader from "../components/articles/header/ArticleHeader.astro";
+import ArticleShareMenu from "../components/articles/actions/ArticleShareMenu.astro";
+import HoverImageCard from "../components/articles/media/HoverImageCard.astro";
+import ArticleImage from "../components/articles/media/ArticleImage.astro";
+import ArticleList from "../components/articles/lists/ArticleList.astro";
+import ArticleMeta from "../components/articles/header/ArticleMeta.astro";
+import ArticleProse from "../components/articles/prose/ArticleProse.astro";
+import ArticleReferenceBacklinks from "../components/articles/references/ArticleReferenceBacklinks.astro";
+import ArticleReferences from "../components/articles/references/ArticleReferences.astro";
+import ArticleTableOfContents from "../components/articles/toc/ArticleTableOfContents.astro";
+import ArticleTags from "../components/articles/header/ArticleTags.astro";
+import ArchiveListBlock from "../components/blocks/listing/ArchiveListBlock.astro";
+import CategoryOverviewBlock from "../components/blocks/terms/CategoryOverviewBlock.astro";
+import CategoryRailBlock from "../components/blocks/terms/CategoryRailBlock.astro";
+import HomeAnnouncementBlock from "../components/blocks/home/HomeAnnouncementBlock.astro";
+import HomeArchiveLinksBlock from "../components/blocks/home/HomeArchiveLinksBlock.astro";
+import HomeCategoryOverviewBlock from "../components/blocks/home/HomeCategoryOverviewBlock.astro";
+import HomeFeaturedArticlesBlock from "../components/blocks/home/HomeFeaturedArticlesBlock.astro";
+import HomeHeroBlock from "../components/blocks/home/HomeHeroBlock.astro";
+import HomeLatestArticleBlock from "../components/blocks/home/HomeLatestArticleBlock.astro";
+import MoreInCategoryBlock from "../components/articles/endcap/MoreInCategoryBlock.astro";
+import NextArticleBlock from "../components/articles/endcap/NextArticleBlock.astro";
+import RelatedArticlesBlock from "../components/articles/endcap/RelatedArticlesBlock.astro";
+import SearchResultsBlock from "../components/blocks/listing/SearchResultsBlock.astro";
+import SupportBlock from "../components/blocks/shared/SupportBlock.astro";
 import MainFrame from "../components/layout/MainFrame.astro";
 import PageFrame from "../components/layout/PageFrame.astro";
 import PriorityInlineRow from "../components/layout/PriorityInlineRow.astro";
@@ -88,10 +88,10 @@ import {
   longTranslatedActionLabel,
 } from "./examples/hostile-fixtures";
 import UiPrimitivesCatalogSection from "./sections/UiPrimitivesCatalogSection.astro";
-import { getAuthorProfiles } from "../lib/authors";
-import { articleImagePresentation } from "../lib/article-image-policy";
-import type { BibliographyEntry as BibliographyEntryViewModel } from "../lib/bibliography";
-import { primaryNavigationItems } from "../lib/navigation";
+import { getAuthorProfiles } from "../lib/content/authors";
+import { articleImagePresentation } from "../lib/articles/article-image-policy";
+import type { BibliographyEntry as BibliographyEntryViewModel } from "../lib/references/bibliography";
+import { primaryNavigationItems } from "../lib/site/navigation";
 
 const catalogPublicationName = "Catalog Review Site";
 const catalogAuthorName = "Catalog Fixture";
@@ -556,7 +556,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleHeader"
         description="Title block with category, metadata, citation utility, and description."
-        componentPath="src/components/articles/ArticleHeader.astro"
+        componentPath="src/components/articles/header/ArticleHeader.astro"
       >
         <ArticleHeader
           author={catalogAuthorName}
@@ -573,7 +573,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleCitationMenu"
         description="Generated citation copy utility with visible no-JavaScript text."
-        componentPath="src/components/articles/ArticleCitationMenu.astro"
+        componentPath="src/components/articles/actions/ArticleCitationMenu.astro"
       >
         <ArticleCitationMenu citation={catalogArticleCitation} />
       </CatalogExample>
@@ -581,7 +581,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleShareMenu"
         description="Article share utility with copy, email, and social targets."
-        componentPath="src/components/articles/ArticleShareMenu.astro"
+        componentPath="src/components/articles/actions/ArticleShareMenu.astro"
       >
         <ArticleShareMenu share={catalogArticleShare} />
       </CatalogExample>
@@ -589,7 +589,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleMeta"
         description="Author and machine-readable date metadata."
-        componentPath="src/components/articles/ArticleMeta.astro"
+        componentPath="src/components/articles/header/ArticleMeta.astro"
       >
         <ArticleMeta
           author={catalogAuthorName}
@@ -601,7 +601,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleTags"
         description="Tag badges for article metadata."
-        componentPath="src/components/articles/ArticleTags.astro"
+        componentPath="src/components/articles/header/ArticleTags.astro"
       >
         <ArticleTags tags={catalogTags} />
       </CatalogExample>
@@ -609,7 +609,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleImage - Default"
         description="Astro-optimized bounded image preview with a full-screen inspection action."
-        componentPath="src/components/articles/ArticleImage.astro"
+        componentPath="src/components/articles/media/ArticleImage.astro"
       >
         <ArticleImage
           src={articleTallImage}
@@ -621,7 +621,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleImage - Captioned"
         description="Default article image anatomy with caption, alt text, and optimized responsive sources."
-        componentPath="src/components/articles/ArticleImage.astro"
+        componentPath="src/components/articles/media/ArticleImage.astro"
       >
         <ArticleImage
           src={articleLandscapeImage}
@@ -633,7 +633,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleImage - Long Alt"
         description="Long accessible image descriptions do not change the visual article image anatomy."
-        componentPath="src/components/articles/ArticleImage.astro"
+        componentPath="src/components/articles/media/ArticleImage.astro"
       >
         <ArticleImage
           src={articleLandscapeImage}
@@ -644,7 +644,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleImage - Natural"
         description="Natural height is the explicit escape hatch for intentional full-height component images."
-        componentPath="src/components/articles/ArticleImage.astro"
+        componentPath="src/components/articles/media/ArticleImage.astro"
       >
         <ArticleImage
           src={articleTallImage}
@@ -657,7 +657,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="Generated Markdown Image - Unknown"
         description="Unknown-dimension generated Markdown images use the same bounded inspector contract without author components."
-        componentPath="src/components/articles/ArticleProse.astro"
+        componentPath="src/components/articles/prose/ArticleProse.astro"
       >
         <ArticleProse enableImageInspector>
           <figure
@@ -698,7 +698,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="Generated Markdown Linked Image"
         description="Explicit image links keep their link behavior instead of becoming image inspector triggers."
-        componentPath="src/components/articles/ArticleProse.astro"
+        componentPath="src/components/articles/prose/ArticleProse.astro"
       >
         <ArticleProse>
           <figure
@@ -731,7 +731,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HoverImageCard"
         description="Native anchored inline image-only preview for MDX article prose."
-        componentPath="src/components/articles/HoverImageCard.astro"
+        componentPath="src/components/articles/media/HoverImageCard.astro"
       >
         <ArticleProse>
           <p>
@@ -749,7 +749,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleProse"
         description="Markdown body wrapper using Tailwind Typography."
-        componentPath="src/components/articles/ArticleProse.astro"
+        componentPath="src/components/articles/prose/ArticleProse.astro"
       >
         <ArticleProse>
           <p>
@@ -767,7 +767,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleTableOfContents"
         description="Article-local heading navigation for the reading margin rail."
-        componentPath="src/components/articles/ArticleTableOfContents.astro"
+        componentPath="src/components/articles/toc/ArticleTableOfContents.astro"
       >
         <div class="max-w-64">
           <ArticleTableOfContents headings={catalogTocHeadings} />
@@ -777,7 +777,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleReferences"
         description="Composed notes and bibliography with repeated citations."
-        componentPath="src/components/articles/ArticleReferences.astro"
+        componentPath="src/components/articles/references/ArticleReferences.astro"
       >
         <div class="grid gap-6">
           <p
@@ -828,7 +828,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleFootnotes"
         description="Notes-only article reference apparatus."
-        componentPath="src/components/articles/ArticleFootnotes.astro"
+        componentPath="src/components/articles/references/ArticleFootnotes.astro"
       >
         <ArticleFootnotes notes={catalogReferences.notes} />
       </CatalogExample>
@@ -836,7 +836,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleBibliography"
         description="Bibliography-only article reference apparatus."
-        componentPath="src/components/articles/ArticleBibliography.astro"
+        componentPath="src/components/articles/references/ArticleBibliography.astro"
       >
         <ArticleBibliography
           citations={catalogReferences.citations}
@@ -848,7 +848,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleReferenceBacklinks"
         description="Compact return links for note and citation entries."
-        componentPath="src/components/articles/ArticleReferenceBacklinks.astro"
+        componentPath="src/components/articles/references/ArticleReferenceBacklinks.astro"
       >
         <ArticleReferenceBacklinks
           kind="citation"
@@ -859,7 +859,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleCard"
         description="One flat editorial article row with bounded preview media."
-        componentPath="src/components/articles/ArticleCard.astro"
+        componentPath="src/components/articles/lists/ArticleCard.astro"
       >
         <ArticleCard {...catalogArticleItemsWithMedia[0]} />
       </CatalogExample>
@@ -867,7 +867,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleList"
         description="Ordered flat editorial list with image and no-image rows."
-        componentPath="src/components/articles/ArticleList.astro"
+        componentPath="src/components/articles/lists/ArticleList.astro"
       >
         <ArticleList items={catalogArticleItemsWithMedia} />
       </CatalogExample>
@@ -875,7 +875,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleList RTL"
         description="RTL localized article list fixture for direction and wrapping review."
-        componentPath="src/components/articles/ArticleList.astro"
+        componentPath="src/components/articles/lists/ArticleList.astro"
       >
         <div dir="rtl" lang="ar">
           <ArticleList items={catalogRtlArticleItems} />
@@ -885,7 +885,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="MoreInCategoryBlock"
         description="Article-end same-category discovery."
-        componentPath="src/components/articles/MoreInCategoryBlock.astro"
+        componentPath="src/components/articles/endcap/MoreInCategoryBlock.astro"
       >
         <MoreInCategoryBlock
           categoryHref="/categories/metamemetics/"
@@ -898,7 +898,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="RelatedArticlesBlock"
         description="Future related-article discovery surface."
-        componentPath="src/components/articles/RelatedArticlesBlock.astro"
+        componentPath="src/components/articles/endcap/RelatedArticlesBlock.astro"
       >
         <RelatedArticlesBlock
           headingId="catalog-related-articles-heading"
@@ -909,7 +909,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="NextArticleBlock"
         description="Chronological article continuation before support."
-        componentPath="src/components/articles/NextArticleBlock.astro"
+        componentPath="src/components/articles/endcap/NextArticleBlock.astro"
       >
         <NextArticleBlock
           headingId="catalog-next-article-heading"
@@ -921,7 +921,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArticleEndcap"
         description="Composed article footer with discovery and support."
-        componentPath="src/components/articles/ArticleEndcap.astro"
+        componentPath="src/components/articles/endcap/ArticleEndcap.astro"
       >
         <ArticleEndcap
           categoryHref="/categories/metamemetics/"
@@ -940,7 +940,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="SupportBlock"
         description="Reusable support CTA for article endcaps and homepage sections."
-        componentPath="src/components/blocks/SupportBlock.astro"
+        componentPath="src/components/blocks/shared/SupportBlock.astro"
       >
         <SupportBlock
           headingId="catalog-support-block-heading"
@@ -1100,7 +1100,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeHeroBlock"
         description="Brand image, tagline, and calls to action."
-        componentPath="src/components/blocks/HomeHeroBlock.astro"
+        componentPath="src/components/blocks/home/HomeHeroBlock.astro"
       >
         <div class="grid gap-8">
           <HomeHeroBlock
@@ -1127,7 +1127,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeAnnouncementBlock"
         description="Announcement artwork with editable Markdown prose."
-        componentPath="src/components/blocks/HomeAnnouncementBlock.astro"
+        componentPath="src/components/blocks/home/HomeAnnouncementBlock.astro"
       >
         <HomeAnnouncementBlock
           image={sampleImage}
@@ -1144,7 +1144,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeLatestArticleBlock"
         description="Latest article teaser and empty state."
-        componentPath="src/components/blocks/HomeLatestArticleBlock.astro"
+        componentPath="src/components/blocks/home/HomeLatestArticleBlock.astro"
       >
         <div class="grid gap-8">
           <HomeLatestArticleBlock
@@ -1164,7 +1164,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeFeaturedArticlesBlock"
         description="Start-here article list and missing-content state."
-        componentPath="src/components/blocks/HomeFeaturedArticlesBlock.astro"
+        componentPath="src/components/blocks/home/HomeFeaturedArticlesBlock.astro"
       >
         <div class="grid gap-8">
           <HomeFeaturedArticlesBlock items={catalogArticleItemsWithMedia} />
@@ -1175,7 +1175,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeCategoryOverviewBlock"
         description="Category discovery grid using navigation data."
-        componentPath="src/components/blocks/HomeCategoryOverviewBlock.astro"
+        componentPath="src/components/blocks/home/HomeCategoryOverviewBlock.astro"
       >
         <HomeCategoryOverviewBlock items={catalogNavigationItems} />
       </CatalogExample>
@@ -1183,7 +1183,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="HomeArchiveLinksBlock"
         description="Archive, categories, and RSS link block."
-        componentPath="src/components/blocks/HomeArchiveLinksBlock.astro"
+        componentPath="src/components/blocks/home/HomeArchiveLinksBlock.astro"
       >
         <HomeArchiveLinksBlock />
       </CatalogExample>
@@ -1196,7 +1196,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="ArchiveListBlock"
         description="Shared archive and category article-list framing."
-        componentPath="src/components/blocks/ArchiveListBlock.astro"
+        componentPath="src/components/blocks/listing/ArchiveListBlock.astro"
       >
         <div class="grid gap-8">
           <ArchiveListBlock
@@ -1216,7 +1216,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="CategoryRailBlock"
         description="One-row category discovery rail with scroll controls."
-        componentPath="src/components/blocks/CategoryRailBlock.astro"
+        componentPath="src/components/blocks/terms/CategoryRailBlock.astro"
       >
         <div class="grid gap-8">
           <CategoryRailBlock
@@ -1235,7 +1235,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="CategoryOverviewBlock"
         description="Category overview backed by shared navigation data."
-        componentPath="src/components/blocks/CategoryOverviewBlock.astro"
+        componentPath="src/components/blocks/terms/CategoryOverviewBlock.astro"
       >
         <div class="grid gap-8">
           <CategoryOverviewBlock
@@ -1254,7 +1254,7 @@ if (primaryCatalogAuthor === undefined) {
       <CatalogExample
         title="SearchResultsBlock"
         description="Search form and empty result-enhancement region."
-        componentPath="src/components/blocks/SearchResultsBlock.astro"
+        componentPath="src/components/blocks/listing/SearchResultsBlock.astro"
       >
         <SearchResultsBlock
           headingId="catalog-search-heading"

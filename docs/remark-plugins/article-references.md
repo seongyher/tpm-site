@@ -17,7 +17,7 @@ It must make these things true:
   from the same normalized data model.
 
 This is project infrastructure, not a reusable package. Keep it under
-`src/remark-plugins/` and `src/lib/article-references/` unless it later proves
+`src/remark-plugins/` and `src/lib/references/article-references/` unless it later proves
 useful outside the site.
 
 ## Current Design Decision

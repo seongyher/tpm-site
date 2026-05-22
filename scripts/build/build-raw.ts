@@ -1,12 +1,12 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 
-import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
+import { type SiteConfig, siteConfig } from "../../src/lib/site/site-config";
 import {
   projectRelativePath,
   resolveSiteInstancePaths,
   siteInstance,
-} from "../../src/lib/site-instance";
+} from "../../src/lib/site/site-instance";
 
 interface CommandRun {
   args: string[];

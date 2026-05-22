@@ -9,19 +9,19 @@ import {
 } from "prettier";
 
 import {
-  authorDiagnosticCategories,
-  authorDiagnosticFixabilities,
-  authorDiagnosticRepairOwners,
-  authorDiagnosticSources,
-} from "../../src/lib/author-diagnostics";
-import {
   announcementSchema,
   articleSchema,
   authorSchema,
   categorySchema,
   editorialCollectionSchema,
   pageSchema,
-} from "../../src/lib/content-schemas";
+} from "../../src/lib/content/content-schemas";
+import {
+  authorDiagnosticCategories,
+  authorDiagnosticFixabilities,
+  authorDiagnosticRepairOwners,
+  authorDiagnosticSources,
+} from "../../src/lib/diagnostics/author-diagnostics";
 import {
   articleMdxPdfCompatibilityPolicies,
   type MediaRole,
@@ -29,17 +29,20 @@ import {
   type MediaSurface,
   mediaSurfaces,
   socialPreviewMediaPolicy,
-} from "../../src/lib/media-policy";
-import { routeRegistryEntries } from "../../src/lib/route-registry";
-import { semanticProfileKinds } from "../../src/lib/semantic-profile-kinds";
-import { siteConfig } from "../../src/lib/site-config";
+} from "../../src/lib/media/media-policy";
+import { semanticProfileKinds } from "../../src/lib/metadata/semantic-profile-kinds";
+import { routeRegistryEntries } from "../../src/lib/routes/route-registry";
+import { siteConfig } from "../../src/lib/site/site-config";
 import {
   defaultFeatureConfig,
   defaultPublishableVisibilityConfig,
   siteFeatureKeys,
-} from "../../src/lib/site-config-defaults";
-import { projectRelativePath, siteInstance } from "../../src/lib/site-instance";
-import { sourceArtifactManifest } from "../../src/lib/source-artifacts";
+} from "../../src/lib/site/site-config-defaults";
+import {
+  projectRelativePath,
+  siteInstance,
+} from "../../src/lib/site/site-instance";
+import { sourceArtifactManifest } from "../../src/lib/site/source-artifacts";
 import {
   qaCommandGroups,
   qaDomainCoverageRegistry,
@@ -184,7 +187,7 @@ function siteConfigReferenceSection(): string[] {
   return [
     "## Site Config Fields",
     "",
-    "Source: `src/lib/site-config.ts` and `site/config/site.schema.json`.",
+    "Source: `src/lib/site/site-config.ts` and `site/config/site.schema.json`.",
     "",
     table(
       ["Field", "Type", "Required", "Default"],
@@ -262,7 +265,7 @@ function frontmatterReferenceSection(): string[] {
   return [
     "## Content Frontmatter Fields",
     "",
-    "Source: `src/lib/content-schemas.ts`.",
+    "Source: `src/lib/content/content-schemas.ts`.",
     "",
     ...schemas.flatMap(({ label, schema, source }) => [
       `### ${label}`,
@@ -287,7 +290,7 @@ function routeReferenceSection(): string[] {
   return [
     "## Routes, Entities, Features, And Output",
     "",
-    "Source: `src/lib/route-registry.ts` and active `site/config/site.json`.",
+    "Source: `src/lib/routes/route-registry.ts` and active `site/config/site.json`.",
     "",
     table(
       [
@@ -317,7 +320,7 @@ function featureReferenceSection(): string[] {
   return [
     "## Feature Flags",
     "",
-    "Source: `src/lib/site-config-defaults.ts` and active `site/config/site.json`.",
+    "Source: `src/lib/site/site-config-defaults.ts` and active `site/config/site.json`.",
     "",
     table(
       ["Feature", "Default", "Current"],
@@ -413,7 +416,7 @@ function visibilityReferenceSection(): string[] {
   return [
     "## Publishable Visibility Surfaces",
     "",
-    "Source: `src/lib/site-config-defaults.ts`.",
+    "Source: `src/lib/site/site-config-defaults.ts`.",
     "",
     table(
       ["Surface", "Default"],
@@ -429,7 +432,7 @@ function metadataReferenceSection(): string[] {
   return [
     "## Semantic Metadata Profiles",
     "",
-    "Source: `src/lib/semantic-profile-kinds.ts`.",
+    "Source: `src/lib/metadata/semantic-profile-kinds.ts`.",
     "",
     table(
       ["Profile kind", "Enabled for this site"],
@@ -446,7 +449,7 @@ function mediaReferenceSection(): string[] {
   return [
     "## Media And PDF Policy Vocabulary",
     "",
-    "Source: `src/lib/media-policy.ts`.",
+    "Source: `src/lib/media/media-policy.ts`.",
     "",
     "### Media Roles",
     "",
@@ -492,7 +495,7 @@ function authorDiagnosticReferenceSection(): string[] {
   return [
     "## Author Diagnostic Vocabulary",
     "",
-    "Source: `src/lib/author-diagnostics.ts`.",
+    "Source: `src/lib/diagnostics/author-diagnostics.ts`.",
     "",
     "### Categories",
     "",
@@ -533,7 +536,7 @@ function sourceArtifactReferenceSection(): string[] {
   return [
     "## Source And Generated Artifact Manifest",
     "",
-    "Source: `src/lib/source-artifacts.ts`.",
+    "Source: `src/lib/site/source-artifacts.ts`.",
     "",
     table(
       ["Key", "Owner", "Kind", "Role", "Required", "Path"],

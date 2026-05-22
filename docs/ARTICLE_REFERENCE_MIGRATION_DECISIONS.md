@@ -431,7 +431,7 @@ Use this shape for future decisions:
 - Status: Accepted
 - Applies to:
   `site/content/articles/metamemetics/what-is-a-meme.md`,
-  `src/lib/article-references/normalize.ts`
+  `src/lib/references/article-references/normalize.ts`
 - Decision: Literal BibTeX `citation` fields must contain real display text;
   placeholder-only values such as `^` are invalid structured bibliography data.
 - Reasoning: The global bibliography is source data, not a place to preserve

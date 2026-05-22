@@ -4,9 +4,9 @@ import { render } from "astro:content";
 import BibliographyPage from "../components/bibliography/BibliographyPage.astro";
 import BrowsingBody from "../components/layout/BrowsingBody.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { bibliographyRouteViewModel } from "../lib/content-route-view-models";
-import { getArticles } from "../lib/content";
-import { itemListJsonLd } from "../lib/metadata";
+import { bibliographyRouteViewModel } from "../lib/content/content-route-view-models";
+import { getArticles } from "../lib/content/content";
+import { itemListJsonLd } from "../lib/metadata/metadata";
 import { articleReferencesFromFrontmatter } from "../remark-plugins/articleReferences";
 
 const articles = await getArticles();

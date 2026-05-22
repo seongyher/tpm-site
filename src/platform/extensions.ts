@@ -38,7 +38,7 @@ export type {
   ExtensionVerifierDeclaration,
   ResolvedDisabledExtension,
   ResolveExtensionManifestsOptions,
-} from "../lib/extensions";
+} from "../lib/extensions/extensions";
 export {
   defineExtensionManifest,
   extensionCapabilityFamilies,
@@ -55,4 +55,4 @@ export {
   extensionTrustBoundaries,
   resolveExtensionManifests,
   validateExtensionManifest,
-} from "../lib/extensions";
+} from "../lib/extensions/extensions";

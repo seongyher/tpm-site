@@ -2,9 +2,9 @@
 import { render } from "astro:content";
 
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
-import { articleTableOfContentsHeadings } from "../../lib/article-toc";
-import { getArticles } from "../../lib/content";
-import { articleStaticPaths } from "../../lib/static-paths";
+import { articleTableOfContentsHeadings } from "../../lib/articles/article-toc";
+import { getArticles } from "../../lib/content/content";
+import { articleStaticPaths } from "../../lib/routes/static-paths";
 import { articleImagesFromFrontmatter } from "../../rehype-plugins/articleImages";
 import { articleReferencesFromFrontmatter } from "../../remark-plugins/articleReferences";
 

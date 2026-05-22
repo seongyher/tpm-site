@@ -1,4 +1,4 @@
-import type { LocalizationFixture } from "../../src/lib/localization-fixtures";
+import type { LocalizationFixture } from "../../src/lib/localization/localization-fixtures";
 
 /** Representative localization fixtures for layout and generated-output tests. */
 export const representativeLocalizationFixtures: readonly LocalizationFixture[] =

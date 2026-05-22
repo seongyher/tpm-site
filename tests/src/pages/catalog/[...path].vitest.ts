@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { siteConfig } from "../../../../src/lib/site-config";
+import { siteConfig } from "../../../../src/lib/site/site-config";
 import CatalogPage from "../../../../src/pages/catalog/[...path].astro";
 import {
   createAstroTestContainer,

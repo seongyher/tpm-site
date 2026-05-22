@@ -1,0 +1,64 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import Card from "../../ui/Card.astro";
+import TextLink from "../../ui/TextLink.astro";
+
+interface Props extends HTMLAttributes<"li"> {
+  align?: "center" | "start";
+  count: number;
+  description?: string | undefined;
+  href: string;
+  itemNoun?: string;
+  itemNounPlural?: string;
+  title: string;
+}
+
+const {
+  align = "start",
+  count,
+  description,
+  href,
+  itemNoun = "article",
+  itemNounPlural = `${itemNoun}s`,
+  title,
+  class: className,
+  ...attrs
+} = Astro.props;
+const countLabel = `${count} ${count === 1 ? itemNoun : itemNounPlural}`;
+const alignClasses = {
+  center: "justify-items-center text-center",
+  start: "justify-items-start text-start",
+} as const;
+---
+
+<Card
+  {...attrs}
+  as="li"
+  class:list={["grid gap-1", alignClasses[align], className]}
+>
+  <TextLink
+    href={href}
+    tone="neutral"
+    class:list={[
+      "font-semibold",
+      align === "center" && "line-clamp-2 text-center",
+    ]}
+    prefetch="hover"
+  >
+    {title}
+  </TextLink>
+  {
+    description && (
+      <p
+        class:list={[
+          "text-muted-foreground text-sm",
+          align === "center" && "line-clamp-2",
+        ]}
+      >
+        {description}
+      </p>
+    )
+  }
+  <p class="text-muted-foreground text-xs">{countLabel}</p>
+</Card>

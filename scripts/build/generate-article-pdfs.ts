@@ -8,17 +8,17 @@ import { PDFDocument } from "pdf-lib";
 import {
   articlePdfHref,
   articlePdfOutputPath,
-} from "../../src/lib/article-pdf";
+} from "../../src/lib/articles/article-pdf";
 import {
   articlePdfFileSizeMediaDiagnostics,
   articlePdfRenderMediaDiagnostics,
-} from "../../src/lib/media-policy";
-import { siteConfig } from "../../src/lib/site-config";
+} from "../../src/lib/media/media-policy";
+import { siteConfig } from "../../src/lib/site/site-config";
 import {
   projectRelativePath,
   resolveSiteInstancePaths,
   siteInstance,
-} from "../../src/lib/site-instance";
+} from "../../src/lib/site/site-instance";
 
 const pdfHeader = "%PDF-";
 const pdfCreator = `${siteConfig.identity.title} Astro PDF pipeline`;

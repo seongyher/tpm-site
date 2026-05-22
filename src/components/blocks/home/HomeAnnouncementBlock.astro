@@ -1,0 +1,32 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
+import PageProse from "../../pages/PageProse.astro";
+
+interface Props {
+  image: ImageMetadata;
+  imageAlt: string;
+  title?: string;
+}
+
+const { image, imageAlt, title = "Announcements" } = Astro.props;
+---
+
+<section class="grid gap-4" aria-labelledby="home-announcement-heading">
+  <h2
+    id="home-announcement-heading"
+    class="text-foreground m-0 text-2xl font-semibold tracking-normal"
+  >
+    {title}
+  </h2>
+  <Image
+    src={image}
+    alt={imageAlt}
+    layout="full-width"
+    class="block h-auto w-full rounded-sm"
+  />
+  <PageProse>
+    <slot />
+  </PageProse>
+</section>

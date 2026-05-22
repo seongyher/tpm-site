@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getTags } from "../../../../src/lib/content";
+import { getTags } from "../../../../src/lib/content/content";
 import TagPage from "../../../../src/pages/tags/[tag].astro";
 import {
   createAstroTestContainer,

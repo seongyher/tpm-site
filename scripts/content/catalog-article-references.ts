@@ -3,7 +3,7 @@ import path from "node:path";
 
 import matter from "gray-matter";
 
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 import {
   type ArticleReferenceAuditArticle,
   auditArticleReferences,

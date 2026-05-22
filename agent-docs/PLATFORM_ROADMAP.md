@@ -685,8 +685,8 @@ contexts that can support TPM, docs examples, fixture sites, and future users.
 Current evidence:
 
 - `site/config/site.json` already carries a large amount of publication intent.
-- `src/lib/site-config.ts` and related helpers centralize much of the loading,
-  but many callers still implicitly consume the active site instance.
+- `src/lib/site/site-config.ts` and related helpers centralize much of the
+  loading, but many callers still implicitly consume the active site instance.
 
 Mature contract:
 
@@ -721,8 +721,9 @@ discoverable through one typed registry.
 
 Current evidence:
 
-- Route helpers exist in `src/lib/routes.ts`, feature helpers exist elsewhere,
-  and generated endpoints/pages encode related policy independently.
+- Route helpers exist in `src/lib/routes/routes.ts`, feature helpers exist in
+  `src/lib/routes/feature-routes.ts`, and generated endpoints/pages encode
+  related policy independently.
 - Redirects, feeds, sitemap, metadata, navigation, and verifier scripts all need
   overlapping URL knowledge.
 

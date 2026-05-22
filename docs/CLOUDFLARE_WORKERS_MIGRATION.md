@@ -120,7 +120,7 @@ Notes:
 Current state:
 
 - Site-owned redirects live in `site/config/redirects.json`.
-- Astro consumes that file through `src/lib/site-redirects.ts`.
+- Astro consumes that file through `src/lib/routes/site-redirects.ts`.
 - Tests and `scripts/build/verify-build.ts` verify the legacy redirect map and
   generated fallback pages.
 - `site/public` is already the site instance public directory, so files there

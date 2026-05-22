@@ -1,0 +1,88 @@
+---
+import type { ImageMetadata } from "astro";
+import { Image, getImage } from "astro:assets";
+
+import AnchoredPanel from "../../ui/AnchoredPanel.astro";
+import AnchoredRoot from "../../ui/AnchoredRoot.astro";
+import AnchoredTrigger from "../../ui/AnchoredTrigger.astro";
+
+/** Public props for inline article hover-image previews. */
+interface Props {
+  alt?: string;
+  expanded?: boolean;
+  image: ImageMetadata;
+  label: string;
+}
+
+const { image, label, alt = "", expanded = false } = Astro.props;
+const maxWidthRem = expanded ? 40 : 30;
+const maxHeightRem = expanded ? 34 : 28;
+const maxOptimizedWidth = expanded ? 1280 : 960;
+const aspectRatio = aspectRatioOrFallback(image);
+const displayWidthRem = Math.min(maxWidthRem, maxHeightRem * aspectRatio);
+const optimizedWidth = Math.min(image.width, maxOptimizedWidth);
+const previewWidths = [480, 640, 960, 1280].filter(
+  (width) => width <= optimizedWidth,
+);
+const fullImage = await getImage({
+  src: image,
+  format: "webp",
+  width: optimizedWidth,
+});
+const imageStyle = [
+  `--hover-image-width: ${displayWidthRem.toFixed(3)}rem;`,
+  `--hover-image-max-height: ${maxHeightRem}rem;`,
+].join(" ");
+
+function aspectRatioOrFallback(image: ImageMetadata): number {
+  if (image.width <= 0 || image.height <= 0) {
+    return 1;
+  }
+
+  return image.width / image.height;
+}
+---
+
+<AnchoredRoot
+  disclosure="hover-focus-tap"
+  preset="inline-hover-preview"
+  class="group/hover-image inline"
+  data-hover-image-card
+  data-hover-image-expanded={expanded ? "true" : "false"}
+>
+  <AnchoredTrigger
+    as="a"
+    href={fullImage.src}
+    data-hover-image-trigger
+    data-disclosure-trigger
+    aria-expanded="false"
+    aria-label={`Open image preview: ${label}`}
+  >
+    {label}
+  </AnchoredTrigger>
+  <AnchoredPanel
+    data-hover-image-panel
+    data-disclosure-panel
+    class="ring-border/45 z-50 hidden overflow-hidden rounded-xs shadow-lg ring-1 group-data-[disclosure-open=true]/hover-image:block before:fixed before:top-[calc(var(--anchor-y,0rem)-0.5rem)] before:left-[var(--anchor-x,0rem)] before:h-2 before:w-[min(var(--hover-image-width),var(--anchor-max-width,calc(100vw-2rem)))] before:content-[''] pointer-fine:group-hover/hover-image:block"
+    style={imageStyle}
+  >
+    <a
+      href={fullImage.src}
+      aria-label={`Open full image: ${label}`}
+      class="focus-visible:outline-ring block focus-visible:outline-2 focus-visible:outline-offset-2"
+    >
+      <Image
+        src={image}
+        alt={alt}
+        aria-hidden={alt === "" ? "true" : undefined}
+        role={alt === "" ? "presentation" : undefined}
+        data-hover-image-image="true"
+        format="webp"
+        widths={previewWidths.length > 0 ? previewWidths : [optimizedWidth]}
+        sizes={`${displayWidthRem.toFixed(3)}rem`}
+        loading="lazy"
+        class="!m-0 block h-auto max-h-[min(var(--hover-image-max-height),var(--anchor-max-height,calc(100svh-2rem)))] w-[min(var(--hover-image-width),var(--anchor-max-width,calc(100vw-2rem)))] max-w-none object-contain"
+      />
+    </a>
+  </AnchoredPanel>
+</AnchoredRoot>

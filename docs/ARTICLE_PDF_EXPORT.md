@@ -84,7 +84,8 @@ Scholar metadata such as `citation_title`, `citation_author`, or
 `citation_publication_date`, because those tags still describe the canonical
 HTML article.
 
-The article PDF helpers expose two related models in `src/lib/article-pdf.ts`:
+The article PDF helpers expose two related models in
+`src/lib/articles/article-pdf.ts`:
 
 - a Scholar metadata model that always exists for published article pages;
 - a PDF view model that exists only when the article is PDF-eligible.
@@ -203,7 +204,7 @@ Current article-content MDX inventory:
 
 Future author-facing MDX article components must have a PDF compatibility
 decision before publication. Add a registry-like test fixture in
-`src/lib/article-pdf-compatibility.ts`, consumed by
+`src/lib/articles/article-pdf-compatibility.ts`, consumed by
 `scripts/content/verify-content.ts`, with a discriminated policy:
 
 ```ts

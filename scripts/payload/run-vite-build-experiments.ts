@@ -4,7 +4,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import astroConfig from "../../astro.config";
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 import {
   type BuildVerificationIssues,
   formatBuildVerificationReport,

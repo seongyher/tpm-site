@@ -1,0 +1,21 @@
+---
+import ArticleList from "../lists/ArticleList.astro";
+import SectionHeader from "../../ui/SectionHeader.astro";
+import type { ArticleListItem } from "../../../lib/content/article-list";
+
+interface Props {
+  headingId?: string;
+  items?: readonly ArticleListItem[] | undefined;
+}
+
+const { headingId = "related-articles-heading", items = [] } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="grid min-w-0 gap-4" aria-labelledby={headingId}>
+      <SectionHeader headingId={headingId} title="Related Articles" />
+      <ArticleList items={items} />
+    </section>
+  )
+}

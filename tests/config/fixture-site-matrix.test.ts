@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
-import { starterTemplateMatrix } from "../../src/lib/starter-templates";
+import { starterTemplateMatrix } from "../../src/lib/starters/starter-templates";
 
 const minimalFixtureRoot = path.join("tests", "fixtures", "site-instance");
 

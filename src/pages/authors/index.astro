@@ -2,9 +2,9 @@
 import AuthorsIndexPage from "../../components/authors/AuthorsIndexPage.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorProfiles } from "../../lib/authors";
-import { authorsIndexRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
+import { getAuthorProfiles } from "../../lib/content/authors";
+import { authorsIndexRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
 
 const model = authorsIndexRouteViewModel(await getAuthorProfiles());
 ---

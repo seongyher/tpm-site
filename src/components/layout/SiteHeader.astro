@@ -8,8 +8,8 @@ import PriorityInlineRow from "./PriorityInlineRow.astro";
 import SearchReveal from "../navigation/SearchReveal.astro";
 import SupportLink from "../navigation/SupportLink.astro";
 import ThemeToggle from "../navigation/ThemeToggle.astro";
-import type { PrimaryNavItem, SectionNavItem } from "../../lib/navigation";
-import { siteConfig } from "../../lib/site-config";
+import type { PrimaryNavItem, SectionNavItem } from "../../lib/site/navigation";
+import { siteConfig } from "../../lib/site/site-config";
 
 interface Props {
   categoryItems: readonly SectionNavItem[];

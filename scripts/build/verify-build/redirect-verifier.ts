@@ -4,7 +4,7 @@ import path from "node:path";
 import {
   createOutputDiagnostic,
   type OutputDiagnostic,
-} from "../../../src/lib/output-verification";
+} from "../../../src/lib/diagnostics/output-verification";
 
 /** Inputs used to verify configured legacy redirect fallback files. */
 export interface MissingLegacyRedirectVerificationInput {

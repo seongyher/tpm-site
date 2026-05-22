@@ -8,12 +8,20 @@ describe("archive catalog examples", () => {
       (example) => example.componentPath,
     );
 
-    expect(paths).toContain("src/components/blocks/ArchiveListBlock.astro");
-    expect(paths).toContain("src/components/blocks/CategoryRailBlock.astro");
     expect(paths).toContain(
-      "src/components/blocks/CategoryOverviewBlock.astro",
+      "src/components/blocks/listing/ArchiveListBlock.astro",
     );
-    expect(paths).toContain("src/components/blocks/TermOverviewBlock.astro");
-    expect(paths).toContain("src/components/blocks/SearchResultsBlock.astro");
+    expect(paths).toContain(
+      "src/components/blocks/terms/CategoryRailBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/terms/CategoryOverviewBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/terms/TermOverviewBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/blocks/listing/SearchResultsBlock.astro",
+    );
   });
 });

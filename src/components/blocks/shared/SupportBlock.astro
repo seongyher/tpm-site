@@ -1,0 +1,52 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import DiscordButton from "../../ui/DiscordButton.astro";
+import PatreonButton from "../../ui/PatreonButton.astro";
+import SectionHeader from "../../ui/SectionHeader.astro";
+import type { SupportBlockViewModel } from "../../../lib/site/support";
+
+interface Props extends HTMLAttributes<"section"> {
+  headingId?: string;
+  support: SupportBlockViewModel;
+}
+
+const {
+  headingId = "support-block-heading",
+  support,
+  class: className,
+  ...attrs
+} = Astro.props;
+---
+
+{
+  support.enabled && (
+    <section
+      {...attrs}
+      data-support-block
+      class:list={[
+        "border-border bg-muted/40 grid w-full min-w-0 gap-4 rounded-sm border p-5",
+        className,
+      ]}
+      aria-labelledby={headingId}
+    >
+      <SectionHeader
+        headingId={headingId}
+        title={support.title}
+        description={support.body}
+        layout="stacked"
+        size="subsection"
+      />
+      <div class="flex min-w-0 flex-wrap items-center gap-3">
+        <PatreonButton
+          href={support.patreon.href}
+          aria-label={support.patreon.ariaLabel}
+        />
+        <DiscordButton
+          href={support.discord.href}
+          aria-label={support.discord.ariaLabel}
+        />
+      </div>
+    </section>
+  )
+}

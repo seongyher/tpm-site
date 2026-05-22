@@ -4,7 +4,7 @@ import { getEntry, render } from "astro:content";
 import ReadingBody from "../components/layout/ReadingBody.astro";
 import MarkdownPage from "../components/pages/MarkdownPage.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { markdownPageRouteViewModel } from "../lib/content-route-view-models";
+import { markdownPageRouteViewModel } from "../lib/content/content-route-view-models";
 
 const about = await getEntry("pages", "about");
 

@@ -10,8 +10,8 @@ import {
   siteDoctorAuthorDiagnostics,
   siteDoctorIssues,
 } from "../../../scripts/site/site-doctor";
-import { parseSiteConfig } from "../../../src/lib/site-config";
-import { resolveSiteInstancePaths } from "../../../src/lib/site-instance";
+import { parseSiteConfig } from "../../../src/lib/site/site-config";
+import { resolveSiteInstancePaths } from "../../../src/lib/site/site-instance";
 
 const validConfig = {
   identity: {

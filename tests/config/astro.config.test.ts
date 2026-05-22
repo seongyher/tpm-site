@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import config from "../../astro.config";
-import { articleImagePolicyCacheKey } from "../../src/lib/article-image-policy";
-import { siteInstance } from "../../src/lib/site-instance";
+import { articleImagePolicyCacheKey } from "../../src/lib/articles/article-image-policy";
+import { siteInstance } from "../../src/lib/site/site-instance";
 import {
   rehypeArticleImages,
   remarkArticleImageMarkers,

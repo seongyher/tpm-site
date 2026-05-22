@@ -8,23 +8,35 @@ describe("article catalog examples", () => {
       (example) => example.componentPath,
     );
 
-    expect(paths).toContain("src/components/articles/ArticleHeader.astro");
-    expect(paths).toContain("src/components/articles/ArticleShareMenu.astro");
-    expect(paths).toContain("src/components/articles/ArticleList.astro");
-    expect(paths).toContain("src/components/articles/CompactEntryList.astro");
-    expect(paths).toContain("src/components/articles/CompactEntryRow.astro");
-    expect(paths).toContain("src/components/articles/ArticleEndcap.astro");
-    expect(paths).toContain("src/components/articles/NextArticleBlock.astro");
     expect(paths).toContain(
-      "src/components/articles/ArticleTableOfContents.astro",
+      "src/components/articles/header/ArticleHeader.astro",
     );
     expect(paths).toContain(
-      "src/components/articles/TableOfContentsItem.astro",
+      "src/components/articles/actions/ArticleShareMenu.astro",
+    );
+    expect(paths).toContain("src/components/articles/lists/ArticleList.astro");
+    expect(paths).toContain(
+      "src/components/articles/lists/CompactEntryList.astro",
     );
     expect(paths).toContain(
-      "src/components/articles/TableOfContentsToggle.astro",
+      "src/components/articles/lists/CompactEntryRow.astro",
     );
-    expect(paths).toContain("src/components/blocks/SupportBlock.astro");
+    expect(paths).toContain(
+      "src/components/articles/endcap/ArticleEndcap.astro",
+    );
+    expect(paths).toContain(
+      "src/components/articles/endcap/NextArticleBlock.astro",
+    );
+    expect(paths).toContain(
+      "src/components/articles/toc/ArticleTableOfContents.astro",
+    );
+    expect(paths).toContain(
+      "src/components/articles/toc/TableOfContentsItem.astro",
+    );
+    expect(paths).toContain(
+      "src/components/articles/toc/TableOfContentsToggle.astro",
+    );
+    expect(paths).toContain("src/components/blocks/shared/SupportBlock.astro");
     expect(new Set(paths).size).toBe(paths.length);
   });
 });

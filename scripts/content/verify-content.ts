@@ -5,9 +5,9 @@ import matter from "gray-matter";
 import type { Image, Nodes, Paragraph, Root } from "mdast";
 import { remark } from "remark";
 
-import { isArticleMdxPdfCompatibleImport } from "../../src/lib/article-pdf-compatibility";
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
-import { tagDiagnostics } from "../../src/lib/tags";
+import { isArticleMdxPdfCompatibleImport } from "../../src/lib/articles/article-pdf-compatibility";
+import { tagDiagnostics } from "../../src/lib/content/tags";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 
 /** Inputs needed to verify source content conventions. */
 export interface ContentVerificationOptions {
@@ -428,7 +428,7 @@ function validateArticleMdxPdfImports(
     .filter((importSource) => !isArticleMdxPdfCompatibleImport(importSource))
     .forEach((importSource) => {
       issues.push(
-        `${toPosix(path.relative(rootDir, file))}: article MDX import "${importSource}" needs an explicit PDF fallback in src/lib/article-pdf-compatibility.ts`,
+        `${toPosix(path.relative(rootDir, file))}: article MDX import "${importSource}" needs an explicit PDF fallback in src/lib/articles/article-pdf-compatibility.ts`,
       );
     });
 }

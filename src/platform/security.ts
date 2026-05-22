@@ -7,11 +7,11 @@ export type {
   StaticOutputTrustBoundary,
   StaticOutputTrustBoundaryDisposition,
   StaticOutputTrustBoundaryKind,
-} from "../lib/static-output-security";
+} from "../lib/release/static-output-security";
 export {
   assessStaticOutputSecurityHeaders,
   defaultStaticOutputSecurityPolicy,
-} from "../lib/static-output-security";
+} from "../lib/release/static-output-security";
 export type {
   SupplyChainCheckId,
   SupplyChainOutputSample,
@@ -20,12 +20,12 @@ export type {
   SupplyChainPolicyAssessmentInput,
   SupplyChainPolicyCheck,
   SupplyChainWorkflowStage,
-} from "../lib/supply-chain-policy";
+} from "../lib/release/supply-chain-policy";
 export {
   assessSupplyChainPolicy,
   defaultSupplyChainPolicy,
   redactSecretLikeValues,
-} from "../lib/supply-chain-policy";
+} from "../lib/release/supply-chain-policy";
 export type {
   ThirdPartyOriginAssessment,
   ThirdPartyOriginAssessmentInput,
@@ -39,8 +39,8 @@ export type {
   ThirdPartyOriginReference,
   ThirdPartyOriginRequirement,
   ThirdPartyOriginSurface,
-} from "../lib/third-party-origins";
+} from "../lib/release/third-party-origins";
 export {
   assessThirdPartyOrigins,
   defaultThirdPartyOriginPolicy,
-} from "../lib/third-party-origins";
+} from "../lib/release/third-party-origins";

@@ -122,20 +122,22 @@ Every citation output should consume normalized sources:
 
 Current implementation ownership:
 
-- `src/lib/article-references/source.ts` owns normalized source fields,
+- `src/lib/references/article-references/source.ts` owns normalized source fields,
   identity confidence, BibTeX export, RIS export, and CSL-like export data.
-- `src/lib/bibliography.ts` consumes normalized source identity and display
-  fields for sitewide bibliography grouping and source rendering.
-- `src/lib/article-pdf.ts` consumes normalized source fields for flattened
-  Scholar `citation_reference` strings used by PDF and metadata output.
+- `src/lib/references/bibliography.ts` consumes normalized source identity and
+  display fields for sitewide bibliography grouping and source rendering.
+- `src/lib/articles/article-pdf.ts` consumes normalized source fields for
+  flattened Scholar `citation_reference` strings used by PDF and metadata
+  output.
 - Article reference rendering, backlink previews, and footnote/citation
   previews consume normalized article reference data produced by the Markdown
   reference pipeline; source display should stay derived from the same BibTeX
   entries rather than a separate prose-only model.
 - Cross-output coverage lives in
-  `tests/src/lib/citation-cross-output.test.ts` and article route fixture
-  coverage lives in `tests/src/pages/articles/[...slug].vitest.ts`. Together
-  they cover citation-heavy output surfaces and articles without references.
+  `tests/src/lib/references/citation-cross-output.test.ts` and article route
+  fixture coverage lives in `tests/src/pages/articles/[...slug].vitest.ts`.
+  Together they cover citation-heavy output surfaces and articles without
+  references.
 
 ## Authoring Rules
 

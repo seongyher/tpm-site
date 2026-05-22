@@ -1,0 +1,49 @@
+---
+import LinkButton from "../../ui/LinkButton.astro";
+import TextLink from "../../ui/TextLink.astro";
+import {
+  articlesArchiveUrl,
+  articlesIndexUrl,
+  feedUrl,
+} from "../../../lib/routes/routes";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Explore the Archive" } = Astro.props;
+---
+
+<section class="grid gap-3" aria-labelledby="home-archive-heading">
+  <h2
+    id="home-archive-heading"
+    class="text-foreground m-0 text-2xl font-semibold tracking-normal"
+  >
+    {title}
+  </h2>
+  <p class="text-muted-foreground">
+    Browse the full <TextLink href={articlesArchiveUrl()} prefetch="hover"
+      >article archive</TextLink
+    >, explore <TextLink href={articlesIndexUrl()} prefetch="hover"
+      >articles by category</TextLink
+    >, or subscribe to the <TextLink href={feedUrl()}>RSS feed</TextLink>.
+  </p>
+  <div class="flex flex-wrap gap-3">
+    <LinkButton
+      href={articlesIndexUrl()}
+      variant="outline"
+      tone="neutral"
+      prefetch="hover"
+    >
+      Articles Hub
+    </LinkButton>
+    <LinkButton
+      href={articlesArchiveUrl()}
+      variant="outline"
+      tone="neutral"
+      prefetch="hover"
+    >
+      All Articles
+    </LinkButton>
+  </div>
+</section>

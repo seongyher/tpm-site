@@ -1,0 +1,97 @@
+---
+import TableOfContentsItem from "./TableOfContentsItem.astro";
+import TableOfContentsToggle from "./TableOfContentsToggle.astro";
+import {
+  hasUsefulTableOfContents,
+  type ArticleTableOfContentsHeading,
+} from "../../../lib/articles/article-toc";
+
+interface Props {
+  headings: readonly ArticleTableOfContentsHeading[];
+  initiallyOpen?: boolean;
+  label?: string;
+  placement?: "inline" | "rail";
+}
+
+const {
+  headings,
+  initiallyOpen = true,
+  label = "Article table of contents",
+  placement = "rail",
+} = Astro.props;
+const shouldRender = hasUsefulTableOfContents(headings);
+const placementClasses = {
+  inline: "xl:hidden",
+  rail: "min-w-0",
+} as const;
+const detailsClasses = {
+  inline: "group grid gap-0 open:gap-3 open:pb-5",
+  rail: "group grid gap-2",
+} as const;
+const listClasses = {
+  inline: "grid gap-1",
+  rail: "border-border grid gap-0.5 border-s ps-3",
+} as const;
+const headingsWithSectionLabels = headings.reduce<{
+  items: {
+    heading: ArticleTableOfContentsHeading;
+    sectionLabel: string | undefined;
+  }[];
+  numberStack: number[];
+}>(
+  (state, heading) => {
+    if (placement !== "inline") {
+      return {
+        items: [...state.items, { heading, sectionLabel: undefined }],
+        numberStack: state.numberStack,
+      };
+    }
+
+    const outlineLevel = Math.max(1, Math.min(heading.level, 4));
+    const nextLabelValue = (state.numberStack[outlineLevel - 1] ?? 0) + 1;
+    const nextNumberStack = [
+      ...state.numberStack.slice(0, outlineLevel - 1),
+      nextLabelValue,
+    ];
+
+    return {
+      items: [
+        ...state.items,
+        {
+          heading,
+          sectionLabel: nextNumberStack.join("."),
+        },
+      ],
+      numberStack: nextNumberStack,
+    };
+  },
+  { items: [], numberStack: [] },
+).items;
+---
+
+{
+  shouldRender && (
+    <nav
+      aria-label={label}
+      data-article-toc
+      data-article-toc-placement={placement}
+      class:list={[placementClasses[placement]]}
+    >
+      <details class:list={[detailsClasses[placement]]} open={initiallyOpen}>
+        <TableOfContentsToggle placement={placement} />
+        <ol class:list={[listClasses[placement]]} data-article-toc-list>
+          {headingsWithSectionLabels.map(({ heading, sectionLabel }) => (
+            <li>
+              <TableOfContentsItem
+                heading={heading}
+                placement={placement}
+                sectionLabel={sectionLabel}
+              />
+            </li>
+          ))}
+        </ol>
+      </details>
+      <script src="../../../scripts/article-table-of-contents.ts" />
+    </nav>
+  )
+}

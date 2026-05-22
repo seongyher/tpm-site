@@ -52,6 +52,8 @@ bun run verify
 For a short explanation of every package script, see `PACKAGE_SCRIPTS.md`.
 For documentation ownership, generated-reference, and drift-check planning,
 see `docs/DOCUMENTATION_LIFECYCLE.md`.
+For the current source layout and repo organization contract, see
+`docs/REPO_ORGANIZATION.md`.
 
 Run the same local quality path with successful command output hidden:
 
@@ -287,8 +289,13 @@ Historical dated URLs such as:
 /2021/05/16/gamergate-as-metagaming/
 ```
 
-are intentionally not handled by this repo. Production redirects are managed
-outside the site, currently through Cloudflare.
+are preserved through generated Cloudflare redirects when article or
+announcement frontmatter has `legacyPermalink`. Hand-written compatibility
+redirects live in `site/config/redirects.json`. `bun run build:release`
+generates `dist/_redirects` from both sources.
+
+Domain-level redirects, such as `www` to apex, are still managed in
+Cloudflare because Workers Static Assets `_redirects` are path-level rules.
 
 ## Search, RSS, And Sitemap
 
@@ -299,6 +306,9 @@ outside the site, currently through Cloudflare.
 - Pagefind search index in `dist/pagefind/`
 - RSS feed at `/feed.xml`
 - sitemap output through `@astrojs/sitemap`
+
+`bun run build:release` also generates Cloudflare compatibility files such as
+`dist/_redirects`.
 
 For a production-like search check, run `bun run build` and then
 `bun run preview`.

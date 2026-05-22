@@ -99,7 +99,7 @@ if (!catalogIsBuilt) {
     await page.goto("/catalog/");
 
     const example = page.locator(
-      '[data-catalog-component="src/components/articles/ArticleList.astro"][data-catalog-example="ArticleList"]',
+      '[data-catalog-component="src/components/articles/lists/ArticleList.astro"][data-catalog-example="ArticleList"]',
     );
     const rows = example.locator("[data-article-card]");
     const imageBackedRow = rows.nth(0);
@@ -271,7 +271,7 @@ if (!catalogIsBuilt) {
     await page.goto("/catalog/");
 
     const example = page.locator(
-      '[data-catalog-component="src/components/articles/ArticleReferences.astro"]',
+      '[data-catalog-component="src/components/articles/references/ArticleReferences.astro"]',
     );
     const marker = example.locator("#cite-ref-baudrillard-1981");
     const entry = example.locator("#cite-baudrillard-1981");
@@ -298,7 +298,7 @@ if (!catalogIsBuilt) {
     await page.goto("/catalog/");
 
     const example = page.locator(
-      '[data-catalog-component="src/components/articles/ArticleReferences.astro"]',
+      '[data-catalog-component="src/components/articles/references/ArticleReferences.astro"]',
     );
     const marker = example.locator("#cite-ref-baudrillard-1981");
     const backlink = example.locator("#cite-backref-baudrillard-1981");
@@ -338,7 +338,7 @@ if (!catalogIsBuilt) {
     await page.goto("/catalog/");
 
     const exampleSelector =
-      '[data-catalog-component="src/components/articles/ArticleReferences.astro"]';
+      '[data-catalog-component="src/components/articles/references/ArticleReferences.astro"]';
     const example = page.locator(exampleSelector);
 
     await expect(example.getByRole("heading", { name: "Notes" })).toBeVisible();
@@ -399,7 +399,7 @@ if (!catalogIsBuilt) {
       await page.goto("/catalog/");
 
       const example = page.locator(
-        '[data-catalog-component="src/components/articles/ArticleReferences.astro"]',
+        '[data-catalog-component="src/components/articles/references/ArticleReferences.astro"]',
       );
       const references = example.locator("[data-article-references]");
 

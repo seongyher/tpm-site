@@ -1,0 +1,145 @@
+---
+import { Download } from "lucide-astro";
+
+import ArticleCitationMenu from "../actions/ArticleCitationMenu.astro";
+import ArticleHeaderActionLink from "../actions/ArticleHeaderActionLink.astro";
+import ArticleHeaderActionRow from "../actions/ArticleHeaderActionRow.astro";
+import ArticleMeta from "./ArticleMeta.astro";
+import ArticleShareMenu from "../actions/ArticleShareMenu.astro";
+import SemanticDetails from "./SemanticDetails.astro";
+import TextLink from "../../ui/TextLink.astro";
+import type { AuthorSummary } from "../../../lib/content/authors";
+import type { ArticlePdfViewModel } from "../../../lib/articles/article-pdf";
+import type { ArticleCitationMenuViewModel } from "../../../lib/references/citations/article-citation";
+import type { SemanticDetailsViewModel } from "../../../lib/metadata/semantic-metadata";
+import type { ArticleShareMenuViewModel } from "../../../lib/site/share-targets";
+
+interface ArticleCategory {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  author?: string | undefined;
+  authors?: readonly AuthorSummary[] | undefined;
+  category?: ArticleCategory | undefined;
+  citation?: ArticleCitationMenuViewModel | undefined;
+  date?: Date | undefined;
+  description?: string | undefined;
+  formattedDate?: string | undefined;
+  pdf?: ArticlePdfViewModel | undefined;
+  profileLinksEnabled?: boolean | undefined;
+  semanticDetails?: SemanticDetailsViewModel | undefined;
+  share?: ArticleShareMenuViewModel | undefined;
+  title: string;
+}
+
+const {
+  author,
+  authors = [],
+  category,
+  citation,
+  date,
+  description,
+  formattedDate,
+  pdf,
+  profileLinksEnabled = true,
+  semanticDetails,
+  share,
+  title,
+} = Astro.props;
+const hasHeaderActions =
+  citation !== undefined || share !== undefined || pdf !== undefined;
+const hasKickerRow = category !== undefined || hasHeaderActions;
+---
+
+<header class="grid min-w-0 gap-4">
+  {
+    hasKickerRow && (
+      <div
+        class:list={[
+          "flex w-full max-w-4xl min-w-0 flex-wrap items-center gap-x-4 gap-y-2",
+          category === undefined ? "justify-end" : "justify-between",
+        ]}
+        data-article-kicker-row
+      >
+        {category && (
+          <TextLink
+            href={category.href}
+            variant="subtle"
+            tone="primary"
+            prefetch="hover"
+            class="text-sm font-semibold uppercase"
+            data-article-category-link
+            data-pdf-exclude
+          >
+            {category.title}
+          </TextLink>
+        )}
+        {hasHeaderActions && (
+          <ArticleHeaderActionRow>
+            {citation && <ArticleCitationMenu citation={citation} />}
+            {share && <ArticleShareMenu share={share} />}
+            {pdf && (
+              <ArticleHeaderActionLink
+                href={pdf.pdfHref}
+                label="Save PDF"
+                data-article-pdf-link
+                download
+              >
+                <Download class="size-3.5" aria-hidden="true" />
+                <span aria-hidden="true">PDF</span>
+              </ArticleHeaderActionLink>
+            )}
+          </ArticleHeaderActionRow>
+        )}
+      </div>
+    )
+  }
+  <h1
+    class="text-foreground m-0 max-w-4xl min-w-0 text-4xl font-bold tracking-normal break-words"
+  >
+    {title}
+  </h1>
+  <div
+    class="flex w-full max-w-4xl min-w-0 flex-wrap items-start gap-x-4 gap-y-1"
+    data-article-meta-row
+  >
+    <ArticleMeta
+      author={author}
+      authors={authors}
+      date={date}
+      formattedDate={formattedDate}
+      profileLinksEnabled={profileLinksEnabled}
+    />
+  </div>
+  {
+    description && (
+      <p class="text-muted-foreground max-w-3xl min-w-0 text-lg break-words">
+        {description}
+      </p>
+    )
+  }
+  <SemanticDetails details={semanticDetails} />
+  {
+    pdf && (
+      <>
+        <p
+          class="hidden text-sm leading-6 print:block"
+          data-article-pdf-canonical
+        >
+          Published {formattedDate ?? pdf.publicationDateForScholar}. Available
+          at <a href={pdf.articleUrl}>{pdf.articleUrl}</a>.
+        </p>
+        <p
+          class="hidden text-sm leading-6 print:block"
+          data-article-pdf-disclaimer
+        >
+          This PDF is a static export of the canonical web article. Interactive
+          media and embeds may be represented as source links; visit the
+          canonical article for the full web version.
+        </p>
+      </>
+    )
+  }
+</header>

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { defaultPublishableVisibility } from "../../src/lib/publishable";
+import { defaultPublishableVisibility } from "../../src/lib/content/publishable";
 import {
   type AnnouncementEntry,
   announcementsIndexUrl,
@@ -31,7 +31,7 @@ import {
   searchUrl,
   tagsIndexUrl,
   tagUrl,
-} from "../../src/lib/routes";
+} from "../../src/lib/routes/routes";
 import { announcementEntry } from "../helpers/content";
 
 function entry(

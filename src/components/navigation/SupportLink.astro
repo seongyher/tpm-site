@@ -1,7 +1,7 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import LinkButton from "../ui/LinkButton.astro";
-import { siteConfig } from "../../lib/site-config";
+import { siteConfig } from "../../lib/site/site-config";
 
 interface Props extends Omit<HTMLAttributes<"a">, "href"> {
   class?: string;

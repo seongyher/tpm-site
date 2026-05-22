@@ -1,0 +1,76 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import TextLink from "../../ui/TextLink.astro";
+
+type EntryMetaLineTag = "div" | "p";
+type EntryMetaLineItem =
+  | string
+  | {
+      href?: string | undefined;
+      label: string;
+      prefetch?: "hover" | "load" | "tap" | "viewport" | boolean | undefined;
+    };
+
+/** Public props for compact entry metadata rows. */
+interface Props extends HTMLAttributes<"p"> {
+  as?: EntryMetaLineTag;
+  hideWhenEmpty?: boolean;
+  items: readonly EntryMetaLineItem[];
+  separator?: string;
+}
+
+const {
+  as = "p",
+  hideWhenEmpty = true,
+  items,
+  separator = "/",
+  class: className,
+  ...attrs
+} = Astro.props;
+
+const MetaTag = as;
+const normalizedItems = items
+  .map((item) => {
+    const normalizedItem = typeof item === "string" ? { label: item } : item;
+    const prefetchAttrs =
+      normalizedItem.prefetch === undefined
+        ? {}
+        : { prefetch: normalizedItem.prefetch };
+
+    return { ...normalizedItem, prefetchAttrs };
+  })
+  .filter((item) => item.label !== "");
+const shouldRender = normalizedItems.length > 0 || !hideWhenEmpty;
+---
+
+{
+  shouldRender && (
+    <MetaTag
+      {...attrs}
+      class:list={[
+        "text-muted-foreground flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-xs",
+        className,
+      ]}
+      aria-hidden={normalizedItems.length === 0 ? "true" : undefined}
+    >
+      {normalizedItems.map((item, index) => (
+        <>
+          {index > 0 && <span aria-hidden="true">{separator}</span>}
+          {item.href ? (
+            <TextLink
+              href={item.href}
+              variant="subtle"
+              tone="muted"
+              {...item.prefetchAttrs}
+            >
+              {item.label}
+            </TextLink>
+          ) : (
+            <span>{item.label}</span>
+          )}
+        </>
+      ))}
+    </MetaTag>
+  )
+}

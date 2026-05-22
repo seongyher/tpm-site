@@ -1,12 +1,15 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../../lib/authors";
-import { getCategories } from "../../lib/content";
-import { categoryDetailRouteViewModel } from "../../lib/listing-route-view-models";
-import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
-import { categoryStaticPaths } from "../../lib/static-paths";
+import { getAuthorEntries } from "../../lib/content/authors";
+import { getCategories } from "../../lib/content/content";
+import { categoryDetailRouteViewModel } from "../../lib/content/listing-route-view-models";
+import {
+  breadcrumbListJsonLd,
+  itemListJsonLd,
+} from "../../lib/metadata/metadata";
+import { categoryStaticPaths } from "../../lib/routes/static-paths";
 
 /**
  * Generates one static category route for each public category.

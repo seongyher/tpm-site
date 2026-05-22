@@ -1,18 +1,21 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../../lib/authors";
-import type { EditorialCollectionEntry } from "../../lib/collections";
+import { getAuthorEntries } from "../../lib/content/authors";
+import type { EditorialCollectionEntry } from "../../lib/content/collections";
 import {
   getAnnouncements,
   getArticles,
   getCategories,
   getEditorialCollections,
-} from "../../lib/content";
-import { collectionDetailRouteViewModel } from "../../lib/listing-route-view-models";
-import { breadcrumbListJsonLd, itemListJsonLd } from "../../lib/metadata";
-import { collectionStaticPaths } from "../../lib/static-paths";
+} from "../../lib/content/content";
+import { collectionDetailRouteViewModel } from "../../lib/content/listing-route-view-models";
+import {
+  breadcrumbListJsonLd,
+  itemListJsonLd,
+} from "../../lib/metadata/metadata";
+import { collectionStaticPaths } from "../../lib/routes/static-paths";
 
 /**
  * Generates one static collection route for each active editorial collection.

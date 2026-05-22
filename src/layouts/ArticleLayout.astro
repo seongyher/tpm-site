@@ -1,12 +1,12 @@
 ---
 import { getImage } from "astro:assets";
 
-import ArticleEndcap from "../components/articles/ArticleEndcap.astro";
-import ArticleHeader from "../components/articles/ArticleHeader.astro";
-import ArticleProse from "../components/articles/ArticleProse.astro";
-import ArticleReferences from "../components/articles/ArticleReferences.astro";
-import ArticleTableOfContents from "../components/articles/ArticleTableOfContents.astro";
-import ArticleTags from "../components/articles/ArticleTags.astro";
+import ArticleEndcap from "../components/articles/endcap/ArticleEndcap.astro";
+import ArticleHeader from "../components/articles/header/ArticleHeader.astro";
+import ArticleProse from "../components/articles/prose/ArticleProse.astro";
+import ArticleReferences from "../components/articles/references/ArticleReferences.astro";
+import ArticleTableOfContents from "../components/articles/toc/ArticleTableOfContents.astro";
+import ArticleTags from "../components/articles/header/ArticleTags.astro";
 import AuthorBioBlock from "../components/authors/AuthorBioBlock.astro";
 import ContentRail from "../components/layout/ContentRail.astro";
 import EndcapStack from "../components/layout/EndcapStack.astro";
@@ -15,11 +15,11 @@ import ReadingNavigationLinks from "../components/navigation/ReadingNavigationLi
 import ArticleJsonLd from "../components/seo/ArticleJsonLd.astro";
 import ArticleScholarMeta from "../components/seo/ArticleScholarMeta.astro";
 import PublishableOpenGraphMeta from "../components/seo/PublishableOpenGraphMeta.astro";
-import type { ArticleReferenceData } from "../lib/article-references/model";
-import type { ArticleTableOfContentsHeading } from "../lib/article-toc";
-import { articlePageViewModel } from "../lib/article-page-view-model";
-import { breadcrumbListJsonLd } from "../lib/metadata";
-import { articlesIndexUrl, type ArticleEntry } from "../lib/routes";
+import type { ArticleReferenceData } from "../lib/references/article-references/model";
+import type { ArticleTableOfContentsHeading } from "../lib/articles/article-toc";
+import { articlePageViewModel } from "../lib/content/article-page-view-model";
+import { breadcrumbListJsonLd } from "../lib/metadata/metadata";
+import { articlesIndexUrl, type ArticleEntry } from "../lib/routes/routes";
 import BaseLayout from "./BaseLayout.astro";
 
 interface Props {

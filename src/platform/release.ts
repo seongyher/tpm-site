@@ -8,9 +8,9 @@ export type {
   ReleaseGovernanceReportOptions,
   ReleaseGovernanceSummary,
   ReleaseLaunchChecklistItem,
-} from "../lib/release-governance";
+} from "../lib/release/release-governance";
 export {
   createReleaseGovernanceReport,
   formatReleaseGovernanceMarkdownReport,
   releaseGovernanceDiagnostics,
-} from "../lib/release-governance";
+} from "../lib/release/release-governance";

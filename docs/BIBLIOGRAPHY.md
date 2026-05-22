@@ -154,7 +154,7 @@ rendering, and article back-links before adding complex filters.
 ## Component Boundaries
 
 - Routes load article data and normalized reference metadata.
-- `src/lib/bibliography` aggregates and sorts source data.
+- `src/lib/references/bibliography` aggregates and sorts source data.
 - Bibliography components receive display-ready entries.
 - Components do not parse Markdown or BibTeX.
 - Article-local reference components and the global bibliography share the same

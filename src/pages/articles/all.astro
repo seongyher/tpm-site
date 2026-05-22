@@ -1,11 +1,11 @@
 ---
-import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import ArchiveListBlock from "../../components/blocks/listing/ArchiveListBlock.astro";
 import BrowsingBody from "../../components/layout/BrowsingBody.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getAuthorEntries } from "../../lib/authors";
-import { getArticles, getCategories } from "../../lib/content";
-import { articlesArchiveRouteViewModel } from "../../lib/listing-route-view-models";
-import { itemListJsonLd } from "../../lib/metadata";
+import { getAuthorEntries } from "../../lib/content/authors";
+import { getArticles, getCategories } from "../../lib/content/content";
+import { articlesArchiveRouteViewModel } from "../../lib/content/listing-route-view-models";
+import { itemListJsonLd } from "../../lib/metadata/metadata";
 
 const model = articlesArchiveRouteViewModel({
   articles: await getArticles(),

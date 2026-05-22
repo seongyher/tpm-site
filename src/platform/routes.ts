@@ -5,7 +5,7 @@ export type {
   RouteRegistryOutputKind,
   RouteRegistryPattern,
   RouteRegistrySurface,
-} from "../lib/route-registry";
+} from "../lib/routes/route-registry";
 export {
   routeChildIndexOutputPath,
   routeFeatureEnabled,
@@ -16,4 +16,4 @@ export {
   routeOwnsPathname,
   routeRegistryEntries,
   routeRegistryEntryForKey,
-} from "../lib/route-registry";
+} from "../lib/routes/route-registry";

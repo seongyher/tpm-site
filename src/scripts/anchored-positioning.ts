@@ -4,7 +4,7 @@ import {
   type AnchorRect,
   computeAnchoredPosition,
   emptyAnchorRect,
-} from "../lib/anchored-positioning";
+} from "../lib/interactions/anchored-positioning";
 
 const rootSelector = "[data-anchor-root]";
 const triggerSelector = "[data-anchor-trigger]";

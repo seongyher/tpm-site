@@ -6,7 +6,7 @@ import {
   pagefindGlobsForSiteConfig,
   runBuildRawCli,
 } from "../../../scripts/build/build-raw";
-import { parseSiteConfig } from "../../../src/lib/site-config";
+import { parseSiteConfig } from "../../../src/lib/site/site-config";
 
 const config = parseSiteConfig({
   features: {

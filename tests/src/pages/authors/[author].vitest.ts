@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getAuthorProfiles } from "../../../../src/lib/authors";
+import { getAuthorProfiles } from "../../../../src/lib/content/authors";
 import AuthorRoute from "../../../../src/pages/authors/[author].astro";
 import {
   createAstroTestContainer,

@@ -3,11 +3,14 @@ import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
-import { articleImagePolicyCacheKey } from "./src/lib/article-image-policy";
-import { sitemapIncludesPath } from "./src/lib/metadata";
-import { siteConfig } from "./src/lib/site-config";
-import { projectRelativePath, siteInstance } from "./src/lib/site-instance";
-import { siteRedirects } from "./src/lib/site-redirects";
+import { articleImagePolicyCacheKey } from "./src/lib/articles/article-image-policy";
+import { sitemapIncludesPath } from "./src/lib/metadata/metadata";
+import { siteRedirects } from "./src/lib/routes/site-redirects";
+import { siteConfig } from "./src/lib/site/site-config";
+import {
+  projectRelativePath,
+  siteInstance,
+} from "./src/lib/site/site-instance";
 import {
   rehypeArticleImages,
   remarkArticleImageMarkers,

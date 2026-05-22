@@ -2,8 +2,8 @@
 import { getImage } from "astro:assets";
 import { render } from "astro:content";
 
-import ArticleHeader from "../../components/articles/ArticleHeader.astro";
-import ArticleProse from "../../components/articles/ArticleProse.astro";
+import ArticleHeader from "../../components/articles/header/ArticleHeader.astro";
+import ArticleProse from "../../components/articles/prose/ArticleProse.astro";
 import ReadingBody from "../../components/layout/ReadingBody.astro";
 import AnnouncementJsonLd from "../../components/seo/AnnouncementJsonLd.astro";
 import PublishableOpenGraphMeta from "../../components/seo/PublishableOpenGraphMeta.astro";
@@ -11,18 +11,18 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   getAnnouncements,
   getSiteSocialFallbackImage,
-} from "../../lib/content";
-import { breadcrumbListJsonLd } from "../../lib/metadata";
+} from "../../lib/content/content";
+import { breadcrumbListJsonLd } from "../../lib/metadata/metadata";
 import {
   announcementsIndexUrl,
   announcementUrl,
   formatDate,
   type AnnouncementEntry,
-} from "../../lib/routes";
-import { siteConfig } from "../../lib/site-config";
-import { semanticDetailsViewModel } from "../../lib/semantic-metadata";
-import { socialPreviewImageViewModel } from "../../lib/social-images";
-import { announcementStaticPaths } from "../../lib/static-paths";
+} from "../../lib/routes/routes";
+import { siteConfig } from "../../lib/site/site-config";
+import { semanticDetailsViewModel } from "../../lib/metadata/semantic-metadata";
+import { socialPreviewImageViewModel } from "../../lib/media/social-images";
+import { announcementStaticPaths } from "../../lib/routes/static-paths";
 
 /**
  * Generates one static announcement route for each published announcement.

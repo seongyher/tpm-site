@@ -1,7 +1,10 @@
 ---
-import type { SocialPreviewImage } from "../../lib/social-images";
-import { routeMetadataGraphViewModel } from "../../lib/metadata-graph";
-import { type JsonLdNode, type RouteMetadata } from "../../lib/metadata";
+import type { SocialPreviewImage } from "../../lib/media/social-images";
+import { routeMetadataGraphViewModel } from "../../lib/metadata/metadata-graph";
+import {
+  type JsonLdNode,
+  type RouteMetadata,
+} from "../../lib/metadata/metadata";
 
 interface Props {
   image?: SocialPreviewImage | undefined;

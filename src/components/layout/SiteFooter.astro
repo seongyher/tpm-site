@@ -1,9 +1,9 @@
 ---
 import SupportLink from "../navigation/SupportLink.astro";
 import TextLink from "../ui/TextLink.astro";
-import type { SectionNavItem } from "../../lib/navigation";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../../lib/routes";
-import { siteConfig } from "../../lib/site-config";
+import type { SectionNavItem } from "../../lib/site/navigation";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../../lib/routes/routes";
+import { siteConfig } from "../../lib/site/site-config";
 
 interface Props {
   navigationItems: readonly SectionNavItem[];

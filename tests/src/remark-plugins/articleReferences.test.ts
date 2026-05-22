@@ -7,7 +7,7 @@ import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 
-import type { ArticleReferenceData } from "../../../src/lib/article-references/model";
+import type { ArticleReferenceData } from "../../../src/lib/references/article-references/model";
 import {
   articleReferencesFromFrontmatter,
   remarkArticleReferences,

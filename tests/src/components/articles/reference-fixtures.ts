@@ -1,4 +1,4 @@
-import type { ArticleReferenceData } from "../../../../src/lib/article-references/model";
+import type { ArticleReferenceData } from "../../../../src/lib/references/article-references/model";
 
 /** Shared normalized reference data for article reference component tests. */
 export const articleReferenceFixture = {

@@ -68,95 +68,95 @@ export const catalogExampleComponentPaths = [
 export const componentCatalogIgnoreList = [
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleCardBody.astro",
+    path: "src/components/articles/lists/ArticleCardBody.astro",
     reason:
       "Internal article-card child covered by ArticleCard and article-list component tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/PublishableMediaFrame.astro",
+    path: "src/components/articles/media/PublishableMediaFrame.astro",
     reason:
       "Internal linked-media primitive covered by ArticleCard, HomeFeaturedSlide, and focused media-frame tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleHeaderActionLink.astro",
+    path: "src/components/articles/actions/ArticleHeaderActionLink.astro",
     reason:
       "Internal article-header action primitive covered by ArticleHeader component tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleHeaderActionRow.astro",
+    path: "src/components/articles/actions/ArticleHeaderActionRow.astro",
     reason:
       "Internal article-header action primitive covered by ArticleHeader component tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleHeaderActionTrigger.astro",
+    path: "src/components/articles/actions/ArticleHeaderActionTrigger.astro",
     reason:
       "Internal article-header anchored trigger covered by citation and share menu tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/SemanticDetails.astro",
+    path: "src/components/articles/header/SemanticDetails.astro",
     reason:
       "Internal article-header semantic metadata surface covered by SemanticDetails and ArticleHeader tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleShareActionRow.astro",
+    path: "src/components/articles/actions/ArticleShareActionRow.astro",
     reason:
       "Internal article-share row renderer covered by ArticleShareMenu examples and component tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleImageFrame.astro",
+    path: "src/components/articles/media/ArticleImageFrame.astro",
     reason:
       "Internal article-image frame covered by ArticleImage, focused frame, and article-image e2e tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleImageInspectorScript.astro",
+    path: "src/components/articles/media/ArticleImageInspectorScript.astro",
     reason:
       "Non-visual script boundary covered by ArticleImage, ArticleProse, browser-script, and e2e tests.",
   },
   {
     lifecycle: "platform-candidate",
-    path: "src/components/articles/HoverImageLink.astro",
+    path: "src/components/articles/media/HoverImageLink.astro",
     reason: "Article-specific MDX wrapper pending article catalog examples.",
   },
   {
     lifecycle: "platform-candidate",
-    path: "src/components/articles/HoverImageParagraph.astro",
+    path: "src/components/articles/media/HoverImageParagraph.astro",
     reason: "Article-specific MDX wrapper pending article catalog examples.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleReferenceDefinitionContent.astro",
+    path: "src/components/articles/references/ArticleReferenceDefinitionContent.astro",
     reason:
       "Internal article-reference renderer covered by parent reference component examples and tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleReferenceInlineContent.astro",
+    path: "src/components/articles/references/ArticleReferenceInlineContent.astro",
     reason:
       "Internal article-reference inline renderer covered by parent reference component examples and tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/blocks/HomeFeaturedCarouselControls.astro",
+    path: "src/components/blocks/home/HomeFeaturedCarouselControls.astro",
     reason:
       "Internal carousel control row covered by HomeFeaturedCarousel and focused control tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/blocks/TermCard.astro",
+    path: "src/components/blocks/terms/TermCard.astro",
     reason:
       "Internal term-surface child covered by TermOverviewBlock and TermRailBlock tests.",
   },
   {
     lifecycle: "route-only",
-    path: "src/components/blocks/TermRailBlock.astro",
+    path: "src/components/blocks/terms/TermRailBlock.astro",
     reason:
       "Generic term rail adapter covered by CategoryRailBlock and focused TermRailBlock tests.",
   },

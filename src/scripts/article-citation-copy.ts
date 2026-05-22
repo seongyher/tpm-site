@@ -2,7 +2,7 @@ import {
   type ClipboardStatusTarget,
   copyTextWithStatus,
   parseJsonStringPayload,
-} from "../lib/browser-clipboard";
+} from "../lib/interactions/browser-clipboard";
 
 /** Browser dependencies used by the article citation copy enhancement. */
 export interface ArticleCitationCopyRuntime {

@@ -13,9 +13,9 @@ export type {
   MigrationRoundTripStatus,
   MigrationSourceKind,
   MigrationSourceReference,
-} from "../lib/migration-fixtures";
+} from "../lib/import-export/migration-fixtures";
 export {
   createMigrationFixtureOutput,
   createMigrationReviewReport,
   formatMigrationReviewMarkdownReport,
-} from "../lib/migration-fixtures";
+} from "../lib/import-export/migration-fixtures";

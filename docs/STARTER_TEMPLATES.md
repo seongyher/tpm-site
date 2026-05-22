@@ -22,7 +22,7 @@ headers, metadata, feeds, PDFs, search, and docs.
 | Documentation Site    | `examples/docs-site`                      | A project maintainer documenting a platform. | Docs-oriented article categories, configuration docs, announcements.                                     | Public support CTA.                                      |
 | Kitchen Sink Demo     | `examples/starters/kitchen-sink`          | A platform evaluator.                        | Broad feature coverage: announcements, citations, bibliography, redirects, support, feeds, search, PDFs. | None by default; future extension demos remain optional. |
 
-The source-of-truth matrix lives in `src/lib/starter-templates.ts` and is
+The source-of-truth matrix lives in `src/lib/starters/starter-templates.ts` and is
 exposed through `src/platform/starters.ts`.
 
 ## Scaffold Workflow
@@ -78,7 +78,7 @@ records the full build command each starter must satisfy.
 Starter changes should be treated like product changes:
 
 - preserve starter IDs unless a migration is documented;
-- update this document and `src/lib/starter-templates.ts` together;
+- update this document and `src/lib/starters/starter-templates.ts` together;
 - keep starter content generic and site-neutral;
 - explain breaking starter changes in release notes;
 - prefer adding a new starter over making an existing starter serve unrelated

@@ -199,12 +199,13 @@ profiles currently emit these Schema.org nodes:
 - `FAQPage`.
 
 These profiles are intentionally narrow and validated by Zod in
-`src/lib/semantic-metadata.ts`. They are general Schema.org machine-readable
-metadata unless this document says otherwise. Google rich-result features for
-events, reviews, video, datasets, software apps, and FAQ pages each have
-additional eligibility rules. Before claiming eligibility for one of those
-features, the corresponding content schema, visible rendering, builder tests,
-and build verifier must be upgraded to that feature's documented contract.
+`src/lib/metadata/semantic-metadata.ts`. They are general Schema.org
+machine-readable metadata unless this document says otherwise. Google
+rich-result features for events, reviews, video, datasets, software apps, and
+FAQ pages each have additional eligibility rules. Before claiming eligibility
+for one of those features, the corresponding content schema, visible rendering,
+builder tests, and build verifier must be upgraded to that feature's documented
+contract.
 
 Current rich-result target status:
 
@@ -290,8 +291,8 @@ fallback pages use `noindex,follow`.
 
 Use these checks when changing metadata code:
 
-- focused unit tests for builders in `tests/src/lib/metadata.test.ts` and
-  `tests/src/lib/seo.test.ts`;
+- focused unit tests for builders in `tests/src/lib/metadata/metadata.test.ts`
+  and `tests/src/lib/metadata/seo.test.ts`;
 - component render tests for `SiteHead`, `ArticleJsonLd`,
   `AnnouncementJsonLd`, `ArticleScholarMeta`, and social metadata;
 - build-output verifier tests in `tests/scripts/build/build-verifier.test.ts`;

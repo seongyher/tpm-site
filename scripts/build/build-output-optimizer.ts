@@ -16,8 +16,8 @@ import { optimize as optimizeSvg } from "svgo";
 import {
   optionalFeatureRouteEntries,
   optionalRouteOwnsPathname,
-} from "../../src/lib/feature-routes";
-import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
+} from "../../src/lib/routes/feature-routes";
+import { type SiteConfig, siteConfig } from "../../src/lib/site/site-config";
 
 /** Supported generated-output transform. */
 export type BuildOutputTransformName =

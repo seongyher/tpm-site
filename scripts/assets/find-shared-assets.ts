@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 
 const sourceFilePattern = /\.(?:astro|css|mdx?|[cm]?[jt]sx?)$/i;
 const assetExtensionPattern =

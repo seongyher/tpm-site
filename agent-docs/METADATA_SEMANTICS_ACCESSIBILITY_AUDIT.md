@@ -13,7 +13,7 @@ The audit reviewed:
 - Source metadata components and helpers in `src/components/seo/`, `src/lib/`,
   `src/layouts/`, and route files under `src/pages/`.
 - Content schemas and site-owner configuration in `src/content.config.ts`,
-  `src/lib/content-schemas.ts`, `src/lib/site-config*`, and
+  `src/lib/content/content-schemas.ts`, `src/lib/site/site-config*`, and
   `site/config/site.json`.
 - Representative generated output in `dist/`, plus a generated-output scan of
   all 295 built HTML files.
@@ -782,10 +782,10 @@ Validation expectations:
 
 Implemented platform shape:
 
-- `src/lib/semantic-metadata.ts` owns the typed `semantic` schema, visible
-  details view model, and JSON-LD node builder.
-- `src/lib/content-schemas.ts` exposes `semantic` on article-like publishable
-  entries while preserving strict frontmatter validation.
+- `src/lib/metadata/semantic-metadata.ts` owns the typed `semantic` schema,
+  visible details view model, and JSON-LD node builder.
+- `src/lib/content/content-schemas.ts` exposes `semantic` on article-like
+  publishable entries while preserving strict frontmatter validation.
 - `ArticleJsonLd` and `AnnouncementJsonLd` keep normal `BlogPosting` output for
   ordinary entries and switch to a graph only when semantic nodes are present.
 - `SemanticDetails` renders the reader-visible facts in the article opening so
@@ -853,9 +853,9 @@ Entry conditions:
 Likely touch points:
 
 - New metadata helpers under `src/lib/metadata/` or equivalent.
-- Tests under `tests/src/lib/metadata*`.
-- Existing metadata tests in `tests/src/lib/seo.test.ts` and related route
-  tests.
+- Tests under `tests/src/lib/metadata/`.
+- Existing metadata tests in `tests/src/lib/metadata/seo.test.ts` and related
+  route tests.
 
 Deliverables:
 
@@ -906,7 +906,7 @@ Dependencies:
 Likely touch points:
 
 - `site/config/site.json`
-- site config schemas and tests under `src/lib/site-config*`
+- site config schemas and tests under `src/lib/site/site-config*`
 - `src/components/seo/SiteHead.astro` or equivalent
 - social-image helpers and existing social-image tests
 - author/site-owner docs in `site/README.md` if configuration changes
@@ -1036,7 +1036,7 @@ Dependencies:
 
 Likely touch points:
 
-- Article reference helpers under `src/lib/article-references/`.
+- Article reference helpers under `src/lib/references/article-references/`.
 - Bibliography route/components.
 - Scholar metadata tests.
 - PDF generation metadata if Scholar/PDF output shares citation strings.

@@ -19,6 +19,8 @@ For a slower step-by-step article walkthrough, see
 - `content/categories/`: category display names and order.
 - `content/pages/`: standalone site pages such as Home and About.
 - `assets/`: images and SVGs that should be optimized by the site build.
+- `config/redirects.json`: hand-written redirects for old or compatibility
+  URLs that cannot be derived from article `legacyPermalink` metadata.
 - `config/site.json`: site title, navigation, homepage labels, support links,
   share settings, feature switches, and defaults.
 - `theme.css`: site colors, fonts, radius, and visual theme tokens.

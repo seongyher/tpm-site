@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getEditorialCollections } from "../../../../src/lib/content";
+import { getEditorialCollections } from "../../../../src/lib/content/content";
 import CollectionPage from "../../../../src/pages/collections/[collection].astro";
 import {
   createAstroTestContainer,

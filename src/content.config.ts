@@ -9,9 +9,9 @@ import {
   editorialCollectionSchema,
   filenameStem,
   pageSchema,
-} from "./lib/content-schemas";
-import { siteConfig } from "./lib/site-config";
-import { projectRelativePath, siteInstance } from "./lib/site-instance";
+} from "./lib/content/content-schemas";
+import { siteConfig } from "./lib/site/site-config";
+import { projectRelativePath, siteInstance } from "./lib/site/site-instance";
 
 const articles = defineCollection({
   loader: glob({

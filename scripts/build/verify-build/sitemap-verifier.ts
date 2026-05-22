@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { sitemapIncludesPath } from "../../../src/lib/metadata";
 import {
   createOutputDiagnostic,
   type OutputDiagnostic,
-} from "../../../src/lib/output-verification";
+} from "../../../src/lib/diagnostics/output-verification";
+import { sitemapIncludesPath } from "../../../src/lib/metadata/metadata";
 
 /** Inputs used to verify a generated sitemap XML file. */
 export interface SitemapFileVerificationInput {

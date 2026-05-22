@@ -15,7 +15,7 @@ import {
   optimizeBuildOutput,
   productionBuildOutputTransforms,
 } from "../../../scripts/build/build-output-optimizer";
-import { type SiteConfig, siteConfig } from "../../../src/lib/site-config";
+import { type SiteConfig, siteConfig } from "../../../src/lib/site/site-config";
 
 function withBuildOutput<T>(run: (outputDir: string) => T): T {
   const rootDir = mkdtempSync(path.join(tmpdir(), "tpm-build-optimizer-test-"));

@@ -3,8 +3,8 @@ import path from "node:path";
 
 import matter from "gray-matter";
 
-import { siteInstance } from "../../src/lib/site-instance";
-import { siteRedirects as currentSiteRedirects } from "../../src/lib/site-redirects";
+import { siteRedirects as currentSiteRedirects } from "../../src/lib/routes/site-redirects";
+import { siteInstance } from "../../src/lib/site/site-instance";
 
 const CLOUDFLARE_STATIC_REDIRECT_LIMIT = 2_000;
 const CLOUDFLARE_REDIRECT_LINE_LIMIT = 1_000;

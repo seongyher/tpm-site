@@ -4,8 +4,8 @@ import { pathToFileURL } from "node:url";
 
 import matter from "gray-matter";
 
-import { articlePdfOutputPath } from "../../src/lib/article-pdf";
-import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
+import { articlePdfOutputPath } from "../../src/lib/articles/article-pdf";
+import { normalizeTag } from "../../src/lib/content/tags";
 import {
   createOutputDiagnostic,
   createOutputVerificationReport,
@@ -14,15 +14,15 @@ import {
   type OutputDiagnosticCode,
   type OutputDiagnosticOwner,
   type OutputVerificationReport,
-} from "../../src/lib/output-verification";
+} from "../../src/lib/diagnostics/output-verification";
+import { optionalFeatureRouteEntries } from "../../src/lib/routes/feature-routes";
 import {
   routeChildIndexOutputPath,
   routeIndexOutputPath,
   routeOutputBasePath,
-} from "../../src/lib/route-registry";
-import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
-import { normalizeTag } from "../../src/lib/tags";
+} from "../../src/lib/routes/route-registry";
+import { type SiteConfig, siteConfig } from "../../src/lib/site/site-config";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 import {
   verifyGeneratedAssetCachePolicy,
   verifySourceMapOutput,

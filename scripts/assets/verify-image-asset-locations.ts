@@ -2,11 +2,11 @@ import { spawn } from "node:child_process";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 import {
   sourceArtifactEntry,
   sourceArtifactManifest,
-} from "../../src/lib/source-artifacts";
+} from "../../src/lib/site/source-artifacts";
 
 const defaultIgnoreFile = "scripts/image-asset-location-ignore.json";
 const imageExtensionPattern =

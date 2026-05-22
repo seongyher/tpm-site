@@ -7,7 +7,7 @@ reference current contracts without copying implementation facts by hand.
 
 ## Site Config Fields
 
-Source: `src/lib/site-config.ts` and `site/config/site.schema.json`.
+Source: `src/lib/site/site-config.ts` and `site/config/site.schema.json`.
 
 | Field                                                | Type                       | Required | Default                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------------- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ Source: `src/lib/site-config.ts` and `site/config/site.schema.json`.
 
 ## Content Frontmatter Fields
 
-Source: `src/lib/content-schemas.ts`.
+Source: `src/lib/content/content-schemas.ts`.
 
 ### Article frontmatter
 
@@ -232,7 +232,7 @@ Source function: `editorialCollectionSchema()`.
 
 ## Routes, Entities, Features, And Output
 
-Source: `src/lib/route-registry.ts` and active `site/config/site.json`.
+Source: `src/lib/routes/route-registry.ts` and active `site/config/site.json`.
 
 | Route key     | Route           | Entity       | Feature       | Enabled | Output        | Surfaces                                                                             |
 | ------------- | --------------- | ------------ | ------------- | ------- | ------------- | ------------------------------------------------------------------------------------ |
@@ -250,7 +250,7 @@ Source: `src/lib/route-registry.ts` and active `site/config/site.json`.
 
 ## Feature Flags
 
-Source: `src/lib/site-config-defaults.ts` and active `site/config/site.json`.
+Source: `src/lib/site/site-config-defaults.ts` and active `site/config/site.json`.
 
 | Feature       | Default | Current |
 | ------------- | ------- | ------- |
@@ -268,7 +268,7 @@ Source: `src/lib/site-config-defaults.ts` and active `site/config/site.json`.
 
 ## Publishable Visibility Surfaces
 
-Source: `src/lib/site-config-defaults.ts`.
+Source: `src/lib/site/site-config-defaults.ts`.
 
 | Surface     | Default |
 | ----------- | ------- |
@@ -284,7 +284,7 @@ Source: `src/lib/site-config-defaults.ts`.
 
 ## Semantic Metadata Profiles
 
-Source: `src/lib/semantic-profile-kinds.ts`.
+Source: `src/lib/metadata/semantic-profile-kinds.ts`.
 
 | Profile kind | Enabled for this site |
 | ------------ | --------------------- |
@@ -299,7 +299,7 @@ Source: `src/lib/semantic-profile-kinds.ts`.
 
 ## Media And PDF Policy Vocabulary
 
-Source: `src/lib/media-policy.ts`.
+Source: `src/lib/media/media-policy.ts`.
 
 ### Media Roles
 
@@ -350,17 +350,17 @@ Source: `src/lib/media-policy.ts`.
 
 ### MDX PDF Compatibility Imports
 
-| Import                                                 | Mode        | Note                                                                                             |
-| ------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
-| ../../../components/articles/HoverImageLink.astro      | static-link | Renders as ordinary inline link text in PDF; hover preview panel is print-hidden.                |
-| @/components/articles/HoverImageLink.astro             | static-link | Renders as ordinary inline link text in PDF; hover preview panel is print-hidden.                |
-| ../../../components/articles/HoverImageParagraph.astro | static-link | Renders as ordinary paragraph text plus inline link in PDF; hover preview panel is print-hidden. |
-| @/components/articles/HoverImageParagraph.astro        | static-link | Renders as ordinary paragraph text plus inline link in PDF; hover preview panel is print-hidden. |
-| @/components/media/SoundCloudEmbed.astro               | static-link | Renders a print-only source link in PDF; the interactive iframe is print-hidden.                 |
+| Import                                                       | Mode        | Note                                                                                             |
+| ------------------------------------------------------------ | ----------- | ------------------------------------------------------------------------------------------------ |
+| ../../../components/articles/media/HoverImageLink.astro      | static-link | Renders as ordinary inline link text in PDF; hover preview panel is print-hidden.                |
+| @/components/articles/media/HoverImageLink.astro             | static-link | Renders as ordinary inline link text in PDF; hover preview panel is print-hidden.                |
+| ../../../components/articles/media/HoverImageParagraph.astro | static-link | Renders as ordinary paragraph text plus inline link in PDF; hover preview panel is print-hidden. |
+| @/components/articles/media/HoverImageParagraph.astro        | static-link | Renders as ordinary paragraph text plus inline link in PDF; hover preview panel is print-hidden. |
+| @/components/media/SoundCloudEmbed.astro                     | static-link | Renders a print-only source link in PDF; the interactive iframe is print-hidden.                 |
 
 ## Author Diagnostic Vocabulary
 
-Source: `src/lib/author-diagnostics.ts`.
+Source: `src/lib/diagnostics/author-diagnostics.ts`.
 
 ### Categories
 
@@ -417,7 +417,7 @@ Source: `src/lib/author-diagnostics.ts`.
 
 ## Source And Generated Artifact Manifest
 
-Source: `src/lib/source-artifacts.ts`.
+Source: `src/lib/site/source-artifacts.ts`.
 
 | Key                      | Owner      | Kind                | Role               | Required | Path                       |
 | ------------------------ | ---------- | ------------------- | ------------------ | -------- | -------------------------- |

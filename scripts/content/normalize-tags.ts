@@ -3,8 +3,8 @@ import path from "node:path";
 
 import matter from "gray-matter";
 
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
-import { normalizeTagList } from "../../src/lib/tags";
+import { normalizeTagList } from "../../src/lib/content/tags";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 
 /** Options for normalizing article tags in source frontmatter. */
 export interface NormalizeArticleTagsOptions {

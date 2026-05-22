@@ -1,0 +1,81 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import type { ArticleTableOfContentsHeading } from "../../../lib/articles/article-toc";
+
+interface Props extends HTMLAttributes<"a"> {
+  current?: boolean;
+  heading: ArticleTableOfContentsHeading;
+  placement?: "inline" | "rail";
+  sectionLabel?: string | undefined;
+}
+
+const {
+  current = false,
+  heading,
+  placement = "rail",
+  sectionLabel,
+  class: className,
+  ...attrs
+} = Astro.props;
+const railIndentationClasses = {
+  1: "",
+  2: "ps-3",
+  3: "ps-6",
+  4: "ps-9",
+} as const;
+const inlineIndentationClasses = {
+  1: "",
+  2: "ps-4",
+  3: "ps-6",
+  4: "ps-8",
+} as const;
+const railIndentClass =
+  railIndentationClasses[
+    Math.min(heading.level, 4) as keyof typeof railIndentationClasses
+  ];
+const inlineIndentClass =
+  inlineIndentationClasses[
+    Math.min(heading.level, 4) as keyof typeof inlineIndentationClasses
+  ];
+const commonClasses =
+  "focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:outline-ring rounded-sm underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-offset-2 focus-visible:outline-solid data-[current=true]:text-primary data-[current=true]:font-semibold";
+const railClasses =
+  "text-muted-foreground hover:text-foreground block py-1.5 text-sm leading-snug";
+const inlineClasses =
+  heading.level === 1
+    ? "text-foreground hover:text-primary grid grid-cols-[4ch_minmax(0,1fr)] items-baseline gap-2 py-1 text-base leading-snug font-semibold"
+    : "text-muted-foreground hover:text-foreground grid grid-cols-[4ch_minmax(0,1fr)] items-baseline gap-2 py-0.5 text-sm leading-snug font-medium";
+const showSectionLabel = placement === "inline" && sectionLabel !== undefined;
+---
+
+<a
+  {...attrs}
+  aria-current={current ? "location" : undefined}
+  class:list={[
+    commonClasses,
+    placement === "inline" ? inlineClasses : railClasses,
+    placement === "inline" ? inlineIndentClass : railIndentClass,
+    className,
+  ]}
+  data-current={current ? "true" : undefined}
+  data-toc-section-label={showSectionLabel ? sectionLabel : undefined}
+  data-toc-heading-depth={heading.depth}
+  data-toc-heading-level={heading.level}
+  data-toc-heading-order={heading.order}
+  data-toc-link-placement={placement}
+  href={heading.href}
+>
+  {
+    showSectionLabel && (
+      <span
+        aria-hidden="true"
+        class="text-muted-foreground tabular-nums"
+        data-toc-section-label-text
+      >
+        {sectionLabel}
+      </span>
+    )
+  }
+  <span>{heading.text}</span>
+</a>

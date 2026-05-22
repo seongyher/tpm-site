@@ -7,15 +7,15 @@ import {
   articlePdfHref,
   articlePdfOutputPath,
   scholarPublicationDate,
-} from "../../../src/lib/article-pdf";
-import {
-  articlePdfFileSizeMediaDiagnostics,
-  type MediaDiagnostic,
-} from "../../../src/lib/media-policy";
+} from "../../../src/lib/articles/article-pdf";
 import {
   createOutputDiagnostic,
   type OutputDiagnostic,
-} from "../../../src/lib/output-verification";
+} from "../../../src/lib/diagnostics/output-verification";
+import {
+  articlePdfFileSizeMediaDiagnostics,
+  type MediaDiagnostic,
+} from "../../../src/lib/media/media-policy";
 import { decodeHtmlAttributeValue, metaContentValues } from "./html-inspection";
 import { linkTargets } from "./link-verifier";
 

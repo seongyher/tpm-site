@@ -1,7 +1,7 @@
 import {
   articleListDescriptionFitClass,
   articleListTitleFitClass,
-} from "../lib/article-list-title-fit";
+} from "../lib/articles/article-list-title-fit";
 
 /** Search-result payload returned by Pagefind. */
 export interface PagefindData {

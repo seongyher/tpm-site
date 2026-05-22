@@ -12,7 +12,7 @@ import {
   type RouteClassPerformanceBudget,
   routeClassPerformanceBudgets,
   type RoutePerformanceClassId,
-} from "../../src/lib/performance-budgets";
+} from "../../src/lib/release/performance-budgets";
 
 /** One measured file from built output. */
 export interface PayloadFile {

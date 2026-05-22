@@ -210,12 +210,13 @@ The route view-model migration is complete when:
 
 Current route view-model helpers live in:
 
-- `src/lib/listing-route-view-models.ts` for listing, taxonomy, author,
+- `src/lib/content/listing-route-view-models.ts` for listing, taxonomy, author,
   announcement, collection, and search route families;
-- `src/lib/content-route-view-models.ts` for Markdown-backed pages and the
-  global bibliography route;
-- `src/lib/article-page-view-model.ts` for article detail routes;
-- `src/lib/home.ts` for homepage curation and homepage route composition.
+- `src/lib/content/content-route-view-models.ts` for Markdown-backed pages and
+  the global bibliography route;
+- `src/lib/content/article-page-view-model.ts` for article detail routes;
+- `src/lib/content/home.ts` for homepage curation and homepage route
+  composition.
 
 Route model tests should cover public route facts and component props without
 snapshotting incidental HTML. Rendered Astro route tests remain the consumer

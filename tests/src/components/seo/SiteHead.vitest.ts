@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import SiteHead from "../../../../src/components/seo/SiteHead.astro";
-import { normalizeRouteMetadata } from "../../../../src/lib/metadata";
+import { normalizeRouteMetadata } from "../../../../src/lib/metadata/metadata";
 import { createAstroTestContainer } from "../../../helpers/astro-container";
 
 describe("SiteHead", () => {

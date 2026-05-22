@@ -1,11 +1,11 @@
-import { defaultPublishableVisibility } from "../../src/lib/publishable";
+import { defaultPublishableVisibility } from "../../src/lib/content/publishable";
 import type {
   AnnouncementEntry,
   ArticleEntry,
   AuthorEntry,
   CategorySummary,
   EditorialCollectionEntry,
-} from "../../src/lib/routes";
+} from "../../src/lib/routes/routes";
 
 /** Options for building announcement-entry test fixtures. */
 export interface AnnouncementEntryFixtureOptions {

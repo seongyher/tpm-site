@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { getAnnouncements } from "../../../../src/lib/content";
+import { getAnnouncements } from "../../../../src/lib/content/content";
 import AnnouncementPage from "../../../../src/pages/announcements/[...slug].astro";
 import {
   createAstroTestContainer,

@@ -159,24 +159,40 @@ src/components/
     Breadcrumbs.astro
 
   articles/
-    ArticleLayout.astro
-    ArticleHeader.astro
-    ArticleCitationMenu.astro
-    ArticleShareMenu.astro
-    ArticleMeta.astro
-    ArticleProse.astro
-    ArticleCard.astro
-    ArticleList.astro
-    ArticleImage.astro
-    ArticleTags.astro
-    ArticleReferences.astro
-    ArticleFootnotes.astro
-    ArticleBibliography.astro
-    ArticleReferenceBacklinks.astro
-    MoreInCategoryBlock.astro
-    RelatedArticlesBlock.astro
-    ArticleEndcap.astro
-    LatestArticleBlock.astro
+    actions/
+      ArticleCitationMenu.astro
+      ArticleShareMenu.astro
+      ArticleHeaderActionRow.astro
+      ArticleHeaderActionTrigger.astro
+    endcap/
+      ArticleEndcap.astro
+      MoreInCategoryBlock.astro
+      NextArticleBlock.astro
+      RelatedArticlesBlock.astro
+    header/
+      ArticleHeader.astro
+      ArticleMeta.astro
+      ArticleTags.astro
+      SemanticDetails.astro
+    lists/
+      ArticleCard.astro
+      ArticleList.astro
+      CompactEntryList.astro
+      FlatArticleList.astro
+    media/
+      ArticleImage.astro
+      HoverImageCard.astro
+      PublishableMediaFrame.astro
+    prose/
+      ArticleProse.astro
+    references/
+      ArticleReferences.astro
+      ArticleFootnotes.astro
+      ArticleBibliography.astro
+      ArticleReferenceBacklinks.astro
+    toc/
+      ArticleTableOfContents.astro
+      TableOfContentsItem.astro
 
   pages/
     MarkdownPage.astro
@@ -202,16 +218,24 @@ src/components/
     AuthorsIndexPage.astro
 
   blocks/
-    HomeHeroBlock.astro
-    HomeAnnouncementBlock.astro
-    HomeLatestArticleBlock.astro
-    HomeFeaturedArticlesBlock.astro
-    HomeCategoryOverviewBlock.astro
-    HomeArchiveLinksBlock.astro
-    SupportBlock.astro
-    CategoryOverviewBlock.astro
-    CategoryRailBlock.astro
-    SearchResultsBlock.astro
+    home/
+      HomeHeroBlock.astro
+      HomeAnnouncementBlock.astro
+      HomeLatestArticleBlock.astro
+      HomeFeaturedArticlesBlock.astro
+      HomeCategoryOverviewBlock.astro
+      HomeArchiveLinksBlock.astro
+    listing/
+      ArchiveListBlock.astro
+      SearchResultsBlock.astro
+    shared/
+      CompactEntryPanel.astro
+      SupportBlock.astro
+    terms/
+      CategoryOverviewBlock.astro
+      CategoryRailBlock.astro
+      TermOverviewBlock.astro
+      TermRailBlock.astro
 
   islands/
     SearchEnhancer.ts
@@ -545,7 +569,7 @@ Article components own article display and metadata presentation.
 - `ArticleHeader`: title, category, description, meta composition, and quiet
   article utilities such as `Cite`, `Share`, and `PDF`.
 - `ArticleShareMenu`: article-header share utility built from the centralized
-  `src/lib/share-targets.ts` endpoint model; it must not hard-code platform
+  `src/lib/site/share-targets.ts` endpoint model; it must not hard-code platform
   URLs or load third-party share SDKs.
 - `ArticleMeta`: author/date/category/tag metadata row.
 - `ArticleProse`: Tailwind Typography wrapper for rendered Markdown/MDX.
@@ -930,8 +954,8 @@ Recommended data flow:
 
 ```text
 content collection entry
-  src/lib/content.ts filters/sorts
-  src/lib/routes.ts normalizes display values and URLs
+  src/lib/content/content.ts filters/sorts
+  src/lib/routes/routes.ts normalizes display values and URLs
   route loads data
   route passes normalized props or entries to layout/block
   component renders semantic HTML
@@ -1354,8 +1378,8 @@ This sequence minimizes risk and keeps visual changes reviewable.
    primitive set grows large.
 3. Add Vitest/Astro Container API render-test setup for isolated component
    tests.
-4. Extract navigation data shape in `src/lib/navigation.ts` or extend
-   `src/lib/content.ts` with a normalized nav helper.
+4. Keep navigation data shape in `src/lib/site/navigation.ts` and use content
+   helpers such as `src/lib/content/content.ts` for normalized entry data.
 5. Extract `SectionNav`, `CategoryTree`, and shared category link data.
 6. Use `CategoryTree` in both sidebar and mobile/discovery menu.
 7. Extract `SiteHeader`, `SiteFooter`, `MainFrame`, and `SiteShell` from

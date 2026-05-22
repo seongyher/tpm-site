@@ -1,0 +1,36 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+import ArticleImageInspectorScript from "../media/ArticleImageInspectorScript.astro";
+
+/** Public props for the article prose wrapper. */
+interface Props extends HTMLAttributes<"div"> {
+  enableImageInspector?: boolean | undefined;
+}
+
+const {
+  class: className,
+  enableImageInspector = false,
+  ...attrs
+} = Astro.props;
+---
+
+<div
+  {...attrs}
+  class:list={[
+    "prose prose-neutral dark:prose-invert max-w-none min-w-0 break-words",
+    "prose-headings:text-[var(--title)] prose-headings:tracking-normal",
+    "prose-a:text-[var(--link)] hover:prose-a:text-[var(--accent-strong)]",
+    "prose-strong:text-foreground prose-code:text-foreground",
+    "prose-blockquote:border-[var(--accent)] prose-blockquote:text-muted-foreground",
+    "prose-pre:border prose-pre:border-border prose-pre:bg-muted prose-pre:text-white [&_pre_code]:text-white",
+    "prose-hr:border-border prose-img:mx-auto prose-img:rounded-md",
+    "[&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+    "[&_iframe[src*='youtube.com/embed']]:aspect-video [&_iframe[src*='youtube.com/embed']]:h-auto [&_iframe[src*='youtube.com/embed']]:w-full",
+    className,
+  ]}
+>
+  <slot />
+</div>
+
+{enableImageInspector && <ArticleImageInspectorScript />}

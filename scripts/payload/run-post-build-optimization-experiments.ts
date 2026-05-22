@@ -3,7 +3,7 @@ import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 import astroConfig from "../../astro.config";
-import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { resolveSiteInstancePaths } from "../../src/lib/site/site-instance";
 import {
   type BuildOutputTransformName,
   optimizeBuildOutput,

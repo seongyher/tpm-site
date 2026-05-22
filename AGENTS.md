@@ -74,8 +74,15 @@ to the active milestone.
 - `src/layouts/`: shared document, page, and article layouts.
 - `src/components/`: reusable Astro UI, layout, navigation, article, block, and
   island components.
+- `src/components/articles/`: article UI grouped by surface: actions, endcap,
+  header, lists, media, prose, references, and table of contents.
+- `src/components/blocks/`: page section blocks grouped by home, listing,
+  terms, and shared cross-page blocks.
 - `src/components/ui/`: shadcn/Radix-style primitives when useful.
-- `src/lib/`: content, route, metadata, validation, and domain helpers.
+- `src/lib/`: platform domain helpers grouped by articles, content,
+  deployment, diagnostics, extensions, import/export, interactions,
+  localization, media, metadata, observability, references, release, routes,
+  shared utilities, site config/context, starters, and studio readiness.
 - `src/platform/`: stable internal platform entrypoints for future studio,
   CLI, MCP, examples, and package-boundary consumers.
 - `src/styles/`: global Tailwind entry, tokens, base styles, and prose styles.
@@ -113,6 +120,10 @@ to the active milestone.
   sequence.
 - `agent-docs/ASTRO_GUIDANCE.md`: expanded Astro notes.
 - `agent-docs/TAILWIND_GUIDANCE.md`: expanded Tailwind notes.
+- `docs/REPO_ORGANIZATION.md`: target filesystem organization and migration
+  rules for platform, site-instance, component, docs, and test boundaries.
+- `docs/DOCUMENTATION_LIFECYCLE.md`: documentation ownership, lifecycle,
+  source-of-truth, generated-reference, and current-vs-historical rules.
 - `docs/PLATFORM_MODULES.md`: map of current platform modules, entrypoints,
   contracts, and package-boundary intent.
 - `docs/STARTER_TEMPLATES.md`: starter-template product contract, registry,
@@ -220,8 +231,8 @@ configuration, not in platform entrypoints or starter examples.
 Starters are maintained distribution assets, not throwaway fixtures. When
 adding or changing starters:
 
-- update `src/lib/starter-templates.ts`, `docs/STARTER_TEMPLATES.md`, and any
-  affected examples together;
+- update `src/lib/starters/starter-templates.ts`,
+  `docs/STARTER_TEMPLATES.md`, and any affected examples together;
 - keep default copy generic, inclusive, and suitable for a new publication;
 - verify every starter uses only supported source contracts and no accidental
   TPM-only assumptions;
@@ -330,10 +341,10 @@ Target component organization:
   footer.
 - `src/components/navigation/`: primary nav, mobile nav, category navigation,
   breadcrumbs.
-- `src/components/articles/`: article header, metadata, article lists, cards,
-  prose wrapper.
-- `src/components/blocks/`: homepage sections, support blocks, category
-  sections, about sections.
+- `src/components/articles/`: article surfaces grouped by actions, endcap,
+  header, lists, media, prose, references, and table of contents.
+- `src/components/blocks/`: page sections grouped by home, listing, terms, and
+  shared cross-page blocks.
 
 ## Responsive Design Standard
 
@@ -687,9 +698,9 @@ the class list looks long. Long utility lists are acceptable when they describe
 a real component once. Repeated utility lists should become reusable components,
 not global CSS.
 
-Use `src/lib/utils.ts` `cn()` for React class composition. It combines `clsx`
-with `tailwind-merge`, so conditional classes are readable and conflicts are
-resolved intentionally.
+Use `src/lib/shared/utils.ts` `cn()` for React class composition. It combines
+`clsx` with `tailwind-merge`, so conditional classes are readable and conflicts
+are resolved intentionally.
 
 ## Tailwind Responsive And Tokens
 
