@@ -49,6 +49,25 @@ tools directly:
 - `bun run site:doctor`
 - `bun run site:schema:check`
 
+Use `site:doctor` directly when changing site configuration, navigation,
+collections, redirects, author profiles, category metadata, or site-level
+assets:
+
+```sh
+bun run site:doctor
+```
+
+For editor, GUI, MCP, or CI consumers that need structured output:
+
+```sh
+bun run site:doctor -- --json
+```
+
+The JSON output uses the shared author diagnostic report shape: stable
+diagnostic codes, severity, category, repair owner, source location, related
+docs, remediation, and summary counts. Human output stays short so authors can
+repair common mistakes without reading platform internals.
+
 Keep new author-facing checks wired into `author:check` when they catch
 mistakes authors can reasonably make while editing `site/`.
 

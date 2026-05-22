@@ -104,6 +104,16 @@ const libDomainFiles = {
     "performance-budgets.ts",
     "performance-workbench.ts",
   ],
+  observability: [
+    "observability-diagnostics.ts",
+    "observability-reports.ts",
+    "observability.ts",
+  ],
+  "studio-readiness": [
+    "studio-forms.ts",
+    "studio-models.ts",
+    "studio-workflows.ts",
+  ],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",

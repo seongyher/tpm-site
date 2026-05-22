@@ -55,6 +55,23 @@ incidental TPM implementation details.
   policy, and machine-readable release-report shapes.
   Current modules: `author-diagnostics`, `output-verification`,
   `performance-budgets`, and `performance-workbench`.
+- Observability
+  Owns provider-neutral webmaster, scanner, analytics, performance, security,
+  and crawler finding models plus deterministic route-linked report helpers,
+  author-diagnostic bridges, and release-health comparison helpers.
+  Current modules: `observability`, `observability-diagnostics`, and
+  `observability-reports`.
+  The import and report contract is documented in
+  [`OBSERVABILITY_AND_WEBMASTER_REPORTS.md`](./OBSERVABILITY_AND_WEBMASTER_REPORTS.md).
+- Studio readiness
+  Owns studio-facing editor model descriptors, source-field mappings,
+  editorial workflow state transitions, schema-to-form descriptors, preview
+  request/response shells, provider-neutral workflow capabilities, mocked
+  workflow adapters, and future GUI/CLI/MCP contracts that must consume
+  existing platform source contracts instead of a parallel CMS model. Current
+  modules: `studio-forms`, `studio-models`, and `studio-workflows`. The
+  readiness contract is documented in
+  [`STUDIO_READINESS_CONTRACTS.md`](./STUDIO_READINESS_CONTRACTS.md).
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:

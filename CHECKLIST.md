@@ -15,6 +15,257 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 4 Execution
+
+### Milestone 300: Milestone 4 Refresh And Dependency Plan
+
+- [x] Re-read the engineering philosophy, platform roadmap, documentation
+      lifecycle, generated references, public docs, diagnostics, observability,
+      and studio product docs.
+- [x] Re-read the Milestone 4 Linear issues and confirm the dependency order
+      for site doctor, documentation, observability, and studio-readiness work.
+- [x] Break the remaining Milestone 4 issues into checklist milestones that can
+      be implemented and verified one at a time.
+
+### Milestone 301: IRK-98 Site Doctor Coverage Design
+
+- [x] Inventory current `site:doctor`, author-diagnostic taxonomy, source
+      artifacts, route registry, generated-output verifier, and site config
+      schemas to identify checks that belong in the site doctor rather than the
+      release verifier.
+- [x] Update or add design documentation for site-doctor responsibilities,
+      diagnostic ownership, JSON output expectations, fixture strategy, and
+      author-facing remediation language.
+- [x] Verify the design avoids duplicate release-verifier ownership and is
+      implementation-ready before changing the checker.
+      Verified with `bun --silent run review:markdown` and `git diff --check`;
+      design added in `docs/SITE_DOCTOR.md`.
+
+### Milestone 302: IRK-98 Site Doctor Coverage Implementation
+
+- [x] Expand `site:doctor` checks across site config, content roots,
+      authors/categories/collections, redirects, routes, assets/media policy,
+      metadata, feeds/search, and generated-artifact expectations where those
+      checks can be resolved from source contracts.
+- [x] Emit stable shared author diagnostics for new checks while preserving the
+      existing concise human output.
+- [x] Add focused tests and mistake fixtures that prove clean sites are quiet
+      and common author/site-owner mistakes are actionable.
+      Added source-side checks for configured logo files, article/announcement
+      author references, article category metadata, collection item references,
+      homepage draft collections, redirect parsing, redirect chains, redirect
+      conflicts, and Cloudflare redirect limits. Rendered output remains owned
+      by generated-output verifier modules. Verified with focused
+      site-doctor/author-diagnostics tests, `bun --silent run site:doctor`, and
+      `bun --silent run typecheck`.
+
+### Milestone 303: IRK-99 Author Command UX And JSON Reports
+
+- [x] Add `site:doctor` command affordances for machine-readable JSON and
+      author-friendly human output, including success/failure summary counts.
+- [x] Document common diagnostic examples, repair owners, JSON output shape, and
+      when authors should use `author:check` versus developer release checks.
+- [x] Verify CLI output, quiet mode, JSON output, and documentation examples
+      with focused tests.
+      Added `site:doctor --json`, kept default human output stable, documented
+      author command usage, and verified with focused site-doctor tests,
+      `bun --silent run site:doctor -- --json`,
+      `bun --silent run review:markdown`, and `bun --silent run typecheck`.
+
+### Milestone 304: IRK-100 Diagnostic Fixtures And Release Integration
+
+- [x] Add fixture-driven diagnostic tests for representative broken source
+      inputs, generated-output mappings, and author-visible remediation.
+- [x] Integrate site-doctor diagnostics into release/report surfaces only where
+      they add source-side value without duplicating verifier failures.
+- [x] Run focused diagnostic, docs, and release checks before closing the
+      site-doctor chain.
+      Site doctor remains in `author:check`, `check:fast`, and the
+      `check:release` path through `check`; package-script coverage now locks
+      that integration. Verified with focused package/QA/site-doctor tests and
+      `bun --silent run check:fast`.
+
+### Milestone 305: IRK-105 Observability Import Schema Design
+
+- [x] Design privacy-conscious import schemas for Lighthouse/Unlighthouse,
+      Cloudflare analytics, Search Console, Bing, link scanners, accessibility
+      scans, uptime checks, crawler errors, dependency/security reports, and
+      generic manual findings.
+- [x] Define normalized fields for route/source/artifact mapping, severity,
+      trend, confidence, owner domain, likely root cause, remediation, and noise
+      classification.
+- [x] Verify the design is provider-neutral and suitable for future static
+      reports, diagnostics, CLI, MCP, and studio consumers.
+      Added `docs/OBSERVABILITY_AND_WEBMASTER_REPORTS.md`; verified with
+      `bun --silent run review:markdown`.
+
+### Milestone 306: IRK-105 Observability Import Implementation
+
+- [x] Implement typed observability import models, parsers, normalization
+      helpers, redaction rules, and fixture tests for supported import shapes.
+- [x] Keep provider-specific parsing thin around a normalized observability
+      finding model.
+- [x] Verify parser fixtures, redaction behavior, and invalid input handling.
+      Added `src/lib/observability.ts` with provider-neutral finding/report
+      models, Lighthouse/status/webmaster/link-scanner parsers, URL redaction,
+      route normalization, summary aggregation, and focused fixture tests.
+      Verified with `bun --silent test tests/src/lib/observability.test.ts`
+      and `bun --silent run typecheck`.
+
+### Milestone 307: IRK-106 Route-Linked Webmaster Reports
+
+- [x] Design static webmaster reports for 404 trends, redirect gaps,
+      crawlability, Core Web Vitals, metadata quality, social previews, cache,
+      payload, and accessibility findings.
+- [x] Implement route-linked report generation that connects observability
+      findings to route registry entries, source artifacts, output artifacts,
+      diagnostics, noise classifications, and remediation docs.
+- [x] Add golden report tests and verify report output is deterministic and
+      author/site-owner readable.
+      Added route-linked observability report contracts, route/source matching,
+      deterministic Markdown report formatting, and exact report fixture tests.
+      Verified with focused observability report tests,
+      `bun --silent run review:markdown`, and `bun --silent run typecheck`.
+
+### Milestone 308: IRK-103 Public Docs IA And Author Paths
+
+- [x] Update the public documentation IA around author, site owner, deploy
+      operator, developer, extension author, and future studio-user journeys.
+- [x] Write or update author paths for articles, announcements, pages,
+      collections, authors, images, citations, redirects, metadata, PDFs,
+      social/support links, and deploy changes.
+- [x] Verify docs keep beginner paths simple while routing advanced work to
+      appropriate platform references.
+      Expanded `docs/PUBLIC_DOCUMENTATION_SITE.md` with audience definitions,
+      first-success journey, target public docs page map, and common author,
+      announcement, collection, image, redirect, and site-setting paths.
+      Verified with `bun --silent run review:markdown`.
+
+### Milestone 309: IRK-104 Docs Drift, Link, And Build Verification
+
+- [x] Add or extend docs drift checks, generated-reference checks, docs links,
+      and docs-site build verification so public docs fail clearly when stale.
+- [x] Preserve root README as developer-focused and `site/README.md` as
+      author/site-owner-focused.
+- [x] Verify docs checks with focused tests and existing docs build scripts.
+      Added `docs:check`, promoted documentation-site verification into
+      release and CI contracts, updated QA registry and package-script docs,
+      regenerated generated platform references, refreshed the docs-site schema,
+      and added docs-site public static compatibility files. Verified with
+      `bun --silent run docs:check`, focused package/QA/generated-reference
+      tests, `bun --silent run review:markdown`, and
+      `bun --silent run check:fast`.
+
+### Milestone 310: IRK-107 Observability Diagnostics And Release Health
+
+- [x] Connect observability reports to author diagnostics where a source-side
+      fix exists, preserving separate classifications for crawler noise,
+      external issues, and unclear findings.
+- [x] Add release-health report sections for before/after scanner comparisons
+      and changed route classes where useful.
+- [x] Document incident/noise triage and verify golden incident reports.
+      Added `src/lib/observability-diagnostics.ts` with a narrow
+      source-repairable diagnostic bridge, release-health diff model, route
+      class summaries, and deterministic Markdown report formatting. Updated
+      observability docs with bridge criteria and incident/noise triage.
+      Verified with focused observability diagnostics/report tests,
+      `bun --silent run typecheck`, and `bun --silent run review:markdown`.
+
+### Milestone 311: IRK-108 Studio Editor Models And State Workflows
+
+- [x] Design studio-facing models for articles, announcements, pages,
+      collections, authors, categories, redirects, support/social links, feature
+      flags, theme tokens, and asset metadata without creating a parallel CMS
+      source model.
+- [x] Model draft, review, publish, unpublish, scheduled, rollback, and preview
+      states as explicit discriminated workflows over platform source
+      contracts.
+- [x] Verify every editable field maps to source/config/schema/diagnostic and
+      generated-artifact ownership.
+      Added `docs/STUDIO_READINESS_CONTRACTS.md` with editable domains, field
+      ownership, editor model layers, discriminated workflow states,
+      schema-to-form, preview, provider-neutral workflow, MDX fallback, and
+      round-trip parity contracts. Verified with
+      `bun --silent run review:markdown`.
+
+### Milestone 312: IRK-108 Studio Model Implementation
+
+- [x] Implement typed studio editor models, state transitions, source mappings,
+      and repairable diagnostic hooks over existing platform contracts.
+- [x] Add state-machine and model normalization tests for representative
+      content, config, redirect, media, and homepage edits.
+- [x] Verify no runtime GUI implementation or provider-specific workflow is
+      introduced in this milestone.
+      Added `src/lib/studio-models.ts` with editable-domain source references,
+      JSON-ready editor documents, field descriptors, diagnostic-to-field
+      lookup, and pure workflow transition validation. Added focused
+      `tests/src/lib/studio-models.test.ts` coverage for source mappings,
+      representative field families, diagnostics, and valid/invalid state
+      transitions. Updated platform boundaries and module docs. Verified with
+      focused studio model tests, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `bun --silent run check:fast`.
+
+### Milestone 313: IRK-109 Schema-To-Form And Preview Contracts
+
+- [x] Design form contracts for frontmatter, site config, redirects,
+      navigation, homepage, collections, metadata, media, and deployment.
+- [x] Design preview contracts that map dirty editor state to route previews,
+      compiler artifacts, diagnostics, metadata output, media fallbacks, and PDF
+      eligibility.
+- [x] Verify MDX fallback rules and unsupported component behavior are explicit.
+      Tightened `docs/STUDIO_READINESS_CONTRACTS.md` with deterministic form
+      descriptor rules, extension/provider-owned deployment settings, dirty
+      state patches, preview statuses, and MDX editability classes. Verified
+      with `bun --silent run review:markdown`.
+
+### Milestone 314: IRK-109 Contract Implementation And Tests
+
+- [x] Implement schema-to-form descriptors, preview request/response contracts,
+      dirty-state normalization, and diagnostics for unsupported preview states.
+- [x] Add round-trip tests proving form descriptors and preview contracts remain
+      stable for current source schemas.
+- [x] Verify contracts are serializable for future GUI, CLI, and MCP consumers.
+      Added `src/lib/studio-forms.ts` with form descriptor grouping,
+      JSON-compatible dirty patches, preview request/response shells,
+      unsupported/unknown-field diagnostics, and provider-capability preview
+      statuses. Added focused tests for descriptor serialization, patch
+      normalization, preview responses, unavailable capabilities, and
+      unsupported source states. Updated platform boundary docs and checks.
+      Verified with focused studio tests, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `bun --silent run check:fast`.
+
+### Milestone 315: IRK-110 Provider-Agnostic Workflow Adapters
+
+- [x] Design provider-neutral actions for save draft, preview, submit, review,
+      publish, unpublish, schedule, rollback, deploy status, cache, release, and
+      audit events.
+- [x] Implement capability descriptors and mocked adapters for local direct
+      publish, optional review workflows, and provider-specific mechanics
+      without making GitHub or pull requests the product model.
+- [x] Add mocked-provider state-machine tests and golden source-diff fixtures.
+      Added `src/lib/studio-workflows.ts` with provider family/capability
+      descriptors, bundled direct/review/provider-backed workflow profiles,
+      operation capability checks, deterministic mocked workflow execution,
+      provider-neutral events, and source/release diff summaries. Added tests
+      covering capability checks, direct publish, optional review, unsupported
+      actions, invalid transitions, and source-diff fixtures. Verified with
+      focused studio tests, `bun --silent run typecheck`,
+      `bun --silent run review:markdown`, and `bun --silent run check:fast`.
+
+### Milestone 316: IRK-111 Studio Round-Trip And Parity Fixtures
+
+- [x] Add round-trip fixtures for Markdown, MDX, frontmatter, collections,
+      redirects, media metadata, site config, and workflow state.
+- [x] Prove studio-shaped edits compile to the same outputs as CLI/source edits
+      under mocked providers and without network access.
+- [x] Run release checks and update Milestone 4 Linear issue statuses after
+      local verification passes.
+  - Completed: Added `tests/src/lib/studio-roundtrip.test.ts` covering
+    Markdown article frontmatter, MDX body patch intent, collection ordering,
+    site config patches, redirects, media metadata, and mocked provider
+    workflows. Verified Milestone 4 with focused studio/observability tests
+    and the full `bun --silent run check:release` gate.
+
 ### Milestone 226: IRK-101 Documentation Lifecycle Design
 
 - [x] Re-read the Milestone 4 documentation roadmap, source-contract docs, docs

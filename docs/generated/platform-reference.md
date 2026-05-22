@@ -487,10 +487,11 @@ Source: `package.json` and `scripts/quality/qa-command-registry.ts`.
 | deploy:cloudflare               | deploy             | release       | external | external         | deploy   |
 | dev                             | development-server | investigation | external | local-server     | none     |
 | diagnostics:diff                | diagnostics        | investigation | fast     | none             | none     |
-| docs-site:build                 | docs-site          | focused       | slow     | generated-output | none     |
-| docs-site:dev                   | docs-site          | focused       | slow     | generated-output | none     |
-| docs-site:preview               | docs-site          | focused       | slow     | generated-output | none     |
-| docs-site:preview:fresh         | docs-site          | focused       | slow     | generated-output | none     |
+| docs-site:build                 | docs-site          | focused       | slow     | generated-output | blocking |
+| docs-site:dev                   | docs-site          | investigation | external | local-server     | none     |
+| docs-site:preview               | docs-site          | investigation | external | local-server     | none     |
+| docs-site:preview:fresh         | docs-site          | investigation | external | local-server     | none     |
+| docs:check                      | docs               | focused       | fast     | none             | blocking |
 | docs:references                 | docs               | mutation      | fast     | source           | none     |
 | docs:references:check           | docs               | focused       | fast     | none             | blocking |
 | fix                             | formatting         | mutation      | medium   | source           | none     |
@@ -542,7 +543,7 @@ Source: `package.json` and `scripts/quality/qa-command-registry.ts`.
 | test:catalog                    | catalog            | focused       | medium   | generated-output | blocking |
 | test:catalog:site-instance      | catalog            | focused       | medium   | generated-output | blocking |
 | test:config                     | tests              | fast-local    | medium   | none             | blocking |
-| test:docs-site                  | docs-site          | focused       | slow     | generated-output | none     |
+| test:docs-site                  | docs-site          | focused       | slow     | generated-output | blocking |
 | test:e2e                        | tests              | release       | slow     | generated-output | blocking |
 | test:e2e:built                  | tests              | focused       | medium   | none             | mixed    |
 | test:flake                      | tests              | investigation | slow     | none             | none     |
@@ -569,10 +570,10 @@ Source: `package.json` and `scripts/quality/qa-command-registry.ts`.
 | coverage           | coverage:check, coverage:verify                | quality:release                | coverage-review                                      | LCOV and broad source coverage accountability.                                        |
 | dead-code          | deadcode                                       | check:release                  | quality                                              | Unused file, export, dependency, binary, and script detection.                        |
 | diagnostics        | diagnostics:diff                               |                                |                                                      | Structured diagnostic snapshot comparison.                                            |
-| docs               | docs:references:check                          | check:release                  | quality                                              | Generated platform reference drift checks.                                            |
+| docs               | docs:check, docs:references:check              | check:release                  | quality, docs-site                                   | Generated platform reference drift and docs-site verification.                        |
 | deploy             | deploy:cloudflare                              | build:release                  | deploy-cloudflare                                    | Cloudflare Workers Static Assets deployment.                                          |
 | development-server | dev, preview, preview:release:fresh            |                                |                                                      | Local development and preview servers.                                                |
-| docs-site          | test:docs-site                                 |                                |                                                      | Public documentation/example site validation.                                         |
+| docs-site          | docs-site:build, test:docs-site                | check:release                  | docs-site                                            | Public documentation/example site validation.                                         |
 | formatting         | format, format:code, format:markdown           | check:release, quality:release | quality, markdown-review                             | Code/config formatting and Markdown review.                                           |
 | lint               | lint, lint:packages, lint:markdown, lint:mdx   | check:release, quality:release | quality, markdown-review                             | ESLint, package ordering, Markdown, and MDX review.                                   |
 | payload            | payload:report                                 | payload:check, check:release   | lighthouse                                           | Payload measurement, deterministic route-class budgets, and optimization experiments. |
