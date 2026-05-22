@@ -1877,3 +1877,87 @@ tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
       The final pass added the default Cloudflare launch scenario while keeping
       Cloudflare as a bundled deploy extension, not core. Linear issue updates
       remain intentionally untouched.
+
+### Milestone 258: Milestone 5 Parallel Track Planning
+
+- [x] Re-read the engineering philosophy, platform roadmap, studio product
+      vision, adapter model, extension model, and the unblocked Milestone 5
+      Linear issues before changing docs.
+- [x] Break `IRK-112`, `IRK-118`, `IRK-126`, and `IRK-129` into granular
+      checklist milestones with explicit design outputs and verification.
+- [x] Verify the Milestone 5 parallel track only covers work that does not
+      depend on unfinished Milestone 4 issues.
+      The active Milestone 5 track is limited to `IRK-112`, `IRK-118`,
+      `IRK-126`, and `IRK-129`; extension architecture, security enforcement,
+      starter templates, and studio architecture remain downstream or
+      prep-only until their blockers are complete.
+
+### Milestone 259: IRK-112 Package Boundary And Extraction Criteria Design
+
+- [x] Inventory internal extraction candidates across config, routes, compiler,
+      metadata, references, media, interactions, generated-output verification,
+      diagnostics, testing, and performance tooling.
+- [x] Define portability targets, extraction readiness criteria, current
+      consumers, dependency boundaries, and missing blockers for each candidate.
+- [x] Verify the candidate matrix rejects vague package extraction and is
+      traceable to the roadmap and engineering philosophy.
+      Added `docs/PACKAGE_BOUNDARIES_AND_EXTRACTION_CRITERIA.md` with a
+      boundary ladder, readiness criteria, candidate matrix, explicit
+      non-candidates, dependency rules, and verification plan for later
+      entrypoint/package work.
+
+### Milestone 260: IRK-118 Deployment Adapter And Release Artifact Design
+
+- [x] Define deployment adapter inputs, outputs, capability reporting,
+      credential requirements, dry-run behavior, unsupported-operation
+      diagnostics, and provider-owned manual steps.
+- [x] Define the release artifact contract for route, redirect, metadata,
+      payload, dependency, generated-output, launch-step, provider diagnostic,
+      and release-health reports.
+- [x] Verify Cloudflare remains the reference bundled adapter while static
+      folder export and GitHub Pages-style deployments remain possible through
+      the same contract.
+      Added `docs/DEPLOYMENT_ADAPTER_CONTRACT.md` with release artifact
+      schema groups, adapter request/result contracts, capability reporting,
+      product actions, provider profiles, diagnostics, and implementation
+      verification fixtures.
+
+### Milestone 261: IRK-126 Import/Export And Preservation Design
+
+- [x] Define canonical import/export envelopes for content, authors, taxonomy,
+      collections, assets, redirects, citations, PDFs, generated metadata, and
+      platform diagnostics.
+- [x] Define source maps, preservation records, migration reports, human-review
+      queues, and stable/experimental field policy for migration tooling.
+- [x] Verify the format supports round-trip fixtures and legacy-source
+      migration without turning migrations into one-off scripts.
+      Added `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md` with a canonical
+      export envelope, record kinds, source maps, preservation states, review
+      queues, asset/citation policies, security constraints, and round-trip
+      verification plan.
+
+### Milestone 262: IRK-129 Localization Contract Design
+
+- [x] Define locale, language, text direction, formatting, route-prefix,
+      feed/sitemap, metadata, PDF, alternate-route, and localized-label
+      contracts.
+- [x] Identify current English/date/string assumptions that future
+      implementation must migrate behind typed locale helpers or config.
+- [x] Verify single-locale sites stay simple while non-English, multilingual,
+      and RTL fixture states have a clear path.
+      Added `docs/LOCALIZATION_CONTRACTS.md` with locale profiles, content
+      locale behavior, route modes, metadata propagation, label registry,
+      formatting policy, RTL considerations, diagnostics, and fixture plan.
+
+### Milestone 263: Milestone 5 Parallel Track Verification
+
+- [x] Run focused documentation checks for the new Milestone 5 design docs.
+- [x] Review the docs together for consistency, missing blockers, premature
+      implementation promises, and conflicts with the studio adapter/extension
+      model.
+- [x] Update this checklist with completion notes and leave downstream
+      implementation issues blocked until their design dependencies are done.
+      Verification passed with `bun --silent run review:markdown` and
+      `git diff --check`. The four design docs stay at the contract/planning
+      layer and leave implementation, packaging, adapters, migrations, and
+      localization fixtures to downstream issues.
