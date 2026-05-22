@@ -5,6 +5,8 @@
   "site/public/favicon.svg",
   "site/unused-assets/**",
   "examples/docs-site/assets/**",
+  "examples/docs-site/public/apple-touch-icon-precomposed.png",
+  "examples/docs-site/public/apple-touch-icon.png",
   "examples/docs-site/public/favicon.svg",
   "src/catalog/assets/**",
   "src/components/ui/assets/**",

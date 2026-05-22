@@ -7,10 +7,15 @@
         "announcements": {
           "draft": false,
           "visibility": {
+            "collections": true,
             "directory": true,
+            "external": true,
             "feed": true,
             "homepage": true,
-            "search": true
+            "pdf": true,
+            "related": true,
+            "search": true,
+            "sitemap": true
           }
         },
         "articles": {
@@ -19,10 +24,15 @@
             "enabled": true
           },
           "visibility": {
+            "collections": true,
             "directory": true,
+            "external": true,
             "feed": true,
             "homepage": true,
-            "search": true
+            "pdf": true,
+            "related": true,
+            "search": true,
+            "sitemap": true
           }
         }
       },
@@ -32,10 +42,15 @@
           "default": {
             "draft": false,
             "visibility": {
+              "collections": true,
               "directory": true,
+              "external": true,
               "feed": true,
               "homepage": true,
-              "search": true
+              "pdf": true,
+              "related": true,
+              "search": true,
+              "sitemap": true
             }
           },
           "type": "object",
@@ -46,14 +61,27 @@
             },
             "visibility": {
               "default": {
+                "collections": true,
                 "directory": true,
+                "external": true,
                 "feed": true,
                 "homepage": true,
-                "search": true
+                "pdf": true,
+                "related": true,
+                "search": true,
+                "sitemap": true
               },
               "type": "object",
               "properties": {
+                "collections": {
+                  "default": true,
+                  "type": "boolean"
+                },
                 "directory": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "external": {
                   "default": true,
                   "type": "boolean"
                 },
@@ -65,7 +93,19 @@
                   "default": true,
                   "type": "boolean"
                 },
+                "pdf": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "related": {
+                  "default": true,
+                  "type": "boolean"
+                },
                 "search": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "sitemap": {
                   "default": true,
                   "type": "boolean"
                 }
@@ -82,10 +122,15 @@
               "enabled": true
             },
             "visibility": {
+              "collections": true,
               "directory": true,
+              "external": true,
               "feed": true,
               "homepage": true,
-              "search": true
+              "pdf": true,
+              "related": true,
+              "search": true,
+              "sitemap": true
             }
           },
           "type": "object",
@@ -96,14 +141,27 @@
             },
             "visibility": {
               "default": {
+                "collections": true,
                 "directory": true,
+                "external": true,
                 "feed": true,
                 "homepage": true,
-                "search": true
+                "pdf": true,
+                "related": true,
+                "search": true,
+                "sitemap": true
               },
               "type": "object",
               "properties": {
+                "collections": {
+                  "default": true,
+                  "type": "boolean"
+                },
                 "directory": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "external": {
                   "default": true,
                   "type": "boolean"
                 },
@@ -115,7 +173,19 @@
                   "default": true,
                   "type": "boolean"
                 },
+                "pdf": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "related": {
+                  "default": true,
+                  "type": "boolean"
+                },
                 "search": {
+                  "default": true,
+                  "type": "boolean"
+                },
+                "sitemap": {
                   "default": true,
                   "type": "boolean"
                 }
@@ -465,6 +535,70 @@
         }
       },
       "required": ["description", "language", "title", "url"],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "default": {
+        "semanticProfiles": {
+          "enabled": [
+            "audio",
+            "book",
+            "dataset",
+            "event",
+            "faq",
+            "review",
+            "software",
+            "video"
+          ]
+        }
+      },
+      "type": "object",
+      "properties": {
+        "semanticProfiles": {
+          "default": {
+            "enabled": [
+              "audio",
+              "book",
+              "dataset",
+              "event",
+              "faq",
+              "review",
+              "software",
+              "video"
+            ]
+          },
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": [
+                "audio",
+                "book",
+                "dataset",
+                "event",
+                "faq",
+                "review",
+                "software",
+                "video"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "audio",
+                  "book",
+                  "dataset",
+                  "event",
+                  "faq",
+                  "review",
+                  "software",
+                  "video"
+                ]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": false
     },
     "navigation": {

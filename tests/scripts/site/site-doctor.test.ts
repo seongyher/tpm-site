@@ -77,14 +77,36 @@ async function createMinimalSite(root: string) {
     writeText(
       root,
       "site/content/articles/proof.md",
-      "---\ntitle: Proof\n---\n",
+      [
+        "---",
+        "title: Proof",
+        "description: Proof article.",
+        "date: 2026-01-01",
+        "author: Proof Author",
+        "tags: []",
+        "---",
+        "",
+      ].join("\n"),
     ),
     writeText(
       root,
       "site/content/announcements/proof.md",
-      "---\ntitle: Proof\n---\n",
+      [
+        "---",
+        "title: Proof",
+        "description: Proof announcement.",
+        "date: 2026-01-02",
+        "author: Proof Author",
+        "tags: []",
+        "---",
+        "",
+      ].join("\n"),
     ),
-    writeText(root, "site/content/authors/proof.md", "---\nname: Proof\n---\n"),
+    writeText(
+      root,
+      "site/content/authors/proof.md",
+      "---\ndisplayName: Proof Author\ntype: person\n---\n",
+    ),
     writeText(
       root,
       "site/content/categories/proof.json",
@@ -248,6 +270,152 @@ describe("site doctor", () => {
     );
   });
 
+  test("reports source relationship issues in author language", async () =>
+    withTempRoot(async (root) => {
+      await createMinimalSite(root);
+      await writeText(
+        root,
+        "site/content/articles/missing-category/bad.md",
+        [
+          "---",
+          "title: Bad",
+          "description: Bad article.",
+          "date: 2026-01-03",
+          "author: Ghost Author",
+          "tags: []",
+          "---",
+          "",
+        ].join("\n"),
+      );
+      await writeText(
+        root,
+        "site/content/collections/featured.md",
+        [
+          "---",
+          "title: Featured",
+          "items:",
+          "  - missing-entry",
+          "---",
+          "",
+        ].join("\n"),
+      );
+
+      const issues = siteDoctorIssues({
+        config: parseSiteConfig(validConfig),
+        paths: resolveSiteInstancePaths({ cwd: root }),
+      });
+
+      expect(
+        issues.some(
+          (issue) =>
+            issue.message ===
+              'Article bad references unknown author "Ghost Author".' &&
+            issue.severity === "error",
+        ),
+      ).toBe(true);
+      expect(
+        issues.some(
+          (issue) =>
+            issue.message ===
+              'Article bad uses category "missing-category" without category metadata.' &&
+            issue.severity === "error",
+        ),
+      ).toBe(true);
+      expect(
+        issues.some(
+          (issue) =>
+            issue.message ===
+              'Collection item "missing-entry" in featured does not match an article or announcement.' &&
+            issue.severity === "error",
+        ),
+      ).toBe(true);
+    }));
+
+  test("reports redirect conflicts and missing configured public assets", async () =>
+    withTempRoot(async (root) => {
+      await createMinimalSite(root);
+      await writeText(
+        root,
+        "site/config/redirects.json",
+        '{"/old/":"/new/"}\n',
+      );
+      await writeText(
+        root,
+        "site/content/articles/proof.md",
+        [
+          "---",
+          "title: Proof",
+          "description: Proof article.",
+          "date: 2026-01-01",
+          "author: Proof Author",
+          "legacyPermalink: /old/",
+          "tags: []",
+          "---",
+          "",
+        ].join("\n"),
+      );
+
+      const issues = siteDoctorIssues({
+        config: parseSiteConfig({
+          ...validConfig,
+          identity: {
+            ...validConfig.identity,
+            logo: "/missing.svg?v=1",
+          },
+        }),
+        paths: resolveSiteInstancePaths({ cwd: root }),
+      });
+
+      expect(
+        issues.some(
+          (issue) =>
+            issue.message ===
+              "Configured site logo /missing.svg?v=1 does not exist in site/public." &&
+            issue.severity === "error",
+        ),
+      ).toBe(true);
+      expect(
+        issues.some(
+          (issue) =>
+            issue.message ===
+              "Redirect /old/ has conflicting destinations: /new/, /articles/proof/." &&
+            issue.severity === "error",
+        ),
+      ).toBe(true);
+    }));
+
+  test("maps source relationship issues into stable author diagnostic codes", async () =>
+    withTempRoot(async (root) => {
+      await createMinimalSite(root);
+      await writeText(
+        root,
+        "site/content/collections/featured.md",
+        [
+          "---",
+          "title: Featured",
+          "items:",
+          "  - missing-entry",
+          "---",
+          "",
+        ].join("\n"),
+      );
+
+      const diagnostics = siteDoctorAuthorDiagnostics({
+        config: parseSiteConfig(validConfig),
+        paths: resolveSiteInstancePaths({ cwd: root }),
+      });
+
+      expect(
+        diagnostics.some(
+          (diagnostic) =>
+            diagnostic.category === "content" &&
+            diagnostic.code === "content.unknown-collection-item" &&
+            diagnostic.repairOwner === "author" &&
+            diagnostic.source === "site-doctor",
+        ),
+      ).toBe(true);
+    }));
+
   test("prints concise CLI success output", () => {
     let output = "";
 
@@ -268,5 +436,36 @@ describe("site doctor", () => {
       }),
     ).toBe(0);
     expect(output).toBe("Site doctor passed.\n");
+  });
+
+  test("prints JSON diagnostic reports for machine consumers", () => {
+    let output = "";
+
+    expect(
+      runSiteDoctorCli(["--json"], {
+        stderr: {
+          write: (text) => {
+            output += String(text);
+            return true;
+          },
+        },
+        stdout: {
+          write: (text) => {
+            output += String(text);
+            return true;
+          },
+        },
+      }),
+    ).toBe(0);
+
+    expect(JSON.parse(output)).toMatchObject({
+      diagnostics: [],
+      summary: {
+        errors: 0,
+        info: 0,
+        total: 0,
+        warnings: 0,
+      },
+    });
   });
 });

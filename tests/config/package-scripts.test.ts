@@ -112,6 +112,7 @@ describe("package scripts", () => {
     const scripts = new Map(Object.entries(packageJson.scripts));
     const fastCheck = scripts.get("check:fast") ?? "";
     const normalCheck = scripts.get("check") ?? "";
+    const docsCheck = scripts.get("docs:check") ?? "";
     const releaseCheck = scripts.get("check:release") ?? "";
 
     for (const scriptName of [
@@ -143,10 +144,19 @@ describe("package scripts", () => {
     }
 
     expect(normalCheck.startsWith("bun --silent run check:fast &&")).toBe(true);
+    expect(docsCheck).toContain("run docs:references:check -- --quiet");
+    expect(docsCheck).toContain("run test:docs-site");
     expect(releaseCheck).toContain("bun --silent run build:release");
+    expect(releaseCheck).toContain("bun --silent run docs:check");
     expect(releaseCheck).toContain("bun --silent run payload:check");
     expect(releaseCheck).toContain("bun --silent run test:e2e:built");
     expect(releaseCheck).not.toContain("bun --silent run test:e2e &&");
+    expect(releaseCheck.indexOf("bun --silent run docs:check")).toBeGreaterThan(
+      releaseCheck.indexOf("bun --silent run check"),
+    );
+    expect(releaseCheck.indexOf("bun --silent run docs:check")).toBeLessThan(
+      releaseCheck.indexOf("bun --silent run test:catalog"),
+    );
     expect(releaseCheck.indexOf("bun --silent run test:catalog")).toBeLessThan(
       releaseCheck.indexOf("bun --silent run build:release"),
     );
@@ -159,6 +169,20 @@ describe("package scripts", () => {
     expect(
       releaseCheck.indexOf("bun --silent run test:e2e:built"),
     ).toBeGreaterThan(releaseCheck.indexOf("bun --silent run validate:html"));
+  });
+
+  test("keeps source-side site diagnostics in author and release check paths", async () => {
+    const packageJson = await readPackageJson();
+    const scripts = new Map(Object.entries(packageJson.scripts));
+    const authorCheck = scripts.get("author:check") ?? "";
+    const fastCheck = scripts.get("check:fast") ?? "";
+    const releaseCheck = scripts.get("check:release") ?? "";
+
+    expect(authorCheck).toContain("run verify:content");
+    expect(authorCheck).toContain("run site:doctor -- --quiet");
+    expect(authorCheck).toContain("run site:schema:check -- --quiet");
+    expect(fastCheck).toContain("run site:doctor -- --quiet");
+    expect(releaseCheck).toContain("bun --silent run check");
   });
 
   test("keeps catalog builds isolated from production output", async () => {
