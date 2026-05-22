@@ -107,6 +107,33 @@ describe("observability", () => {
     });
   });
 
+  test("ignores unsupported Lighthouse rows and maps metadata audit categories", () => {
+    expect(observabilityFindingsFromLighthouseReport(null)).toEqual([]);
+
+    const findings = observabilityFindingsFromLighthouseReport({
+      audits: {
+        "crawlable-anchors": {
+          score: 0.9,
+          scoreDisplayMode: "numeric",
+          title: "Links are crawlable",
+        },
+        "ignored-informative": {
+          score: 0,
+          scoreDisplayMode: "informative",
+          title: "Ignored",
+        },
+        malformed: "not an audit",
+      },
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      category: "metadata",
+      providerCode: "crawlable-anchors",
+      severity: "warning",
+    });
+  });
+
   test("parses Cloudflare-style status rows and classifies scanner noise", () => {
     const findings = observabilityFindingsFromStatusRows({
       rows: [
@@ -132,6 +159,26 @@ describe("observability", () => {
       category: "deployment",
       route: "/articles/what-is-a-meme/",
       severity: "error",
+    });
+  });
+
+  test("ignores successful status rows and classifies stale asset crawls", () => {
+    const findings = observabilityFindingsFromStatusRows([
+      { count: 99, path: "/articles/ok/", status: 200 },
+      {
+        requests: 4,
+        url: "https://example.com/assets/old.jpg",
+        statusCode: 404,
+      },
+      { path: "/missing-status" },
+    ]);
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      noise: "stale-crawler",
+      owner: "external",
+      route: "/assets/old.jpg",
+      trend: { current: 4 },
     });
   });
 
@@ -167,6 +214,35 @@ describe("observability", () => {
       source: "link-scanner",
       url: "/assets/missing.jpg",
     });
+  });
+
+  test("maps webmaster issue language and ignores incomplete scanner rows", () => {
+    const findings = observabilityFindingsFromWebmasterRows(
+      {
+        rows: [
+          { issue: "Missing title metadata", url: "/untitled/" },
+          { issue: "Crawl blocked by robots", url: "/private/" },
+          { issue: "Bad inbound link", url: "/broken/" },
+          { issue: "Low quality page", url: "external.example" },
+          { issue: "No URL" },
+        ],
+      },
+      { source: "search-console" },
+    );
+
+    expect(findings.map((finding) => finding.category)).toEqual([
+      "metadata",
+      "crawlability",
+      "links",
+      "search",
+    ]);
+    expect(findings.at(-1)).toMatchObject({
+      confidence: "low",
+      route: undefined,
+    });
+    expect(
+      observabilityFindingsFromLinkScannerRows([{ page: "/articles/only/" }]),
+    ).toEqual([]);
   });
 
   test("redacts query strings and hashes from stored URLs", () => {

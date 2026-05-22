@@ -124,6 +124,42 @@ describe("anchored positioning", () => {
     expect(result.state).toContain("flipped-side");
   });
 
+  test("supports centered top placements without forcing an alignment suffix", () => {
+    const trigger = rect({ height: 40, width: 80, x: 360, y: 320 });
+    const result = computeAnchoredPosition(
+      input({
+        blockAnchorRect: trigger,
+        fallback: ["none"],
+        floatingSize: { height: 120, width: 200 },
+        inlineAnchorRect: trigger,
+        offset: 12,
+        placement: "top",
+      }),
+    );
+
+    expect(result.placement).toBe("top");
+    expect(result.x).toBe(300);
+    expect(result.y).toBe(188);
+    expect(result.state).toEqual(["preferred"]);
+  });
+
+  test("flips top placements below the trigger when start space is insufficient", () => {
+    const highTrigger = rect({ height: 24, width: 80, x: 320, y: 110 });
+    const result = computeAnchoredPosition(
+      input({
+        blockAnchorRect: highTrigger,
+        fallback: ["flip", "shift-then-size"],
+        inlineAnchorRect: highTrigger,
+        offset: 8,
+        placement: "top-start",
+      }),
+    );
+
+    expect(result.placement).toBe("bottom-start");
+    expect(result.y).toBe(142);
+    expect(result.state).toContain("flipped-side");
+  });
+
   test("exposes deterministic operation helpers", () => {
     const preferred = initialPlacement(
       input({

@@ -60,6 +60,41 @@ describe("bibliography aggregation", () => {
     ]);
   });
 
+  test("merges repeated source backlinks within the same article", () => {
+    const entries = bibliographyEntriesFromArticleReferences([
+      {
+        article: articleEntry({
+          data: { date: new Date("2023-01-01T00:00:00.000Z") },
+          id: "repeated-source-article",
+        }),
+        references: {
+          citations: [
+            citation("first-marker", {
+              author: "Writer, A.",
+              doi: "10.1000/repeated",
+              title: "Repeated Source",
+              year: "2023",
+            }),
+            citation("second-marker", {
+              author: "Writer, A.",
+              doi: "10.1000/repeated",
+              title: "Repeated Source",
+              year: "2023",
+            }),
+          ],
+          notes: [],
+        },
+      },
+    ]);
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]?.sourceArticles).toHaveLength(1);
+    expect(entries[0]?.sourceArticles[0]?.markerIds).toEqual([
+      "cite-ref-first-marker",
+      "cite-ref-second-marker",
+    ]);
+  });
+
   test("groups sources by exact URL before falling back to fingerprints", () => {
     const entries = bibliographyEntriesFromArticleReferences([
       {

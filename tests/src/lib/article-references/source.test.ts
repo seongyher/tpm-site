@@ -108,6 +108,97 @@ describe("citation source normalization", () => {
       type: "webpage",
     });
   });
+
+  test("normalizes source type variants and defensive export fallbacks", () => {
+    const typeCases = [
+      ["article", "article", "JOUR", "article-journal"],
+      ["book", "book", "BOOK", "book"],
+      ["dataset", "dataset", "DATA", "dataset"],
+      ["inbook", "chapter", "CHAP", "chapter"],
+      ["incollection", "chapter", "CHAP", "chapter"],
+      ["inproceedings", "conference-paper", "CPAPER", "paper-conference"],
+      ["proceedings", "conference-paper", "CPAPER", "paper-conference"],
+      ["software", "software", "COMP", "software"],
+      ["www", "web", "ELEC", "webpage"],
+      ["misc", "misc", "GEN", "document"],
+    ] as const;
+
+    expect(
+      typeCases.map(([entryType]) => {
+        const source = normalizedCitationSource(
+          bibtex(entryType, `${entryType}-source`, {
+            title: "Typed Source",
+          }),
+        );
+
+        return {
+          cslType: citationSourceCslJson(source).type,
+          risType: citationSourceRisExport(source).split("\n").at(0),
+          sourceType: source.sourceType,
+        };
+      }),
+    ).toEqual(
+      typeCases.map(([, sourceType, risType, cslType]) => ({
+        cslType,
+        risType: `TY  - ${risType}`,
+        sourceType,
+      })),
+    );
+
+    const chapter = normalizedCitationSource(
+      bibtex("incollection", "chapter-source", {
+        booktitle: "Collected Work",
+        editor: "Editor, Example and Mononym",
+        isbn: "978-0-00-000000-0",
+        pages: "10--20",
+        publisher: "Example Press",
+        title: "{Nested} Source",
+        year: "2020",
+      }),
+    );
+
+    expect(chapter).toMatchObject({
+      containerTitle: "Collected Work",
+      editors: ["Editor, Example", "Mononym"],
+      identity: {
+        confidence: "exact",
+        key: "isbn:978-0-00-000000-0",
+      },
+      isbn: "978-0-00-000000-0",
+      publisher: "Example Press",
+      title: "Nested Source",
+    });
+    expect(citationSourceBibtexExport(chapter)).toContain(
+      "  title = {\\{Nested\\} Source},",
+    );
+    expect(citationSourceCslJson(chapter)).toMatchObject({
+      ISBN: "978-0-00-000000-0",
+      "container-title": "Collected Work",
+      editor: [{ family: "Editor", given: "Example" }, { literal: "Mononym" }],
+      issued: { "date-parts": [[2020]] },
+      page: "10--20",
+      publisher: "Example Press",
+      type: "chapter",
+    });
+
+    const invalidDates = citationSourceCslJson(
+      normalizedCitationSource(
+        bibtex("software", "bad-dates", {
+          author: "No Comma Name",
+          date: "2024-13-40",
+          title: "Bad Dates",
+          urldate: "not-a-date",
+        }),
+      ),
+    );
+
+    expect(invalidDates).toEqual({
+      author: [{ literal: "No Comma Name" }],
+      id: "bad-dates",
+      title: "Bad Dates",
+      type: "software",
+    });
+  });
 });
 
 function bibtex(

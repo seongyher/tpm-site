@@ -135,4 +135,45 @@ describe("article citation helpers", () => {
       "ris",
     ]);
   });
+
+  test("formats two-author and many-author edge cases across citation styles", () => {
+    const twoAuthors = {
+      articleId: "two-authors",
+      authors: [
+        { displayName: "First Writer", type: "person" },
+        { displayName: "Second Writer", type: "person" },
+      ],
+      canonicalUrl: "https://example.com/articles/two-authors/",
+      publishedAt,
+      title: "Two Authors",
+    } as const;
+    const fourAuthors = {
+      articleId: "four-authors",
+      authors: [
+        { displayName: "First Writer", type: "person" },
+        { displayName: "Second Writer", type: "person" },
+        { displayName: "Third Writer", type: "person" },
+        { displayName: "Fourth Writer", type: "person" },
+      ],
+      canonicalUrl: "https://example.com/articles/four-authors/",
+      publishedAt,
+      title: "Four Authors",
+    } as const;
+
+    expect(
+      articleApaCitation(twoAuthors).startsWith(
+        "Writer, F., & Writer, S. (2022, April 6).",
+      ),
+    ).toBe(true);
+    expect(
+      articleChicagoNotesCitation(fourAuthors).startsWith(
+        'Writer, First, et al. "Four Authors."',
+      ),
+    ).toBe(true);
+    expect(
+      articleIeeeCitation(fourAuthors).startsWith(
+        'F. Writer et al., "Four Authors,"',
+      ),
+    ).toBe(true);
+  });
 });

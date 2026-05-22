@@ -15,6 +15,21 @@ const standaloneMarkerForTests = "data-article-image-standalone-source";
 const markdownPath = "/repo/src/content/articles/example/post.md";
 
 describe("rehypeArticleImages", () => {
+  test("ignores missing or malformed image frontmatter", () => {
+    expect(articleImagesFromFrontmatter(undefined)).toEqual({
+      hasInspectableImages: false,
+    });
+    expect(
+      articleImagesFromFrontmatter({
+        articleImages: {
+          hasInspectableImages: "yes",
+        },
+      }),
+    ).toEqual({
+      hasInspectableImages: false,
+    });
+  });
+
   test("wraps standalone Markdown images in bounded inspectable figure markup", async () => {
     const result = await processMarkdownImage(
       `![Long thread screenshot](../assets/thread.png "Thread caption")`,
@@ -124,6 +139,48 @@ describe("rehypeArticleImages", () => {
     expect(image.properties).not.toHaveProperty(
       "dataArticleImageStandaloneSource",
     );
+  });
+
+  test("wraps direct linked image nodes that arrive outside paragraphs", () => {
+    const image = {
+      children: [],
+      properties: {
+        alt: "Direct linked image",
+        [standaloneMarkerForTests]: "true",
+        src: "../assets/direct.png",
+      },
+      tagName: "img",
+      type: "element" as const,
+    };
+    const link = {
+      children: [image],
+      properties: {
+        className: ["legacy-link"],
+        href: "https://example.com/direct",
+      },
+      tagName: "a",
+      type: "element" as const,
+    };
+    const tree = {
+      children: [link],
+      type: "root" as const,
+    };
+
+    rehypeArticleImages()(tree, { data: {} });
+
+    const [figure] = tree.children as Array<{
+      properties?: Record<string, unknown>;
+      tagName?: string;
+    }>;
+    const rendered = JSON.stringify(figure);
+
+    expect(figure?.tagName).toBe("figure");
+    expect(figure?.properties?.["data-article-image-inspectable"]).toBe(
+      "false",
+    );
+    expect(rendered).toContain("legacy-link inline-flex");
+    expect(rendered).toContain("https://example.com/direct");
+    expect(image.properties).not.toHaveProperty(standaloneMarkerForTests);
   });
 
   test("ignores width and height properties instead of changing image anatomy", () => {
@@ -262,6 +319,27 @@ Introductory paragraph.
     expect(JSON.stringify(figure)).toContain("Raw video");
   });
 
+  test("leaves non-iframe raw HTML untouched in rehype output", () => {
+    const tree = {
+      children: [
+        {
+          type: "raw" as const,
+          value: "<div>Legacy raw block</div>",
+        },
+      ],
+      type: "root" as const,
+    };
+
+    rehypeArticleImages()(tree, { data: {} });
+
+    expect(tree.children).toEqual([
+      {
+        type: "raw",
+        value: "<div>Legacy raw block</div>",
+      },
+    ]);
+  });
+
   test("rewrites Markdown raw iframe HTML before Astro preserves it", () => {
     const tree = {
       children: [
@@ -283,6 +361,18 @@ Introductory paragraph.
     expect(html?.value).toContain('data-article-embed-provider="youtube"');
     expect(html?.value).toContain("https://www.youtube.com/embed/markdown");
     expect(html?.value).toContain("Markdown video");
+  });
+
+  test("leaves non-iframe Markdown HTML untouched before Astro preserves it", () => {
+    const tree = remark().parse("<div>Legacy block</div>");
+
+    remarkArticleImageMarkers()(tree);
+
+    const [html] = tree.children;
+    expect(html).toMatchObject({
+      type: "html",
+      value: "<div>Legacy block</div>",
+    });
   });
 
   test("wraps SoundCloud iframes with compact audio embed layout", () => {
@@ -337,6 +427,27 @@ Introductory paragraph.
     expect(html.value).toContain("data-pdf-exclude");
     expect(html.value).toContain("https://www.youtube.com/embed/multiline");
     expect(html.value).toContain("Multiline video");
+  });
+
+  test("rewrites unquoted Markdown iframe attributes and empty titles safely", () => {
+    const tree = remark().parse(
+      `<iframe src=https://www.youtube.com/embed/unquoted title=""></iframe>`,
+    );
+
+    remarkArticleImageMarkers()(tree);
+
+    const [html] = tree.children;
+    if (html?.type !== "html") {
+      throw new Error("Expected unquoted iframe to remain raw HTML");
+    }
+
+    expect(html.value).toContain(
+      'href="https://www.youtube.com/embed/unquoted"',
+    );
+    expect(html.value).toContain(">Embedded media</a>");
+    expect(html.value).toContain(
+      '<iframe src=https://www.youtube.com/embed/unquoted title=""></iframe>',
+    );
   });
 
   test("rewrites Markdown SoundCloud iframe HTML to compact audio layout", () => {

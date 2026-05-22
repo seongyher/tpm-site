@@ -2,14 +2,19 @@ import { describe, expect, test } from "bun:test";
 
 import { defaultPublishableVisibility } from "../../src/lib/publishable";
 import {
+  type AnnouncementEntry,
+  announcementsIndexUrl,
+  announcementUrl,
   type ArticleEntry,
   articlesArchiveUrl,
   articlesIndexUrl,
   articleSlug,
   articleUrl,
+  assertUniqueAnnouncementSlugs,
   assertUniqueArticleSlugs,
   authorsIndexUrl,
   authorUrl,
+  bibliographyUrl,
   categoriesIndexUrl,
   categorySlug,
   categoryUrl,
@@ -17,11 +22,17 @@ import {
   collectionUrl,
   decodeHtmlEntities,
   feedUrl,
+  formatDate,
+  imageUrl,
+  isPublishedAnnouncement,
   isPublishedArticle,
   normalizeSlug,
   pageUrl,
   searchUrl,
+  tagsIndexUrl,
+  tagUrl,
 } from "../../src/lib/routes";
+import { announcementEntry } from "../helpers/content";
 
 function entry(
   id: string,
@@ -57,6 +68,8 @@ describe("route helpers", () => {
   });
 
   test("keeps canonical routes trailing-slashed", () => {
+    expect(announcementsIndexUrl()).toBe("/announcements/");
+    expect(announcementUrl("support-us")).toBe("/announcements/support-us/");
     expect(articlesIndexUrl()).toBe("/articles/");
     expect(articlesArchiveUrl()).toBe("/articles/all/");
     expect(articleUrl("gamergate-as-metagaming")).toBe(
@@ -64,12 +77,17 @@ describe("route helpers", () => {
     );
     expect(authorsIndexUrl()).toBe("/authors/");
     expect(authorUrl("seong-young-her")).toBe("/authors/seong-young-her/");
+    expect(bibliographyUrl()).toBe("/bibliography/");
     expect(categoriesIndexUrl()).toBe("/categories/");
     expect(categoryUrl("memeculture")).toBe("/categories/memeculture/");
     expect(collectionsIndexUrl()).toBe("/collections/");
     expect(collectionUrl("featured")).toBe("/collections/featured/");
     expect(pageUrl("About")).toBe("/about/");
     expect(searchUrl()).toBe("/search/");
+    expect(tagsIndexUrl()).toBe("/tags/");
+    expect(tagUrl("twitch plays pokémon")).toBe(
+      "/tags/twitch%20plays%20pok%C3%A9mon/",
+    );
     expect(feedUrl()).toBe("/feed.xml");
   });
 
@@ -97,6 +115,15 @@ describe("route helpers", () => {
     }).toThrow('Duplicate article slug "same"');
   });
 
+  test("detects duplicate announcement slugs", () => {
+    expect(() => {
+      assertUniqueAnnouncementSlugs([
+        announcementEntry({ id: "same" }),
+        announcementEntry({ id: "same" }),
+      ]);
+    }).toThrow('Duplicate announcement slug "same"');
+  });
+
   test("detects article slugs reserved for static routes", () => {
     expect(() => {
       assertUniqueArticleSlugs([entry("all")]);
@@ -113,6 +140,36 @@ describe("route helpers", () => {
     expect(categorySlug(politics)).toBe("politics");
   });
 
+  test("keeps entries without usable source paths uncategorized", () => {
+    const noPath = entry("no-file");
+    noPath.filePath = "";
+
+    expect(categorySlug(noPath)).toBe("");
+    expect(
+      categorySlug(
+        entry("outside-root", {}, "/tmp/imported/articles/outside-root.md"),
+      ),
+    ).toBe("");
+  });
+
+  test("reads publication fields with defensive fallbacks", () => {
+    const image = {
+      format: "png",
+      height: 400,
+      src: "/image.png",
+      width: 600,
+    };
+
+    expect(imageUrl(entry("with-image", { image }))).toBe("/image.png");
+    expect(imageUrl(entry("without-image"))).toBeUndefined();
+    expect(formatDate(undefined)).toBe("");
+    expect(formatDate(new Date("invalid"))).toBe("");
+    expect(isPublishedAnnouncement(announcement("published"))).toBe(true);
+    expect(
+      isPublishedAnnouncement(announcement("draft", { draft: true })),
+    ).toBe(false);
+  });
+
   test("decodes known HTML entities in titles", () => {
     expect(
       decodeHtmlEntities(
@@ -121,3 +178,10 @@ describe("route helpers", () => {
     ).toBe('Memes and Humor: & "What is a Meme?"');
   });
 });
+
+function announcement(
+  id: string,
+  data: Partial<AnnouncementEntry["data"]> = {},
+): AnnouncementEntry {
+  return announcementEntry({ data, id });
+}

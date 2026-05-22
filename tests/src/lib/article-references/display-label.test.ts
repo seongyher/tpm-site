@@ -77,6 +77,53 @@ describe("article reference display label extraction", () => {
     });
   });
 
+  test("keeps definitions without leading text content unchanged", () => {
+    const empty = extractLeadingDisplayLabel(label, []);
+    expect(empty).toEqual({ children: [], ok: true });
+
+    const codeBlock = {
+      kind: "code",
+      text: "const value = 1;",
+    } as const satisfies ArticleReferenceBlockContent;
+    expect(extractLeadingDisplayLabel(label, [codeBlock])).toEqual({
+      children: [codeBlock],
+      ok: true,
+    });
+
+    const inlineCode = paragraph([{ kind: "inlineCode", text: "[@code]" }]);
+    expect(extractLeadingDisplayLabel(label, [inlineCode])).toEqual({
+      children: [inlineCode],
+      ok: true,
+    });
+  });
+
+  test("removes a display-label-only leading text node without leaving empty text", () => {
+    const result = extractLeadingDisplayLabel(label, [
+      paragraph([
+        { kind: "text", text: "[@Display Only] " },
+        { kind: "text", text: "Remaining source." },
+      ]),
+    ]);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      throw new Error("Expected valid display label.");
+    }
+
+    const [firstChild] = result.children;
+    expect(result.displayLabel).toBe("Display Only");
+    expect(firstChild?.kind).toBe("paragraph");
+
+    if (firstChild?.kind !== "paragraph") {
+      throw new Error("Expected paragraph reference content.");
+    }
+
+    expect(firstChild.children).toEqual([
+      { kind: "text", text: "Remaining source." },
+    ]);
+  });
+
   test("rejects malformed leading display labels", () => {
     expect(
       extractLeadingDisplayLabel(label, [

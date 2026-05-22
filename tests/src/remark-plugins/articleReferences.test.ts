@@ -36,6 +36,134 @@ Claim with context.[^note-context]
     expect(result.html).not.toContain('data-footnotes="true"');
   });
 
+  test("serializes rich note definitions for previews and downstream outputs", () => {
+    const result = processMarkdown(`
+Claim with a rich note.[^note-rich]
+
+[^note-rich]: See [linked **source**](https://example.com "Source title") with \`code\`, *emphasis*, and **strong**.
+
+    \`\`\`js
+    const value = 1;
+    \`\`\`
+`);
+
+    const blocks = result.references.notes[0]?.definition.children ?? [];
+    const paragraph = blocks.find((block) => block.kind === "paragraph");
+    const code = blocks.find((block) => block.kind === "code");
+
+    if (paragraph?.kind !== "paragraph") {
+      throw new Error("Expected rich note paragraph block.");
+    }
+
+    expect(result.references.notes[0]?.label).toBe("note-rich");
+    expect(paragraph).toMatchObject({
+      kind: "paragraph",
+      text: "See linked source with code, emphasis, and strong.",
+    });
+    expect(paragraph.children.find((child) => child.kind === "link")).toEqual({
+      children: [
+        { kind: "text", text: "linked " },
+        {
+          children: [{ kind: "text", text: "source" }],
+          kind: "strong",
+          text: "source",
+        },
+      ],
+      kind: "link",
+      text: "linked source",
+      title: "Source title",
+      url: "https://example.com",
+    });
+    expect(
+      paragraph.children.find((child) => child.kind === "inlineCode"),
+    ).toEqual({
+      kind: "inlineCode",
+      text: "code",
+    });
+    expect(
+      paragraph.children.find((child) => child.kind === "emphasis"),
+    ).toEqual({
+      children: [{ kind: "text", text: "emphasis" }],
+      kind: "emphasis",
+      text: "emphasis",
+    });
+    expect(paragraph.children.find((child) => child.kind === "strong")).toEqual(
+      {
+        children: [{ kind: "text", text: "strong" }],
+        kind: "strong",
+        text: "strong",
+      },
+    );
+    expect(code).toMatchObject({
+      kind: "code",
+      lang: "js",
+      text: "const value = 1;",
+    });
+  });
+
+  test("preserves line breaks and unknown AST nodes in serialized definitions", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- The plugin intentionally preserves unknown MDX/remark node shapes that the mdast Root type cannot enumerate.
+    const references = transformTreeWithPluginAndReadReferences({
+      children: [
+        {
+          children: [
+            { type: "text", value: "Claim with custom note." },
+            {
+              identifier: "note-custom",
+              label: "note-custom",
+              type: "footnoteReference",
+            },
+          ],
+          type: "paragraph",
+        },
+        {
+          children: [
+            {
+              children: [
+                { type: "text", value: "First line" },
+                { type: "break" },
+                { type: "text", value: "Second line" },
+                {
+                  children: [{ type: "text", value: "custom inline" }],
+                  type: "customInline",
+                },
+              ],
+              type: "paragraph",
+            },
+            {
+              type: "customBlock",
+              value: "custom block",
+            },
+          ],
+          identifier: "note-custom",
+          label: "note-custom",
+          type: "footnoteDefinition",
+        },
+      ],
+      type: "root",
+    } as unknown as Root);
+
+    const [paragraph, customBlock] =
+      references.notes[0]?.definition.children ?? [];
+
+    if (paragraph?.kind !== "paragraph") {
+      throw new Error("Expected custom note paragraph.");
+    }
+
+    expect(paragraph.children).toContainEqual({ kind: "break", text: "" });
+    expect(paragraph.children).toContainEqual({
+      children: [{ kind: "text", text: "custom inline" }],
+      kind: "unknown",
+      nodeType: "customInline",
+      text: "custom inline",
+    });
+    expect(customBlock).toEqual({
+      kind: "unknown",
+      nodeType: "customBlock",
+      text: "custom block",
+    });
+  });
+
   test("normalizes repeated citations from hidden BibTeX data", () => {
     const result = processMarkdown(`
 First claim.[^cite-baudrillard-1981] Later claim.[^cite-baudrillard-1981]
@@ -238,6 +366,26 @@ function transformTreeWithPlugin(tree: Root): void {
     },
     message: () => undefined,
   });
+}
+
+function transformTreeWithPluginAndReadReferences(
+  tree: Root,
+): ArticleReferenceData {
+  const data: Record<string, unknown> = { astro: { frontmatter: {} } };
+  remarkArticleReferences()(tree, {
+    data,
+    fail: (message: string): never => {
+      throw new Error(message);
+    },
+    message: () => undefined,
+  });
+
+  return (
+    articleReferencesFromFrontmatter(frontmatterFromData(data)) ?? {
+      citations: [],
+      notes: [],
+    }
+  );
 }
 
 function missingDefinitionTree(): Root {

@@ -117,6 +117,57 @@ describe("observability diagnostics", () => {
     });
   });
 
+  test("maps every source-repairable observability category into author taxonomy", () => {
+    const cases = [
+      ["accessibility", "accessibility"],
+      ["assets", "assets"],
+      ["cache", "deployment"],
+      ["crawlability", "metadata"],
+      ["deployment", "deployment"],
+      ["links", "routes"],
+      ["metadata", "metadata"],
+      ["performance", "performance"],
+      ["redirects", "redirects"],
+      ["routes", "routes"],
+      ["search", "search"],
+      ["security", "deployment"],
+      ["unknown", "generated-artifacts"],
+      ["uptime", "deployment"],
+    ] as const;
+    const report = createRouteLinkedObservabilityReport(
+      cases.map(([category]) =>
+        createObservabilityFinding({
+          category,
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "site-owner",
+          route: "/articles/example/",
+          severity: "warning",
+          source: "manual",
+          summary: `${category} warning.`,
+        }),
+      ),
+      { routeRegistry },
+    );
+
+    expect(
+      authorDiagnosticsFromObservabilityReport(report).map((diagnostic) => ({
+        category: diagnostic.category,
+        repairOwner: diagnostic.repairOwner,
+        sourceCode: diagnostic.sourceCode,
+        summary: diagnostic.summary,
+      })),
+    ).toEqual(
+      cases.map(([category, expectedCategory]) => ({
+        category: expectedCategory,
+        repairOwner: "site-owner",
+        sourceCode: undefined,
+        summary: `${category} warning.`,
+      })),
+    );
+  });
+
   test("builds release-health deltas and route-class summaries", () => {
     const baseline = createRouteLinkedObservabilityReport(
       [
@@ -201,6 +252,56 @@ describe("observability diagnostics", () => {
         routeClass: "unknown-internal-route",
       },
     ]);
+  });
+
+  test("sorts release-health deltas by route class, severity, and finding label", () => {
+    const candidate = createRouteLinkedObservabilityReport(
+      [
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          route: "/tags/example/",
+          severity: "warning",
+          source: "link-scanner",
+          summary: "Tag warning.",
+        }),
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          route: "/articles/b/",
+          severity: "warning",
+          source: "link-scanner",
+          summary: "B warning.",
+        }),
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          route: "/articles/a/",
+          severity: "error",
+          source: "link-scanner",
+          summary: "A error.",
+        }),
+      ],
+      { routeRegistry },
+    );
+
+    const releaseHealth = createObservabilityReleaseHealthReport({
+      baseline: createRouteLinkedObservabilityReport([], { routeRegistry }),
+      candidate,
+    });
+
+    expect(
+      releaseHealth.added.map((delta) => delta.finding.finding.summary),
+    ).toEqual(["A error.", "B warning.", "Tag warning."]);
   });
 
   test("formats deterministic release-health Markdown", () => {
@@ -295,5 +396,68 @@ describe("observability diagnostics", () => {
         "",
       ].join("\n"),
     );
+  });
+
+  test("formats empty and persistent release-health reports without fake deltas", () => {
+    const baseline = createRouteLinkedObservabilityReport(
+      [
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          route: "/articles/stable/",
+          severity: "warning",
+          source: "link-scanner",
+          summary: "Stable | warning.",
+        }),
+      ],
+      { routeRegistry },
+    );
+    const candidate = createRouteLinkedObservabilityReport(
+      [
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          route: "/articles/stable/",
+          severity: "warning",
+          source: "link-scanner",
+          summary: "Stable | warning.",
+        }),
+      ],
+      { routeRegistry },
+    );
+
+    const persistent = createObservabilityReleaseHealthReport({
+      baseline,
+      candidate,
+    });
+    expect(persistent.added).toEqual([]);
+    expect(persistent.changed).toEqual([]);
+    expect(persistent.resolved).toEqual([]);
+    expect(persistent.persistent).toHaveLength(1);
+    expect(persistent.routeClasses).toEqual([
+      {
+        added: 0,
+        changed: 0,
+        persistent: 1,
+        resolved: 0,
+        routeClass: "articles",
+      },
+    ]);
+    expect(
+      formatObservabilityReleaseHealthMarkdownReport(
+        createObservabilityReleaseHealthReport({
+          baseline: createRouteLinkedObservabilityReport([], { routeRegistry }),
+          candidate: createRouteLinkedObservabilityReport([], {
+            routeRegistry,
+          }),
+        }),
+      ),
+    ).toContain("No route-class changes.");
   });
 });

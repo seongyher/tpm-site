@@ -7,6 +7,35 @@ import {
 } from "../../../src/scripts/article-reference-previews";
 
 describe("article reference preview browser script", () => {
+  test("does nothing without a usable preview panel", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    expect(() => installArticleReferencePreviews()).not.toThrow();
+
+    document.body.innerHTML = `<section data-article-references></section>`;
+    installArticleReferencePreviews(runtimeFor(window));
+    expect(
+      document.querySelector("[data-article-reference-preview-initialized]"),
+    ).toBe(null);
+
+    document.body.innerHTML = `<div data-article-reference-preview></div>`;
+    installArticleReferencePreviews(runtimeFor(window));
+    expect(
+      document.querySelector("[data-article-reference-preview-initialized]"),
+    ).toBe(null);
+
+    document.body.innerHTML = `
+      <div data-article-reference-preview data-article-reference-preview-initialized>
+        <div data-article-reference-preview-content></div>
+      </div>
+    `;
+    installArticleReferencePreviews(runtimeFor(window));
+    expect(requiredElement(window, "[data-article-reference-preview]").id).toBe(
+      "",
+    );
+  });
+
   test("opens citation definition previews from inline markers", () => {
     const window = browserWindow();
     const document = window.document;
@@ -42,6 +71,90 @@ describe("article reference preview browser script", () => {
       null,
     );
     expect(panel.style.getPropertyValue("--anchor-x")).toBe("54px");
+  });
+
+  test("opens marker previews from encoded hash fragments when metadata is absent", () => {
+    const window = browserWindow();
+    const document = window.document;
+    document.body.innerHTML = `
+      <article data-article-prose>
+        <p>
+          Encoded marker
+          <a
+            id="encoded-marker"
+            href="#cite%20source"
+            data-article-reference-marker="true"
+          >[1]</a>
+        </p>
+      </article>
+      <section data-article-references>
+        <ol>
+          <li id="cite source">
+            <div data-article-reference-definition-content>
+              <p>Encoded source title.</p>
+            </div>
+          </li>
+        </ol>
+        <div class="hidden" data-article-reference-preview hidden>
+          <div data-article-reference-preview-content></div>
+        </div>
+      </section>
+    `;
+
+    const marker = requiredElement(window, "#encoded-marker");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+
+    expect(panel.hidden).toBe(false);
+    expect(
+      textContent(panel, "[data-article-reference-preview-content]"),
+    ).toContain("Encoded source title.");
+  });
+
+  test("falls back to undecodable hash fragments when finding preview targets", () => {
+    const window = browserWindow();
+    const document = window.document;
+    document.body.innerHTML = `
+      <article data-article-prose>
+        <p>
+          Legacy marker
+          <a
+            id="legacy-marker"
+            href="#%E0%A4%A"
+            data-article-reference-marker="true"
+          >[1]</a>
+        </p>
+      </article>
+      <section data-article-references>
+        <ol>
+          <li id="%E0%A4%A">
+            <div data-article-reference-definition-content>
+              <p>Legacy malformed fragment source.</p>
+            </div>
+          </li>
+        </ol>
+        <div class="hidden" data-article-reference-preview hidden>
+          <div data-article-reference-preview-content></div>
+        </div>
+      </section>
+    `;
+
+    const marker = requiredElement(window, "#legacy-marker");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+
+    expect(panel.hidden).toBe(false);
+    expect(
+      textContent(panel, "[data-article-reference-preview-content]"),
+    ).toContain("Legacy malformed fragment source.");
   });
 
   test("opens backlink context previews from source prose blocks", () => {
@@ -164,6 +277,35 @@ describe("article reference preview browser script", () => {
 
     expect(panel.style.getPropertyValue("--anchor-x")).not.toBe(firstX);
   });
+
+  test("closes previews after pointer and focus leave both trigger and panel", () => {
+    const window = browserWindow({ immediateTimers: true });
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const outside = requiredElement(window, "#outside-target");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+    expect(panel.hidden).toBe(false);
+
+    dispatchWindowEvent(marker, window, "pointerout", {
+      relatedTarget: outside,
+    });
+    expect(panel.hidden).toBe(true);
+
+    dispatchWindowEvent(marker, window, "pointerover");
+    marker.focus();
+    dispatchWindowEvent(marker, window, "focusout", {
+      relatedTarget: outside,
+    });
+    expect(panel.hidden).toBe(true);
+  });
 });
 
 function referencePreviewFixture(): string {
@@ -239,7 +381,10 @@ function referencePreviewFixture(): string {
 }
 
 function browserWindow(
-  options: { readonly coarsePointer?: boolean } = {},
+  options: {
+    readonly coarsePointer?: boolean;
+    readonly immediateTimers?: boolean;
+  } = {},
 ): Window {
   const window = new Window({ url: "https://example.com/articles/source/" });
   Reflect.set(window, "SyntaxError", SyntaxError);
@@ -248,6 +393,14 @@ function browserWindow(
   Reflect.set(window, "matchMedia", () => ({
     matches: options.coarsePointer === true,
   }));
+  if (options.immediateTimers === true) {
+    Reflect.set(window, "setTimeout", (callback: () => void) => {
+      callback();
+
+      return 1;
+    });
+    Reflect.set(window, "clearTimeout", () => undefined);
+  }
 
   return window;
 }
@@ -290,18 +443,26 @@ function dispatchWindowEvent(
   element: unknown,
   window: Window,
   eventName: string,
-  options: EventInit = {},
+  options: TestEventOptions = {},
 ): DispatchedEventState {
   if (!isDispatchableEventTarget(element)) {
     throw new Error("Expected fixture target to dispatch browser events.");
   }
 
-  const event = new window.Event(eventName, { bubbles: true, ...options });
+  const { relatedTarget, ...eventOptions } = options;
+  const event = new window.Event(eventName, { bubbles: true, ...eventOptions });
+  if (relatedTarget !== undefined) {
+    Object.defineProperty(event, "relatedTarget", { value: relatedTarget });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
   element.dispatchEvent(event as unknown as Event);
 
   return { defaultPrevented: event.defaultPrevented };
+}
+
+interface TestEventOptions extends EventInit {
+  readonly relatedTarget?: EventTarget | null;
 }
 
 function dispatchPointerEvent(
