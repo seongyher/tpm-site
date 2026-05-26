@@ -15,6 +15,81 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active CLI Design Research
+
+This research phase produces an evergreen, evidence-backed guide to excellent
+CLI design. It is intentionally not a TPM CLI product spec. The final document
+should be useful for future CLI design work in this repo and in unrelated
+projects.
+
+### Milestone 500: Research Scope And Source Plan
+
+- [x] Define the research questions, source quality bar, source categories,
+      evidence-strength labels, and evaluation rubric.
+- [x] Create supporting research documents for source logging, case-study
+      notes, anti-patterns, and synthesis notes.
+- [x] Verify the scope excludes TPM-specific command design while still
+      producing principles useful for later CLI contracts.
+      Added `agent-docs/cli-design-research/` scaffolding and
+      `agent-docs/CLI_DESIGN_GUIDE.md`. Verified with markdown lint and
+      `git diff --check`.
+
+### Milestone 501: Authoritative Guidance Review
+
+- [x] Review standards, platform guidance, expert CLI design guides,
+      accessibility/scriptability guidance, and developer-experience sources.
+- [x] Record source claims, credibility, limits, and whether each source should
+      influence the final guide.
+- [x] Verify claims against primary sources where possible.
+      Recorded standards, platform docs, expert guidance, and official CLI
+      docs in `agent-docs/cli-design-research/SOURCE_LOG.md`. Verified with
+      markdown lint and `git diff --check`.
+
+### Milestone 502: Best-In-Class CLI Discovery And Case Studies
+
+- [x] Identify CLIs that are repeatedly praised, influential, or instructive
+      from evidence rather than assumption.
+- [x] Evaluate selected CLIs with the research rubric.
+- [x] Include critiques of popular CLIs where evidence shows UX tradeoffs.
+      Added evidence-backed case studies for `gh`, Terraform, `kubectl`,
+      `gcloud`, `rg`, `fd`, `jq`, and Git. Verified with markdown lint and
+      `git diff --check`.
+
+### Milestone 503: Anti-Patterns And Tradeoff Review
+
+- [x] Identify common CLI UX failures, unsafe patterns, automation hazards,
+      documentation failures, and provider/auth pitfalls.
+- [x] Separate universal anti-patterns from context-dependent tradeoffs.
+- [x] Verify each anti-pattern is supported by evidence or marked as
+      judgment-based.
+      Added anti-pattern and tradeoff notes for output contracts,
+      non-interactive safety, destructive operations, flags, inference,
+      side effects, secrets, color/accessibility, state recovery,
+      documentation, compatibility, and scope. Verified with markdown lint and
+      `git diff --check`.
+
+### Milestone 504: Draft Evergreen CLI Design Guide
+
+- [x] Write the first full guide from the research notes.
+- [x] Include principles, concrete necessities, examples, tradeoffs,
+      evidence-strength notes, and a reusable review rubric.
+- [x] Keep the guide general-purpose and avoid a TPM-specific section.
+      Drafted `agent-docs/CLI_DESIGN_GUIDE.md` from the research notes and
+      added synthesis notes. Verified with markdown lint and whitespace checks.
+
+### Milestone 505: Iterative Refinement And Fact Checking
+
+- [x] Critique the draft for unsupported claims, missing sources,
+      contradictions, weak recommendations, and overfitting.
+- [x] Run multiple refinement passes until the guide is practical,
+      evidence-backed, evergreen, and implementation-useful.
+- [x] Verify citations, markdown quality, and checklist completion before
+      handoff.
+      Removed project-specific example text, added agent/automation readiness,
+      added a reusable command contract template, checked for TPM-specific
+      drift, reviewed source links, and verified with markdown review and
+      whitespace checks.
+
 ## Active Milestone 5 Execution
 
 Milestone 5 is the distribution and ecosystem readiness layer. It should finish
