@@ -1591,6 +1591,11 @@ Mature contract:
 - The GUI, CLI, and MCP server all use the same headless studio core for source
   edits, diagnostics, previews, generated-output checks, release reports,
   deploy proposals, and publish/rollback workflows.
+- The headless studio core is implemented Rust-first where practical. Rust
+  owns durable operation contracts, diagnostics, workspace/source models,
+  release reports, CLI behavior, MCP behavior, and the future Tauri backend;
+  Astro and TypeScript remain renderer/frontend adapters where they are the
+  right tools.
 - Authors can use a real-time WYSIWYG or split-view Markdown/MDX editor while
   the platform preserves source fidelity and exposes code escape hatches only
   when needed.
@@ -1613,6 +1618,17 @@ Work:
 - Define a headless studio core with explicit interfaces for source reads,
   source edits, diagnostics, preview builds, generated artifacts, release
   reports, provider actions, audit logs, and credential scopes.
+- Add the Rust migration foundation described in
+  [`RUST_MIGRATION_AND_CLI_PLAN.md`](./RUST_MIGRATION_AND_CLI_PLAN.md):
+  workspace crates, strict Rust QA, `just` orchestration, parity tests, CLI
+  operation boundaries, Tauri reuse, and MCP reuse.
+- Use
+  [`CLI_RUST_GUI_INTEGRATION_PLAN.md`](./CLI_RUST_GUI_INTEGRATION_PLAN.md) as
+  the coordination plan for CLI, Rust migration, MCP, and the Tauri/Astro GUI.
+  The sequencing is: Rust operation core, CLI vertical slice, dual-run script
+  migrations, adapter contracts, Tauri/Astro command-binding spike, studio
+  authoring/preview, publish/release workflows, MCP automation, then packaging
+  and extraction.
 - Design CLI workflows for developer, CI, migration, automation, preview,
   publish, rollback, and release-report tasks. The CLI should expose the same
   domain actions as the studio instead of becoming a script wrapper around

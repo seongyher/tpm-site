@@ -99,6 +99,16 @@ to the active milestone.
   strictness, modularity, type-driven design, and testing philosophy.
 - `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
   tooling, and productization roadmap.
+- `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`: product strategy, command
+  language, user journeys, and implementation direction for the future CLI.
+- `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`: Rust-first migration plan,
+  crate boundaries, CLI/Tauri/MCP reuse model, `just` orchestration, and Rust
+  QA strategy.
+- `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md`: coordinated high-level plan
+  for the Rust operation core, CLI, MCP, and Tauri/Astro studio GUI.
+- `agent-docs/rust-migration-research/RUST_QA_TOOLING_EVALUATION.md`:
+  source-checked Rust QA/static-analysis tooling evaluation, adoption timing,
+  and blocking versus review-only gate guidance.
 - `agent-docs/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
   product modes, default author UX, and non-goals.
 - `agent-docs/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,

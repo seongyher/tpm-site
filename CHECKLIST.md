@@ -373,6 +373,116 @@ that can become command specs and Linear implementation issues later.
       with `bunx prettier --write`, `bun --silent run review:markdown`, and
       `git diff --check`.
 
+### Milestone 526: Rust Migration Research Scope And Repo Audit
+
+- [x] Re-read platform, CLI, studio, and QA docs for migration implications.
+- [x] Audit the current Bun/TypeScript scripts, platform modules, QA gates,
+      generated artifacts, and adapter seams for Rust migration candidates.
+- [x] Separate Rust-core candidates, Astro/TS adapter work, browser-bound work,
+      and orchestration-only work.
+      Added a Rust migration repo audit in
+      `agent-docs/rust-migration-research/REPO_MIGRATION_AUDIT.md`, covering
+      current script domains, first/second/third wave migration candidates,
+      TypeScript/Astro boundaries, and the recommended first implementation
+      slice.
+
+### Milestone 527: Rust Tooling And Library Research
+
+- [x] Research Rust workspace, CLI, diagnostics, config/schema, testing,
+      property/fuzz testing, coverage, security, supply-chain, linting,
+      formatting, docs, Tauri, MCP, and `just` tooling from primary docs where
+      practical.
+- [x] Identify recommended libraries and tools, alternatives, tradeoffs, and
+      adoption timing.
+- [x] Verify recommendations support strictness, developer velocity, parity
+      testing, and eventual Tauri GUI reuse.
+      Added `agent-docs/rust-migration-research/RUST_TOOLING_STRICTNESS.md`,
+      `agent-docs/rust-migration-research/CLI_TAURI_JUST_ARCHITECTURE.md`, and
+      `agent-docs/rust-migration-research/SOURCE_LOG.md`, with recommendations
+      for Cargo workspace setup, rustup, Clippy/rustfmt, nextest, llvm-cov,
+      cargo-deny, cargo-audit, property/fuzz tests, snapshots, CLI libraries,
+      Tauri capabilities, MCP timing, and `just` command orchestration.
+
+### Milestone 528: Rust Migration Architecture And Implementation Plan
+
+- [x] Write the Rust-first platform/core migration plan, crate layout, adapter
+      boundaries, operation protocol, `just` orchestration model, CLI plan, and
+      Tauri path.
+- [x] Define safe migration sequencing with parity tests, comparison mode,
+      fixture strategy, quality gates, and rollback points.
+- [x] Call out concrete dependencies/tooling to add, when to add them, and
+      which current scripts/domains they replace.
+      Added the authoritative plan in
+      `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`, then cross-linked it from
+      `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`,
+      `agent-docs/PLATFORM_ROADMAP.md`, and `AGENTS.md`.
+
+### Milestone 529: Rust Migration Plan Critique And Verification
+
+- [x] Critique the plan for overreach, underreach, duplicated logic, missing
+      tests, weak boundaries, poor developer UX, and hidden TypeScript/Astro
+      coupling.
+- [x] Iterate until the docs are implementation-ready and clearly actionable.
+- [x] Run markdown and whitespace verification before handoff.
+      Removed fake precision around the initial Rust version, tightened YAML
+      dependency guidance, clarified MCP SDK timing, and verified with
+      `bunx prettier --write`, `bun --silent run review:markdown`, and
+      `git diff --check`.
+
+### Milestone 530: Rust Migration Linear Readiness Pass
+
+- [x] Re-read the Rust migration plan, migration audit, tooling strictness
+      plan, CLI/Tauri/Just architecture notes, CLI strategy, and platform
+      roadmap for Linear planning gaps.
+- [x] Add issue-ready sequencing, blockers, acceptance criteria, promotion
+      gates, and open implementation decisions where the docs were too broad.
+- [x] Verify the updated docs and checklist before handoff.
+      Added a Linear planning breakdown to
+      `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`, a migration-readiness table
+      to `agent-docs/rust-migration-research/REPO_MIGRATION_AUDIT.md`, tool
+      decision states to
+      `agent-docs/rust-migration-research/RUST_TOOLING_STRICTNESS.md`, and
+      operation readiness / CLI issue ordering to
+      `agent-docs/rust-migration-research/CLI_TAURI_JUST_ARCHITECTURE.md`.
+
+### Milestone 531: Rust QA Tooling Evaluation
+
+- [x] Re-read `AGENTS.md`, the engineering philosophy, the Rust migration
+      plan, and existing Rust tooling notes for repo-specific goals.
+- [x] Treat `/Users/irk/Downloads/deep-research-report (2).md` as untrusted
+      input, then verify candidate tools and claims against primary sources.
+- [x] Write a project-specific Rust QA/static-analysis report with goals,
+      staged adoption states, blocking versus review-only guidance, command
+      profiles, and implementation notes.
+      Added
+      `agent-docs/rust-migration-research/RUST_QA_TOOLING_EVALUATION.md` and
+      cross-linked it from the Rust migration plan, Rust tooling strictness
+      notes, and `AGENTS.md`.
+
+### Milestone 532: CLI, Rust, And Tauri/Astro GUI Integration Plan
+
+- [x] Re-read `AGENTS.md`, the engineering philosophy, the CLI strategy, Rust
+      migration plan, studio product vision, adapter model, extension model,
+      Rust/Tauri architecture notes, and current platform/script structure.
+- [x] Verify the Tauri/Astro stack assumptions against official docs and map
+      them to the repo's static-first operation-core model.
+- [x] Write a coherent high-level plan that coordinates CLI, Rust migration,
+      MCP, `just`, adapter contracts, and the Tauri/Astro GUI into one
+      issue-ready sequence.
+      Added `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md` and cross-linked it
+      from the roadmap, CLI strategy, Rust migration plan, and `AGENTS.md`.
+
+### Milestone 533: CLI/Rust/GUI Planning Readiness Audit
+
+- [x] Re-read the CLI, Rust migration, Tauri/Astro GUI, studio, adapter, and
+      extension planning docs for consistency before implementation issue
+      breakdown.
+- [x] Identify planning-readiness gaps around decision records, tradeoffs,
+      promotion gates, first GUI proof acceptance criteria, and open questions.
+- [x] Patch the integration and Rust QA plans so implementation issues can be
+      created without implying a parallel GUI/CLI/MCP model or overly noisy
+      first Rust gates.
+
 ## Active Milestone 5 Execution
 
 Milestone 5 is the distribution and ecosystem readiness layer. It should finish

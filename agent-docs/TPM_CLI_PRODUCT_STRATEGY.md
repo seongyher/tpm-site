@@ -44,6 +44,12 @@ The CLI must stay thin. It should translate user intent into typed platform
 operations, then render human or machine output. It should not create a
 parallel CMS/source/workflow/deploy model.
 
+Implementation direction is now Rust-first. The CLI should be a Rust binary
+over shared Rust operation crates, not a Bun script or TypeScript wrapper. The
+same operation crates should later power the MCP server, CI integrations, and
+Tauri studio backend. The Rust migration plan is documented in
+[`RUST_MIGRATION_AND_CLI_PLAN.md`](./RUST_MIGRATION_AND_CLI_PLAN.md).
+
 ## Product Thesis
 
 The TPM CLI is for users and teams who want static-site performance,
@@ -122,6 +128,13 @@ The explicit alternatives, tradeoffs, and rejected pivots are in
 Realistic command-flow examples with files, routes, plans, reports, and tool
 behavior are in
 [`USER_JOURNEY_DESIGNS.md`](./cli-product-research/USER_JOURNEY_DESIGNS.md).
+
+Rust migration, strict tooling, `just`, Tauri, and MCP implications are in
+[`RUST_MIGRATION_AND_CLI_PLAN.md`](./RUST_MIGRATION_AND_CLI_PLAN.md).
+
+The cross-interface implementation sequence for CLI, Rust migration, MCP, and
+the Tauri/Astro GUI is in
+[`CLI_RUST_GUI_INTEGRATION_PLAN.md`](./CLI_RUST_GUI_INTEGRATION_PLAN.md).
 
 ## Market And Product Landscape
 
