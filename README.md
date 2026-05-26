@@ -8,6 +8,8 @@ Astro static site for The Philosopher's Meme.
 
 - Bun
 - Node.js `>=22.12.0`
+- Rust `1.93.0` through `rustup` for additive Rust workspace checks
+- `just` for the repository command router
 
 Install dependencies:
 
@@ -52,6 +54,20 @@ bun run verify
 For a short explanation of every package script, see `PACKAGE_SCRIPTS.md`.
 For documentation ownership, generated-reference, and drift-check planning,
 see `docs/DOCUMENTATION_LIFECYCLE.md`.
+For the additive Rust workspace and `just` command router, see
+`docs/RUST_WORKSPACE.md`.
+
+List the repository command router recipes:
+
+```sh
+just --list
+```
+
+Run the additive Rust gate:
+
+```sh
+just rust-check
+```
 
 Run the same local quality path with successful command output hidden:
 

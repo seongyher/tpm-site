@@ -45,8 +45,33 @@ When an existing script currently uses `node`, keep it working unless the task
 explicitly includes converting the script to Bun. Avoid churn that is unrelated
 to the active milestone.
 
+## Rust And Just Usage
+
+The Rust workspace is additive infrastructure for the future platform core,
+CLI, MCP, and Tauri studio backend. It does not replace existing Bun/Astro
+behavior until a later parity milestone explicitly promotes a Rust command.
+
+- Use `cargo` for direct Rust formatting, checks, lints, and tests.
+- Use `just --list` to discover repository command-router recipes.
+- Keep `justfile` recipes as orchestration only; do not put domain logic there.
+- Keep Rust crates dependency-light and strict. Unsafe Rust is forbidden by
+  default.
+- Do not weaken existing Bun, Astro, TypeScript, browser, accessibility,
+  performance, or release gates when adding Rust gates.
+
 ## Project Map
 
+- `Cargo.toml`: additive Rust workspace root, shared metadata, dependencies,
+  and lint policy.
+- `Cargo.lock`: committed Rust dependency lockfile for deterministic tool and
+  binary builds.
+- `rust-toolchain.toml`: pinned Rust toolchain and required components.
+- `deny.toml`: initial Rust supply-chain policy for review-only `cargo-deny`
+  checks.
+- `justfile`: repository command router over existing Bun scripts and Rust
+  checks; keep it orchestration-only.
+- `crates/`: additive Rust platform crates. Rust code here is not source of
+  truth for existing site behavior until parity promotion.
 - `site/`: default TPM site instance. Publication-specific content, assets,
   public files, theme overrides, redirects, and site config belong here.
 - `site/config/site.json`: publication configuration. Keep TPM-specific text,
@@ -89,6 +114,8 @@ to the active milestone.
 - `scripts/site/`: source-level site-instance tools such as site doctor and
   starter-template verification.
 - `tests/`: unit, e2e, accessibility, and performance tests.
+- `tests/fixtures/rust-workspace/`: small neutral site-like fixture for Rust
+  workspace and future operation tests.
 - `dist/`: generated build output. Do not edit by hand.
 - `dist-catalog/`: generated private component catalog output. Do not edit by
   hand.
@@ -146,6 +173,8 @@ to the active milestone.
   provenance policy.
 - `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`: fixture matrix and test strategy
   for platform/studio readiness.
+- `docs/RUST_WORKSPACE.md`: additive Rust workspace, `just`, blocking/review
+  Rust checks, fixture, and migration policy.
 
 ## Project-Local Skills
 

@@ -30,6 +30,7 @@ integration behavior that lower layers cannot prove.
 | Docs-site checks                   | `bun run test:docs-site`                                                                           | Validates and builds the public documentation example site as a separate site instance.                    |
 | Fixture site checks                | `bun run test:site-instance`                                                                       | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                               |
 | Coverage checks                    | `bun run coverage`, `bun run coverage:check`                                                       | Review and enforcement surface for unit-level coverage expectations.                                       |
+| Rust workspace checks              | `just rust-check`, direct `cargo fmt/check/clippy/test` commands                                   | Additive Rust formatting, type, lint, doctest, and unit-test gates before Rust replaces any Bun behavior.  |
 | Quality dispatcher                 | `bun run quality`, `bun run quality:release`                                                       | Sequential blocking checks followed by nonblocking review checks.                                          |
 | Payload and optimization workbench | `bun run payload:check`, `bun run payload:*`                                                       | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments. |
 
@@ -42,6 +43,7 @@ integration behavior that lower layers cannot prove.
 | Public docs/example site       | `examples/docs-site/`                                                 | A larger non-TPM site can use the platform while documenting authoring, configuration, operations, and reference workflows.  |
 | Starter templates              | `examples/starters/` plus `examples/docs-site/`                       | Maintained distribution examples for minimal, editorial, scholarly, docs, and broad demo adoption paths.                     |
 | Component catalog              | `src/catalog/`                                                        | Isolated component, block, hostile-content, and visual-state examples outside normal page routes.                            |
+| Rust workspace fixture         | `tests/fixtures/rust-workspace/`                                      | Small neutral site-like fixture for Rust workspace and future operation tests without TPM branding.                          |
 | Reference parser fixtures      | `tests/fixtures/article-references*`                                  | Markdown/reference parser and migration behavior for notes, citations, and bibliography syntax.                              |
 | Invalid and hostile examples   | `src/catalog/examples/hostile-fixtures.ts` plus focused test fixtures | Long strings, hostile content, missing metadata, invalid references, and intentionally broken source examples used by tests. |
 
@@ -153,6 +155,9 @@ The command ownership manifest is implemented in
 - `scripts/quality/qa-failure-probes.ts` records intentional bad-input probes
   for source, generated-output, layout, citation, config, and payload budget
   failure classes without leaking bad fixtures into production content.
+- The additive Rust workspace has a root `Cargo.toml`, pinned
+  `rust-toolchain.toml`, strict workspace lints, `just rust-check`, and
+  `tests/fixtures/rust-workspace/` for neutral Rust workspace tests.
 
 The remaining implementation work should:
 

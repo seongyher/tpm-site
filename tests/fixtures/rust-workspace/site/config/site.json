@@ -1,0 +1,10 @@
+{
+  "identity": {
+    "name": "Example Journal",
+    "description": "A neutral fixture publication for Rust workspace tests.",
+    "url": "https://example.test",
+    "language": "en",
+    "locale": "en_US",
+    "publisherType": "Organization"
+  }
+}
