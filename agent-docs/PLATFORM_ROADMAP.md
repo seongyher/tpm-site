@@ -1613,6 +1613,33 @@ Mature contract:
 - CLI and MCP write operations default to dry-run/proposed-diff behavior unless
   an explicit trusted workflow grants a narrow write scope.
 
+Milestone 6 design packets:
+
+- [`STUDIO_EDITING_SURFACES.md`](../docs/STUDIO_EDITING_SURFACES.md) owns the
+  schema-driven editing, media, metadata, preview, MDX/source-view, and
+  extension-surface design.
+- [`STUDIO_PROVIDER_CAPABILITY_MATRIX.md`](../docs/STUDIO_PROVIDER_CAPABILITY_MATRIX.md)
+  owns provider capabilities, unsupported-operation behavior, adapter
+  sequencing, and Milestone 10 runtime handoff.
+- [`STUDIO_PUBLISH_WORKFLOWS.md`](../docs/STUDIO_PUBLISH_WORKFLOWS.md) owns
+  provider-backed publish, rollback, credential, permission, audit, and release
+  workflow design.
+- [`HEADLESS_STUDIO_CORE_CONTRACT.md`](../docs/HEADLESS_STUDIO_CORE_CONTRACT.md)
+  owns the shared operation core and GUI/CLI/MCP/CI interface adapter
+  contract.
+- [`STUDIO_PROGRESSIVE_ADOPTION_PATHS.md`](../docs/STUDIO_PROGRESSIVE_ADOPTION_PATHS.md)
+  owns migration and upgrade paths from simple local publishing to complex
+  provider-backed workflows.
+- [`CLI_PRODUCT_CONTRACT.md`](../docs/CLI_PRODUCT_CONTRACT.md) owns the future
+  `tpm` command language, output contracts, safety classes, and workspace
+  discovery behavior.
+- [`STUDIO_MCP_SAFETY_MODEL.md`](../docs/STUDIO_MCP_SAFETY_MODEL.md) owns MCP
+  resources, tools, permissions, plan/apply gates, redaction, and agent safety.
+- [`STUDIO_PRODUCT_TEST_PLAN.md`](../docs/STUDIO_PRODUCT_TEST_PLAN.md) owns the
+  mocked-provider product test matrix.
+- [`STUDIO_PARITY_FIXTURE_STRATEGY.md`](../docs/STUDIO_PARITY_FIXTURE_STRATEGY.md)
+  owns GUI/CLI/MCP/CI parity fixture strategy.
+
 Work:
 
 - Define the studio product architecture: local app, hosted app, desktop app,
