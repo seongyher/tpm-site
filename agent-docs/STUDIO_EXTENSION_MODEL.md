@@ -377,6 +377,11 @@ these behaviors. Official bundled extensions can receive trusted defaults.
 Third-party and site extensions should be more constrained until the user grants
 capabilities.
 
+Credential and provider permissions should use the shared reference, scope,
+redaction, audit, and recovery contract in
+[`../docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](../docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md)
+rather than exposing raw secrets to extension code.
+
 ## Refactor Implications
 
 Existing features that should be evaluated as future extensions:

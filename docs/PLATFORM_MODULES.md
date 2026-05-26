@@ -61,6 +61,9 @@ incidental TPM implementation details.
   [`RELEASE_GOVERNANCE.md`](./RELEASE_GOVERNANCE.md).
   Static-output trust boundaries and security headers are documented in
   [`STATIC_OUTPUT_SECURITY.md`](./STATIC_OUTPUT_SECURITY.md).
+  Future studio credential, provider permission, redaction, audit, and recovery
+  contracts are documented in
+  [`STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
   Supply-chain and secret posture is documented in
   [`SUPPLY_CHAIN_AND_SECRET_POLICY.md`](./SUPPLY_CHAIN_AND_SECRET_POLICY.md).
 - Deployment adapters
