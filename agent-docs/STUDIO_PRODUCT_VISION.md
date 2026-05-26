@@ -9,6 +9,9 @@ described in [PLATFORM_ROADMAP.md](./PLATFORM_ROADMAP.md) and
 [ENGINEERING_PHILOSOPHY.md](./ENGINEERING_PHILOSOPHY.md). It should not become
 a separate CMS data model.
 
+The focused architecture and publication workspace decision is owned by
+[STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md](./STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md).
+
 ## Product North Star
 
 The end product is a comprehensive static blog CMS/studio.

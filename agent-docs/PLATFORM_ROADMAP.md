@@ -62,10 +62,13 @@ is the source of truth; GUI, CLI, MCP, and CI are interfaces over it.
 The detailed product vision is owned by
 [STUDIO_PRODUCT_VISION.md](./STUDIO_PRODUCT_VISION.md). The provider and
 adapter architecture is owned by
-[STUDIO_ADAPTER_MODEL.md](./STUDIO_ADAPTER_MODEL.md). The extension model is
-owned by [STUDIO_EXTENSION_MODEL.md](./STUDIO_EXTENSION_MODEL.md). This roadmap
+[STUDIO_ADAPTER_MODEL.md](./STUDIO_ADAPTER_MODEL.md). The focused studio
+architecture and publication workspace decision is owned by
+[STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md](./STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md).
+The extension model is owned by
+[STUDIO_EXTENSION_MODEL.md](./STUDIO_EXTENSION_MODEL.md). This roadmap
 summarizes their implications and sequences the work; it should not duplicate
-every product, adapter, or extension detail.
+every product, adapter, workspace, or extension detail.
 
 The end-state user paths are:
 

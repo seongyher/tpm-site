@@ -111,6 +111,9 @@ to the active milestone.
   and blocking versus review-only gate guidance.
 - `agent-docs/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
   product modes, default author UX, and non-goals.
+- `agent-docs/STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md`: studio product
+  architecture decision, publication workspace model, product surface
+  traceability, and first product-slice boundaries.
 - `agent-docs/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,
   build, deploy, identity, and diagnostics adapter boundaries.
 - `agent-docs/STUDIO_EXTENSION_MODEL.md`: core, bundled, optional, site, and
