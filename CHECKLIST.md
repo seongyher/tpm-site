@@ -15,6 +15,44 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 5 Wrap-Up
+
+This pass closes the remaining Distribution And Ecosystem Readiness work by
+finishing the open security design issue and verifying parent issue readiness.
+
+### Milestone 519: IRK-125 Credential And Provider Security Model
+
+- [x] Re-read the studio, adapter, extension, deployment, static-output
+      security, and secret-policy docs.
+- [x] Add or update the credential/provider security contract so GUI, CLI, MCP,
+      CI, and provider adapters share one model for scopes, storage, redaction,
+      audit, recovery, and tests.
+- [x] Verify the contract does not introduce provider lock-in or a parallel
+      studio source model.
+- [x] Attach relevant documentation to `IRK-125` and move it to review.
+
+### Milestone 520: IRK-32 Localization Parent Readiness
+
+- [x] Verify localization child issues are complete and docs describe current
+      contracts, fixture states, diagnostics, and deferred implementation
+      boundaries clearly.
+- [x] Attach relevant documentation to `IRK-32` and move it to review.
+
+### Milestone 521: IRK-33 Starter Parent Readiness
+
+- [x] Verify starter child issues are complete and docs describe maintained
+      starters, acceptance criteria, scaffold workflow, and release
+      compatibility clearly.
+- [x] Attach relevant documentation to `IRK-33` and keep or move it to review.
+
+### Milestone 522: Milestone 5 Verification And Linear Closeout
+
+- [x] Run focused docs, starter, site, and markdown checks appropriate for the
+      changed surfaces.
+- [x] Confirm no milestone 5 issue remains in `Todo` or `Backlog` unless it is
+      intentionally not ready for review.
+- [x] Summarize the wrap-up in Linear project/issue comments where useful.
+
 ## Active CLI Design Research
 
 This research phase produces an evergreen, evidence-backed guide to excellent

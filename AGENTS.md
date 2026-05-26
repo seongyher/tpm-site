@@ -137,6 +137,8 @@ to the active milestone.
 - `docs/RELEASE_GOVERNANCE.md`: versioning, compatibility, release-note, and
   migration policy.
 - `docs/STATIC_OUTPUT_SECURITY.md`: generated-output security invariants.
+- `docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`: future studio credential,
+  provider permission, redaction, audit, recovery, and fixture contract.
 - `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`: dependency, lockfile, secret, and
   provenance policy.
 - `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`: fixture matrix and test strategy

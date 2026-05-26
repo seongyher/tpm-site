@@ -148,7 +148,8 @@ must be changed first when the contract changes.
   `docs/DEPLOYMENT_ADAPTER_CONTRACT.md`,
   `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`,
   `docs/LOCALIZATION_CONTRACTS.md`, `docs/RELEASE_GOVERNANCE.md`,
-  `docs/STATIC_OUTPUT_SECURITY.md`, and
+  `docs/STATIC_OUTPUT_SECURITY.md`,
+  `docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`, and
   `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md` define Milestone 5 platform
   contracts for future productization.
 - `docs/generated/platform-reference.md` is generated from platform schemas

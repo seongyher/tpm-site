@@ -105,6 +105,10 @@ The request object should carry:
 - previous release reference when rollback or differential diagnostics need it;
 - optional logging hooks for CLI, CI, GUI, and MCP surfaces.
 
+Credential references, provider scopes, redaction, audit, and recovery behavior
+are governed by
+[`STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
+
 ## Adapter Outputs
 
 Every adapter action should return a structured result:
