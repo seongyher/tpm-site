@@ -338,6 +338,10 @@ Optional capabilities:
 Rule: secret handling must be explicit and adapter-scoped. No studio, CLI, MCP,
 or build path should leak secrets into public generated output.
 
+The shared credential, scope, redaction, audit, and recovery contract is
+defined in
+[`../docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](../docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
+
 ### Diagnostics And Observability Adapter
 
 Owns how diagnostics, release reports, crawler feedback, and runtime/public

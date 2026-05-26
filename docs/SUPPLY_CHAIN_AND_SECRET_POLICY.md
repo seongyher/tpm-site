@@ -57,6 +57,12 @@ Fixtures may contain obviously fake secret-like strings only when the test
 proves redaction or rejection behavior. Such fixtures must not be copied into
 generated site output.
 
+Future studio, CLI, MCP, CI, and provider-adapter credential flows use the
+credential-reference, scope, redaction, audit, and recovery model in
+[`STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
+This policy remains the repo-wide secret and supply-chain posture; the studio
+credential contract owns product-facing provider connection behavior.
+
 ## Third-Party Script And Asset Provenance Policy
 
 Third-party scripts are rejected by default through the static-output security

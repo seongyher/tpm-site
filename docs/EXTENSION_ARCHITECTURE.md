@@ -113,7 +113,9 @@ Examples:
 - external origins require `external.origin`;
 - migrations require `migration.write`;
 - deploy actions require `deploy.publish`;
-- credentials require `credential.read`.
+- credentialed provider actions require the relevant credential/provider
+  permission declared by
+  [`STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
 
 Official bundled extensions can receive trusted defaults, but site and
 third-party extensions should declare more of their behavior explicitly. Future
@@ -297,7 +299,8 @@ Trust boundary behavior:
 - third-party extensions should be treated as untrusted until policy explicitly
   grants permissions;
 - browser scripts, network origins, credentials, source writes, and generated
-  output writes must stay explicit.
+  output writes must stay explicit and follow the credential-reference model in
+  [`STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md).
 
 ## Design Boundaries
 

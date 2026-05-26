@@ -27,6 +27,9 @@ The plan should preserve the repo's core engineering commitments:
 8. Tauri remains a native shell and permissioned Rust command host, not a
    separate business-logic layer.
 
+The studio product architecture and publication workspace model are owned by
+[STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md](./STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md).
+
 ## Current Repo Starting Point
 
 The repo is ready for this plan, but the implementation has not started.

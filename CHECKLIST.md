@@ -71,6 +71,43 @@ the replacement is safe.
 - [x] Run existing Bun checks needed to prove the Rust foundation is additive.
 - [x] Confirm review-only tools are documented as review-only.
 - [x] Update Linear issues to In Review and attach relevant docs.
+## Active Milestone 5 Wrap-Up
+
+This pass closes the remaining Distribution And Ecosystem Readiness work by
+finishing the open security design issue and verifying parent issue readiness.
+
+### Milestone 519: IRK-125 Credential And Provider Security Model
+
+- [x] Re-read the studio, adapter, extension, deployment, static-output
+      security, and secret-policy docs.
+- [x] Add or update the credential/provider security contract so GUI, CLI, MCP,
+      CI, and provider adapters share one model for scopes, storage, redaction,
+      audit, recovery, and tests.
+- [x] Verify the contract does not introduce provider lock-in or a parallel
+      studio source model.
+- [x] Attach relevant documentation to `IRK-125` and move it to review.
+
+### Milestone 520: IRK-32 Localization Parent Readiness
+
+- [x] Verify localization child issues are complete and docs describe current
+      contracts, fixture states, diagnostics, and deferred implementation
+      boundaries clearly.
+- [x] Attach relevant documentation to `IRK-32` and move it to review.
+
+### Milestone 521: IRK-33 Starter Parent Readiness
+
+- [x] Verify starter child issues are complete and docs describe maintained
+      starters, acceptance criteria, scaffold workflow, and release
+      compatibility clearly.
+- [x] Attach relevant documentation to `IRK-33` and keep or move it to review.
+
+### Milestone 522: Milestone 5 Verification And Linear Closeout
+
+- [x] Run focused docs, starter, site, and markdown checks appropriate for the
+      changed surfaces.
+- [x] Confirm no milestone 5 issue remains in `Todo` or `Backlog` unless it is
+      intentionally not ready for review.
+- [x] Summarize the wrap-up in Linear project/issue comments where useful.
 
 ## Active CLI Design Research
 
@@ -2931,3 +2968,77 @@ tests/src/lib/interaction-primitives.test.ts --reporter=dots`.
       make documented metadata contracts difficult or impossible to violate.
 - [x] Run focused metadata verification and the relevant release checks before
       marking the milestone complete.
+
+### Milestone 265: IRK-136 Studio Architecture Scope And Source Review
+
+- [x] Re-read `IRK-136`, the milestone 6 issue tree, and the studio product,
+      adapter, extension, roadmap, readiness, and Rust/Tauri/CLI docs.
+- [x] Confirm which milestone 6 issues are genuinely unblocked before starting
+      implementation.
+- [x] Define the design output needed to close `IRK-136` without prematurely
+      implementing downstream studio, provider, CLI, or MCP behavior.
+      `IRK-136` is the only milestone 6 issue ready for active work. The other
+      milestone 6 children depend on this architecture/workspace model, the
+      provider capability matrix, downstream interface contracts, or later test
+      plans. The output will be a focused architecture/workspace design doc
+      plus small index/link updates, not implementation.
+
+### Milestone 266: IRK-136 Product Architecture Design
+
+- [x] Evaluate local app, hosted app, desktop app, hybrid, and phased product
+      architecture options with tradeoffs.
+- [x] Select the recommended architecture and first product slice boundaries.
+- [x] Verify the selected architecture keeps the studio as an interface over
+      static compiler contracts, not a separate CMS source model.
+      Added `agent-docs/STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md` with a
+      local-first, desktop-first hybrid recommendation over a headless
+      operation core. The first product slice is intentionally read-only and
+      fixture-backed so it proves operation/workspace boundaries before rich
+      editing, credentials, provider publish, or MCP writes.
+
+### Milestone 267: IRK-136 Workspace And Source Ownership Design
+
+- [x] Define the publication workspace model, canonical source ownership,
+      materialized build inputs, generated output, caches, release reports, and
+      provider-owned artifacts.
+- [x] Define account connection, credential, preview/build execution, offline,
+      error-recovery, and provider-migration expectations.
+- [x] Trace product surfaces to platform contracts, schemas, diagnostics,
+      media policy, extension capabilities, route previews, and release
+      reports.
+      The new architecture doc separates source workspace, media identity,
+      history, provider account state, materialized build input, preview cache,
+      generated output, release/audit records, and provider-owned artifacts. It
+      also includes a product-surface traceability table from studio actions to
+      platform contracts.
+
+### Milestone 268: IRK-136 Product Modes And Adoption Design
+
+- [x] Define default local publisher, collaborative publication, complex
+      publisher, site-owner, collaborator/reviewer, maintainer, and operator
+      journeys.
+- [x] Verify progressive adoption scenarios add or migrate one capability at a
+      time without requiring a site rebuild.
+- [x] Identify advanced escape hatches and non-goals for the first product
+      slice.
+      The design defines default local publisher, collaborative static
+      publication, and complex publisher modes, plus journey fixtures for
+      default author, site owner, collaborator/reviewer, maintainer, operator,
+      and complex publisher roles. The progressive adoption ladder adds one
+      capability at a time and keeps Cloudflare, Git/GitHub, repo-local media,
+      and review workflows as replaceable adapters/extensions.
+
+### Milestone 269: IRK-136 Verification And Linear Handoff
+
+- [x] Critique the architecture/workspace document against `IRK-136`
+      verification criteria and update related docs where needed.
+- [x] Run focused markdown/documentation checks and `git diff --check`.
+- [x] Attach relevant documentation to Linear issues and mark `IRK-136` ready
+      for review.
+      Verification passed with `bun --silent run review:markdown`,
+      `bun --silent run docs:check`, and `git diff --check`. Related pointers
+      were added to `AGENTS.md`, `agent-docs/STUDIO_PRODUCT_VISION.md`,
+      `agent-docs/PLATFORM_ROADMAP.md`, and
+      `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md`. `IRK-136` is marked In
+      Review in Linear, with the architecture doc attached to `IRK-136`, the
+      milestone 6 parent, and downstream milestone 6 planning issues.

@@ -138,6 +138,9 @@ behavior until a later parity milestone explicitly promotes a Rust command.
   and blocking versus review-only gate guidance.
 - `agent-docs/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
   product modes, default author UX, and non-goals.
+- `agent-docs/STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md`: studio product
+  architecture decision, publication workspace model, product surface
+  traceability, and first product-slice boundaries.
 - `agent-docs/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,
   build, deploy, identity, and diagnostics adapter boundaries.
 - `agent-docs/STUDIO_EXTENSION_MODEL.md`: core, bundled, optional, site, and
@@ -164,6 +167,8 @@ behavior until a later parity milestone explicitly promotes a Rust command.
 - `docs/RELEASE_GOVERNANCE.md`: versioning, compatibility, release-note, and
   migration policy.
 - `docs/STATIC_OUTPUT_SECURITY.md`: generated-output security invariants.
+- `docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`: future studio credential,
+  provider permission, redaction, audit, recovery, and fixture contract.
 - `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`: dependency, lockfile, secret, and
   provenance policy.
 - `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`: fixture matrix and test strategy
