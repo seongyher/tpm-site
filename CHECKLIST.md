@@ -90,6 +90,289 @@ projects.
       drift, reviewed source links, and verified with markdown review and
       whitespace checks.
 
+## Active TPM CLI Product Strategy Research
+
+This research phase applies the evergreen CLI design guide to the future TPM
+platform CLI. It should survey adjacent products, catalog their feature sets,
+identify product-market-fit opportunities, and produce a product/design report
+that can become command specs and Linear implementation issues later.
+
+### Milestone 506: Product Research Scope And Rubric
+
+- [x] Define target users, product questions, source quality bar, comparison
+      criteria, and report structure.
+- [x] Create supporting docs for source notes, product survey, feature catalog,
+      user jobs, opportunity synthesis, command principles, platform mapping,
+      and phase/risk planning.
+- [x] Verify the research is product-specific without prematurely specifying
+      final commands.
+      Added `agent-docs/cli-product-research/` scaffolding and
+      `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`. Verified with markdown lint and
+      `git diff --check`.
+
+### Milestone 507: Adjacent Product Survey
+
+- [x] Research representative CLIs and adjacent CMS/static-site products from
+      authoritative sources where possible.
+- [x] Record product model, target users, feature set, workflow assumptions,
+      strengths, weaknesses, and relevance.
+- [x] Include CLI and non-CLI products so the product strategy is not trapped
+      in terminal-first assumptions.
+      Researched static-site CLIs, deploy-provider CLIs, Git-backed static CMS
+      products, headless CMS tools, managed publishing tools, and docs
+      publishing tools. Recorded sources in
+      `agent-docs/cli-product-research/SOURCE_LOG.md` and product notes in
+      `agent-docs/cli-product-research/PRODUCT_SURVEY.md`. Verified with
+      markdown lint and `git diff --check`.
+
+### Milestone 508: Feature Catalog And Competitive Matrix
+
+- [x] Catalog feature sets across initialization, authoring, content modeling,
+      media, preview, build, deploy, migration, diagnostics, collaboration,
+      extensions, automation, machine output, and governance.
+- [x] Identify repeated patterns, gaps, and places where existing tools make
+      difficult work too technical.
+- [x] Separate lessons to copy from constraints to avoid.
+      Added the competitive matrix, feature area findings, table stakes,
+      differentiators, mature capabilities, and constraints to avoid in
+      `agent-docs/cli-product-research/FEATURE_CATALOG.md`. Verified with
+      markdown lint and `git diff --check`.
+
+### Milestone 509: User Segments, Jobs, And Opportunities
+
+- [x] Map default users, terminal-comfortable owners, publication teams,
+      CI/automation, extension developers, future GUI/MCP consumers, and
+      complex publishers to concrete jobs.
+- [x] Identify product opportunities where the CLI can make hard workflows
+      unusually easy.
+- [x] Draft the CLI product thesis and non-goals.
+      Added user segment/job mapping to
+      `agent-docs/cli-product-research/USER_JOBS.md` and opportunity synthesis,
+      thesis, differentiators, and non-goals to
+      `agent-docs/cli-product-research/OPPORTUNITY_SYNTHESIS.md`. Verified with
+      markdown lint and `git diff --check`.
+
+### Milestone 510: Command Surface Principles And Platform Mapping
+
+- [x] Apply `agent-docs/CLI_DESIGN_GUIDE.md` to TPM CLI grammar, output modes,
+      interactivity, safety, auth, config, diagnostics, and compatibility.
+- [x] Map proposed CLI responsibility areas to platform contracts and identify
+      missing seams.
+- [x] Ensure the CLI is an interface over studio/platform contracts, not a
+      parallel source/workflow model.
+      Added command surface notes in
+      `agent-docs/cli-product-research/COMMAND_SURFACE_NOTES.md` and platform
+      contract mapping in `agent-docs/cli-product-research/PLATFORM_MAPPING.md`.
+      Verified with markdown lint and `git diff --check`.
+
+### Milestone 511: Implementation Phase Plan, Risks, And Validation
+
+- [x] Define initial implementation scope, later phases, and explicit deferrals.
+- [x] Record risks around provider lock-in, Git assumptions, asset storage,
+      destructive deploys, migration correctness, command compatibility,
+      secrets, hidden network effects, and UX confusion.
+- [x] Define validation through docs examples, fixtures, help/output tests,
+      JSON/schema tests, CI, dogfooding, and usability walkthroughs.
+      Added initial implementation scope, phase plan, risks, non-goals, and
+      validation plan in
+      `agent-docs/cli-product-research/PHASE_RISKS_VALIDATION.md`. Verified
+      with markdown lint and `git diff --check`.
+
+### Milestone 512: Final Report Refinement And Verification
+
+- [x] Write the final TPM CLI product strategy report from research notes.
+- [x] Iterate for weak claims, missing evidence, over-specific commands, bad
+      product assumptions, and alignment with the platform roadmap.
+- [x] Verify markdown quality, source links, checklist completion, and handoff
+      readiness.
+      Added `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md` as the standalone TPM CLI
+      product strategy report. Replaced the weak Eleventy mirror citation with
+      the official 11ty docs, reviewed the report against the roadmap and
+      platform contracts, and verified with markdown lint and
+      `git diff --check`.
+
+### Milestone 513: Future Help Contract Draft
+
+- [x] Add a final-form `tpm --help` draft to the product strategy report.
+- [x] Make the help output concrete enough to express the full CLI vision
+      across default local publishing, TPM-like collaboration, complex
+      publishers, automation, extensions, and MCP.
+- [x] Verify the help draft is realistic, coherent, and aligned with the
+      platform roadmap before using it as the next design target.
+      Added a `Future Help Contract` section to
+      `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md` with root help, global options,
+      command-family help, user-journey fit notes, and product conclusions.
+      Refined the report to lead with the full CLI control-plane vision rather
+      than the first implementation slice. Verified with focused markdown lint
+      and `git diff --check`.
+
+### Milestone 514: Feature Matrix Scope And Source Expansion
+
+- [x] Define the products, feature categories, evidence labels, and matrix
+      notation for a researched comparison matrix.
+- [x] Re-read existing CLI product research and identify gaps that need more
+      primary-source verification.
+- [x] Add or update source notes for products and features that materially
+      affect the matrix.
+      Reviewed the existing CLI strategy research, defined matrix notation in
+      `agent-docs/cli-product-research/FEATURE_COMPARISON_MATRIX.md`, and
+      expanded `SOURCE_LOG.md` with additional official docs for integrations,
+      media, static CMS editing, no-code CMS publishing, managed CMS workflows,
+      and versioning.
+
+### Milestone 515: Product Feature Survey
+
+- [x] Survey adjacent static-site, deploy, Git-backed CMS, managed CMS,
+      headless CMS, and studio products from official docs where possible.
+- [x] Record which features are native, partial, plugin/provider-specific,
+      developer-only, GUI-only, or absent.
+- [x] Capture caveats that matter to a blog/article publishing product, not
+      just raw feature presence.
+      Surveyed static-site CLIs, deploy CLIs, Git-backed CMS/studios, no-code
+      site CMSs, managed CMSs, and headless CMSs. Recorded nuanced feature
+      markings in `FEATURE_COMPARISON_MATRIX.md`.
+
+### Milestone 516: Comparison Matrix And Feature Taxonomy
+
+- [x] Create a feature comparison matrix that compares relevant products to the
+      mature TPM CLI/platform vision.
+- [x] Include nuanced cells rather than only yes/no where the UX or product
+      model materially differs.
+- [x] Organize features around user jobs: create, write, preview, validate,
+      media, publish, collaborate, migrate, extend, automate, and govern.
+      Added three feature matrices for static/deploy tooling, static
+      CMS/no-code products, and managed/headless CMS products, plus a feature
+      taxonomy and coverage synthesis table.
+
+### Milestone 517: CLI Language And UX Synthesis
+
+- [x] Use the matrix to refine the CLI language: which concepts deserve
+      first-class commands, adapters, profiles, plans, reports, or GUI/MCP
+      backing.
+- [x] Identify ways TPM can make complex behavior simpler without removing
+      extensibility.
+- [x] Update the CLI strategy report with the refined comparison conclusions.
+      Added design-language implications and matrix conclusions to
+      `FEATURE_COMPARISON_MATRIX.md`, and added a `Feature Matrix Conclusions`
+      section to `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`.
+
+### Milestone 518: Matrix Refinement And Verification
+
+- [x] Critique the matrix for weak claims, missing caveats, false equivalence,
+      overfitting to current TPM needs, and command-language ambiguity.
+- [x] Iterate until the matrix is useful for product design and future command
+      specs.
+- [x] Verify markdown quality, source links, checklist completion, and handoff
+      readiness.
+      Replaced stale small-scope framing in the CLI product research docs with
+      implementation-slice language, corrected source links, refined the
+      matrix conclusions, and verified with focused markdown lint,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 519: CLI Design Decision Critique Scope
+
+- [x] Re-read the engineering philosophy, platform roadmap, studio vision,
+      evergreen CLI guide, CLI product strategy, and feature matrix.
+- [x] Identify the high-impact CLI design decisions that need explicit
+      alternatives, recommendations, justifications, and tradeoffs.
+- [x] Verify the critique scope is broad enough to allow hard pivots if the
+      current product direction is weak.
+      Re-read the relevant philosophy, roadmap, studio, CLI guide, product
+      strategy, and comparison matrix docs. Identified the missing design
+      decision layer and scoped the critique around hard-pivot review, command
+      grammar, product vocabulary, platform operation contracts, and safety.
+
+### Milestone 520: CLI Alternatives And Tradeoff Review
+
+- [x] For each high-impact CLI design decision, list viable options rather than
+      only the current momentum.
+- [x] Recommend one option with clear justification, explicit tradeoffs, and
+      mitigation steps.
+- [x] Call out rejected hard pivots and explain why they are weaker for the
+      end-state studio/CLI/MCP product.
+      Added
+      `agent-docs/cli-product-research/DESIGN_DECISION_REVIEW.md` with
+      option-by-option critiques, recommendations, tradeoffs, mitigations, and
+      rejected pivots for CLI product model, grammar, publish/deploy,
+      releases, check/doctor, source/workflow, media, extensions/adapters,
+      plan/apply, machine output, profiles/targets, GUI/CLI/MCP parity,
+      import/export, product packaging, content language, guided flows,
+      config, Astro boundaries, and MCP timing.
+
+### Milestone 521: CLI Strategy Refinement
+
+- [x] Update the CLI product strategy and supporting research docs with the
+      critique findings.
+- [x] Make sure the recommended command language is elegant, ambitious,
+      user-centered, and aligned with shared platform operation contracts.
+- [x] Verify the help contract and phase plan still follow from the refined
+      design decisions.
+      Updated `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md` with the shared
+      operation-model thesis, explicit design recommendations, and rejected
+      pivots. Cross-linked the design decision review from the strategy,
+      feature matrix, and research index. Verified the future help contract and
+      phase plan still follow from the refined command language.
+
+### Milestone 522: CLI Critique Verification And Handoff
+
+- [x] Objectively re-read the updated documents for weak claims, missing
+      alternatives, contradictions, fake precision, and overfitting.
+- [x] Iterate until no further design improvements are apparent.
+- [x] Run markdown and whitespace verification before handoff.
+      Performed a second critique pass and added missing decisions for content
+      vocabulary, guided flows, typed config, Astro boundaries, and MCP timing.
+      Corrected supporting publish/deploy terminology drift in the command
+      surface, feature catalog, and opportunity synthesis notes. Verified with
+      `bunx prettier --write` on the touched docs,
+      `bun --silent run review:markdown`, and `git diff --check`.
+
+### Milestone 523: CLI Journey Design Scope
+
+- [x] Re-read the CLI strategy, decision review, user jobs, command notes, and
+      phase plan for places where abstract recommendations need concrete
+      examples.
+- [x] Identify realistic journeys across default local publishers,
+      terminal-comfortable owners, collaborative publications, automation,
+      migration, media growth, extension developers, MCP, and complex
+      publishers.
+- [x] Verify the examples use realistic files, paths, commands, user goals, and
+      platform operations without becoming fake implementation promises.
+      Re-read the CLI strategy packet and identified concrete journeys for
+      default publishing, diagnostics repair, TPM-like article review, media
+      externalization, legacy imports, CI publish, extension development, MCP
+      troubleshooting, complex publishers, support debugging, backup/history,
+      and typed config changes.
+
+### Milestone 524: CLI Journey Design Draft
+
+- [x] Add a dedicated journey design report with concrete scenario narratives,
+      command flows, expected files/artifacts, and explanations of what the tool
+      does.
+- [x] Include both happy paths and repair paths so diagnostics, plans, machine
+      output, media, releases, source/workflow, import/export, and adapters are
+      exercised.
+- [x] Keep examples aligned with the mature command language and shared
+      operation model.
+      Added
+      `agent-docs/cli-product-research/USER_JOURNEY_DESIGNS.md` with realistic
+      user goals, filenames, routes, plans, reports, command flows, tool
+      behavior, design requirements, a journey coverage matrix, and command-spec
+      implications.
+
+### Milestone 525: CLI Journey Design Integration And Verification
+
+- [x] Cross-link the journey report from the CLI strategy and research index.
+- [x] Objectively critique the journey examples for missing user goals,
+      unrealistic commands, unclear tool behavior, and design drift.
+- [x] Iterate until no further improvements are apparent, then run markdown and
+      whitespace verification.
+      Cross-linked the journey report from `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`
+      and `agent-docs/cli-product-research/README.md`. Added a journey summary
+      to the main strategy. Iterated on gaps for backup/history and typed config
+      plans, then aligned the config help contract and decision review. Verified
+      with `bunx prettier --write`, `bun --silent run review:markdown`, and
+      `git diff --check`.
+
 ## Active Milestone 5 Execution
 
 Milestone 5 is the distribution and ecosystem readiness layer. It should finish
