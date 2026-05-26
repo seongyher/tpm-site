@@ -15,6 +15,63 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 7: Rust Workspace And QA Foundation
+
+This phase implements Linear milestone 7 additively. Rust, Cargo, and `just`
+must not replace existing Bun/Astro behavior until later parity milestones prove
+the replacement is safe.
+
+### Milestone 700: IRK-157 Add Rust Workspace Infrastructure
+
+- [x] Read relevant Rust migration, QA, CLI/Tauri/Just, fixture, and repo
+      philosophy docs.
+- [x] Add root Cargo workspace files, pinned toolchain, minimal initial crates,
+      and lockfile without changing site behavior.
+- [x] Verify direct Rust formatting, check, lint, and tests pass.
+- [x] Verify generated site output is unchanged or explain any intentional
+      difference.
+
+### Milestone 701: IRK-158 Add Strict Rust QA Baseline
+
+- [x] Add strict but low-noise workspace lint policy.
+- [x] Add initial `cargo-deny` policy file and keep unavailable tooling out of
+      default blocking gates.
+- [x] Add review-only Rust QA commands for coverage and optional external
+      cargo tools.
+- [x] Verify blocking Rust QA commands pass with installed stable tooling.
+
+### Milestone 702: IRK-159 Add Just Command Router
+
+- [x] Add a root `justfile` with discoverable repository, Bun, and Rust
+      recipes.
+- [x] Keep `just` recipes as orchestration only; domain logic stays in Bun,
+      Cargo, or future `tpm` commands.
+- [x] Verify `just --list`, focused recipes, and default check recipes work.
+
+### Milestone 703: IRK-160 Create Neutral Rust Fixture Workspace
+
+- [x] Add a small non-TPM Rust fixture workspace for future Rust parity and
+      diagnostic tests.
+- [x] Add fixture ownership notes and tests that prove the initial workspace
+      model can consume it without TPM branding.
+- [x] Verify fixture tests run through Rust QA.
+
+### Milestone 704: IRK-161 Document Rust Contributor Workflow
+
+- [x] Add contributor documentation for Cargo, `just`, Bun, review-only Rust
+      tooling, and additive migration policy.
+- [x] Update AGENTS/readme-style guidance only where it helps contributors use
+      the new tooling correctly.
+- [x] Verify docs match actual commands.
+
+### Milestone 705: IRK-162 Verify Additive Rust Foundation
+
+- [x] Run direct Rust checks.
+- [x] Run relevant `just` recipes.
+- [x] Run existing Bun checks needed to prove the Rust foundation is additive.
+- [x] Confirm review-only tools are documented as review-only.
+- [x] Update Linear issues to In Review and attach relevant docs.
+
 ## Active CLI Design Research
 
 This research phase produces an evergreen, evidence-backed guide to excellent

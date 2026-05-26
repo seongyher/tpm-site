@@ -267,10 +267,14 @@ export async function verifyTestAccountability({
       expectedMirrorTests(file).some((testFile) => fileSet.has(testFile)),
     ),
   );
+  const rustWorkspaceFiles = new Set(
+    repositoryFiles.filter((file) => isRustWorkspaceAccountedFile(file)),
+  );
   const unaccountedFiles = repositoryFiles.filter(
     (file) =>
       !accountabilityFileSet.has(file) &&
       !mirroredFiles.has(file) &&
+      !rustWorkspaceFiles.has(file) &&
       !testFilePattern.test(file),
   );
 
@@ -354,6 +358,18 @@ function isIgnoredPath(relativePath: string): boolean {
 
 function isMeaningfulReason(reason: string): boolean {
   return reason.length >= 24 && !/^ignored?\.?$/iu.test(reason.trim());
+}
+
+function isRustWorkspaceAccountedFile(file: string): boolean {
+  return (
+    file === "Cargo.lock" ||
+    file === "Cargo.toml" ||
+    file === "deny.toml" ||
+    file === "justfile" ||
+    file === "rust-toolchain.toml" ||
+    /^crates\/[^/]+\/Cargo\.toml$/u.test(file) ||
+    /^crates\/[^/]+\/src\/.+\.rs$/u.test(file)
+  );
 }
 
 function listRepositoryFiles(rootDir: string): string[] {

@@ -162,6 +162,28 @@ public/**
     ]);
   });
 
+  test("accounts for Rust workspace files through Cargo and just gates", async () => {
+    const result = await verifyTestAccountability({
+      files: [
+        ".test-accountability-ignore",
+        "Cargo.lock",
+        "Cargo.toml",
+        "crates/tpm-cli/Cargo.toml",
+        "crates/tpm-cli/src/lib.rs",
+        "crates/tpm-cli/src/main.rs",
+        "crates/tpm-core/Cargo.toml",
+        "crates/tpm-core/src/lib.rs",
+        "deny.toml",
+        "justfile",
+        "rust-toolchain.toml",
+      ],
+      rootDir: process.cwd(),
+    });
+
+    expect(result.missingMirrors).toEqual([]);
+    expect(result.unaccountedFiles).toEqual([]);
+  });
+
   test("formats all accountability failure sections", () => {
     const report = formatTestAccountabilityReport(
       {
