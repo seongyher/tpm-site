@@ -7,5 +7,5 @@ tags:
   - configuration
 ---
 
-The `site:doctor` command checks config relationships in webmaster-readable
+The `site-doctor` command checks config relationships in webmaster-readable
 language before a site owner reaches the full build.

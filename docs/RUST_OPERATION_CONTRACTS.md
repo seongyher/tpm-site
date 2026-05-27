@@ -29,6 +29,7 @@ of truth for a domain.
 | `tpm-workspace`   | Workspace discovery, active site roots, source roots, ignored-path policy, source inventory.     |
 | `tpm-operations`  | Versioned operation request/result envelopes, status derivation, timing, summaries, renderers.   |
 | `tpm-cli`         | Thin command shell. It should parse intent and render operation results, not own domain logic.   |
+| `tpm-xtask`       | Internal repository automation over some shared operations. It is not a product command surface. |
 
 Do not import Astro pages, layouts, visual components, current TPM content, or
 provider-specific deployment code into these crates.
@@ -127,18 +128,19 @@ Current operations:
 | `workspace.status`    | Report discovered workspace source roots, required roots, source inventory, and health.  |
 | `workspace.check`     | Run the first Rust workspace diagnostic check over the same operation envelope.          |
 | `workspace.doctor`    | Explain workspace diagnostics and remediations through the shared diagnostic model.      |
-| `site.doctor`         | Run the dual-run Rust site-doctor report over shared workspace diagnostics.              |
+| `site.doctor`         | Run site workspace diagnostics over the shared operation envelope.                       |
 | `migration.baseline`  | Report milestone 9 script-domain classifications and migration cleanup targets.          |
-| `media.images`        | Run the dual-run Rust image asset inventory and verification report.                     |
-| `routes.redirects`    | Run the dual-run Rust redirect inventory and Cloudflare static redirect policy report.   |
+| `media.images`        | Run the image asset inventory and verification report.                                   |
+| `routes.redirects`    | Run the redirect inventory and Cloudflare static redirect policy report.                 |
 | `qa.registry`         | Report QA command ownership, migration domains, and package-wrapper debt.                |
 | `qa.diagnostics-diff` | Compare normalized diagnostic snapshots using the shared operation envelope.             |
-| `output.verify`       | Bridge generated-output inventory into shared diagnostics without replacing verifiers.   |
+| `output.verify`       | Report generated-output inventory through shared diagnostics.                            |
 | `release.inspect`     | Inspect the conventional generated-output root and report release-readiness diagnostics. |
 
-Dual-run operations are intentionally report-first. They prove CLI/GUI/MCP/CI
-contract shape and capture parity evidence without claiming source-of-truth
-status over the existing Bun/Astro release checks until promotion.
+Some operations are product-facing CLI commands. Others are internal
+repo-maintenance operations consumed by `just`/`tpm-xtask`. Do not expose an
+operation through the public `tpm` CLI unless the command belongs in the
+site-owner product language.
 
 The current requesting interfaces are:
 

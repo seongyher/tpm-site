@@ -2,6 +2,10 @@
 
 Generated from `just references-audit` on May 5, 2026.
 
+Historical tooling note: `just references-audit` was retired from the active
+command surface during the Rust/`just` migration. This report remains a
+snapshot of the normalized corpus at the time it was generated.
+
 This is the current corpus status after article-reference normalization. The
 generated per-article catalog contains the detailed inventory; the migration
 decision log records why each noncanonical pattern was converted or preserved.

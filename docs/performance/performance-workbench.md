@@ -19,9 +19,11 @@ experience.
    unoptimized Astro/Pagefind output. Use `just build` when the
    question is about production output.
 2. Run the smallest reproducible experiment.
-   Use the named `just payload-*` recipe for the workbench track. Experiments must
-   write to `tmp/` or a copied output directory and must not mutate `dist/`
-   unless they are already part of the production build.
+   Use active `just` recipes such as `payload-report`, `payload-check`, and
+   `build-optimize` when they match the track. Historical experiment harnesses
+   are not active commands; restoring one should create an explicit workflow
+   that writes to `tmp/` or a copied output directory and does not mutate
+   `dist/` unless it becomes part of the production build.
 3. Measure comparable artifacts.
    Compare raw, gzip, and Brotli bytes for the same route classes and asset
    roles. Browser-only metrics such as LCP and CLS should be recorded as
@@ -41,15 +43,15 @@ experience.
 
 ## Tracks
 
-| Track                       | Current state      | Evidence command                                                     | Promotion rule                                                                                          |
+| Track                       | Current state      | Evidence command or artifact                                         | Promotion rule                                                                                          |
 | --------------------------- | ------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | Route-class payload budgets | Release-gated      | `just payload-check` and `just payload-report --top 12`              | Deterministic route/PDF/cache failures can block release; noisy Lighthouse timings stay warning-only.   |
 | Cache policy                | Release-gated      | `just payload-check` and `just payload-report --top 12`              | Header patterns may be broadened only when all matched files are fingerprinted or intentionally stable. |
-| Post-build optimization     | Production-adopted | `just payload-postbuild-experiments`                                 | New transforms need copied-output validation, browser checks, accessibility checks, and release checks. |
-| Critical CSS extraction     | Experiment-only    | `just payload-critical-css-experiment`                               | Adopt only if route-class wins outweigh duplicated CSS and lost shared-cache benefits.                  |
+| Post-build optimization     | Production-adopted | `just build-optimize`, `just payload-report`, `just verify`          | New transforms need copied-output validation, browser checks, accessibility checks, and release checks. |
+| Critical CSS extraction     | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only if route-class wins outweigh duplicated CSS and lost shared-cache benefits.                  |
 | Preload/fetch priority      | Experiment-only    | Route-class Lighthouse or browser profile plus `just payload-report` | Adopt only for stable first-viewport LCP resources with no competing-priority regression.               |
-| Vite build options          | Experiment-only    | `just payload-vite-experiments`                                      | Adopt only when a temporary Astro/Vite config passes all gates and reduces compressed output.           |
-| HTML minification           | Experiment-only    | `just payload-minify-html-experiments`                               | Adopt only when strict HTML validation and machine-readable output stay correct.                        |
+| Vite build options          | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only when a temporary Astro/Vite config passes all gates and reduces compressed output.           |
+| HTML minification           | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only when strict HTML validation and machine-readable output stay correct.                        |
 
 ## Promotion Checklist
 
@@ -118,7 +120,7 @@ When adding cache rules:
 - prove the files are fingerprinted or intentionally stable;
 - keep the rule in `site/public/_headers` or the owning generated-output
   adapter;
-- keep `payload:report` cache-header evidence passing.
+- keep `just payload-report` cache-header evidence passing.
 
 ## Rollback Policy
 

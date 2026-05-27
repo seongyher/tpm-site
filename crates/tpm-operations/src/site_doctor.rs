@@ -1,4 +1,4 @@
-//! Rust site-doctor operation for parity-protected migration.
+//! Site-doctor operation for workspace diagnostics.
 
 use std::path::{Path, PathBuf};
 
@@ -23,16 +23,9 @@ pub fn run_site_doctor(
 
     match WorkspaceContext::discover(&start) {
         Ok(context) => {
-            let mut diagnostics = context.validate_required_paths();
-            diagnostics.push(transition_note(
-                "TPM-SITE-DOCTOR-DUAL-RUN",
-                "Rust site doctor is running in dual-run mode; current TypeScript site:doctor remains source of truth until promotion.",
-                context.root(),
-                &context,
-            ));
+            let diagnostics = context.validate_required_paths();
             let summary = OperationSummary::new("Site doctor completed")
-                .with_detail("checked required site workspace paths")
-                .with_detail("dual-run parity target: site:doctor");
+                .with_detail("checked required site workspace paths");
 
             OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
         }
@@ -54,19 +47,6 @@ pub fn run_site_doctor(
             ]),
         ),
     }
-}
-
-fn transition_note(
-    code: &'static str,
-    message: &'static str,
-    path: &Path,
-    context: &WorkspaceContext,
-) -> Diagnostic {
-    Diagnostic::new(diagnostic_code(code), Severity::Note, message)
-        .with_location(DiagnosticLocation::source(context.display_path(path)))
-        .with_remediation(
-            "Compare this Rust report with the current TypeScript site:doctor before promotion.",
-        )
 }
 
 fn operation_id(value: &'static str) -> OperationId {
@@ -104,17 +84,11 @@ mod tests {
     }
 
     #[test]
-    fn site_doctor_reports_dual_run_note_for_valid_fixture() {
+    fn site_doctor_reports_success_for_valid_fixture() {
         let result = run_site_doctor(fixture_root(), OperationInterface::Test);
 
-        assert_eq!(result.status(), OperationStatus::Warning);
-        assert!(
-            result
-                .diagnostics()
-                .diagnostics()
-                .iter()
-                .any(|diagnostic| diagnostic.code().as_str() == "TPM-SITE-DOCTOR-DUAL-RUN")
-        );
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert!(result.diagnostics().diagnostics().is_empty());
     }
 
     #[test]

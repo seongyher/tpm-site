@@ -54,9 +54,9 @@ URLs:
 
 ## Feature Flags
 
-Do not link to disabled optional features. `site:doctor` catches many of these
+Do not link to disabled optional features. `site-doctor` catches many of these
 mistakes.
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
 ```

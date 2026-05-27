@@ -66,7 +66,7 @@ build-release: build build-cloudflare
 
 # Run the raw Astro/Pagefind build.
 build-raw *args:
-    bun scripts/build/build-raw.ts {{args}}
+    just _xtask build-raw {{args}}
 
 # Generate same-directory static article PDFs.
 build-pdf *args:
@@ -74,11 +74,11 @@ build-pdf *args:
 
 # Optimize generated build output.
 build-optimize *args:
-    bun scripts/build/optimize-build-output.ts {{args}}
+    just _xtask build-optimize {{args}}
 
 # Generate Cloudflare Workers Static Assets redirect files.
 build-cloudflare *args:
-    bun scripts/build/generate-cloudflare-redirects.ts {{args}}
+    just _xtask build-cloudflare {{args}}
 
 # Preview a release-like build locally.
 preview-fresh *args:
@@ -120,15 +120,15 @@ author-fix:
 
 # Verify content source invariants.
 content-check *args:
-    bun scripts/content/verify-content.ts {{args}}
+    just _xtask content-check {{args}}
 
 # Dry-run safe tag normalization.
 tags-check *args:
-    bun scripts/content/normalize-tags.ts {{args}}
+    just _xtask tags-check {{args}}
 
 # Write safe tag normalization.
 tags-normalize *args:
-    bun scripts/content/normalize-tags.ts --write {{args}}
+    just _xtask tags-normalize {{args}}
 
 # Run the Rust site-doctor report.
 site-doctor *args:
@@ -136,15 +136,15 @@ site-doctor *args:
 
 # Generate the site config JSON schema.
 site-schema *args:
-    bun scripts/site/generate-site-config-schema.ts {{args}}
+    just _xtask site-schema {{args}}
 
 # Check whether the site config JSON schema is current.
 site-schema-check *args:
-    bun scripts/site/generate-site-config-schema.ts --check {{args}}
+    just _xtask site-schema-check {{args}}
 
 # Verify maintained starter templates.
 starters-check *args:
-    bun scripts/site/verify-starter-templates.ts {{args}}
+    just _xtask starters-check {{args}}
 
 # Run the Rust media image report.
 media-images *args:
@@ -152,19 +152,19 @@ media-images *args:
 
 # Check image asset locations.
 assets-locations *args:
-    bun scripts/assets/verify-image-asset-locations.ts {{args}}
+    just _xtask assets-locations {{args}}
 
 # Check shared image asset policy.
 assets-shared *args:
-    bun scripts/assets/find-shared-assets.ts {{args}}
+    just _xtask assets-shared {{args}}
 
 # Review duplicate images.
 assets-duplicates *args:
-    bun scripts/assets/find-duplicate-images.ts {{args}}
+    just _xtask assets-duplicates {{args}}
 
 # Review unused images.
 assets-unused *args:
-    bun scripts/assets/find-unused-images.ts {{args}}
+    just _xtask assets-unused {{args}}
 
 # Run duplicate and unused image review signals.
 review-assets:
@@ -177,30 +177,30 @@ routes-redirects *args:
 
 # Verify generated build output.
 verify *args:
-    bun scripts/build/verify-build.ts {{args}}
+    just _xtask verify {{args}}
 
 # Validate representative built HTML output.
 validate-html *args:
-    bun scripts/build/validate-html.ts {{args}}
+    just _xtask validate-html {{args}}
 
-# Run the Rust generated-output report bridge.
+# Run the internal Rust generated-output report bridge.
 output-verify *args:
-    just cli output verify {{args}}
+    just _xtask output-verify {{args}}
 
 # Check generated platform reference drift.
 docs-references-check *args:
-    bun scripts/docs/generate-platform-references.ts --check {{args}}
+    just _xtask docs-references-check {{args}}
 
 # Generate platform reference docs.
 docs-references *args:
-    bun scripts/docs/generate-platform-references.ts {{args}}
+    just _xtask docs-references {{args}}
 
 # Run documentation checks, including generated references and docs-site validation.
 docs-check: docs-references-check test-docs-site
 
 # Build the documentation-site example.
 docs-site-build:
-    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build
+    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build-release
 
 # Start the documentation-site example in Astro dev mode.
 docs-site-dev *args:
@@ -212,7 +212,7 @@ docs-site-preview *args:
 
 # Build, then preview the documentation-site example.
 docs-site-preview-fresh *args:
-    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build
+    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build-release
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just preview {{args}}
 
 # Build the private component catalog.
@@ -221,7 +221,7 @@ catalog-build:
 
 # Verify component catalog accountability.
 catalog-check *args:
-    bun scripts/quality/verify-component-catalog.ts {{args}}
+    just _xtask catalog-check {{args}}
 
 # Start the private component catalog in Astro dev mode.
 catalog-dev *args:
@@ -238,7 +238,7 @@ catalog-preview-fresh *args:
 
 # Verify platform module boundary rules.
 platform-check *args:
-    bun scripts/quality/verify-platform-boundaries.ts {{args}}
+    just _xtask platform-check {{args}}
 
 # Type-check Astro and repository TypeScript tooling.
 typecheck: typecheck-astro typecheck-tools
@@ -305,25 +305,25 @@ test: test-accountability test-unit test-astro
 
 # Run Bun unit/script/component/page tests.
 test-unit:
-    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/scripts tests/components tests/pages --reporter=dots --randomize --concurrent
+    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages --reporter=dots --randomize --concurrent
 
 # Run Astro component/container tests.
 test-astro:
     ./node_modules/.bin/astro sync --force
-    bun scripts/testing/sync-astro-test-store.ts
+    just _xtask sync-astro-test-store
     ./node_modules/.bin/vitest run --config vitest.config.ts
 
 # Run repository config tests.
 test-config:
-    bun test tests/config tests/scripts/quality/diagnostic-diff.test.ts tests/scripts/quality/qa-command-registry.test.ts tests/scripts/quality/qa-failure-probes.test.ts --reporter=dots
+    bun test tests/config --reporter=dots
 
 # Run broad test-accountability verification.
 test-accountability *args:
-    bun scripts/testing/verify-test-accountability.ts {{args}}
+    just _xtask test-accountability {{args}}
 
 # Run release-mode test-accountability verification.
 test-accountability-release:
-    bun scripts/testing/verify-test-accountability.ts --quiet --release
+    just _xtask test-accountability-release --quiet
 
 # Build, then run Playwright browser tests.
 test-e2e *args:
@@ -354,11 +354,11 @@ test-perf-built *args:
 
 # Run randomized flake detection.
 test-flake *args:
-    bun scripts/testing/run-randomized-tests.ts {{args}}
+    just _xtask test-flake {{args}}
 
 # Build and test the private component catalog.
 test-catalog *args:
-    bun scripts/testing/run-catalog-tests.ts {{args}}
+    just _xtask test-catalog {{args}}
 
 # Build the external fixture site with the private component catalog enabled.
 test-catalog-site-instance:
@@ -369,7 +369,7 @@ test-docs-site:
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just content-check --quiet
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just site-doctor --site examples/docs-site --quiet
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just site-schema-check --quiet
-    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build
+    SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build-release
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just verify
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just validate-html
 
@@ -379,21 +379,23 @@ test-site-instance:
     SITE_INSTANCE_ROOT=tests/fixtures/site-instance SITE_OUTPUT_DIR=dist/fixtures/site-instance just build-pdf
     SITE_INSTANCE_ROOT=tests/fixtures/site-instance SITE_OUTPUT_DIR=dist/fixtures/site-instance just build-optimize
 
-# Generate Bun unit-test coverage and verify coverage accountability.
-coverage: coverage-unit coverage-verify
+# Run all coverage review signals.
+coverage: coverage-ts coverage-rust
 
-# Generate concise LCOV coverage and verify coverage accountability.
-coverage-check:
-    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/scripts tests/components tests/pages --reporter=dots --randomize --coverage --coverage-reporter=lcov
-    just coverage-verify
+# Run TypeScript/Astro unit coverage and broad coverage accountability.
+coverage-ts *args:
+    just _coverage-ts-report
+    just coverage-verify {{args}}
 
-# Generate Bun unit-test coverage reports.
-coverage-unit:
-    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/scripts tests/components tests/pages --randomize --coverage --coverage-reporter=text --coverage-reporter=lcov
+# Generate TypeScript/Astro LCOV and text coverage reports.
+[private]
+_coverage-ts-report:
+    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages --randomize --coverage --coverage-reporter=text --coverage-reporter=lcov
 
 # Verify broad source coverage accountability.
+[private]
 coverage-verify *args:
-    bun scripts/testing/verify-test-coverage.ts {{args}}
+    just _xtask coverage-verify {{args}}
 
 # Run quiet quality gate plus review-only signals.
 quality:
@@ -414,57 +416,19 @@ quality-release:
 
 # Run payload budget checks.
 payload-check *args:
-    bun scripts/payload/report-payload.ts --check {{args}}
+    just _xtask payload-check {{args}}
 
 # Run payload report.
 payload-report *args:
-    bun scripts/payload/report-payload.ts {{args}}
+    just _xtask payload-report {{args}}
 
-# Run a bounded critical-CSS experiment.
-payload-critical-css-experiment *args:
-    bun scripts/payload/run-critical-css-experiment.ts {{args}}
-
-# Run one minify-html experiment.
-payload-minify-html-experiment *args:
-    bun scripts/payload/minify-html-experiment.ts {{args}}
-
-# Run minify-html experiment suite.
-payload-minify-html-experiments *args:
-    just build-raw
-    bun scripts/payload/run-minify-html-experiments.ts {{args}}
-
-# Run post-build optimization experiment suite.
-payload-postbuild-experiments *args:
-    just build-raw
-    bun scripts/payload/run-post-build-optimization-experiments.ts {{args}}
-
-# Run Vite build option experiments.
-payload-vite-experiments *args:
-    bun scripts/payload/run-vite-build-experiments.ts {{args}}
-
-# Run article reference pattern audit.
-references-audit *args:
-    bun scripts/content/audit-article-references.ts {{args}}
-
-# Run BibTeX citation audit.
-references-bibtex-audit *args:
-    bun scripts/content/audit-bibtex-citations.ts {{args}}
-
-# Generate article reference migration catalog.
-references-catalog *args:
-    bun scripts/content/catalog-article-references.ts {{args}}
-
-# Dry-run or write mechanical article-reference migration.
-references-migrate-mechanical *args:
-    bun scripts/content/migrate-mechanical-article-references.ts {{args}}
-
-# Run the Rust QA command registry report.
+# Run the internal Rust QA command registry report.
 qa-registry *args:
-    just cli qa registry {{args}}
+    just _xtask qa-registry {{args}}
 
-# Compare normalized diagnostic snapshots with the Rust operation.
+# Compare normalized diagnostic snapshots with the internal Rust operation.
 diagnostics-diff *args:
-    just cli qa diagnostics-diff {{args}}
+    just _xtask diagnostics-diff {{args}}
 
 # Run high-severity dependency audit.
 audit:
@@ -514,10 +478,10 @@ rust-test:
     cargo test --workspace --all-features --locked
 
 # Run Rust coverage review. Review-only; not part of `just rust-check`.
-rust-coverage:
+coverage-rust:
     @command -v cargo-llvm-cov >/dev/null 2>&1 || (echo 'cargo-llvm-cov is review-only and is not installed. Install it with: cargo install cargo-llvm-cov' >&2; exit 127)
     @rustup component list --installed | grep -q '^llvm-tools' || (echo 'llvm-tools-preview is required for Rust coverage on the active toolchain. Install it with: rustup component add llvm-tools-preview' >&2; exit 127)
-    cargo llvm-cov --workspace --all-features --summary-only
+    cargo llvm-cov --workspace --all-features --summary-only --show-missing-lines
 
 # Run cargo-deny supply-chain policy.
 rust-deny:
@@ -529,10 +493,14 @@ rust-nextest:
     @cargo nextest --version >/dev/null 2>&1 || (echo 'cargo-nextest is review-only and is not installed. Install it with: cargo install cargo-nextest --locked' >&2; exit 127)
     cargo nextest run --workspace --all-features --locked
 
+# Run internal Rust repository automation used by named just recipes.
+_xtask *args:
+    cargo run --package tpm-xtask --bin tpm-xtask -- {{args}}
+
 # Run the additive TPM CLI shell.
 cli *args:
     cargo run --package tpm-cli --bin tpm -- {{args}}
 
-# Show migration classifications and script debt through the Rust CLI.
+# Show internal migration classifications and script debt.
 migration-baseline *args:
-    just cli migration baseline {{args}}
+    just _xtask migration-baseline {{args}}

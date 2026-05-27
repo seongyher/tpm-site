@@ -48,7 +48,7 @@ Dark theme values live under the site theme selector:
 Run:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 ## Next

@@ -2,6 +2,12 @@
 
 Generated from repository content on May 21, 2026.
 
+Historical tooling note: the `just references-*` audit commands used to
+generate this report were retired from the active command surface during the
+Rust/`just` migration. This document remains source material for manual
+citation cleanup; restoring automated citation audit commands should be an
+explicit new tooling task.
+
 This report inventories every article `[^cite-*]` marker and every hidden
 `tpm-bibtex` entry under `site/content/articles/`. It is a structural
 audit, not the final source-correction pass: every inventory row still

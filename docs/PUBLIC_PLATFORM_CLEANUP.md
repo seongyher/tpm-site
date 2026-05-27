@@ -35,7 +35,7 @@ layout path as real articles.
 
 Catalog copy should use neutral examples such as "Catalog Review Site" and
 `example.com` URLs. This keeps the catalog useful as a public-engine regression
-surface and lets `platform:check` scan catalog code for site-specific literals.
+surface and lets `platform-check` scan catalog code for site-specific literals.
 
 The catalog build flag is renamed to `PLATFORM_COMPONENT_CATALOG`. The tracked
 `.env.catalog` file owns that detail for normal scripts, so users keep running
@@ -72,7 +72,7 @@ compile-time asset coupling.
    with neutral fixture data.
 3. Rename catalog metadata and the environment flag to platform terminology.
 4. Rename the docs-site identity and hero copy to neutral platform language.
-5. Include catalog source files in `platform:check`.
-6. Add `test:catalog:site-instance` and run it in catalog CI and release checks.
+5. Include catalog source files in `platform-check`.
+6. Add `test-catalog-site-instance` and run it in catalog CI and release checks.
 7. Verify with focused catalog tests, platform boundary checks, docs-site and
    fixture catalog builds, then the normal build gates.

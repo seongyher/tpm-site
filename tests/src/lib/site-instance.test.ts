@@ -3,7 +3,6 @@ import path from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
-import { verifyContent } from "../../../scripts/content/verify-content";
 import { parseSiteConfig } from "../../../src/lib/site-config";
 import {
   projectRelativePath,
@@ -115,17 +114,16 @@ describe("site instance paths", () => {
     const config = parseSiteConfig(
       JSON.parse(await readFile(paths.config.site, "utf8")),
     );
-    const content = await verifyContent({
-      articleDir: paths.content.articles,
-      authorDir: paths.content.authors,
-      categoryDir: paths.content.categories,
-      rootDir: process.cwd(),
-    });
 
     expect(paths.root).toBe(
       path.join(process.cwd(), "tests", "fixtures", "site-instance"),
     );
     expect(config.identity.title).toBe("Example Platform Site");
-    expect(content.issues).toEqual([]);
+    const article = await readFile(
+      path.join(paths.content.articles, "proof", "external-proof.md"),
+      "utf8",
+    );
+
+    expect(article).toContain("External Proof");
   });
 });

@@ -16,8 +16,8 @@ changed.
 Run:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:schema:check -- --quiet
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-schema-check --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
 ```
 
 Common causes:
@@ -32,7 +32,7 @@ Common causes:
 Run:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run verify:content -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just content-check --quiet
 ```
 
 Common causes:
@@ -47,7 +47,7 @@ Common causes:
 Run:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 Common causes:

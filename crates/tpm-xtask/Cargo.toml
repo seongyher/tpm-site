@@ -1,0 +1,29 @@
+[package]
+name = "tpm-xtask"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+publish.workspace = true
+description = "Internal repository automation for TPM development."
+
+[dependencies]
+serde_json.workspace = true
+tpm-core.workspace = true
+tpm-operations.workspace = true
+
+[dev-dependencies]
+tpm-diagnostics.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+name = "tpm_xtask"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tpm-xtask"
+path = "src/main.rs"

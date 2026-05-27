@@ -101,7 +101,7 @@ Astro internals.
 The active platform module map is now maintained in
 `docs/PLATFORM_MODULES.md`. That document is the source of truth for reusable
 domain ownership, site-instance import boundaries, and the current
-`platform:check` CI invariant.
+`platform-check` CI invariant.
 
 The active configurability audit is maintained in
 `docs/PLATFORM_CONFIGURABILITY_AUDIT.md`. It classifies hard-coded values by
@@ -214,11 +214,11 @@ the semantic CSS variables the engine already uses.
 | Static pages         | `/about/` is assumed by nav, routes, tests, and content lookup.                                                                     | Treat pages as site instance content. Navigation should refer to page slugs from config.                                | Low    |
 | Routes               | Helpers assume `/articles/`, `/authors/`, `/categories/`, `/tags/`, `/search/`, and `/feed.xml`.                                    | Keep defaults but centralize route config. Make pagefind, validation, and build verification read the same route model. | Medium |
 | Legacy redirects     | TPM redirects are site-owned compatibility data.                                                                                    | Keep redirects in instance config, validate them, and pass them into Astro config.                                      | Low    |
-| Search/Pagefind      | `package.json` hard-codes Pagefind globs for current routes.                                                                        | Generate Pagefind globs from feature and route config.                                                                  | Medium |
-| Build verification   | `scripts/build/verify-build.ts` assumes current required paths and content roots.                                                   | Make verifier accept site instance paths and generated route expectations from config.                                  | Medium |
-| Content verification | `scripts/content/verify-content.ts` hard-codes content roots and author/category expectations.                                      | Read paths and feature requirements from the site instance adapter.                                                     | Medium |
-| Asset tooling        | Asset scripts now default to resolver-backed `site/assets`, `site/public`, and `site/unused-assets`.                                | Keep new asset scripts resolver-backed and avoid adding new hard-coded site roots.                                      | Medium |
-| Package scripts      | Scripts reference route globs, content paths, and project-specific checks directly.                                                 | Keep commands stable but move path knowledge into scripts/config files.                                                 | Medium |
+| Search/Pagefind      | Rust build tasks derive Pagefind globs from current route config.                                                                   | Keep Pagefind globs generated from feature and route config.                                                            | Medium |
+| Build verification   | `just verify` checks required output paths and core generated HTML invariants.                                                      | Deepen Rust verifier modules so they accept site instance paths and generated route expectations from config.           | Medium |
+| Content verification | `just content-check` reads active site-instance content roots.                                                                      | Keep source checks behind the site instance adapter and feature requirements.                                           | Medium |
+| Asset tooling        | Asset tasks now default to resolver-backed `site/assets`, `site/public`, and `site/unused-assets`.                                  | Keep asset tasks resolver-backed and avoid adding new hard-coded site roots.                                            | Medium |
+| Command surface      | `just` owns commands; package scripts are retired.                                                                                  | Keep commands stable and move path knowledge into Rust tasks/config files.                                              | Medium |
 | CI/deploy            | GitHub Actions checkout one repo and deploy `dist`.                                                                                 | Future private deployment workflow must checkout platform and instance repos, set `SITE_INSTANCE_ROOT`, then build.     | Medium |
 | Tests                | Many tests assert TPM copy, URLs, category names, and exact nav labels.                                                             | Split engine tests from instance tests. Engine tests should use fixtures; TPM tests can live in the site instance.      | High   |
 | Component catalog    | Catalog examples include TPM assets/copy and site-specific support links.                                                           | Use engine fixture data by default; allow site instance examples as optional catalog input.                             | Medium |
@@ -285,17 +285,18 @@ interface SiteInstancePaths {
 }
 ```
 
-Scripts that should consume this resolver:
+Commands that should consume this resolver:
 
-- `scripts/content/verify-content.ts`
-- `scripts/content/normalize-tags.ts`
-- `scripts/assets/verify-image-asset-locations.ts`
-- `scripts/assets/find-shared-assets.ts`
-- `scripts/assets/find-unused-images.ts`
-- `scripts/assets/find-duplicate-images.ts`
-- `scripts/build/verify-build.ts`
-- `scripts/payload/*`
-- test accountability and coverage scripts if they need to distinguish engine
+- `just content-check`
+- `just tags-check`
+- `just tags-normalize`
+- `just assets-locations`
+- `just assets-shared`
+- `just assets-unused`
+- `just assets-duplicates`
+- `just verify`
+- `just payload-check`
+- test accountability and coverage tasks if they need to distinguish engine
   files from instance files.
 
 Package scripts should remain simple, but the scripts they call should own path
@@ -468,7 +469,7 @@ Remove TPM-specific assumptions from the public platform:
 Once the instance contract is stable:
 
 - generate JSON Schema from config/content schemas;
-- add `site:doctor` and repair commands;
+- add `site-doctor` and repair commands;
 - define asset upload/manifests;
 - define safe editing operations for pages, articles, authors, categories,
   tags, redirects, theme, and navigation.

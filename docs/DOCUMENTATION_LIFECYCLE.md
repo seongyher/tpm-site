@@ -401,8 +401,9 @@ Documentation verification should match the kind of doc that changed.
 Future documentation tooling should add a broader docs accountability check
 that maps changed source domains to expected documentation surfaces. That check
 should use the ownership and trigger model in this document rather than
-hard-coded filename guesses. `docs:references:check`, `just site-schema-check`, and
-`starters:check` are current focused precedents.
+hard-coded filename guesses. `just docs-references-check`,
+`just site-schema-check`, and `just starters-check` are current focused
+precedents.
 
 ## Downstream Boundaries
 

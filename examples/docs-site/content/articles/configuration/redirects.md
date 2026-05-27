@@ -34,8 +34,8 @@ examples/docs-site/config/redirects.json
 ## Verify
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
-bun run test:docs-site
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
+just test-docs-site
 ```
 
 ## Rule Of Thumb

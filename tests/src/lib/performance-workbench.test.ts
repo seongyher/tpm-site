@@ -38,13 +38,11 @@ describe("performance workbench policy", () => {
 
   test("keeps workbench script ownership explicit", () => {
     expect(performanceWorkbenchScriptNames()).toEqual([
+      "build-optimize",
       "payload-check",
-      "payload-critical-css-experiment",
-      "payload-minify-html-experiment",
-      "payload-minify-html-experiments",
-      "payload-postbuild-experiments",
       "payload-report",
-      "payload-vite-experiments",
+      "validate-html",
+      "verify",
     ]);
   });
 });

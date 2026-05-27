@@ -170,15 +170,15 @@ pub fn run_qa_registry(
                     .with_detail("package-script surface: retired");
                 let diagnostics = DiagnosticReport::from_diagnostics(vec![
                     Diagnostic::new(
-                        diagnostic_code("TPM-QA-DUAL-RUN"),
+                        diagnostic_code("TPM-QA-REGISTRY"),
                         Severity::Note,
-                        "Rust QA registry reporting is in dual-run mode; the TypeScript registry now guards the just command surface during promotion.",
+                        "Rust QA registry reporting tracks just command ownership and remaining command-surface debt.",
                     )
                     .with_location(DiagnosticLocation::source(
-                        context.display_path(&context.root().join("scripts/quality/qa-command-registry.ts")),
+                        context.display_path(&context.root().join("justfile")),
                     ))
                     .with_remediation(
-                        "Keep CI/local parity evidence explicit while remaining TypeScript fallback tools are promoted or time-boxed.",
+                        "Keep CI/local parity evidence explicit when adding, renaming, or retiring repository commands.",
                     ),
                 ]);
 
@@ -246,8 +246,7 @@ pub fn run_qa_diagnostic_diff(
                 .with_detail(format!("actual diagnostics: {}", actual.len()))
                 .with_detail(format!("missing: {}", diff.missing.len()))
                 .with_detail(format!("added: {}", diff.added.len()))
-                .with_detail(format!("count changes: {}", diff.count_changed.len()))
-                .with_detail("dual-run parity target: diagnostics:diff");
+                .with_detail(format!("count changes: {}", diff.count_changed.len()));
 
             OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
         }

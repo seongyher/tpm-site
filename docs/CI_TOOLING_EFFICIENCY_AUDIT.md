@@ -48,7 +48,7 @@ counting the production build.
 | a11y on existing dist       |    0 |    7.02 |
 | lighthouse on existing dist |    0 |   80.29 |
 
-Additional split for `test:astro`:
+Additional split for `test-astro`:
 
 | Stage                                  | Exit | Seconds |
 | -------------------------------------- | ---: | ------: |
@@ -99,14 +99,14 @@ build, build verification, and HTML validation before uploading `dist/`.
 2. article PDF generation through Playwright Chromium;
 3. output optimization.
 
-That is roughly 57 seconds locally before `verify` and `validate:html`.
+That is roughly 57 seconds locally before `verify` and `validate-html`.
 
 In PR CI, the production build runs independently in:
 
 - `build`;
-- `browser`, because `test:e2e` runs `just build`;
-- `accessibility`, because `test:a11y` runs `just build`;
-- `lighthouse`, because `test:perf` runs `just build`.
+- `browser`, because `test-e2e` runs `just build`;
+- `accessibility`, because `test-a11y` runs `just build`;
+- `lighthouse`, because `test-perf` runs `just build`.
 
 That means the same production output is rebuilt four times on PRs, including
 the 42-second PDF step. On `main`, deploy builds a fifth time instead of using
@@ -126,9 +126,9 @@ PDFs no longer need Chrome, the normal build can stop provisioning Playwright.
 
 The pre-refactor scripts were safe but inflexible:
 
-- `test:e2e` always runs `just build` first.
-- `test:a11y` always runs `just build` first.
-- `test:perf` always runs `just build` first.
+- `test-e2e` always runs `just build` first.
+- `test-a11y` always runs `just build` first.
+- `test-perf` always runs `just build` first.
 
 This is convenient locally when starting from no `dist/`, but it blocks CI from
 reusing a verified build artifact and blocks developers from intentionally
@@ -165,7 +165,7 @@ feedback and a clear release path for exhaustive confidence.
 
 Milestone 100 implements the highest-value first tranche from this audit:
 
-- `test:e2e:built`, `test:a11y:built`, and `test:perf:built` run browser,
+- `test-e2e-built`, `test-a11y-built`, and `test-perf-built` run browser,
   accessibility, and Lighthouse checks against an existing `dist/`.
 - The local convenience scripts still build first, then delegate to the
   built-output scripts.
@@ -180,16 +180,16 @@ Correctness is encoded with package-script tests, CI workflow contract tests,
 formatting checks, a production build, generated-output verification, HTML
 validation, and built-output browser smoke checks.
 
-Milestone 101 implements two local script follow-ups:
+Milestone 101 implements two local command follow-ups:
 
-- `check:fast` exposes the cheap invariant checks for early local feedback and
-  makes the normal `check` script reuse that set before expensive typecheck,
+- `just check-fast` exposes the cheap invariant checks for early local feedback and
+  makes the normal `just check` command reuse that set before expensive typecheck,
   lint, formatting, dead-code, and test stages.
-- `check:release` now runs e2e browser tests against the already verified
-  release build through `test:e2e:built` instead of rebuilding before e2e.
-- `quality` now stops at the first blocking failure, avoiding build/PDF/browser
+- `just release-check` now runs e2e browser tests against the already verified
+  release build through `just test-e2e-built` instead of rebuilding before e2e.
+- `just quality` now stops at the first blocking failure, avoiding build/PDF/browser
   work after an earlier required gate has already failed.
-- `quality:release` now runs review-only a11y and Lighthouse checks through the
+- `just quality-release` now runs review-only a11y and Lighthouse checks through the
   built-output entrypoints after the release gate has left a verified normal
   `dist/` in place.
 
@@ -198,10 +198,10 @@ Milestone 102 adds output ownership and safe local parallelism:
 - Catalog builds now use `SITE_OUTPUT_DIR=dist-catalog`, a sibling output
   directory outside the production `dist/` tree. That prevents catalog checks
   from depending on, overwriting, or being wiped by the normal release build.
-- `test:catalog` now has a small catalog-specific runner that builds the
+- `just test-catalog` now has a small catalog-specific runner that builds the
   catalog variant into that isolated output directory before running the
   catalog Playwright invariants.
-- `check:fast` now runs cheap config contract tests, including the ESLint
+- `just check-fast` now runs cheap config contract tests, including the ESLint
   generated-output ignore contract, so new build output directories fail before
   the full lint stage starts reporting generated JavaScript.
 - The quiet quality runner keeps build-producing gates sequential, then runs
@@ -211,21 +211,21 @@ Milestone 102 adds output ownership and safe local parallelism:
 
 Local command guidance after the follow-up:
 
-- Use `check:fast` while editing content, config, assets, or platform
+- Use `just check-fast` while editing content, config, assets, or platform
   boundaries and you want quick feedback.
-- Use `check` before pushing normal code changes.
-- Use `quality` when you also want build, generated-output, HTML, Markdown,
+- Use `just check` before pushing normal code changes.
+- Use `just quality` when you also want build, generated-output, HTML, Markdown,
   asset-review, and coverage review signals.
-- Use `check:release` or `quality:release` only for release-grade local
+- Use `just release-check` or `just quality-release` only for release-grade local
   confidence.
 
 ### 1. Add Built-Output Test Scripts
 
 Add scripts that run browser/review checks against an existing `dist/`:
 
-- `test:e2e:built`: `playwright test tests/e2e`
-- `test:a11y:built`: `playwright test tests/a11y`
-- `test:perf:built`: `lhci autorun`
+- `test-e2e-built`: `playwright test tests/e2e`
+- `test-a11y-built`: `playwright test tests/a11y`
+- `test-perf-built`: `lhci autorun`
 
 Catalog tests are intentionally separate from these built-output scripts
 because they exercise a different site variant. `test:catalog` owns its
@@ -233,16 +233,16 @@ isolated `dist-catalog/` build instead of reusing the production artifact.
 
 Keep the current convenience scripts:
 
-- `test:e2e`: build then run `test:e2e:built`;
-- `test:a11y`: build then run `test:a11y:built`;
-- `test:perf`: build then run `test:perf:built`.
+- `test-e2e`: build then run `test-e2e-built`;
+- `test-a11y`: build then run `test-a11y-built`;
+- `test-perf`: build then run `test-perf-built`.
 
 This preserves local ergonomics while giving CI a no-rebuild path.
 
 ### 2. Upload The Verified Build Once And Reuse It
 
 Change the `build` job to upload the verified `dist/` as an artifact after
-`build`, `verify`, and `validate:html` pass.
+`build`, `verify`, and `validate-html` pass.
 
 Then change `browser`, `accessibility`, and `lighthouse` to download that
 artifact and run their new `*:built` scripts instead of rebuilding.
@@ -293,7 +293,7 @@ nature. Accessibility is cheaper and should probably remain on PRs.
 
 ### 5. Add A Fast Local Feedback Script
 
-Add a developer-first script such as `check:fast` or `doctor` that runs cheap
+Add a developer-first script such as `check-fast` or `doctor` that runs cheap
 high-signal checks:
 
 - content verification;
@@ -310,10 +310,11 @@ replace `check`; it gives developers earlier feedback before the full gate.
 
 ### 6. Add A Reproducible Benchmark Script
 
-The ad hoc benchmark from this audit should become a script, for example:
+The ad hoc benchmark from this audit should become a Rust task surfaced
+through `just`, for example:
 
 ```text
-scripts/quality/benchmark-tooling.ts
+just tooling-benchmark
 ```
 
 It should:
@@ -329,7 +330,7 @@ This makes future tooling changes measurable rather than vibes-based.
 
 ### 7. Treat PDF Generation As The Main Build-Time Design Risk
 
-`build:pdf` is the largest build substage at about 42 seconds locally and is
+`build-pdf` is the largest build substage at about 42 seconds locally and is
 the reason normal production builds need Playwright Chromium installed.
 
 Short-term:
@@ -356,8 +357,8 @@ tests, ESLint, and Astro typechecking.
 
 ### Milestone 1: Built-Output Test Scripts
 
-- Add `test:e2e:built`, `test:a11y:built`, and `test:perf:built`.
-- Update existing `test:e2e`, `test:a11y`, and `test:perf` to delegate after
+- Add `test-e2e-built`, `test-a11y-built`, and `test-perf-built`.
+- Update existing `test-e2e`, `test-a11y`, and `test-perf` to delegate after
   building.
 - Update `COMMANDS.md`.
 - Add package-script tests for the new entries.
@@ -378,8 +379,8 @@ tests, ESLint, and Astro typechecking.
 ### Milestone 4: Local Fast Feedback
 
 - Add a fast local check script for cheap invariant checks.
-- Document when to use `check:fast`, `check`, `quality`, and
-  `quality:release`.
+- Document when to use `check-fast`, `check`, `quality`, and
+  `quality-release`.
 
 ### Milestone 5: Benchmark Tooling
 

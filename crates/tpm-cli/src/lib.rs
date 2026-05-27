@@ -5,8 +5,7 @@ use std::path::PathBuf;
 
 use tpm_core::{CommandExit, PLATFORM_NAME};
 use tpm_operations::{
-    OperationInterface, OperationResult, run_generated_output_bridge, run_image_asset_verification,
-    run_migration_baseline, run_qa_diagnostic_diff, run_qa_registry, run_redirect_report,
+    OperationInterface, OperationResult, run_image_asset_verification, run_redirect_report,
     run_release_inspect, run_site_doctor, run_workspace_check, run_workspace_doctor,
     run_workspace_status,
 };
@@ -20,16 +19,11 @@ Usage:
 
 Commands:
   site status        Show workspace source roots, config, and source inventory
-  site doctor        Run the dual-run Rust site-doctor report
+  site doctor        Run site workspace diagnostics
   check              Run the first Rust workspace diagnostic check
   doctor             Explain current workspace diagnostics and remediation
-  media images       Run the dual-run Rust image asset verification report
-  routes redirects   Run the dual-run Rust redirect report
-  qa registry        Run the dual-run Rust QA registry report
-  qa diagnostics-diff <expected.json> <actual.json>
-                     Compare normalized diagnostic snapshots
-  output verify      Run the dual-run generated-output report bridge
-  migration baseline Show migration classifications and script debt
+  media images       Inspect image asset policy
+  routes redirects   Inspect route and redirect policy
   release inspect    Inspect generated output/release readiness
   help <command>     Show command help
   version            Show version information
@@ -46,15 +40,10 @@ Global options:
 
 Examples:
   tpm site status --format json
-  tpm migration baseline --format json
   tpm media images
-  tpm qa registry
   tpm check --format json
   tpm doctor
   tpm release inspect
-
-This Rust CLI is additive and does not replace existing Bun/Astro release
-checks yet.
 ";
 
 const SITE_HELP: &str = "\
@@ -66,7 +55,7 @@ Usage:
 
 Commands:
   status        Show site config, source roots, source artifacts, and health
-  doctor        Run the dual-run Rust site-doctor report
+  doctor        Run site workspace diagnostics
 
 Examples:
   tpm site status
@@ -132,40 +121,6 @@ Examples:
   tpm routes redirects --format json
 ";
 
-const QA_HELP: &str = "\
-tpm qa - inspect QA command ownership and diagnostic snapshots
-
-Usage:
-  tpm qa registry [options]
-  tpm qa diagnostics-diff <expected.json> <actual.json> [options]
-
-Examples:
-  tpm qa registry
-  tpm qa diagnostics-diff expected.json actual.json
-";
-
-const OUTPUT_HELP: &str = "\
-tpm output - inspect generated output reports
-
-Usage:
-  tpm output verify [options]
-
-Examples:
-  tpm output verify
-  tpm output verify --format json
-";
-
-const MIGRATION_HELP: &str = "\
-tpm migration - inspect migration classifications
-
-Usage:
-  tpm migration baseline [options]
-
-Examples:
-  tpm migration baseline
-  tpm migration baseline --format json
-";
-
 /// Runs the CLI shell against an argument sequence and output sink.
 ///
 /// # Errors
@@ -226,10 +181,6 @@ enum CliCommand {
     Doctor,
     Help(HelpTopic),
     MediaImages,
-    MigrationBaseline,
-    OutputVerify,
-    QaDiagnosticDiff { actual: PathBuf, expected: PathBuf },
-    QaRegistry,
     ReleaseInspect,
     RoutesRedirects,
     SiteDoctor,
@@ -242,9 +193,6 @@ enum HelpTopic {
     Check,
     Doctor,
     Media,
-    Migration,
-    Output,
-    Qa,
     Release,
     Routes,
     Site,
@@ -344,9 +292,6 @@ fn help_topic(topic: Option<&str>) -> Result<HelpTopic, CliError> {
         Some("check") => Ok(HelpTopic::Check),
         Some("doctor") => Ok(HelpTopic::Doctor),
         Some("media") => Ok(HelpTopic::Media),
-        Some("migration") => Ok(HelpTopic::Migration),
-        Some("output") => Ok(HelpTopic::Output),
-        Some("qa") => Ok(HelpTopic::Qa),
         Some("release") => Ok(HelpTopic::Release),
         Some("routes") => Ok(HelpTopic::Routes),
         Some("site") => Ok(HelpTopic::Site),
@@ -373,23 +318,6 @@ fn parse_command(positionals: &[String]) -> Result<CliCommand, CliError> {
         }
         [command, subcommand] if command == "routes" && subcommand == "redirects" => {
             Ok(CliCommand::RoutesRedirects)
-        }
-        [command, subcommand] if command == "qa" && subcommand == "registry" => {
-            Ok(CliCommand::QaRegistry)
-        }
-        [command, subcommand, expected, actual]
-            if command == "qa" && subcommand == "diagnostics-diff" =>
-        {
-            Ok(CliCommand::QaDiagnosticDiff {
-                actual: PathBuf::from(actual),
-                expected: PathBuf::from(expected),
-            })
-        }
-        [command, subcommand] if command == "output" && subcommand == "verify" => {
-            Ok(CliCommand::OutputVerify)
-        }
-        [command, subcommand] if command == "migration" && subcommand == "baseline" => {
-            Ok(CliCommand::MigrationBaseline)
         }
         [command] if command == "check" => Ok(CliCommand::Check),
         [command, scope] if command == "check" && matches!(scope.as_str(), "all" | "workspace") => {
@@ -429,28 +357,6 @@ where
         CliCommand::MediaImages => {
             let result =
                 run_image_asset_verification(invocation.options.site, OperationInterface::Cli);
-            write_operation(&result, invocation.options.format, output)
-        }
-        CliCommand::MigrationBaseline => {
-            let result = run_migration_baseline(invocation.options.site, OperationInterface::Cli);
-            write_operation(&result, invocation.options.format, output)
-        }
-        CliCommand::OutputVerify => {
-            let result =
-                run_generated_output_bridge(invocation.options.site, OperationInterface::Cli);
-            write_operation(&result, invocation.options.format, output)
-        }
-        CliCommand::QaDiagnosticDiff { actual, expected } => {
-            let result = run_qa_diagnostic_diff(
-                invocation.options.site,
-                expected,
-                actual,
-                OperationInterface::Cli,
-            );
-            write_operation(&result, invocation.options.format, output)
-        }
-        CliCommand::QaRegistry => {
-            let result = run_qa_registry(invocation.options.site, OperationInterface::Cli);
             write_operation(&result, invocation.options.format, output)
         }
         CliCommand::ReleaseInspect => {
@@ -518,9 +424,6 @@ const fn help_text(topic: HelpTopic) -> &'static str {
         HelpTopic::Check => CHECK_HELP,
         HelpTopic::Doctor => DOCTOR_HELP,
         HelpTopic::Media => MEDIA_HELP,
-        HelpTopic::Migration => MIGRATION_HELP,
-        HelpTopic::Output => OUTPUT_HELP,
-        HelpTopic::Qa => QA_HELP,
         HelpTopic::Release => RELEASE_HELP,
         HelpTopic::Routes => ROUTES_HELP,
         HelpTopic::Site => SITE_HELP,
@@ -530,8 +433,6 @@ const fn help_text(topic: HelpTopic) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-    use std::fs;
     use std::path::{Path, PathBuf};
 
     use super::run;
@@ -541,10 +442,6 @@ mod tests {
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../..")
             .join("tests/fixtures/rust-workspace")
-    }
-
-    fn repo_root() -> PathBuf {
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
     }
 
     fn missing_workspace() -> PathBuf {
@@ -576,25 +473,15 @@ mod tests {
         args
     }
 
-    fn temp_workspace(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!("tpm-cli-{name}-{}", std::process::id()))
-    }
-
-    fn write_file(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
-        if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)?;
-        }
-        fs::write(path, contents)?;
-        Ok(())
-    }
-
     #[test]
     fn help_command_prints_first_slice_usage() {
         let (exit, output) = run_text(vec![String::from("--help")]);
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("tpm site status --format json"));
-        assert!(output.contains("migration baseline"));
+        assert!(!output.contains("migration baseline"));
+        assert!(!output.contains("qa registry"));
+        assert!(!output.contains("output verify"));
         assert!(output.contains("release inspect"));
     }
 
@@ -609,16 +496,7 @@ mod tests {
 
     #[test]
     fn command_help_covers_all_topics_and_unknown_topics() {
-        for topic in [
-            "doctor",
-            "media",
-            "migration",
-            "output",
-            "qa",
-            "release",
-            "routes",
-            "site",
-        ] {
+        for topic in ["doctor", "media", "release", "routes", "site"] {
             let (exit, output) = run_text(vec![String::from("help"), String::from(topic)]);
 
             assert_eq!(exit, CommandExit::Success);
@@ -653,6 +531,21 @@ mod tests {
 
         assert_eq!(exit, CommandExit::UsageError);
         assert!(output.contains("Unknown command `unknown`."));
+    }
+
+    #[test]
+    fn internal_repo_tasks_are_not_exposed_by_product_cli() {
+        for command in [
+            vec![String::from("task"), String::from("verify")],
+            vec![String::from("qa"), String::from("registry")],
+            vec![String::from("output"), String::from("verify")],
+            vec![String::from("migration"), String::from("baseline")],
+        ] {
+            let (exit, output) = run_text(command);
+
+            assert_eq!(exit, CommandExit::UsageError);
+            assert!(output.contains("Unknown command"));
+        }
     }
 
     #[test]
@@ -757,88 +650,22 @@ mod tests {
     }
 
     #[test]
-    fn migration_baseline_renders_json_operation_output() {
-        let mut args = command_with_site(&["migration", "baseline"], &repo_root());
-        args.push(String::from("--json"));
-
-        let (exit, output) = run_text(args);
-
-        assert_eq!(exit, CommandExit::Success);
-        assert!(output.contains("\"operationId\": \"migration.baseline\""));
-        assert!(output.contains("\"migration domains: "));
-    }
-
-    #[test]
-    fn site_doctor_command_uses_dual_run_operation() {
+    fn site_doctor_command_uses_product_operation() {
         let args = command_with_site(&["site", "doctor"], &fixture_root());
 
         let (exit, output) = run_text(args);
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("site.doctor"));
-        assert!(output.contains("TPM-SITE-DOCTOR-DUAL-RUN"));
     }
 
     #[test]
-    fn media_images_command_uses_dual_run_operation() {
+    fn media_images_command_uses_product_operation() {
         let args = command_with_site(&["media", "images"], &fixture_root());
 
         let (exit, output) = run_text(args);
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("media.images"));
-        assert!(output.contains("TPM-MEDIA-DUAL-RUN"));
-    }
-
-    #[test]
-    fn qa_registry_command_uses_dual_run_operation() {
-        let args = command_with_site(&["qa", "registry"], &repo_root());
-
-        let (exit, output) = run_text(args);
-
-        assert_eq!(exit, CommandExit::Success);
-        assert!(output.contains("qa.registry"));
-        assert!(output.contains("TPM-QA-DUAL-RUN"));
-    }
-
-    #[test]
-    fn output_verify_command_uses_report_bridge() {
-        let args = command_with_site(&["output", "verify"], &fixture_root());
-
-        let (exit, output) = run_text(args);
-
-        assert_eq!(exit, CommandExit::Success);
-        assert!(output.contains("output.verify"));
-        assert!(output.contains("TPM-OUTPUT-DUAL-RUN"));
-    }
-
-    #[test]
-    fn qa_diagnostic_diff_command_uses_snapshot_operation() -> Result<(), Box<dyn Error>> {
-        let root = temp_workspace("diagnostic-diff");
-        let _ = fs::remove_dir_all(&root);
-        write_file(&root.join("site/config/site.json"), "{}")?;
-        fs::create_dir_all(root.join("site/content"))?;
-        fs::create_dir_all(root.join("site/assets"))?;
-        fs::create_dir_all(root.join("site/public"))?;
-        write_file(
-            &root.join("expected.json"),
-            r#"[{"tool":"tool","code":"A","severity":"warning","message":"old"}]"#,
-        )?;
-        write_file(
-            &root.join("actual.json"),
-            r#"[{"tool":"tool","code":"A","severity":"warning","message":"old"}]"#,
-        )?;
-
-        let expected = root.join("expected.json").to_string_lossy().into_owned();
-        let actual = root.join("actual.json").to_string_lossy().into_owned();
-        let args = command_with_site(&["qa", "diagnostics-diff", &expected, &actual], &root);
-        let (exit, output) = run_text(args);
-
-        assert_eq!(exit, CommandExit::Success);
-        assert!(output.contains("qa.diagnostics-diff"));
-        assert!(output.contains("missing: 0"));
-
-        let _ = fs::remove_dir_all(root);
-        Ok(())
     }
 }

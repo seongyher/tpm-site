@@ -20,8 +20,8 @@ and verify that the platform still accepts the result.
 From the repository root:
 
 ```sh
-bun install
-bun run docs-site:dev
+just setup
+just docs-site-dev
 ```
 
 The docs-site command runs the same platform code with this site instance:
@@ -71,13 +71,13 @@ items:
 Run the docs-site check after changing config or content:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 For a faster author-facing check against the active default site instance, use:
 
 ```sh
-bun run author:check
+just author-check
 ```
 
 ## Next

@@ -100,6 +100,7 @@ crates/
   tpm-adapters/
   tpm-qa/
   tpm-cli/
+  tpm-xtask/
   tpm-mcp/
 apps/
   studio/
@@ -160,6 +161,10 @@ diagnostic diffing, and test accountability.
 `tpm-cli`
 : Thin `clap` binary that parses user intent, loads workspace context, calls
 shared operations, and renders human/JSON output.
+
+`tpm-xtask`
+: Internal repository automation binary used behind focused `just` recipes. It
+must not become the product command language.
 
 `tpm-mcp`
 : MCP server over the same operation layer. It should expose tools/resources
@@ -265,7 +270,7 @@ just build
 just preview
 just rust-check
 just rust-test
-just rust-coverage
+just coverage-rust
 just rust-audit
 just js-check
 just site-check
@@ -423,8 +428,8 @@ Deliverables:
 - strict baseline lints;
 - `justfile`;
 - initial CI/local commands;
-- empty or minimal `tpm-core`, `tpm-diagnostics`, `tpm-workspace`, and
-  `tpm-cli` crates;
+- empty or minimal `tpm-core`, `tpm-diagnostics`, `tpm-workspace`, `tpm-cli`,
+  and internal `tpm-xtask` crates;
 - docs explaining command ownership and migration policy.
 
 Verification:
@@ -703,8 +708,10 @@ These should be resolved or deliberately deferred before creating implementation
 issues from this plan.
 
 1. **Initial crate count.**
-   Recommendation: start with four crates: `tpm-core`, `tpm-diagnostics`,
-   `tpm-workspace`, and `tpm-cli`. Add domain crates as real code demands.
+   Recommendation: start with product crates for `tpm-core`,
+   `tpm-diagnostics`, `tpm-workspace`, and `tpm-cli`, plus internal
+   `tpm-xtask` only for repository automation behind `just`. Add domain crates
+   as real code demands.
 2. **Rust MSRV.**
    Recommendation: pin stable in `rust-toolchain.toml` first, then set
    `rust-version` once the initial toolchain and dependency floor are known.

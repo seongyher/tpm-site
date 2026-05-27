@@ -33,9 +33,12 @@ as normal output.
 
 ## Experiment Harness
 
-`just payload-postbuild-experiments` copies `dist/` into temporary scenario
-directories and applies standalone transforms to those copies only. Each
-scenario then runs:
+Historical note: the old `just payload-postbuild-experiments` rerun command was
+retired from the active command surface during the Rust/`just` migration. The
+active production path is `just build-optimize`; if this experiment harness is
+reactivated, it should copy `dist/` into temporary scenario directories and
+apply standalone transforms to those copies only. Each scenario should then
+run:
 
 - strict HTML validation;
 - build-output verification;

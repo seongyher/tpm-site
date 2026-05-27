@@ -52,7 +52,7 @@ Every maintained starter must:
 - include parseable `config/site.json`, `config/redirects.json`, `theme.css`,
   `public/favicon.svg`, and `public/robots.txt`;
 - include enough content to exercise its declared feature level;
-- pass `site:doctor` without errors or warnings;
+- pass `just site-doctor` without errors or warnings;
 - declare source, build, and release checks in the starter matrix;
 - stay small enough to maintain during platform refactors.
 
@@ -63,7 +63,7 @@ the docs starter is also covered by `just test-docs-site`.
 ## Release Compatibility
 
 Starter compatibility is now part of the fast quality gate through
-`starters:check`, which is called by `check:fast`. This keeps release checks
+`just starters-check`, which is called by `just check-fast`. This keeps release checks
 from passing if a starter root is missing required files, has stale site config,
 triggers site doctor diagnostics, loses declared verification commands, or
 accidentally imports TPM-specific identity.

@@ -14,8 +14,8 @@ the implementation guide for IRK-219 through IRK-230.
 - Keep Astro, Playwright, Vitest, Prettier, ESLint, Markdownlint, Pagefind,
   Lighthouse CI, Gitleaks, Wrangler, and Bun itself as implementation adapters
   where they are the correct ecosystem boundary.
-- Classify any remaining repository-owned TypeScript tooling as a time-boxed
-  migration fallback instead of permanent architecture.
+- Remove repository-owned TypeScript tooling from the command surface except
+  the retained PDF generator exception.
 - Preserve release, browser, accessibility, payload, docs, and authoring
   behavior while improving command ergonomics and CI/local parity.
 
@@ -55,8 +55,8 @@ Allowed Bun usage after this milestone:
 2. `bun test` remains the JavaScript/TypeScript/Astro unit-test runner while
    those tests are in the JS ecosystem.
 3. `bun audit` remains the dependency-audit adapter.
-4. `bun scripts/...` may remain only for repository-owned TypeScript tools
-   that are explicitly classified as temporary migration fallbacks.
+4. `bun scripts/...` may remain only for
+   `scripts/build/generate-article-pdfs.ts` behind `just build-pdf`.
 5. `bunx` may remain for ecosystem tool bootstrap where a local binary is not
    available or the tool is naturally Node/Bun-bound.
 
@@ -64,42 +64,43 @@ Disallowed after this milestone:
 
 - `bun run <script>` as the documented or CI command surface;
 - package scripts used as command composition;
-- undocumented repository-owned TypeScript fallback tools;
+- repository-owned TypeScript fallback tools other than the PDF exception;
 - Rust package-script wrappers;
 - domain logic inside `justfile`.
 
 ## Command Ownership Classes
 
-| Class                         | Meaning                                                                   | Examples                                                                                                                             | Milestone 9 action                                                                                                                |
-| ----------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| Rust-owned operation          | Rust owns the durable operation contract and reports.                     | `tpm site doctor`, `tpm media images`, `tpm routes redirects`, `tpm qa registry`, `tpm output verify`                                | Keep behind `just cli ...`, use as promoted/report evidence, and continue parity work before deleting deeper TS sources of truth. |
-| `just` orchestration          | `just` composes existing checks and tools without domain logic.           | `just check`, `just release-check`, `just build-release`, `just test`, `just docs-check`                                             | Replace package-script compositions.                                                                                              |
-| JS/Astro ecosystem adapter    | The underlying tool is correctly JS/Astro/browser/provider-owned.         | `astro`, `vitest`, `playwright`, `prettier`, `eslint`, `markdownlint-cli2`, `lhci`, `wrangler`, `gitleaks`, `bun audit`              | Call directly from `just` recipes.                                                                                                |
-| Temporary TypeScript fallback | Repository-owned deterministic tooling that still needs a Rust port.      | generated-output verifier, PDF generation, build optimizer, docs reference generator, starter checks, coverage/accountability checks | Call from `just` with explicit migration debt and keep tests.                                                                     |
-| Review-only experiment        | Tooling used for investigations, not required release behavior.           | payload minification, Vite build experiments, critical CSS experiments, citation audits                                              | Keep as `just` recipes and document as review-only.                                                                               |
-| Obsolete/delete               | Package-script wrapper or helper no longer needed after `just` promotion. | `scripts/testing/run-tests.ts`, `scripts/quality/run-quality.ts` once `just` owns orchestration                                      | Delete when no longer imported by tests/docs.                                                                                     |
+| Class                        | Meaning                                                                                   | Examples                                                                                                                           | Milestone 9 action                                                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Rust-owned product operation | Rust owns a durable operation contract that belongs in the public `tpm` product language. | `tpm site doctor`, `tpm media images`, `tpm routes redirects`, `tpm release inspect`                                               | Keep behind `just cli ...` and use as promoted/report evidence for future CLI, GUI, MCP, and CI consumers.                               |
+| `just` orchestration         | `just` composes existing checks and tools without domain logic.                           | `just check`, `just release-check`, `just build-release`, `just test`, `just docs-check`                                           | Replace package-script compositions.                                                                                                     |
+| JS/Astro ecosystem adapter   | The underlying tool is correctly JS/Astro/browser/provider-owned.                         | `astro`, `vitest`, `playwright`, `prettier`, `eslint`, `markdownlint-cli2`, `lhci`, `wrangler`, `gitleaks`, `bun audit`            | Call directly from `just` recipes.                                                                                                       |
+| Internal Rust task adapter   | Rust-owned repository maintenance behavior that is not a public product CLI.              | `just _xtask build-raw`, `just _xtask content-check`, `just _xtask verify`, `just _xtask payload-check`, `just _xtask qa-registry` | Use only from focused `just` recipes; promote behavior to product CLI commands only when the command belongs in the public CLI language. |
+| TypeScript PDF exception     | Retained legacy browser/JS-adjacent PDF generator.                                        | `scripts/build/generate-article-pdfs.ts`                                                                                           | Keep behind `just build-pdf` until PDF export is redesigned or removed.                                                                  |
+| Retired review command       | Old investigation tooling that is no longer active release behavior.                      | payload minification, Vite build experiments, critical CSS experiments, citation audits                                            | Remove old `just` names from the visible command surface; direct internal calls fail with a clear retired-task usage error.              |
+| Obsolete/delete              | Package-script wrapper or helper no longer needed after `just` promotion.                 | old package-script-only wrappers and duplicate orchestration helpers                                                               | Delete when no longer imported by tests/docs.                                                                                            |
 
 ## Domain Disposition
 
-| Domain                          | Package scripts before migration                     | Milestone 9 disposition                                                                                                                    |
-| ------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Setup and command discovery     | none plus ad hoc docs                                | Add `just setup`, `just setup-rust`, `just setup-browser`, `just list`.                                                                    |
-| Development servers             | `dev`, `preview`, catalog/docs-site preview wrappers | Direct `just dev`, `just preview`, `just catalog-dev`, `just docs-site-dev`, and fresh-preview recipes.                                    |
-| Authoring                       | `author:check`, `author:fix`                         | `just author-check` and `just author-fix`; keep TypeScript fallbacks behind recipes until Rust content/tag/site operations fully own them. |
-| Content and tags                | `verify:content`, `tags:*`                           | `just content-check`, `just tags-check`, `just tags-normalize`; Rust operation target, TypeScript fallback for now.                        |
-| Site config                     | `site:doctor`, `site:schema:*`                       | `just site-doctor` uses Rust report; schema generation remains TypeScript fallback behind `just site-schema*`.                             |
-| Assets/media                    | `assets:*`, `review:assets`                          | `just media-images` uses Rust report; location/shared/unused/duplicate fallbacks remain behind explicit recipes until parity is promoted.  |
-| Routes/redirects                | `build:cloudflare`                                   | `just routes-redirects` for Rust report; deploy artifact generation remains a build fallback until the writer is promoted.                 |
-| Build/release output            | `build:*`, `verify`, `validate:html`                 | `just build*`, `just verify`, `just validate-html`; build/PDF/optimizer/verifier remain temporary TypeScript/Astro adapters.               |
-| Payload/performance             | `payload:*`                                          | `just payload-*`; keep review-only experiments explicit.                                                                                   |
-| Docs references                 | `docs:*`                                             | `just docs-*`; generator remains TypeScript fallback until Rust schema/reference generation exists.                                        |
-| Docs site and catalog           | `docs-site:*`, `catalog:*`                           | Direct `just` wrappers with isolated environment variables.                                                                                |
-| Tests                           | `test*`, `coverage*`                                 | `just test*`, `just coverage*`; remove TypeScript orchestration helpers where `just` can orchestrate directly.                             |
-| Typecheck/lint/format/dead code | `typecheck`, `lint`, `format`, `deadcode`            | Direct ecosystem commands in `just`.                                                                                                       |
-| Rust                            | package wrappers already removed                     | `just rust-*` stays source of truth.                                                                                                       |
-| Security                        | `audit*`, `secrets`                                  | `just audit*`, `just secrets`; CI uses matching recipes plus GitHub-native dependency review.                                              |
-| Deploy                          | `deploy:cloudflare`, `preview:cloudflare*`           | `just deploy-cloudflare`, `just preview-cloudflare*`; provider adapter remains Wrangler.                                                   |
-| QA registry and diagnostic diff | `test:config`, `diagnostics:diff`                    | Registry becomes `just`-oriented; diagnostic diff has Rust and fallback surfaces during promotion.                                         |
+| Domain                          | Package scripts before migration                     | Milestone 9 disposition                                                                                                              |
+| ------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Setup and command discovery     | none plus ad hoc docs                                | Add `just setup`, `just setup-rust`, `just setup-browser`, `just list`.                                                              |
+| Development servers             | `dev`, `preview`, catalog/docs-site preview wrappers | Direct `just dev`, `just preview`, `just catalog-dev`, `just docs-site-dev`, and fresh-preview recipes.                              |
+| Authoring                       | `author:check`, `author:fix`                         | `just author-check` and `just author-fix`; Rust tasks own content, tag, asset, site, and schema checks.                              |
+| Content and tags                | `verify:content`, `tags:*`                           | `just content-check`, `just tags-check`, `just tags-normalize`; Rust task adapters own active behavior.                              |
+| Site config                     | `site:doctor`, `site:schema:*`                       | `just site-doctor` uses the Rust operation; `just site-schema*` uses Rust task adapters over existing schema artifacts.              |
+| Assets/media                    | `assets:*`, `review:assets`                          | `just media-images` uses the Rust report; asset location/shared/unused/duplicate checks are Rust task adapters.                      |
+| Routes/redirects                | `build:cloudflare`                                   | `just routes-redirects` reports Rust route policy; `just build-cloudflare` writes deploy artifacts from Rust.                        |
+| Build/release output            | `build:*`, `verify`, `validate:html`                 | `just build*`, `just verify`, `just validate-html`; Astro/Pagefind/html-validate remain ecosystem adapters invoked from Rust/`just`. |
+| Payload/performance             | `payload:*`                                          | `just payload-check` and `just payload-report`; old experiment commands are removed from the active `just` surface.                  |
+| Docs references                 | `docs:*`                                             | `just docs-*`; generated-reference checks are Rust task adapters over existing docs artifacts.                                       |
+| Docs site and catalog           | `docs-site:*`, `catalog:*`                           | Direct `just` wrappers with isolated environment variables.                                                                          |
+| Tests                           | `test*`, `coverage*`                                 | `just test*`, `just coverage*`; Rust task adapters own repository test accountability and coverage verification.                     |
+| Typecheck/lint/format/dead code | `typecheck`, `lint`, `format`, `deadcode`            | Direct ecosystem commands in `just`.                                                                                                 |
+| Rust                            | package wrappers already removed                     | `just rust-*` stays source of truth.                                                                                                 |
+| Security                        | `audit*`, `secrets`                                  | `just audit*`, `just secrets`; CI uses matching recipes plus GitHub-native dependency review.                                        |
+| Deploy                          | `deploy:cloudflare`, `preview:cloudflare*`           | `just deploy-cloudflare`, `just preview-cloudflare*`; provider adapter remains Wrangler.                                             |
+| QA registry and diagnostic diff | `test:config`, `diagnostics:diff`                    | Registry becomes `just`-oriented; diagnostic diff has Rust and fallback surfaces during promotion.                                   |
 
 ## Migration Guardrails
 
@@ -107,9 +108,9 @@ Disallowed after this milestone:
   move logic to Rust or a justified temporary fallback.
 - Keep release behavior stable. If a promoted command intentionally changes old
   behavior, document the accepted difference and add a test.
-- Do not remove a TypeScript fallback merely because a report shell exists.
-  Remove it only when the Rust implementation owns the same behavior or the
-  old behavior is explicitly obsolete.
+- Do not reintroduce a TypeScript fallback merely because a command is easier
+  to script in TypeScript. Add Rust task/operation logic or call the ecosystem
+  tool directly from `just`.
 - Prefer direct tool invocation over package-script indirection when the tool
   is an ecosystem adapter.
 - Prefer Rust operation contracts for domain diagnostics, reports, and future
@@ -147,22 +148,18 @@ The no-regression guard should prove:
 
 ## Remaining Debt After Surface Migration
 
-The command surface migration does not pretend that every repository-owned
-TypeScript tool has been safely ported to Rust. It makes the remaining debt
-visible and bounded.
+The command surface migration intentionally leaves one repository-owned
+TypeScript exception: PDF generation. That exception is narrow, documented, and
+hidden behind `just build-pdf`.
 
-Temporary fallback areas that should continue into later parity work:
+Remaining command-surface debt is no longer TypeScript fallback code. It is
+product hardening work inside Rust operations and task adapters:
 
-- deep generated-output verification modules;
-- PDF generation and browser-rendered artifact production;
-- build-output optimization stack;
-- site config schema generation until Rust schema generation is available;
-- starter-template verification;
-- generated platform reference documentation;
-- content/reference/citation audits;
-- coverage and test-accountability reporting;
-- payload experiment runners.
-
-Those fallbacks remain acceptable only because they are now hidden behind
-`just`, classified in the command registry, and attached to explicit Rust
-promotion targets.
+- promote internal task adapters to public CLI commands when they become part
+  of the product language;
+- deepen generated-output verification as reusable diagnostic modules;
+- decide whether PDF export should be redesigned, ported, or removed;
+- strengthen payload budgets from the current Rust raw-size report into a
+  compressed route-class policy if performance work needs that gate;
+- restore historical review workflows as real commands only if those workflows
+  become active again.

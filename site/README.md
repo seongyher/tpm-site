@@ -654,7 +654,7 @@ articles. If a visual change affects layout or components, ask a maintainer.
 If you can use the terminal, install dependencies once:
 
 ```sh
-bun install
+just setup
 ```
 
 Run the author-facing check after content edits:

@@ -1,4 +1,4 @@
-//! Generated-output verification report bridge for parity-protected migration.
+//! Generated-output verification report for static build artifacts.
 
 use std::fs;
 use std::io;
@@ -21,7 +21,7 @@ struct OutputInventory {
     has_sitemap_index: bool,
 }
 
-/// Runs the Rust generated-output report bridge.
+/// Runs the generated-output report.
 #[must_use]
 pub fn run_generated_output_bridge(
     start: impl Into<PathBuf>,
@@ -36,8 +36,7 @@ pub fn run_generated_output_bridge(
             let output = context.layout().output();
             let mut diagnostics = DiagnosticReport::new();
             let mut summary = OperationSummary::new("Generated-output report completed")
-                .with_detail(format!("output root: {}", context.display_path(output)))
-                .with_detail("dual-run parity target: verify, validate:html, build:cloudflare");
+                .with_detail(format!("output root: {}", context.display_path(output)));
 
             if output.is_dir() {
                 match inventory_output(output) {
@@ -79,18 +78,6 @@ pub fn run_generated_output_bridge(
                     ),
                 );
             }
-
-            diagnostics.push(
-                Diagnostic::new(
-                    diagnostic_code("TPM-OUTPUT-DUAL-RUN"),
-                    Severity::Note,
-                    "Rust generated-output verification is a report bridge; TypeScript verifiers remain source of truth until promotion.",
-                )
-                .with_location(DiagnosticLocation::artifact(context.display_path(output)))
-                .with_remediation(
-                    "Compare this report with verify, validate:html, and build:cloudflare output before promotion.",
-                ),
-            );
 
             OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
         }
@@ -229,7 +216,7 @@ mod tests {
 
         let result = run_generated_output_bridge(&root, OperationInterface::Test);
 
-        assert_eq!(result.status(), OperationStatus::Warning);
+        assert_eq!(result.status(), OperationStatus::Success);
         assert!(
             result
                 .summary()

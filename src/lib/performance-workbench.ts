@@ -40,7 +40,7 @@ export const performanceWorkbenchTracks = [
       "HTML validation, build verification, browser tests, accessibility tests, payload report, and release checks.",
     rollbackRule:
       "Remove the critical-CSS post-process and return to shared hashed CSS when route payload or validation regresses.",
-    commands: ["payload-critical-css-experiment"],
+    commands: [],
     state: "experiment-only",
   },
   {
@@ -105,7 +105,7 @@ export const performanceWorkbenchTracks = [
       "Strict HTML validation, build verification, browser tests, accessibility tests, and release checks.",
     rollbackRule:
       "Disable the specific optimizer scenario that causes validation, behavior, or payload regression.",
-    commands: ["payload-postbuild-experiments"],
+    commands: ["build-optimize", "payload-report", "verify", "validate-html"],
     state: "production-adopted",
   },
   {
@@ -122,7 +122,7 @@ export const performanceWorkbenchTracks = [
       "Pagefind, strict HTML validation, build verification, payload report, and release checks.",
     rollbackRule:
       "Revert the Astro/Vite config fragment and rerun the route-class payload report.",
-    commands: ["payload-vite-experiments"],
+    commands: [],
     state: "experiment-only",
   },
   {
@@ -139,10 +139,7 @@ export const performanceWorkbenchTracks = [
       "Strict HTML validation, build verification, representative browser tests, payload report, and release checks.",
     rollbackRule:
       "Remove the minify-html scenario and keep raw Astro HTML when validation or machine-readable output regresses.",
-    commands: [
-      "payload-minify-html-experiment",
-      "payload-minify-html-experiments",
-    ],
+    commands: [],
     state: "experiment-only",
   },
 ] as const satisfies readonly PerformanceWorkbenchTrack[];

@@ -15,26 +15,26 @@ Start here as a user:
    `examples/docs-site/content/collections/start-here.md`.
 4. Customize labels or navigation in `examples/docs-site/config/site.json`.
 5. Change visual identity in `examples/docs-site/theme.css`.
-6. Run `bun run test:docs-site`.
+6. Run `just test-docs-site`.
 
 Run the example site locally from the repository root:
 
 ```sh
-bun run docs-site:dev
+just docs-site-dev
 ```
 
 For a production-like local preview:
 
 ```sh
-bun run docs-site:preview:fresh
+just docs-site-preview-fresh
 ```
 
 Run the example site checks:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
-These scripts run the platform against the docs-site instance with
+These recipes run the platform against the docs-site instance with
 `SITE_INSTANCE_ROOT=examples/docs-site`. The check validates the site config
 contract and builds the example site.

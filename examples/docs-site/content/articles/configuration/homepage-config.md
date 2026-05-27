@@ -80,5 +80,5 @@ needs to change:
 ## Verify
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
 ```

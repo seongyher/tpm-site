@@ -37,7 +37,7 @@ explicit component props.
 Run:
 
 ```sh
-bun run platform:check
+just platform-check
 ```
 
 The check verifies that `src/lib` modules have documented owners and that

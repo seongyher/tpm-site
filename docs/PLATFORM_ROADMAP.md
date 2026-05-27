@@ -83,7 +83,7 @@ features.
   tools can consume the platform without duplicating path, route, and article
   policy.
 - Generate JSON Schema for `site/config/site.json`.
-- Add `site:doctor` for webmaster-friendly validation.
+- Add `site-doctor` for webmaster-friendly validation.
 - Validate route/nav/feature/homepage/content-default relationships.
 - Keep error messages actionable and non-technical.
 

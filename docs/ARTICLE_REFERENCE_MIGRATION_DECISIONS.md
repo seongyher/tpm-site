@@ -5,6 +5,11 @@ human decision layer that sits beside the generated
 [`ARTICLE_REFERENCE_CONTENT_MIGRATION.md`](./ARTICLE_REFERENCE_CONTENT_MIGRATION.md)
 catalog.
 
+Historical tooling note: the `just references-*` commands referenced in older
+decision records were retired from the active command surface during the
+Rust/`just` migration. The decisions remain historical evidence; reactivating
+that tooling should be explicit work.
+
 Every future catalog update that changes migration rules, article
 classification, exception handling, or content-normalization scope should add or
 update a decision record here. The catalog says what the tooling detected; this

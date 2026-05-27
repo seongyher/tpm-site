@@ -6,5 +6,5 @@ curation, announcements, and modest support links.
 Run it with:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/starters/editorial-magazine bun run build
+SITE_INSTANCE_ROOT=examples/starters/editorial-magazine just build
 ```

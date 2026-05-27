@@ -38,7 +38,8 @@ is still early and must remain parity-driven.
 Current facts:
 
 - The additive Rust workspace exists with `tpm-core`, `tpm-diagnostics`,
-  `tpm-workspace`, `tpm-operations`, and `tpm-cli`.
+  `tpm-workspace`, `tpm-operations`, the user-facing `tpm-cli`, and the
+  internal `tpm-xtask` repository automation crate.
 - `justfile` routes Bun and Rust checks while keeping domain logic out of
   recipes.
 - There is no `apps/studio/` or `src-tauri/` yet.
@@ -507,7 +508,7 @@ Deliverables:
 - root Cargo workspace;
 - `rust-toolchain.toml`;
 - initial crates such as `tpm-core`, `tpm-diagnostics`, `tpm-workspace`,
-  `tpm-cli`;
+  `tpm-cli`, and internal `tpm-xtask`;
 - strict Rust QA baseline from
   [`RUST_QA_TOOLING_EVALUATION.md`](./rust-migration-research/RUST_QA_TOOLING_EVALUATION.md);
 - `justfile` recipes for existing Bun gates and new Rust gates.

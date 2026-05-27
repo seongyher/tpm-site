@@ -134,13 +134,13 @@ The slugs are target IA, not a requirement to create route files in this pass.
 
 ### Operations
 
-| Page                              | Primary audience           | Purpose                                                                                            |
-| --------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------- |
-| `/docs/operations/checks/`        | author/deploy operator     | `author:check`, `site:doctor`, release checks, JSON diagnostics, and when to ask for help.         |
-| `/docs/operations/deploy/`        | deploy operator            | Current Cloudflare Worker deployment flow, verified artifacts, domain notes, and rollback posture. |
-| `/docs/operations/observability/` | site owner/deploy operator | Webmaster imports, route-linked reports, noise triage, and diagnostic escalation.                  |
-| `/docs/operations/performance/`   | deploy operator/developer  | Payload budgets, Lighthouse, cache headers, image optimization, and route-class budgets.           |
-| `/docs/operations/pdf-scholar/`   | site owner/author          | PDF eligibility, Google Scholar metadata, fallbacks, and opt-out behavior.                         |
+| Page                              | Primary audience           | Purpose                                                                                              |
+| --------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `/docs/operations/checks/`        | author/deploy operator     | `just author-check`, `just site-doctor`, release checks, JSON diagnostics, and when to ask for help. |
+| `/docs/operations/deploy/`        | deploy operator            | Current Cloudflare Worker deployment flow, verified artifacts, domain notes, and rollback posture.   |
+| `/docs/operations/observability/` | site owner/deploy operator | Webmaster imports, route-linked reports, noise triage, and diagnostic escalation.                    |
+| `/docs/operations/performance/`   | deploy operator/developer  | Payload budgets, Lighthouse, cache headers, image optimization, and route-class budgets.             |
+| `/docs/operations/pdf-scholar/`   | site owner/author          | PDF eligibility, Google Scholar metadata, fallbacks, and opt-out behavior.                           |
 
 ### Reference
 

@@ -117,8 +117,8 @@ Current state:
 
 - Site-owned redirects live in `site/config/redirects.json`.
 - Astro consumes that file through `src/lib/site-redirects.ts`.
-- Tests and `scripts/build/verify-build.ts` verify the legacy redirect map and
-  generated fallback pages.
+- Tests, `just build-cloudflare`, and `just verify` verify the legacy redirect
+  map and generated deploy artifacts.
 - `site/public` is already the site instance public directory, so files there
   are copied into `dist/`.
 
@@ -158,10 +158,10 @@ Implementation options:
 
 Prefer option 1.
 
-Implemented script:
+Implemented command:
 
 ```text
-scripts/build/generate-cloudflare-redirects.ts
+just build-cloudflare
 ```
 
 Inputs:
@@ -315,14 +315,14 @@ just verify
 just validate-html
 ```
 
-`build:release` runs the optimized production build and then runs
-`build:cloudflare`. `build:cloudflare` should initially only generate
+`just build-release` runs the optimized production build and then runs
+`just build-cloudflare`. `just build-cloudflare` should initially only generate
 `dist/_redirects`. If future headers are added, the same script can write
 `dist/_headers`.
 
 Focused tests:
 
-- Config/package-script test: `deploy:cloudflare` uses Wrangler.
+- Config/command-surface test: `just deploy-cloudflare` uses Wrangler.
 - Wrangler config test:
   - has `[assets] directory = "./dist"`;
   - has `not_found_handling = "404-page"`;
@@ -375,7 +375,7 @@ Cloudflare is now the production host. The cleanup state is:
    Workers hosting.
 
 2. **Redirect generation**
-   Add `build:cloudflare` to generate `dist/_redirects` from content
+   Add `just build-cloudflare` to generate `dist/_redirects` from content
    `legacyPermalink` metadata and `site/config/redirects.json`, then verify it
    in tests and build checks.
 

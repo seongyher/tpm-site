@@ -116,6 +116,9 @@ other testable code:
 just coverage
 ```
 
+Use `just coverage-ts` for the TypeScript/Astro side only, or
+`just coverage-rust` for the Rust workspace only.
+
 Prefer meaningful behavior tests. If a remaining uncovered path is an
 unavoidable process, generated-output, or browser auto-init boundary, document
 the reason near that boundary with a `Coverage note:` comment.

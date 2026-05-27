@@ -29,10 +29,10 @@ integration behavior that lower layers cannot prove.
 | Lighthouse checks                  | `just test-perf`, `just test-perf-built`                                              | Lighthouse CI assertions and resource budgets over representative built routes.                                        |
 | Docs-site checks                   | `just test-docs-site`                                                                 | Validates and builds the public documentation example site as a separate site instance.                                |
 | Fixture site checks                | `just test-site-instance`                                                             | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                                           |
-| Coverage checks                    | `just coverage`, `just coverage-check`                                                | Review and enforcement surface for unit-level coverage expectations.                                                   |
+| Coverage checks                    | `just coverage`, `just coverage-ts`, `just coverage-rust`                             | Review and enforcement surface for TypeScript/Astro and Rust coverage expectations.                                    |
 | Rust workspace checks              | `just rust-check`, direct `cargo fmt/check/clippy/doc/test` commands                  | Additive Rust formatting, type, lint, rustdoc, doctest, unit-test, and CI gates before Rust replaces any Bun behavior. |
 | Quality dispatcher                 | `just quality`, `just quality-release`                                                | Sequential blocking checks followed by nonblocking review checks.                                                      |
-| Payload and optimization workbench | `just payload-check`, `just payload-*`                                                | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments.             |
+| Payload and optimization workbench | `just payload-check`, `just payload-report`, `just build-optimize`                    | Release-gated deterministic payload/cache budgets plus active production optimization evidence.                        |
 
 ### Current Fixture Surfaces
 
@@ -57,7 +57,7 @@ integration behavior that lower layers cannot prove.
 | Focused built output | `just build`, `just verify`, `just validate-html`, focused `just test-e2e-built`                               | Used when a change touches output, layout, metadata, links, browser behavior, or generated files. |
 | Release blocking     | `just release-check`, `just payload-check`                                                                     | Full release gate for platform/site changes plus deterministic route-class payload/cache budgets. |
 | Review-only release  | `just quality-release` review steps: assets, markdown, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.     |
-| Investigation-only   | `just payload-*experiment*`, full-site Unlighthouse scans, ad hoc browser profiling                            | Data collection for future budgets, experiments, and roadmap planning.                            |
+| Investigation-only   | full-site Unlighthouse scans, ad hoc browser profiling, explicitly restored experiment harnesses               | Data collection for future budgets, experiments, and roadmap planning.                            |
 
 ## Target Ownership Principles
 
@@ -138,26 +138,21 @@ the correct fixture whenever a new domain needs proof.
 
 ## Current Implementation Status
 
-The command ownership manifest is implemented in
-`scripts/quality/qa-command-registry.ts`:
+The command ownership manifest is now the `just` command surface plus Rust QA
+operation metadata:
 
-- `qaCommandGroups` classifies every `just` recipe by command class, domain,
-  runtime, mutation behavior, CI usage, and purpose.
-- `qaCiJobRegistry` maps CI jobs back to local `just` commands or documented
-  CI-only reasons.
-- `qaDomainCoverageRegistry` maps every command domain to focused/release/CI
-  evidence, including `just` commands for promoted Rust gates, or a documented
-  exception for investigation-only/manual domains.
-- `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
-  aligned with `justfile` and CI workflows.
+- `justfile` is the canonical local workflow surface.
+- `COMMANDS.md` is the human command reference.
+- `crates/tpm-xtask/src/tasks.rs` owns migrated internal maintenance task
+  adapters.
+- `just qa-registry` exposes Rust command ownership and migration-debt reports.
+- `tests/config` keeps `justfile`, CI workflows, command docs, and package
+  metadata aligned.
 - `tests/config/fixture-site-matrix.test.ts` keeps the minimal external site
   fixture and maintained starter roots aligned with required content,
   public-file, redirect, and theme coverage.
 - `just starters-check` verifies starter source files, parseable config,
   site-doctor compatibility, declared checks, and TPM branding leakage.
-- `scripts/quality/qa-failure-probes.ts` records intentional bad-input probes
-  for source, generated-output, layout, citation, config, and payload budget
-  failure classes without leaking bad fixtures into production content.
 - The additive Rust workspace has a root `Cargo.toml`, pinned
   `rust-toolchain.toml`, strict workspace lints, `just rust-check`, and
   `tests/fixtures/rust-workspace/` for neutral Rust workspace tests.
@@ -175,7 +170,7 @@ The remaining implementation work should:
 ## Verification
 
 This design is grounded in the current `justfile`,
-`scripts/testing/*`, `scripts/quality/*`,
+`crates/tpm-xtask/src/tasks.rs`, `tests/config/`,
 `tests/fixtures/site-instance/`, `examples/docs-site/`, `src/catalog/`, and the
 existing performance and component-audit docs. Before implementation starts,
-developers should re-check those files if the script surface changes.
+developers should re-check those files if the command surface changes.

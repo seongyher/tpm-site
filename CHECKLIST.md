@@ -15,6 +15,358 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active TypeScript Automation To Rust Migration
+
+This migration removes repository-owned TypeScript automation scripts from the
+developer and CI command surface. TypeScript remains allowed for Astro/frontend
+code and frontend tests. PDF generation is the explicit legacy exception:
+`scripts/build/generate-article-pdfs.ts` and the `build-pdf` recipe stay as-is
+and are not ported to Rust in this migration.
+
+## Active Rust And Just Tooling Quality Pass
+
+This pass tightens the newly migrated Rust/`just` tooling after the command
+surface swap. The goal is to remove false confidence, restore high-signal QA
+semantics where migration placeholders were too weak, and improve maintainable
+Rust seams without reintroducing TypeScript automation.
+
+### Milestone TQ01: Restore High-Signal Test And Coverage Accountability
+
+- [x] Replace placeholder Rust test-accountability behavior with source-file,
+      mirrored-test, documented-ignore, unmatched-rule, and release-exception
+      checks.
+- [x] Replace placeholder Rust coverage verification with LCOV inventory,
+      approved-exception, mirrored-test, and missing-file checks.
+- [x] Add focused Rust tests for parsing, matching, missing coverage, and
+      release-blocking behavior.
+- [x] Verify focused accountability and coverage recipes.
+
+### Milestone TQ02: Remove False-Confidence Retired Command Behavior
+
+- [x] Remove retired review-only recipes from the visible `just --list`
+      command surface.
+- [x] Make direct internal `tpm-xtask` calls to removed task names fail with a
+      clear usage error instead of succeeding as no-ops.
+- [x] Update performance workbench command ownership and command-surface docs
+      so active commands and historical reports are not conflated.
+- [x] Verify command-surface and performance workbench tests.
+
+### Milestone TQ03: Improve Xtask Dispatch Shape
+
+- [x] Introduce a typed internal task parser so dispatch is exhaustive and old
+      task names are explicitly classified.
+- [x] Keep the user-facing `tpm` CLI separate from internal repository
+      automation.
+- [x] Add Rust tests for task parsing, unknown task handling, and removed task
+      handling.
+- [x] Verify Rust checks after dispatch changes.
+
+### Milestone TQ04: Redesign Xtask Task Architecture
+
+- [x] Write a design for replacing the monolithic `tasks.rs` shape with
+      domain modules, typed task specs, parser-first argument models, and
+      testable plan/execution seams.
+- [x] Iterate on the design until it names invariants, migration sequence,
+      coverage expectations, coverage-ignore policy, risks, and verification
+      gates.
+- [x] Implement the initial architecture passes from the design, prioritizing
+      coverage-blocking repetition, parse-don't-verify seams, and pure logic
+      extraction without changing public `just` behavior.
+- [x] Add focused Rust tests for the extracted pure seams and command/task
+      contracts.
+- [x] Verify Rust coverage, Rust gates, command-surface tests, docs checks,
+      and release checks before handoff.
+
+### Milestone TS00: Inventory, Tracking, And Parity Strategy
+
+- [x] Create a durable replacement map documenting every TypeScript automation
+      script, replacement Rust operation or deletion, command recipe, parity
+      evidence, and final status.
+- [x] Add temporary parity scaffolding where old TypeScript behavior must be
+      compared with Rust behavior before deletion, and document accepted
+      differences where an exact port is not the desired end state.
+- [x] Classify each script as Rust replacement, ecosystem adapter, obsolete
+      deletion, or PDF legacy exception.
+- [x] Run baseline command/config tests before changing command ownership.
+
+### Milestone TS01: Build Raw Replacement
+
+- [x] Replace `scripts/build/build-raw.ts` with a Rust-owned command or
+      operation that invokes the Astro/Pagefind ecosystem adapters.
+- [x] Preserve environment-variable behavior and generated-output
+      expectations.
+- [x] Add Rust tests for argument handling and build adapter planning.
+- [x] Verify the `build-raw` recipe and remove the TypeScript script/test.
+
+### Milestone TS02: Build Optimize Replacement
+
+- [x] Replace `scripts/build/optimize-build-output.ts` and reusable optimizer
+      logic with Rust-owned generated-output optimization or an accepted
+      no-op/removal decision.
+- [x] Preserve verified output semantics or document accepted differences.
+- [x] Add Rust tests for optimization planning and output safety.
+- [x] Verify the `build-optimize` recipe and remove migrated TypeScript files.
+
+### Milestone TS03: Cloudflare Redirect Generation Replacement
+
+- [x] Replace `scripts/build/generate-cloudflare-redirects.ts` with Rust
+      redirect output generation.
+- [x] Preserve generated `_redirects` behavior, manual redirects, legacy
+      permalink handling, duplicate detection, and Cloudflare limits.
+- [x] Add Rust tests for generated file output and failure cases.
+- [x] Verify the `build-cloudflare` recipe and remove the TypeScript script/test.
+
+### Milestone TS04: Content Verification Replacement
+
+- [x] Replace `scripts/content/verify-content.ts` with Rust content/source
+      verification.
+- [x] Preserve article, page, author, announcement, category, collection,
+      image, reference, and MDX/PDF-compatibility diagnostics where still
+      relevant, with accepted differences documented for narrower source
+      checks.
+- [x] Add Rust fixtures and tests for valid and invalid content states.
+- [x] Verify the `content-check` recipe and remove the TypeScript script/test.
+
+### Milestone TS05: Tag Normalization Replacement
+
+- [x] Replace `scripts/content/normalize-tags.ts` with Rust tag dry-run/write
+      behavior.
+- [x] Preserve safe source mutation behavior and deterministic output.
+- [x] Add Rust tests for dry-run, write mode, and no-op behavior.
+- [x] Verify `tags-check`, `tags-normalize`, and remove the TypeScript
+      script/test.
+
+### Milestone TS06: Site Config Schema Replacement
+
+- [x] Replace `scripts/site/generate-site-config-schema.ts` with Rust schema
+      generation/check behavior.
+- [x] Preserve generated schema contents or document accepted differences.
+- [x] Add Rust tests for check/write modes and schema path handling.
+- [x] Verify `site-schema`, `site-schema-check`, and remove the TypeScript
+      script/test.
+
+### Milestone TS07: Starter Template Verification Replacement
+
+- [x] Replace `scripts/site/verify-starter-templates.ts` with Rust starter
+      verification.
+- [x] Preserve starter registry, generic-copy, source-contract, and fixture
+      checks where still active.
+- [x] Add Rust tests for valid and invalid starter fixtures.
+- [x] Verify `starters-check` and remove the TypeScript script/test.
+
+### Milestone TS08: Asset Location Replacement
+
+- [x] Replace `scripts/assets/verify-image-asset-locations.ts` with Rust media
+      location checks.
+- [x] Preserve ignore-file behavior and generated-directory exclusions.
+- [x] Add Rust tests for misplaced, ignored, and valid image assets.
+- [x] Verify `assets-locations` and remove the TypeScript script/test.
+
+### Milestone TS09: Shared Asset Replacement
+
+- [x] Replace `scripts/assets/find-shared-assets.ts` with Rust shared-asset
+      policy checks.
+- [x] Preserve reference counting and allowlist behavior.
+- [x] Add Rust tests for shared asset violations and accepted cases.
+- [x] Verify `assets-shared` and remove the TypeScript script/test.
+
+### Milestone TS10: Duplicate Asset Replacement
+
+- [x] Replace `scripts/assets/find-duplicate-images.ts` with Rust duplicate
+      image review behavior.
+- [x] Preserve review-only status, hash/group output, and ignore behavior.
+- [x] Add Rust tests for duplicate groups and ignored duplicates.
+- [x] Verify `assets-duplicates`/`review-assets` and remove the TypeScript
+      script/test.
+
+### Milestone TS11: Unused Asset Replacement
+
+- [x] Replace `scripts/assets/find-unused-images.ts` with Rust unused image
+      review behavior.
+- [x] Preserve review/fail modes and ignore behavior.
+- [x] Add Rust tests for used, unused, ignored, and generated assets.
+- [x] Verify `assets-unused`/`review-assets` and remove the TypeScript
+      script/test.
+
+### Milestone TS12: Generated Output Verification Replacement
+
+- [x] Replace `scripts/build/verify-build.ts` and all verifier modules except
+      behavior tied solely to retained PDF generation with Rust output
+      verification.
+- [x] Preserve link, metadata, feed, sitemap, HTML, route, redirect, asset,
+      content-output, and static-output diagnostics.
+- [x] Add Rust fixtures and tests for representative valid and invalid output.
+- [x] Verify `verify` and remove migrated TypeScript verifier files/tests.
+
+### Milestone TS13: HTML Validation Replacement
+
+- [x] Replace `scripts/build/validate-html.ts` with Rust-owned validation
+      orchestration or a direct ecosystem adapter where appropriate.
+- [x] Preserve representative HTML validation and failure reporting.
+- [x] Add Rust tests for selected file planning and validator invocation.
+- [x] Verify `validate-html` and remove the TypeScript script/test.
+
+### Milestone TS14: Docs Reference Generation Replacement
+
+- [x] Replace `scripts/docs/generate-platform-references.ts` with Rust
+      generated-reference check/write behavior.
+- [x] Preserve generated docs contents or document accepted differences.
+- [x] Add Rust tests for command/platform reference generation.
+- [x] Verify `docs-references`, `docs-references-check`, and remove the
+      TypeScript script/test.
+
+### Milestone TS15: Component Catalog Verification Replacement
+
+- [x] Replace `scripts/quality/verify-component-catalog.ts` with Rust catalog
+      accountability checks.
+- [x] Preserve component catalog source/accountability rules.
+- [x] Add Rust tests for catalog coverage and missing examples.
+- [x] Verify `catalog-check` and remove the TypeScript script/test.
+
+### Milestone TS16: Platform Boundary Verification Replacement
+
+- [x] Replace `scripts/quality/verify-platform-boundaries.ts` with Rust
+      platform/site boundary checks.
+- [x] Preserve import boundary and TPM-neutrality diagnostics.
+- [x] Add Rust tests for valid and violating imports/content.
+- [x] Verify `platform-check` and remove the TypeScript script/test.
+
+### Milestone TS17: Astro Test Store Sync Replacement
+
+- [x] Replace `scripts/testing/sync-astro-test-store.ts` with Rust or remove
+      it if the behavior is obsolete under current Astro tests.
+- [x] Preserve required Astro container test setup behavior.
+- [x] Add Rust or config tests for the setup contract.
+- [x] Verify `test-astro` and remove the TypeScript script/test.
+
+### Milestone TS18: Test Accountability Replacement
+
+- [x] Replace `scripts/testing/verify-test-accountability.ts` with Rust source
+      accountability verification.
+- [x] Preserve release-mode behavior and permission-exception handling.
+- [x] Add Rust tests for mirrored files, ignored files, and release failures.
+- [x] Verify `test-accountability`, `test-accountability-release`, and remove
+      the TypeScript script/test.
+
+### Milestone TS19: Flake Runner Replacement
+
+- [x] Replace `scripts/testing/run-randomized-tests.ts` with Rust test-runner
+      orchestration or remove it if obsolete.
+- [x] Preserve randomized command planning where useful.
+- [x] Add Rust tests for command generation and seed handling.
+- [x] Verify `test-flake` and remove the TypeScript script/test.
+
+### Milestone TS20: Catalog Test Runner Replacement
+
+- [x] Replace `scripts/testing/run-catalog-tests.ts` with Rust orchestration.
+- [x] Preserve catalog build/playwright command sequencing and argument
+      forwarding.
+- [x] Add Rust tests for command planning.
+- [x] Verify `test-catalog` and remove the TypeScript script/test.
+
+### Milestone TS21: Coverage Verification Replacement
+
+- [x] Replace `scripts/testing/verify-test-coverage.ts` with Rust coverage
+      accountability verification.
+- [x] Preserve LCOV parsing, approved exceptions, and source accountability.
+- [x] Add Rust tests for covered, uncovered, ignored, and exception cases.
+- [x] Verify `coverage-verify`, `coverage`, and remove the TypeScript
+      script/test.
+
+### Milestone TS22: Payload Report Replacement
+
+- [x] Replace `scripts/payload/report-payload.ts` with Rust payload report and
+      budget checks.
+- [x] Preserve route-class budgets, gzip/Brotli/raw measurement, cache-header
+      evidence, and check mode, with accepted differences documented for the
+      initial Rust raw-size report.
+- [x] Add Rust tests for payload metrics and budget failures.
+- [x] Verify `payload-check`, `payload-report`, and remove the TypeScript
+      script/test.
+
+### Milestone TS23: Payload Experiment Replacement Or Deletion
+
+- [x] Replace or explicitly delete `scripts/payload/minify-html-experiment.ts`.
+- [x] Replace or explicitly delete
+      `scripts/payload/run-critical-css-experiment.ts`.
+- [x] Replace or explicitly delete
+      `scripts/payload/run-minify-html-experiments.ts`.
+- [x] Replace or explicitly delete
+      `scripts/payload/run-post-build-optimization-experiments.ts`.
+- [x] Replace or explicitly delete
+      `scripts/payload/run-vite-build-experiments.ts`.
+- [x] Verify payload experiment recipes are Rust-owned, ecosystem adapters, or
+      removed from `just`.
+
+### Milestone TS24: Reference Tooling Replacement
+
+- [x] Replace `scripts/content/audit-article-references.ts` with Rust
+      reference audit behavior.
+- [x] Replace `scripts/content/audit-bibtex-citations.ts` with Rust BibTeX
+      citation audit behavior.
+- [x] Replace `scripts/content/catalog-article-references.ts` with Rust
+      catalog generation behavior.
+- [x] Replace `scripts/content/migrate-mechanical-article-references.ts` with
+      Rust dry-run/write migration behavior.
+- [x] Add Rust tests for reference diagnostics, catalog output, and migration
+      safety.
+- [x] Verify reference recipes and remove the TypeScript scripts/tests.
+
+### Milestone TS25: QA Metadata And Diff Replacement
+
+- [x] Replace `scripts/quality/qa-command-registry.ts` with Rust or durable
+      data generated/validated by Rust.
+- [x] Replace `scripts/quality/diagnostic-diff.ts` with Rust diagnostic diff
+      behavior.
+- [x] Replace `scripts/quality/qa-failure-probes.ts` with Rust/data-owned
+      failure-probe metadata.
+- [x] Preserve CI/local parity, command-domain coverage, failure-probe
+      accountability, and diagnostic snapshot comparison tests.
+- [x] Verify `test-config`, `qa-registry`, `diagnostics-diff`, and remove
+      migrated TypeScript files/tests.
+
+### Milestone TS26: Command Surface Swap And TypeScript Script Deletion
+
+- [x] Update `justfile` so no recipe calls `bun scripts/...` except
+      `build-pdf`.
+- [x] Delete migrated `scripts/**/*.ts` automation files and obsolete
+      `tests/scripts/**/*.ts` tests.
+- [x] Keep `scripts/build/generate-article-pdfs.ts` and necessary PDF support
+      untouched as the explicit legacy exception.
+- [x] Verify no docs or script help direct users to deleted TypeScript scripts.
+
+### Milestone TS26A: Product CLI And Internal Xtask Split
+
+- [x] Remove internal repository maintenance task plumbing from the
+      user-facing `tpm` product CLI.
+- [x] Add an internal `tpm-xtask` Rust crate for migrated repository
+      automation behind focused `just` recipes.
+- [x] Update `justfile` so named workflows call private `_xtask` plumbing
+      instead of a public CLI maintenance subcommand.
+- [x] Add Rust tests proving internal maintenance commands are rejected by the
+      user-facing CLI and `tpm-xtask` is explicitly internal.
+- [x] Update command, Rust workspace, operation, and migration docs for the
+      product/internal command split.
+
+### Milestone TS27: Rust Coverage And Quality Gates
+
+- [x] Run Rust coverage after each major port and add tests until no genuine
+      useful coverage improvements remain.
+- [x] Run `just rust-check`, `just test-config`, and focused recipes after each
+      command group is promoted.
+- [x] Run `just check` and `just release-check` before handoff.
+- [x] Document any remaining uncovered Rust branches with justification.
+
+### Milestone TS28: Documentation And Replacement Report
+
+- [x] Update `AGENTS.md`, `COMMANDS.md`, Rust workspace docs, roadmap docs, and
+      generated platform references for the final command ownership model.
+- [x] Document every old TypeScript script and its Rust replacement, deletion,
+      ecosystem adapter status, or PDF legacy exception.
+- [x] Remove outdated package-script/`bun scripts/...` guidance from active
+      docs.
+- [x] Verify docs checks and generated-reference drift checks pass.
+
 ## Active Milestone 9: Dual-Run Rust Migrations And Command Promotion
 
 This phase migrates deterministic TypeScript/Bun tooling toward Rust and `just`

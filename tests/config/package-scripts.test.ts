@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, test } from "bun:test";
 
-import { justRecipeBlock } from "../helpers/justfile";
+import { justRecipeBlock, parseJustRecipes } from "../helpers/justfile";
 
 interface PackageJson {
   scripts?: Record<string, string>;
@@ -51,6 +51,9 @@ describe("command surface", () => {
       "author-check",
       "review-assets",
       "review-markdown",
+      "coverage",
+      "coverage-ts",
+      "coverage-rust",
       "audit",
       "secrets",
       "deploy-cloudflare",
@@ -58,6 +61,59 @@ describe("command surface", () => {
       "cli",
     ]) {
       expect(justfile).toContain(`\n${recipe}`);
+    }
+  });
+
+  test("keeps coverage commands explicit by ecosystem and aggregate", async () => {
+    const justfile = await readJustfile();
+
+    expect(justRecipeBlock(justfile, "coverage")).toContain(
+      "coverage-ts coverage-rust",
+    );
+    expect(justRecipeBlock(justfile, "coverage-ts")).toContain(
+      "just _coverage-ts-report",
+    );
+    expect(justRecipeBlock(justfile, "coverage-ts")).toContain(
+      "just coverage-verify {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "coverage-rust")).toContain(
+      "cargo llvm-cov",
+    );
+    expect(justRecipeBlock(justfile, "coverage-rust")).toContain(
+      "--show-missing-lines",
+    );
+
+    for (const retiredRecipe of [
+      "coverage-check",
+      "coverage-unit",
+      "rust-coverage",
+    ]) {
+      expect(
+        justfile.includes(`\n${retiredRecipe}:`),
+        `${retiredRecipe} should not be a public just recipe`,
+      ).toBe(false);
+    }
+  });
+
+  test("keeps retired review-only commands out of the visible just surface", async () => {
+    const justfile = await readJustfile();
+    const recipes = new Set(parseJustRecipes(justfile));
+
+    for (const retiredRecipe of [
+      "payload-critical-css-experiment",
+      "payload-minify-html-experiment",
+      "payload-minify-html-experiments",
+      "payload-postbuild-experiments",
+      "payload-vite-experiments",
+      "references-audit",
+      "references-bibtex-audit",
+      "references-catalog",
+      "references-migrate-mechanical",
+    ]) {
+      expect(
+        recipes.has(retiredRecipe),
+        `${retiredRecipe} should be retired`,
+      ).toBe(false);
     }
   });
 
@@ -152,7 +208,7 @@ describe("command surface", () => {
       "just catalog-build",
     );
     expect(justRecipeBlock(justfile, "test-catalog")).toContain(
-      "scripts/testing/run-catalog-tests.ts",
+      "just _xtask test-catalog",
     );
   });
 
@@ -160,7 +216,7 @@ describe("command surface", () => {
     const justfile = await readJustfile();
 
     expect(justRecipeBlock(justfile, "build-cloudflare")).toContain(
-      "scripts/build/generate-cloudflare-redirects.ts",
+      "just _xtask build-cloudflare",
     );
     expect(justRecipeBlock(justfile, "build-release")).toContain(
       "build-cloudflare",

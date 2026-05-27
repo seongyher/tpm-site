@@ -113,6 +113,6 @@ Focused tests cover:
 - blocked deployment adapters becoming release-governance errors;
 - platform entrypoint exposure.
 
-Release-level scripts can later wrap these pure helpers to write JSON and
-Markdown artifacts during `check:release` or a future `release:report`
+Release-level commands can later wrap these pure helpers to write JSON and
+Markdown artifacts during `just release-check` or a future `just release-report`
 command.

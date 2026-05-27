@@ -1,4 +1,4 @@
-//! Redirect rule reporting for parity-protected migration.
+//! Redirect rule reporting for static deploy targets.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -39,11 +39,10 @@ pub fn run_redirect_report(
         Ok(context) => match collect_redirect_rules(&context) {
             Ok(rules) => {
                 let output = format_redirects(&rules);
-                let diagnostics = redirect_diagnostics(&context, &rules, &output);
+                let diagnostics = redirect_diagnostics(&context, &rules);
                 let summary = OperationSummary::new("Redirect report completed")
                     .with_detail(format!("redirect rules: {}", rules.len()))
-                    .with_detail(format!("cloudflare output bytes: {}", output.len()))
-                    .with_detail("dual-run parity target: build:cloudflare");
+                    .with_detail(format!("cloudflare output bytes: {}", output.len()));
 
                 OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
             }
@@ -192,11 +191,7 @@ fn insert_rule(
     Ok(())
 }
 
-fn redirect_diagnostics(
-    context: &WorkspaceContext,
-    rules: &[RedirectRule],
-    output: &str,
-) -> DiagnosticReport {
+fn redirect_diagnostics(context: &WorkspaceContext, rules: &[RedirectRule]) -> DiagnosticReport {
     let mut diagnostics = Vec::new();
 
     if rules.len() > CLOUDFLARE_STATIC_REDIRECT_LIMIT {
@@ -235,21 +230,6 @@ fn redirect_diagnostics(
             );
         }
     }
-
-    diagnostics.push(
-        Diagnostic::new(
-            diagnostic_code("TPM-REDIRECTS-DUAL-RUN"),
-            Severity::Note,
-            format!(
-                "Rust redirect report is in dual-run mode; formatted output currently contains {} lines.",
-                output.lines().count()
-            ),
-        )
-        .with_location(DiagnosticLocation::artifact("dist/_redirects"))
-        .with_remediation(
-            "Compare this Rust report with build:cloudflare output before promotion.",
-        ),
-    );
 
     DiagnosticReport::from_diagnostics(diagnostics)
 }
@@ -454,7 +434,7 @@ mod tests {
 
         let result = run_redirect_report(&root, OperationInterface::Test);
 
-        assert_eq!(result.status(), OperationStatus::Warning);
+        assert_eq!(result.status(), OperationStatus::Success);
         assert!(
             result
                 .summary()
@@ -659,7 +639,7 @@ mod tests {
             source: String::from("/too-long/"),
         });
 
-        let diagnostics = redirect_diagnostics(&context, &rules, "one\ntwo");
+        let diagnostics = redirect_diagnostics(&context, &rules);
         let codes = diagnostics
             .diagnostics()
             .iter()
@@ -668,7 +648,6 @@ mod tests {
 
         assert!(codes.contains(&"TPM-REDIRECTS-CLOUDFLARE-COUNT"));
         assert!(codes.contains(&"TPM-REDIRECTS-CLOUDFLARE-LINE"));
-        assert!(codes.contains(&"TPM-REDIRECTS-DUAL-RUN"));
         assert_eq!(display_path(Path::new("")), ".");
     }
 }

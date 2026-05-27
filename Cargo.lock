@@ -132,6 +132,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tpm-xtask"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "tpm-core",
+ "tpm-diagnostics",
+ "tpm-operations",
+]
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"

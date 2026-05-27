@@ -17,7 +17,7 @@ checks for content, config, assets, generated output, and complete site builds.
 Run:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 This validates the docs-site instance and builds it into an isolated output
@@ -28,7 +28,7 @@ directory.
 Run:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
 ```
 
 Use this after editing navigation, homepage collections, routes, feature flags,
@@ -39,7 +39,7 @@ or required site directories.
 Run:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run verify:content -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just content-check --quiet
 ```
 
 Use this after adding articles, announcements, authors, categories, tags, or
@@ -50,7 +50,7 @@ collections.
 For the default production site instance, run:
 
 ```sh
-bun run check:release
+just release-check
 ```
 
 This is intentionally heavier than an authoring check.

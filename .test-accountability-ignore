@@ -2,8 +2,8 @@
 # Bun or Vitest and do not require their own mirrored tests.
 tests/**
 
-# The accountability policy file is parsed and validated by
-# scripts/testing/verify-test-accountability.ts on every accountability run.
+# The accountability policy file is parsed and validated by the Rust
+# `test-accountability` xtask on every accountability run.
 .test-accountability-ignore
 
 # Approved exception: Article, announcement, page, and editor-owned collection

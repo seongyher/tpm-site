@@ -503,9 +503,10 @@ Acceptance criteria:
 
 Experiment result:
 
-- `just payload-critical-css-experiment` now runs a bounded Beasties
-  experiment against a copied build output and writes a reproducible report
-  under `tmp/critical-css-experiment/report.md`.
+- The retired `just payload-critical-css-experiment` command previously ran a
+  bounded Beasties experiment against copied build output. The workflow is now
+  historical evidence only; restoring it should be an explicit implementation
+  task.
 - The first-pass Beasties scenario processed 303 HTML files and increased HTML
   payload by 8,890,189 bytes raw, 1,827,807 bytes gzip, and 1,535,810 bytes
   Brotli.

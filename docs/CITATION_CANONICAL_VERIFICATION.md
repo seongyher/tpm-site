@@ -2,6 +2,11 @@
 
 Date: 2026-05-17
 
+Historical tooling note: the `just references-*` audit commands referenced in
+this plan were retired from the active command surface during the Rust/`just`
+migration. The plan remains useful for manual citation cleanup; restoring the
+automation should be an explicit tooling task.
+
 This document defines the citation cleanup workflow after the structural
 BibTeX audit. The structural audit proves that every article citation marker
 and `tpm-bibtex` entry can be inventoried. It does not prove source accuracy.

@@ -316,7 +316,7 @@ rust-test:
     cargo test --workspace --doc --all-features --locked
     cargo test --workspace --all-features --locked
 
-rust-coverage:
+coverage-rust:
     cargo llvm-cov --workspace --all-features --summary-only
 
 rust-audit:

@@ -1618,8 +1618,8 @@ is not worth broken semantics. A faster build is not worth weak validation.
 
 Useful metrics include:
 
-- `check` runtime;
-- `check:release` runtime;
+- `just check` runtime;
+- `just release-check` runtime;
 - build time by stage;
 - content-only author check runtime;
 - generated HTML size;

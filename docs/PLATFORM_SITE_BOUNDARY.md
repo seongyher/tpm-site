@@ -256,7 +256,7 @@ cleanup:
   tokens stable;
 - generated JSON Schema for `site/config/site.json` and editor/GUI validation;
 - public/private CI checkout orchestration;
-- `site:doctor` or equivalent admin tooling for authors and webmasters.
+- `site-doctor` or equivalent admin tooling for authors and webmasters.
 
 ## Component Contract
 
@@ -344,5 +344,5 @@ Completed in the config-defaults tranche:
 6. Kept remaining feature-gated route pruning as an explicit later milestone.
 
 Later milestones should handle theme-token splitting, public/private CI checkout
-orchestration, JSON Schema export, route pruning, and `site:doctor` style admin
+orchestration, JSON Schema export, route pruning, and `site-doctor` style admin
 UI preparation.

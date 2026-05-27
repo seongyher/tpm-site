@@ -10,19 +10,20 @@ The command router follows these rules:
 
 - use `just <recipe>` for repository workflows;
 - keep `justfile` recipes as orchestration only;
-- keep Rust domain operations behind `just cli ...` or focused recipes;
+- keep public platform operations behind `just cli ...`, and keep internal
+  repository automation behind focused recipes that call the private
+  `just _xtask ...` adapter;
 - call Astro, Playwright, Vitest, Prettier, ESLint, Markdownlint, Lighthouse
   CI, Wrangler, Gitleaks, and Bun directly from `just` when those ecosystem
   tools are still the correct boundary;
-- keep remaining repository TypeScript scripts as explicit migration
-  fallbacks until Rust parity work safely replaces them.
+- keep `scripts/build/generate-article-pdfs.ts` as the only retained
+  TypeScript automation exception, behind `just build-pdf`.
 
-The command registry in
-[`scripts/quality/qa-command-registry.ts`](scripts/quality/qa-command-registry.ts)
-classifies every `just` recipe, records CI parity expectations, and maps
-command domains to focused/release/CI evidence or a documented exception.
-`just test-config` fails when the registry drifts from `justfile`, CI
-workflows, or domain-coverage accountability.
+Internal Rust task adapters in
+[`crates/tpm-xtask/`](crates/tpm-xtask/) own migrated repository maintenance
+behavior. They are intentionally separate from the user-facing `tpm` product
+CLI. `just test-config` keeps the command surface guarded against
+package-script regressions and documented command drift.
 
 Dependency audit, secret scan, lockfile, third-party script, and generated
 secret-output expectations are documented in
@@ -92,16 +93,18 @@ used by browser-backed tests.
 | Command                | Purpose                                                             |
 | ---------------------- | ------------------------------------------------------------------- |
 | `just test`            | Run test accountability, Bun unit tests, and Astro component tests. |
-| `just test-unit`       | Run Bun unit/script/component/page tests.                           |
+| `just test-unit`       | Run Bun unit/component/page tests plus retained PDF tests.          |
 | `just test-astro`      | Run Astro container/component tests.                                |
-| `just test-config`     | Run config, command-registry, and QA metadata tests.                |
+| `just test-config`     | Run command-surface and repository configuration tests.             |
 | `just test-e2e`        | Build, then run Playwright browser tests.                           |
 | `just test-e2e-built`  | Run Playwright browser tests against existing built output.         |
 | `just test-a11y`       | Build, then run axe accessibility review tests.                     |
 | `just test-a11y-built` | Run axe tests against existing built output.                        |
 | `just test-perf`       | Build, then run Lighthouse CI review.                               |
 | `just test-perf-built` | Run Lighthouse CI against existing built output.                    |
-| `just coverage`        | Generate LCOV coverage and verify broad coverage accountability.    |
+| `just coverage`        | Run all coverage review signals.                                    |
+| `just coverage-ts`     | Run TypeScript/Astro coverage plus broad coverage accountability.    |
+| `just coverage-rust`   | Run Rust coverage with missing-line output when installed.           |
 | `just review-assets`   | Run duplicate and unused image review checks.                       |
 | `just review-markdown` | Run Markdown/MDX style review.                                      |
 
@@ -112,40 +115,28 @@ used by browser-backed tests.
 | `just rust-check`         | Run all blocking Rust gates.                             |
 | `just rust-check-fast`    | Run the fastest Rust type-check gate.                    |
 | `just rust-fix`           | Run Rust formatting and Clippy machine-applicable fixes. |
-| `just rust-coverage`      | Run review-only Rust coverage when installed.            |
 | `just rust-nextest`       | Run review-only `cargo-nextest` when installed.          |
 | `just cli --help`         | Run the additive Rust CLI shell.                         |
 | `just migration-baseline` | Show migration classifications and command debt.         |
 | `just qa-registry`        | Run the Rust QA registry report.                         |
 
-## Performance And Experiments
+## Performance
 
-| Command                                | Purpose                                    |
-| -------------------------------------- | ------------------------------------------ |
-| `just payload-check`                   | Run deterministic release payload budgets. |
-| `just payload-report`                  | Report raw, gzip, and Brotli sizes.        |
-| `just payload-critical-css-experiment` | Run the bounded critical-CSS experiment.   |
-| `just payload-minify-html-experiment`  | Run one minify-html experiment.            |
-| `just payload-minify-html-experiments` | Run the minify-html experiment suite.      |
-| `just payload-postbuild-experiments`   | Run post-build optimization experiments.   |
-| `just payload-vite-experiments`        | Run Vite build option experiments.         |
+| Command               | Purpose                                              |
+| --------------------- | ---------------------------------------------------- |
+| `just payload-check`  | Run release payload checks from Rust.                |
+| `just payload-report` | Report generated-output payload size data from Rust. |
 
-## Remaining TypeScript Fallbacks
+Retired payload experiment commands are intentionally absent from
+`just --list`; historical reports remain in `docs/performance/`, but reusing
+those workflows requires restoring them explicitly instead of relying on a
+successful no-op.
 
-Some commands still call repository-owned TypeScript files with `bun
-scripts/...`. These are migration fallbacks, not package-script architecture.
-They remain while Rust parity work proceeds for:
+## Remaining TypeScript Exception
 
-- deep generated-output verification;
-- PDF generation and browser-rendered artifacts;
-- build-output optimization;
-- site config schema generation;
-- starter-template verification;
-- generated platform references;
-- content/reference/citation audits;
-- coverage and test-accountability reporting;
-- payload experiment runners.
-
-The target state is Rust-owned deterministic platform operations with `just`
-as the developer command router and Astro/Bun ecosystem tools hidden behind
-focused recipes where appropriate.
+`just build-pdf` is the only recipe that calls a repository-owned TypeScript
+automation file: `scripts/build/generate-article-pdfs.ts`. It remains because
+PDF generation is browser/JS-adjacent legacy behavior and has a retained unit
+test in `tests/build/generate-article-pdfs.test.ts`. All other migrated
+repository automation is Rust-owned or removed from the active command
+surface.

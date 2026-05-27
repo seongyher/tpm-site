@@ -319,15 +319,11 @@ Current consumers:
   policy from the shared media policy layer.
 - `src/components/articles/PublishableMediaFrame.astro` consumes text fallback
   policy for image-less publishable media frames.
-- `scripts/build/generate-article-pdfs.ts` and
-  `scripts/build/verify-build/pdf-verifier.ts` consume media diagnostics for
-  unloaded PDF images, unoptimized PDF image sources, and oversized generated
-  PDF artifacts.
-- `scripts/build/verify-build/html-verifier.ts` checks scoped article, hover,
-  and publishable media image output for accidental remote/raw images and
-  verifies article embeds keep static fallbacks.
-- `scripts/build/verify-build/asset-verifier.ts` checks the generated
-  `_headers` file keeps immutable cache policy for hashed Astro assets.
+- `scripts/build/generate-article-pdfs.ts` consumes PDF media compatibility
+  decisions for the retained PDF export path.
+- `just verify`, `just validate-html`, and `just build-optimize` consume
+  generated-output media invariants for release validation, representative HTML
+  validity, and hashed Astro asset cleanup.
 
 The implementation deliberately keeps component props narrow. Components still
 receive the exact display facts they need; the policy layer owns how those

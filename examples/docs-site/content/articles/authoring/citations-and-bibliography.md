@@ -31,9 +31,12 @@ disable broken markers with Markdownlint exceptions.
 ## Verify
 
 ```sh
-bun run references:audit
-bun run author:check
+just author-check
 ```
+
+Historical one-off reference audit commands are no longer part of the active
+command surface. Source validation now runs through the normal author-facing
+checks.
 
 ## Deferred Details
 

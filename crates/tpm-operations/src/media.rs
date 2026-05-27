@@ -1,4 +1,4 @@
-//! Image-asset verification operation for parity-protected migration.
+//! Image-asset verification operation for source media policy.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -31,7 +31,7 @@ pub fn run_image_asset_verification(
     match WorkspaceContext::discover(&start) {
         Ok(context) => match image_inventory(&context) {
             Ok(inventory) => {
-                let diagnostics = image_diagnostics(&context, &inventory);
+                let diagnostics = image_diagnostics(&inventory);
                 let summary = OperationSummary::new("Image asset verification completed")
                     .with_detail(format!("image files scanned: {}", inventory.images.len()))
                     .with_detail(format!(
@@ -41,10 +41,7 @@ pub fn run_image_asset_verification(
                     .with_detail(format!(
                         "duplicate groups: {}",
                         inventory.duplicate_groups.len()
-                    ))
-                    .with_detail(
-                        "dual-run parity target: assets:locations, assets:shared, assets:duplicates, assets:unused",
-                    );
+                    ));
 
                 OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
             }
@@ -113,7 +110,7 @@ fn image_inventory(context: &WorkspaceContext) -> io::Result<ImageInventory> {
     })
 }
 
-fn image_diagnostics(context: &WorkspaceContext, inventory: &ImageInventory) -> DiagnosticReport {
+fn image_diagnostics(inventory: &ImageInventory) -> DiagnosticReport {
     let mut diagnostics = Vec::new();
 
     for violation in &inventory.location_violations {
@@ -143,23 +140,11 @@ fn image_diagnostics(context: &WorkspaceContext, inventory: &ImageInventory) -> 
                 )
                 .with_location(DiagnosticLocation::source(first.clone()))
                 .with_remediation(
-                    "Review duplicates before promotion; current duplicate script remains review-only source of truth.",
+                    "Review duplicates, remove accidental copies, or add a narrow ignore entry when duplication is intentional.",
                 ),
             );
         }
     }
-
-    diagnostics.push(
-        Diagnostic::new(
-            diagnostic_code("TPM-MEDIA-DUAL-RUN"),
-            Severity::Note,
-            "Rust image verification is in dual-run mode; TypeScript asset scripts remain source of truth until promotion.",
-        )
-        .with_location(DiagnosticLocation::source(context.display_path(context.layout().assets())))
-        .with_remediation(
-            "Compare Rust image evidence with the current asset scripts before promotion.",
-        ),
-    );
 
     DiagnosticReport::from_diagnostics(diagnostics)
 }

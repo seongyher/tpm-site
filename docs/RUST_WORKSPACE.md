@@ -36,19 +36,21 @@ just cli site status --format json
 
 The current CLI slice supports `tpm --help`, `tpm --version`,
 `tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
-`tpm migration baseline`, `tpm media images`, `tpm routes redirects`,
-`tpm qa registry`, `tpm qa diagnostics-diff`, `tpm output verify`, and
-`tpm release inspect`. These commands are product-interface proofs over Rust
-operation contracts. Dual-run report commands do not replace deeper
-Astro/browser/generated-output behavior until parity evidence is reviewed and
-the command owner is promoted.
+`tpm media images`, `tpm routes redirects`, and `tpm release inspect`. These
+commands are product-interface proofs over Rust operation contracts.
+
+Repository maintenance automation is intentionally not exposed as `tpm`
+commands. Focused `just` recipes call the internal `tpm-xtask` binary when a
+Rust adapter is needed for build, QA, generated-output, or migration plumbing.
 
 The current ownership model is:
 
 - `just <recipe>` is the source of truth for repository workflow commands.
+- `tpm-xtask` owns internal repository maintenance adapters behind focused
+  `just` recipes; it is not a public product CLI.
 - `cargo` owns direct Rust crate formatting, type checks, lints, and tests.
-- Bun owns dependency installation, JS tests, `bun audit`, and temporary
-  TypeScript fallback execution behind `just`.
+- Bun owns dependency installation, JS tests, `bun audit`, and the retained
+  TypeScript PDF-generation exception behind `just build-pdf`.
 - Astro, Playwright, Vitest, Prettier, ESLint, Markdownlint, Lighthouse CI,
   Wrangler, and Gitleaks remain ecosystem adapters behind focused `just`
   recipes.
@@ -69,6 +71,7 @@ The current ownership model is:
 | `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
 | `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
 | `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
+| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
 | `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
 | `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
 
@@ -113,17 +116,17 @@ These commands are useful signals, but they are not part of `just rust-check`
 or the current release gate:
 
 ```sh
-just rust-coverage
+just coverage-rust
 just rust-nextest
 ```
 
-`rust-coverage` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
+`coverage-rust` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
 available. `rust-nextest` prints install guidance if its Cargo subcommand is
 not installed. Promote a review-only Rust tool to a blocking gate only after it
 is installed in the shared environment, documented, low-noise, and represented
 in the CI/local parity model.
 
-GitHub Actions also runs `just rust-coverage` in a non-blocking
+GitHub Actions also runs `just coverage-rust` in a non-blocking
 `Rust coverage review` job. The job installs `cargo-llvm-cov` and
 `llvm-tools-preview` for CI evidence, but coverage remains informational.
 
@@ -179,8 +182,9 @@ policy, generated-output inspection, QA reports, and release artifacts.
 
 Rules for future migrations:
 
-1. Keep Astro rendering, browser behavior, and TypeScript fallback tools as the
-   source of truth for unpromoted domains until parity is proven.
+1. Keep Astro rendering, browser behavior, and explicitly retained ecosystem
+   adapters as the source of truth for unpromoted domains until parity is
+   proven.
 2. Add Rust operations behind tests and fixtures before wiring them into
    command routers.
 3. Dual-run old and new implementations for behavior-sensitive migrations.

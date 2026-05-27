@@ -2,6 +2,11 @@
 
 Date: 2026-05-17
 
+Historical tooling note: the `just references-*` audit commands referenced in
+this report were retired from the active command surface during the Rust/`just`
+migration. The report remains editorial evidence, not a currently runnable
+workflow.
+
 This is the human review layer on top of
 `docs/CITATION_BIBTEX_AUDIT.md`. The structural audit proves that the corpus
 has 246 parsed BibTeX entries. This pass manually inspected all 246 inventory

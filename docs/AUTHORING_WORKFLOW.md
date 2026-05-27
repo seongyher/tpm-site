@@ -68,7 +68,7 @@ diagnostic codes, severity, category, repair owner, source location, related
 docs, remediation, and summary counts. Human output stays short so authors can
 repair common mistakes without reading platform internals.
 
-Keep new author-facing checks wired into `author:check` when they catch
+Keep new author-facing checks wired into `just author-check` when they catch
 mistakes authors can reasonably make while editing `site/`.
 
 ## Authoring Surfaces

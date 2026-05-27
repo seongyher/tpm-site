@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { formatCloudflareRedirects } from "../../../scripts/build/generate-cloudflare-redirects";
+import { formatCloudflareRedirects } from "../../../src/lib/cloudflare-redirects";
 import {
   createCloudflareWorkersStaticAssetsDeploymentPlan,
   createStaticFolderDeploymentPlan,

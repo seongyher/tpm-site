@@ -4,7 +4,8 @@ This file is the operating manual for agents working in this repository.
 
 ## Operating Priorities
 
-The Philosopher's Meme is a Bun-first Astro static site.
+The Philosopher's Meme is a Bun-managed, `just`-driven Astro static site with
+an additive Rust operation/tooling workspace.
 
 Primary goals:
 
@@ -38,17 +39,17 @@ command surface.
   `just setup`.
 - Use `just <recipe>` for repository workflows instead of `bun run <script>`.
 - Use `bun test` where the `just` recipe intentionally runs JS/TS tests.
-- Use `bun scripts/...` only for repository-owned TypeScript tooling that is
-  explicitly classified as a migration fallback behind a `just` recipe.
+- Use `bun scripts/build/generate-article-pdfs.ts` only through
+  `just build-pdf`; it is the retained legacy PDF-generation exception.
 - Use `bunx <package> <command>` instead of `npx <package> <command>` when a
   package runner is needed.
 - Do not reintroduce package scripts unless the task explicitly requires a
   temporary compatibility shim with documented ownership and an expiry trigger.
 - Do not introduce unrelated build toolchains into the Astro build path.
 
-When an existing script currently uses `node` or `bun`, keep it working unless
-the task explicitly includes converting the script to Rust or a direct `just`
-recipe. Avoid churn that is unrelated to the active milestone.
+Do not add new repository-owned TypeScript automation scripts. Deterministic
+repository tooling belongs in internal Rust task adapters or Rust operations
+behind `just`; TypeScript should stay focused on Astro/frontend/product code.
 
 ## Rust And Just Usage
 
@@ -78,8 +79,13 @@ the correct boundary.
 - `deny.toml`: Rust supply-chain policy for blocking `cargo-deny` checks.
 - `justfile`: canonical repository command router over Rust operations and
   JS/Astro ecosystem adapters; keep it orchestration-only.
-- `crates/`: additive Rust platform crates. Rust code here is not source of
-  truth for existing site behavior until parity promotion.
+- `crates/`: additive Rust platform crates. Rust code owns promoted operation
+  and tooling behavior where documented; otherwise it remains additive until
+  parity promotion.
+- `crates/tpm-cli/`: user-facing product CLI shell and first command grammar
+  over operation contracts. Do not place repository maintenance tasks here.
+- `crates/tpm-xtask/`: internal Rust repository automation invoked by focused
+  `just` recipes. This is not a product CLI surface.
 - `crates/tpm-operations/`: shared operation request/result envelopes for
   future CLI, GUI, MCP, CI, and generated-output consumers.
 - `site/`: default TPM site instance. Publication-specific content, assets,
@@ -117,12 +123,9 @@ the correct boundary.
   Keep this small.
 - `src/content.config.ts`: Astro content collection config that resolves the
   active site instance.
-- `scripts/`: repository maintenance, verification, and quality scripts.
-- `scripts/quality/`: QA orchestration helpers, the command/CI parity
-  registry, diagnostic diff tooling, failure-probe metadata, and platform
-  boundary checks.
-- `scripts/site/`: source-level site-instance tools such as site doctor and
-  starter-template verification.
+- `scripts/`: retained PDF generator, script-adjacent authoring design notes,
+  and JSON ignore/configuration files consumed by Rust task adapters. Do not
+  add new TypeScript automation here.
 - `tests/`: unit, e2e, accessibility, and performance tests.
 - `tests/fixtures/rust-workspace/`: small neutral site-like fixture for Rust
   workspace and future operation tests.
@@ -133,8 +136,8 @@ the correct boundary.
   hand.
 - `CHECKLIST.md`: implementation milestone tracker.
 - `DEFERRED.md`: postponed work with reasons and resume triggers.
-- `COMMANDS.md`: brief reference for repository `just` recipes and remaining
-  TypeScript fallback adapters.
+- `COMMANDS.md`: brief reference for repository `just` recipes and the
+  retained TypeScript PDF-generation exception.
 - `agent-docs/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
   strictness, modularity, type-driven design, and testing philosophy.
 - `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
@@ -144,11 +147,14 @@ the correct boundary.
 - `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`: Rust-first migration plan,
   crate boundaries, CLI/Tauri/MCP reuse model, `just` orchestration, and Rust
   QA strategy.
+- `agent-docs/XTASK_ARCHITECTURE_REDESIGN.md`: internal Rust xtask
+  architecture redesign for moving repository automation toward domain modules,
+  parse-first options, pure planning seams, and auditable coverage exceptions.
 - `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md`: coordinated high-level plan
   for the Rust operation core, CLI, MCP, and Tauri/Astro studio GUI.
 - `agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`: current
-  parity-protected Rust/`just` migration classifications, dual-run report
-  surface, accepted differences, and verification expectations.
+  parity-protected Rust/`just` migration classifications, promoted/internal
+  command surfaces, accepted differences, and verification expectations.
 - `agent-docs/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`: current milestone 9
   command-surface inventory, package-script retirement policy, allowed Bun
   adapter rules, and remaining migration fallback plan.
@@ -1354,17 +1360,28 @@ suppressed output, or copied flags unless their behavior is understood and the
 reason is documented.
 
 `just` is the canonical human command router for repository workflows, Rust
-operations, and cross-tool QA orchestration. `package.json` is dependency
-metadata, not the executable command surface. The human-readable command map is
-`COMMANDS.md`. The machine-readable QA contract is
-`scripts/quality/qa-command-registry.ts`, which classifies every `just` recipe
-and maps CI jobs to local `just` commands or documented CI-only reasons.
-Update the registry, docs, and tests together when adding, removing, or
+operations, internal Rust task adapters, and cross-tool QA orchestration.
+`package.json` is dependency metadata, not the executable command surface. The
+human-readable command map is `COMMANDS.md`. Internal Rust task adapters in
+`crates/tpm-xtask/src/tasks.rs` own repository automation that should not be
+part of the user-facing `tpm` product CLI. Rust operations in
+`crates/tpm-operations/` own product-facing operation contracts. Update the
+command docs, Rust tests, and config tests together when adding, removing, or
 changing `just` recipes, command owners, or CI jobs.
 
 Use `just diagnostics-diff` when replacing or narrowing a risky QA command.
 Compare diagnostic codes, files, severities, messages, and counts rather than
 trusting exit-code parity alone.
+
+Before PR handoff, run the strongest relevant local gate and fix all automated
+failures. For normal code/config changes, run `just fix` when safe, then
+`just release-check`. For TypeScript, Astro, or Rust behavior changes, also run
+the matching coverage command (`just coverage-ts`, `just coverage-rust`, or
+aggregate `just coverage`), inspect any missing lines, and add meaningful tests
+or refactor weak seams before accepting a coverage exception. If a gate cannot
+run locally, retry with the appropriate permission when practical, then report
+the command, failure reason, and any narrower substitute checks in the final
+handoff.
 
 Current baseline commands:
 
@@ -1387,9 +1404,12 @@ Current baseline commands:
   mirrored test or documented accountability rule.
 - `just test-accountability-release`: run the same accountability check and
   fail on requested-permission exceptions.
-- `just coverage`: run unit tests with LCOV, then report code-like files that
-  are not represented by LCOV coverage, a mirrored accountability test, or an
-  approved exception.
+- `just coverage`: run all coverage review signals.
+- `just coverage-ts`: run TypeScript/Astro unit coverage with LCOV, then
+  report code-like files that are not represented by LCOV coverage, a mirrored
+  accountability test, or an approved exception.
+- `just coverage-rust`: run Rust coverage with missing-line output when
+  `cargo-llvm-cov` is installed.
 - `just typecheck`: run Astro checks while failing on warnings, then run
   TypeScript tool checks.
 - `just quality`: run the local quality path plus review-only signals.
@@ -1427,7 +1447,9 @@ This keeps mechanical formatting, import ordering, and safe lint autofixes out
 of the reasoning path. Markdown/MDX style is review-only; do not block author
 publishing on prose formatting if the content is valid and builds.
 
-If a check cannot be run, say so in the final handoff with the reason.
+If a check cannot be run, say so in the final handoff with the reason. Also
+report any coverage ignore annotations, coverage tool excludes, or `Coverage
+note:` comments added or relied on during the change.
 
 ## Coding Policy
 
@@ -1545,11 +1567,24 @@ leaky public interfaces. A coverage exception must be explicitly justified in a
 nearby code comment, reported during handoff, and accepted by the user after
 handoff. Do not silently leave testable code uncovered.
 
+Coverage ignores are exceptional design decisions, not cleanup tools. Prefer a
+test or a cleaner seam first. When ignoring coverage is genuinely necessary,
+use the narrowest supported mechanism and pair it with a nearby explanation of
+why the path is untestable or misleading to count. JavaScript/TypeScript
+ignore comments must include a reason. Rust's function/module
+`#[coverage(off)]` support is currently unstable, so stable-toolchain Rust code
+should rely on tests, refactors, and documented `Coverage note:` comments
+before using file-pattern excludes. Any file-pattern exclude must target only
+generated code, test harnesses, process entrypoints, or similarly untestable
+boundaries, and the rationale must be documented in the recipe or nearby code.
+
 Developer checks are practical iteration gates, not permission to leave
 coverage weak. Passing `just check` does not prove coverage is sufficient;
 developers must still add meaningful tests for every sensible behavior path
-they touch and push coverage upward wherever practical. `just coverage` is a
-broad review inventory, not a release gate.
+they touch and push coverage upward wherever practical. `just coverage-ts` and
+`just coverage-rust` are focused review inventories; `just coverage` runs both.
+Coverage is not a substitute for asking whether an uncovered branch points to a
+poor abstraction, dead code, duplicated policy, or an avoidable side effect.
 
 When a remaining uncovered path is genuinely a process boundary,
 generated-output boundary, browser auto-init guard, or similarly brittle

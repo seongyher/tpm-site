@@ -451,139 +451,128 @@ Source: `src/lib/source-artifacts.ts`.
 
 ## QA Commands And Domains
 
-Source: `justfile` and `scripts/quality/qa-command-registry.ts`.
+Source: `justfile`, `COMMANDS.md`, Rust QA operations, and Rust task adapters.
 
 ### Commands
 
-| Command                         | Domain             | Class         | Runtime  | Mutation         | CI       |
-| ------------------------------- | ------------------ | ------------- | -------- | ---------------- | -------- |
-| assets-duplicates               | assets             | investigation | fast     | none             | review   |
-| assets-locations                | assets             | focused       | fast     | none             | blocking |
-| assets-shared                   | assets             | focused       | fast     | none             | blocking |
-| assets-unused                   | assets             | investigation | fast     | none             | review   |
-| audit                           | security           | release       | medium   | none             | blocking |
-| audit-all                       | security           | investigation | medium   | none             | review   |
-| author-check                    | authoring          | focused       | fast     | none             | none     |
-| author-fix                      | authoring          | mutation      | fast     | source           | none     |
-| build                           | build              | release       | slow     | generated-output | blocking |
-| build-cloudflare                | build              | release       | slow     | generated-output | blocking |
-| build-optimize                  | build              | release       | slow     | generated-output | blocking |
-| build-pdf                       | build              | release       | slow     | generated-output | blocking |
-| build-raw                       | build              | release       | slow     | generated-output | blocking |
-| build-release                   | build              | release       | slow     | generated-output | blocking |
-| catalog-build                   | catalog            | focused       | medium   | generated-output | blocking |
-| catalog-check                   | catalog            | focused       | medium   | generated-output | blocking |
-| catalog-dev                     | catalog            | investigation | external | local-server     | none     |
-| catalog-preview                 | catalog            | investigation | external | local-server     | none     |
-| catalog-preview-fresh           | catalog            | focused       | medium   | generated-output | blocking |
-| check                           | orchestration      | focused       | slow     | none             | blocking |
-| check-fast                      | orchestration      | focused       | slow     | none             | blocking |
-| cli                             | rust               | focused       | medium   | none             | blocking |
-| content-check                   | content            | focused       | fast     | none             | blocking |
-| coverage                        | coverage           | investigation | medium   | coverage-output  | review   |
-| coverage-check                  | coverage           | investigation | medium   | coverage-output  | review   |
-| coverage-unit                   | coverage           | investigation | medium   | coverage-output  | review   |
-| coverage-verify                 | coverage           | investigation | medium   | coverage-output  | review   |
-| deadcode                        | dead-code          | focused       | medium   | none             | blocking |
-| default                         | command-surface    | focused       | fast     | none             | none     |
-| deploy-cloudflare               | deploy             | release       | external | external         | deploy   |
-| dev                             | development-server | investigation | external | local-server     | none     |
-| diagnostics-diff                | diagnostics        | investigation | fast     | none             | none     |
-| docs-check                      | docs               | focused       | medium   | source           | blocking |
-| docs-references                 | docs               | focused       | medium   | source           | blocking |
-| docs-references-check           | docs               | focused       | medium   | source           | blocking |
-| docs-site-build                 | docs-site          | focused       | slow     | generated-output | blocking |
-| docs-site-dev                   | docs-site          | focused       | slow     | generated-output | blocking |
-| docs-site-preview               | docs-site          | focused       | slow     | generated-output | blocking |
-| docs-site-preview-fresh         | docs-site          | focused       | slow     | generated-output | blocking |
-| fix                             | formatting         | mutation      | medium   | source           | none     |
-| format                          | formatting         | fast-local    | medium   | none             | blocking |
-| format-code                     | formatting         | fast-local    | medium   | none             | blocking |
-| format-code-write               | formatting         | mutation      | medium   | source           | none     |
-| format-markdown                 | formatting         | investigation | medium   | none             | review   |
-| format-markdown-write           | formatting         | mutation      | medium   | source           | none     |
-| format-write                    | formatting         | mutation      | medium   | source           | none     |
-| js-fix                          | formatting         | mutation      | medium   | source           | none     |
-| lint                            | lint               | fast-local    | medium   | none             | blocking |
-| lint-fix                        | formatting         | mutation      | medium   | source           | none     |
-| lint-markdown                   | lint               | focused       | medium   | none             | review   |
-| lint-mdx                        | lint               | focused       | medium   | none             | review   |
-| list                            | command-surface    | focused       | fast     | none             | none     |
-| markdown-fix                    | formatting         | mutation      | medium   | source           | none     |
-| media-images                    | assets             | focused       | fast     | none             | blocking |
-| migration-baseline              | rust               | focused       | medium   | none             | blocking |
-| output-verify                   | generated-output   | release       | medium   | none             | blocking |
-| package-check                   | command-surface    | focused       | fast     | none             | none     |
-| payload-check                   | payload            | release       | medium   | none             | blocking |
-| payload-critical-css-experiment | payload            | investigation | slow     | temp-output      | none     |
-| payload-minify-html-experiment  | payload            | investigation | slow     | temp-output      | none     |
-| payload-minify-html-experiments | payload            | investigation | slow     | temp-output      | none     |
-| payload-postbuild-experiments   | payload            | investigation | slow     | temp-output      | none     |
-| payload-report                  | payload            | investigation | slow     | temp-output      | none     |
-| payload-vite-experiments        | payload            | investigation | slow     | temp-output      | none     |
-| platform-check                  | platform           | focused       | fast     | none             | blocking |
-| preview                         | development-server | investigation | external | local-server     | none     |
-| preview-cloudflare              | deploy             | release       | external | external         | deploy   |
-| preview-cloudflare-fresh        | deploy             | release       | external | external         | deploy   |
-| preview-fresh                   | development-server | investigation | external | local-server     | none     |
-| preview-release-fresh           | development-server | investigation | external | local-server     | none     |
-| qa-registry                     | diagnostics        | investigation | fast     | none             | none     |
-| quality                         | orchestration      | focused       | slow     | none             | blocking |
-| quality-release                 | orchestration      | focused       | slow     | none             | blocking |
-| references-audit                | references         | investigation | medium   | temp-output      | none     |
-| references-bibtex-audit         | references         | investigation | medium   | temp-output      | none     |
-| references-catalog              | references         | investigation | medium   | temp-output      | none     |
-| references-migrate-mechanical   | references         | mutation      | medium   | source           | none     |
-| release-check                   | orchestration      | focused       | slow     | none             | blocking |
-| review-assets                   | assets             | investigation | fast     | none             | review   |
-| review-markdown                 | formatting         | investigation | medium   | none             | review   |
-| routes-redirects                | routes             | focused       | fast     | none             | blocking |
-| rust-cargo-check                | rust               | focused       | medium   | none             | blocking |
-| rust-check                      | rust               | focused       | medium   | none             | blocking |
-| rust-check-fast                 | rust               | focused       | medium   | none             | blocking |
-| rust-clippy                     | rust               | focused       | medium   | none             | blocking |
-| rust-coverage                   | rust               | investigation | medium   | coverage-output  | review   |
-| rust-deny                       | rust               | focused       | medium   | none             | blocking |
-| rust-doc                        | rust               | focused       | medium   | none             | blocking |
-| rust-doc-test                   | rust               | focused       | medium   | none             | blocking |
-| rust-fix                        | formatting         | mutation      | medium   | source           | none     |
-| rust-fmt                        | rust               | focused       | medium   | none             | blocking |
-| rust-fmt-write                  | formatting         | mutation      | medium   | source           | none     |
-| rust-nextest                    | rust               | investigation | medium   | coverage-output  | review   |
-| rust-test                       | rust               | focused       | medium   | none             | blocking |
-| secrets                         | security           | release       | medium   | none             | blocking |
-| setup                           | setup              | focused       | external | external         | none     |
-| setup-browser                   | setup              | focused       | external | external         | none     |
-| setup-js                        | setup              | focused       | external | external         | none     |
-| setup-rust                      | setup              | focused       | external | external         | none     |
-| site-doctor                     | site-config        | focused       | fast     | none             | blocking |
-| site-schema                     | site-config        | mutation      | fast     | source           | none     |
-| site-schema-check               | site-config        | focused       | fast     | none             | blocking |
-| starters-check                  | starters           | focused       | fast     | none             | blocking |
-| tags-check                      | content            | focused       | fast     | none             | blocking |
-| tags-normalize                  | authoring          | mutation      | fast     | source           | none     |
-| test                            | tests              | fast-local    | medium   | none             | blocking |
-| test-a11y                       | tests              | release       | slow     | generated-output | blocking |
-| test-a11y-built                 | tests              | focused       | medium   | none             | mixed    |
-| test-accountability             | tests              | fast-local    | medium   | none             | blocking |
-| test-accountability-release     | tests              | fast-local    | medium   | none             | blocking |
-| test-astro                      | tests              | fast-local    | medium   | none             | blocking |
-| test-catalog                    | catalog            | focused       | medium   | generated-output | blocking |
-| test-catalog-site-instance      | catalog            | focused       | medium   | generated-output | blocking |
-| test-config                     | tests              | fast-local    | medium   | none             | blocking |
-| test-docs-site                  | docs               | focused       | medium   | source           | blocking |
-| test-e2e                        | tests              | release       | slow     | generated-output | blocking |
-| test-e2e-built                  | tests              | focused       | medium   | none             | mixed    |
-| test-flake                      | tests              | investigation | slow     | none             | none     |
-| test-perf                       | tests              | release       | slow     | generated-output | blocking |
-| test-perf-built                 | tests              | focused       | medium   | none             | mixed    |
-| test-site-instance              | tests              | release       | slow     | generated-output | blocking |
-| test-unit                       | tests              | fast-local    | medium   | none             | blocking |
-| typecheck                       | typecheck          | fast-local    | medium   | none             | blocking |
-| typecheck-astro                 | typecheck          | fast-local    | medium   | none             | blocking |
-| typecheck-tools                 | typecheck          | fast-local    | medium   | none             | blocking |
-| validate-html                   | generated-output   | release       | medium   | none             | blocking |
-| verify                          | generated-output   | release       | medium   | none             | blocking |
+| Command                     | Domain             | Class         | Runtime  | Mutation         | CI       |
+| --------------------------- | ------------------ | ------------- | -------- | ---------------- | -------- |
+| assets-duplicates           | assets             | investigation | fast     | none             | review   |
+| assets-locations            | assets             | focused       | fast     | none             | blocking |
+| assets-shared               | assets             | focused       | fast     | none             | blocking |
+| assets-unused               | assets             | investigation | fast     | none             | review   |
+| audit                       | security           | release       | medium   | none             | blocking |
+| audit-all                   | security           | investigation | medium   | none             | review   |
+| author-check                | authoring          | focused       | fast     | none             | none     |
+| author-fix                  | authoring          | mutation      | fast     | source           | none     |
+| build                       | build              | release       | slow     | generated-output | blocking |
+| build-cloudflare            | build              | release       | slow     | generated-output | blocking |
+| build-optimize              | build              | release       | slow     | generated-output | blocking |
+| build-pdf                   | build              | release       | slow     | generated-output | blocking |
+| build-raw                   | build              | release       | slow     | generated-output | blocking |
+| build-release               | build              | release       | slow     | generated-output | blocking |
+| catalog-build               | catalog            | focused       | medium   | generated-output | blocking |
+| catalog-check               | catalog            | focused       | medium   | generated-output | blocking |
+| catalog-dev                 | catalog            | investigation | external | local-server     | none     |
+| catalog-preview             | catalog            | investigation | external | local-server     | none     |
+| catalog-preview-fresh       | catalog            | focused       | medium   | generated-output | blocking |
+| check                       | orchestration      | focused       | slow     | none             | blocking |
+| check-fast                  | orchestration      | focused       | slow     | none             | blocking |
+| cli                         | rust               | focused       | medium   | none             | blocking |
+| content-check               | content            | focused       | fast     | none             | blocking |
+| coverage                    | coverage           | investigation | medium   | coverage-output  | review   |
+| coverage-rust               | coverage           | investigation | medium   | coverage-output  | review   |
+| coverage-ts                 | coverage           | investigation | medium   | coverage-output  | review   |
+| deadcode                    | dead-code          | focused       | medium   | none             | blocking |
+| default                     | command-surface    | focused       | fast     | none             | none     |
+| deploy-cloudflare           | deploy             | release       | external | external         | deploy   |
+| dev                         | development-server | investigation | external | local-server     | none     |
+| diagnostics-diff            | diagnostics        | investigation | fast     | none             | none     |
+| docs-check                  | docs               | focused       | medium   | source           | blocking |
+| docs-references             | docs               | focused       | medium   | source           | blocking |
+| docs-references-check       | docs               | focused       | medium   | source           | blocking |
+| docs-site-build             | docs-site          | focused       | slow     | generated-output | blocking |
+| docs-site-dev               | docs-site          | focused       | slow     | generated-output | blocking |
+| docs-site-preview           | docs-site          | focused       | slow     | generated-output | blocking |
+| docs-site-preview-fresh     | docs-site          | focused       | slow     | generated-output | blocking |
+| fix                         | formatting         | mutation      | medium   | source           | none     |
+| format                      | formatting         | fast-local    | medium   | none             | blocking |
+| format-code                 | formatting         | fast-local    | medium   | none             | blocking |
+| format-code-write           | formatting         | mutation      | medium   | source           | none     |
+| format-markdown             | formatting         | investigation | medium   | none             | review   |
+| format-markdown-write       | formatting         | mutation      | medium   | source           | none     |
+| format-write                | formatting         | mutation      | medium   | source           | none     |
+| js-fix                      | formatting         | mutation      | medium   | source           | none     |
+| lint                        | lint               | fast-local    | medium   | none             | blocking |
+| lint-fix                    | formatting         | mutation      | medium   | source           | none     |
+| lint-markdown               | lint               | focused       | medium   | none             | review   |
+| lint-mdx                    | lint               | focused       | medium   | none             | review   |
+| list                        | command-surface    | focused       | fast     | none             | none     |
+| markdown-fix                | formatting         | mutation      | medium   | source           | none     |
+| media-images                | assets             | focused       | fast     | none             | blocking |
+| migration-baseline          | rust               | focused       | medium   | none             | blocking |
+| output-verify               | generated-output   | release       | medium   | none             | blocking |
+| package-check               | command-surface    | focused       | fast     | none             | none     |
+| payload-check               | payload            | release       | medium   | none             | blocking |
+| payload-report              | payload            | investigation | slow     | temp-output      | none     |
+| platform-check              | platform           | focused       | fast     | none             | blocking |
+| preview                     | development-server | investigation | external | local-server     | none     |
+| preview-cloudflare          | deploy             | release       | external | external         | deploy   |
+| preview-cloudflare-fresh    | deploy             | release       | external | external         | deploy   |
+| preview-fresh               | development-server | investigation | external | local-server     | none     |
+| preview-release-fresh       | development-server | investigation | external | local-server     | none     |
+| qa-registry                 | diagnostics        | investigation | fast     | none             | none     |
+| quality                     | orchestration      | focused       | slow     | none             | blocking |
+| quality-release             | orchestration      | focused       | slow     | none             | blocking |
+| release-check               | orchestration      | focused       | slow     | none             | blocking |
+| review-assets               | assets             | investigation | fast     | none             | review   |
+| review-markdown             | formatting         | investigation | medium   | none             | review   |
+| routes-redirects            | routes             | focused       | fast     | none             | blocking |
+| rust-cargo-check            | rust               | focused       | medium   | none             | blocking |
+| rust-check                  | rust               | focused       | medium   | none             | blocking |
+| rust-check-fast             | rust               | focused       | medium   | none             | blocking |
+| rust-clippy                 | rust               | focused       | medium   | none             | blocking |
+| rust-deny                   | rust               | focused       | medium   | none             | blocking |
+| rust-doc                    | rust               | focused       | medium   | none             | blocking |
+| rust-doc-test               | rust               | focused       | medium   | none             | blocking |
+| rust-fix                    | formatting         | mutation      | medium   | source           | none     |
+| rust-fmt                    | rust               | focused       | medium   | none             | blocking |
+| rust-fmt-write              | formatting         | mutation      | medium   | source           | none     |
+| rust-nextest                | rust               | investigation | medium   | coverage-output  | review   |
+| rust-test                   | rust               | focused       | medium   | none             | blocking |
+| secrets                     | security           | release       | medium   | none             | blocking |
+| setup                       | setup              | focused       | external | external         | none     |
+| setup-browser               | setup              | focused       | external | external         | none     |
+| setup-js                    | setup              | focused       | external | external         | none     |
+| setup-rust                  | setup              | focused       | external | external         | none     |
+| site-doctor                 | site-config        | focused       | fast     | none             | blocking |
+| site-schema                 | site-config        | mutation      | fast     | source           | none     |
+| site-schema-check           | site-config        | focused       | fast     | none             | blocking |
+| starters-check              | starters           | focused       | fast     | none             | blocking |
+| tags-check                  | content            | focused       | fast     | none             | blocking |
+| tags-normalize              | authoring          | mutation      | fast     | source           | none     |
+| test                        | tests              | fast-local    | medium   | none             | blocking |
+| test-a11y                   | tests              | release       | slow     | generated-output | blocking |
+| test-a11y-built             | tests              | focused       | medium   | none             | mixed    |
+| test-accountability         | tests              | fast-local    | medium   | none             | blocking |
+| test-accountability-release | tests              | fast-local    | medium   | none             | blocking |
+| test-astro                  | tests              | fast-local    | medium   | none             | blocking |
+| test-catalog                | catalog            | focused       | medium   | generated-output | blocking |
+| test-catalog-site-instance  | catalog            | focused       | medium   | generated-output | blocking |
+| test-config                 | tests              | fast-local    | medium   | none             | blocking |
+| test-docs-site              | docs               | focused       | medium   | source           | blocking |
+| test-e2e                    | tests              | release       | slow     | generated-output | blocking |
+| test-e2e-built              | tests              | focused       | medium   | none             | mixed    |
+| test-flake                  | tests              | investigation | slow     | none             | none     |
+| test-perf                   | tests              | release       | slow     | generated-output | blocking |
+| test-perf-built             | tests              | focused       | medium   | none             | mixed    |
+| test-site-instance          | tests              | release       | slow     | generated-output | blocking |
+| test-unit                   | tests              | fast-local    | medium   | none             | blocking |
+| typecheck                   | typecheck          | fast-local    | medium   | none             | blocking |
+| typecheck-astro             | typecheck          | fast-local    | medium   | none             | blocking |
+| typecheck-tools             | typecheck          | fast-local    | medium   | none             | blocking |
+| validate-html               | generated-output   | release       | medium   | none             | blocking |
+| verify                      | generated-output   | release       | medium   | none             | blocking |
 
 ### Domain Coverage
 
@@ -596,7 +585,7 @@ Source: `justfile` and `scripts/quality/qa-command-registry.ts`.
 | build              | just build, just build-release                                   | just release-check                       | build                                                | Production build, optimization, PDF, and deploy artifact output.                                                          |
 | catalog            | just catalog-check, just test-catalog                            | just release-check                       | catalog                                              | Component catalog accountability, builds, and fixture coverage.                                                           |
 | orchestration      | just check-fast, just check, just quality                        | just release-check, just quality-release | quality                                              | Local and release QA command orchestration.                                                                               |
-| coverage           | just coverage-check, just coverage-verify                        | just quality-release                     | coverage-review                                      | LCOV and broad source coverage accountability.                                                                            |
+| coverage           | just coverage, just coverage-ts, just coverage-rust               | just quality-release                     | coverage-review                                      | TypeScript/Astro LCOV, Rust coverage, and broad source coverage accountability.                                            |
 | dead-code          | just deadcode                                                    | just release-check                       | quality                                              | Unused file, export, dependency, binary, and command detection.                                                           |
 | diagnostics        | just diagnostics-diff, just qa-registry                          |                                          |                                                      | Structured diagnostic snapshot comparison and QA command reports.                                                         |
 | docs               | just docs-check, just docs-references-check                      | just release-check                       | quality, docs-site                                   | Generated platform reference drift and docs-site verification.                                                            |
@@ -605,11 +594,10 @@ Source: `justfile` and `scripts/quality/qa-command-registry.ts`.
 | docs-site          | just docs-site-build, just test-docs-site                        | just release-check                       | docs-site                                            | Public documentation/example site validation.                                                                             |
 | formatting         | just format, just format-code, just format-markdown              | just release-check, just quality-release | quality, markdown-review                             | Code/config formatting and Markdown review.                                                                               |
 | lint               | just lint, just lint-markdown, just lint-mdx                     | just release-check, just quality-release | quality, markdown-review                             | ESLint, Markdown, and MDX review.                                                                                         |
-| payload            | just payload-report                                              | just payload-check, just release-check   | lighthouse                                           | Payload measurement, deterministic route-class budgets, and optimization experiments.                                     |
+| payload            | just payload-report                                              | just payload-check, just release-check   | lighthouse                                           | Payload measurement and deterministic route-class budgets.                                                                |
 | platform           | just platform-check                                              | just release-check                       | quality                                              | Platform/site boundary contract checks.                                                                                   |
-| references         | just references-audit, just references-bibtex-audit              |                                          |                                                      | Citation, reference, and bibliography maintenance.                                                                        |
 | routes             | just routes-redirects                                            | just release-check                       | quality                                              | Route and redirect policy reporting.                                                                                      |
-| rust               | just rust-check, just rust-coverage, just rust-nextest           | just rust-check                          | rust, rust-coverage-review                           | Rust workspace checks, operation-core tests, blocking supply-chain policy, and review-only Rust coverage/nextest signals. |
+| rust               | just rust-check, just rust-nextest                               | just rust-check                          | rust, coverage-rust-review                           | Rust workspace checks, operation-core tests, blocking supply-chain policy, and review-only nextest signal.                 |
 | security           | just audit, just secrets                                         | just release-check, just quality-release | audit, audit-review, dependency-review, secrets      | Dependency audit, dependency review, and secrets scanning.                                                                |
 | site-config        | just site-doctor, just site-schema-check                         | just release-check                       | quality                                              | Site configuration validation and schema drift checks.                                                                    |
 | starters           | just starters-check                                              | just release-check                       | quality                                              | Maintained starter template source and distribution contracts.                                                            |
