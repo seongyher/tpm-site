@@ -43,7 +43,7 @@ js-release-check:
     bun --silent run check:release
 
 # Run all blocking Rust gates.
-rust-check: rust-fmt rust-cargo-check rust-clippy rust-doc-test rust-test
+rust-check: rust-fmt rust-cargo-check rust-clippy rust-doc-test rust-test rust-deny
 
 # Run the fastest blocking Rust gate.
 rust-check-fast:
@@ -79,9 +79,9 @@ rust-coverage:
     @rustup component list --installed | grep -q '^llvm-tools' || (echo 'llvm-tools-preview is required for Rust coverage on the active toolchain. Install it with: rustup component add llvm-tools-preview' >&2; exit 127)
     cargo llvm-cov --workspace --all-features --summary-only
 
-# Run cargo-deny supply-chain review. Review-only; not part of `just rust-check`.
+# Run cargo-deny supply-chain policy.
 rust-deny:
-    @command -v cargo-deny >/dev/null 2>&1 || (echo 'cargo-deny is review-only and is not installed. Install it with: cargo install cargo-deny' >&2; exit 127)
+    @command -v cargo-deny >/dev/null 2>&1 || (echo 'cargo-deny is required for the Rust supply-chain gate. Install it with: cargo install cargo-deny --locked' >&2; exit 127)
     cargo deny check
 
 # Run cargo-nextest. Review-only until the tool is installed and promoted.

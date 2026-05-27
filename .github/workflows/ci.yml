@@ -33,6 +33,31 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run check
 
+  rust:
+    name: Rust
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
+      - uses: taiki-e/install-action@cargo-deny
+      - run: rustup show
+      - run: just rust-check
+
+  rust-coverage-review:
+    name: Rust coverage review
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: rustup component add llvm-tools-preview
+      - run: just rust-coverage
+
   markdown-review:
     name: Markdown style review
     continue-on-error: true
@@ -283,6 +308,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs:
       - quality
+      - rust
       - build
       - browser
       - catalog

@@ -36,7 +36,7 @@ const config = {
     "public/**",
     "test-results/**",
   ],
-  ignoreBinaries: ["gitleaks"],
+  ignoreBinaries: ["gitleaks", "just"],
   ignoreDependencies: [
     "@typescript-eslint/parser",
     "@tailwindcss/typography",

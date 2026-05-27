@@ -370,6 +370,36 @@ export const qaCommandGroups = [
   },
   {
     ciUsage: "blocking",
+    class: "focused",
+    domain: "rust",
+    mutation: "none",
+    runtime: "medium",
+    scope:
+      "Blocking additive Rust workspace formatting, type, lint, doctest, unit-test, and supply-chain gates.",
+    scripts: ["rust:check", "rust:deny"],
+  },
+  {
+    ciUsage: "review",
+    class: "investigation",
+    domain: "rust",
+    mutation: "coverage-output",
+    runtime: "medium",
+    scope:
+      "Review-only Rust coverage signal for operation-core and future CLI/MCP/Tauri crates.",
+    scripts: ["rust:coverage"],
+  },
+  {
+    ciUsage: "review",
+    class: "investigation",
+    domain: "rust",
+    mutation: "none",
+    runtime: "medium",
+    scope:
+      "Review-only alternate Rust test-runner signal until nextest is promoted.",
+    scripts: ["rust:nextest"],
+  },
+  {
+    ciUsage: "blocking",
     class: "release",
     domain: "security",
     mutation: "none",
@@ -500,6 +530,29 @@ export const qaCiJobRegistry = [
     job: "quality",
     localScripts: ["check"],
     notes: "Main pull request quality gate.",
+    parity: "exact",
+    workflow: ".github/workflows/ci.yml",
+  },
+  {
+    blocking: true,
+    ciCommandSnippets: ["taiki-e/install-action@cargo-deny", "just rust-check"],
+    job: "rust",
+    localScripts: ["rust:check", "rust:deny"],
+    notes:
+      "Additive Rust workspace and supply-chain gate for operation-core and CLI foundations.",
+    parity: "exact",
+    workflow: ".github/workflows/ci.yml",
+  },
+  {
+    blocking: false,
+    ciCommandSnippets: [
+      "taiki-e/install-action@cargo-llvm-cov",
+      "just rust-coverage",
+    ],
+    job: "rust-coverage-review",
+    localScripts: ["rust:coverage"],
+    notes:
+      "Review-only Rust coverage signal for operation-core and future CLI foundations.",
     parity: "exact",
     workflow: ".github/workflows/ci.yml",
   },
@@ -769,6 +822,14 @@ export const qaDomainCoverageRegistry = [
     focusedScripts: ["references:audit", "references:bibtex:audit"],
     purpose: "Citation, reference, and bibliography maintenance.",
     releaseScripts: [],
+  },
+  {
+    ciJobs: ["rust", "rust-coverage-review"],
+    domain: "rust",
+    focusedScripts: ["rust:check", "rust:coverage"],
+    purpose:
+      "Additive Rust workspace checks, operation-core tests, blocking supply-chain policy, and review-only Rust coverage/nextest signals.",
+    releaseScripts: ["rust:check"],
   },
   {
     ciJobs: ["audit", "audit-review", "dependency-review", "secrets"],
