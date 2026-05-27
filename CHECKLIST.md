@@ -124,6 +124,7 @@ replacing existing Bun/Astro behavior.
 - [x] Attach relevant docs to completed Linear issues and move completed
       issues to In Review.
 - [x] Summarize completed work and remaining blockers.
+
 ## Active Milestone 6: Static Blog Studio Product Planning
 
 This phase completes Linear milestone 6. It is design and planning work only:
