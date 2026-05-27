@@ -124,6 +124,123 @@ replacing existing Bun/Astro behavior.
 - [x] Attach relevant docs to completed Linear issues and move completed
       issues to In Review.
 - [x] Summarize completed work and remaining blockers.
+## Active Milestone 6: Static Blog Studio Product Planning
+
+This phase completes Linear milestone 6. It is design and planning work only:
+product architecture, source/workspace contracts, provider capability
+matrices, interface contracts, test plans, and implementation-ready design
+packets. It must not implement the production studio GUI, provider runtime,
+CLI command behavior, MCP server, credentialed publish flow, or real parity
+suite.
+
+### Milestone 600: Milestone 6 Context And Dependency Plan
+
+- [x] Read the engineering philosophy, platform roadmap, studio product,
+      workspace, adapter, extension, credential/security, deployment, and
+      studio-readiness docs.
+- [x] Read the Linear milestone 6 parent and child issue requirements.
+- [x] Confirm `IRK-136` is already complete and the remaining milestone 6 work
+      is design-only.
+- [x] Add a dependency-ordered checklist for every remaining milestone 6 issue.
+
+### Milestone 601: IRK-137 Schema-Driven Editing Surfaces
+
+- [x] Re-check the issue requirements against the studio readiness and product
+      vision docs.
+- [x] Write the schema-driven editing, media, metadata, and preview surface
+      design packet.
+- [x] Verify the design covers default users, power users, complex publishers,
+      source-view escape hatches, accessibility, responsive behavior,
+      diagnostics, and future tests.
+- [x] Attach the design packet to `IRK-137` and move the issue to review.
+
+### Milestone 602: IRK-146 Provider Capability Matrix
+
+- [x] Re-check the issue requirements against the adapter, extension,
+      deployment, and credential/security docs.
+- [x] Write the provider capability matrix and adapter sequencing design
+      packet.
+- [x] Verify unsupported operations, credential scopes, dry-run support,
+      reversibility, diagnostics, and Milestone 10 runtime handoff are clear.
+- [x] Attach the design packet to `IRK-146` and move the issue to review.
+
+### Milestone 603: IRK-138 Publish, Rollback, Credential, And Audit Flows
+
+- [x] Re-check the issue requirements after `IRK-146` capability decisions are
+      documented.
+- [x] Write the provider-backed publish, rollback, credential, and audit
+      workflow design packet.
+- [x] Verify direct publish remains the default, review remains optional, and
+      provider mechanics do not become the product model.
+- [x] Attach the design packet to `IRK-138` and move the issue to review.
+
+### Milestone 604: IRK-140 Headless Studio Core Contract
+
+- [x] Re-check the issue requirements after `IRK-146` capability decisions are
+      documented.
+- [x] Write the headless studio core and interface adapter contract.
+- [x] Verify GUI, CLI, MCP, CI, and future integrations share operation result,
+      diagnostic, capability, audit, preview, and release contracts.
+- [x] Attach the design packet to `IRK-140` and move the issue to review.
+
+### Milestone 605: IRK-147 Progressive Adoption Migrations
+
+- [x] Re-check the issue requirements after the workspace and capability
+      contracts are documented.
+- [x] Write the progressive adoption migration and upgrade-path design packet.
+- [x] Verify dry-run migrations, rollback/export, media externalization,
+      collaboration, automated publishing, and complex-provider upgrade paths
+      preserve source truth.
+- [x] Attach the design packet to `IRK-147` and move the issue to review.
+
+### Milestone 606: IRK-141 Studio CLI Product Contract
+
+- [x] Re-check the issue requirements after the headless core contract is
+      documented.
+- [x] Write the CLI product contract with command families, help shape,
+      output modes, exit codes, workspace discovery, and safety classes.
+- [x] Verify the CLI is a first-class adapter over the headless studio core,
+      not a wrapper around current `bun run` scripts.
+- [x] Attach the design packet to `IRK-141` and move the issue to review.
+
+### Milestone 607: IRK-142 MCP Server And Agent Safety Model
+
+- [x] Re-check the issue requirements after the headless core contract is
+      documented.
+- [x] Write the MCP server and agent safety model.
+- [x] Verify read-only defaults, plan/apply gates, scopes, audit, secret
+      redaction, provider capabilities, and no-shell/no-provider-bypass rules.
+- [x] Attach the design packet to `IRK-142` and move the issue to review.
+
+### Milestone 608: IRK-139 Mocked-Provider Studio Product Test Plan
+
+- [x] Re-check the issue requirements after editing, publishing, capability,
+      and headless-core designs are documented.
+- [x] Write the mocked-provider studio product test plan.
+- [x] Verify personas, workflows, mock providers, accessibility, recovery,
+      security, output parity, and later milestone ownership are explicit.
+- [x] Attach the design packet to `IRK-139` and move the issue to review.
+
+### Milestone 609: IRK-143 GUI, CLI, And MCP Parity Fixture Strategy
+
+- [x] Re-check the issue requirements after product test, CLI, and MCP designs
+      are documented.
+- [x] Write the GUI/CLI/MCP parity fixture strategy.
+- [x] Verify cross-interface fixtures, intentional interface differences,
+      security gates, operation-result contracts, and later milestone
+      ownership are explicit.
+- [x] Attach the design packet to `IRK-143` and move the issue to review.
+
+### Milestone 610: Milestone 6 Verification And Linear Closeout
+
+- [x] Update project docs or agent guidance so the new milestone 6 design
+      packets are discoverable.
+- [x] Run focused documentation and markdown checks appropriate for design-only
+      changes.
+- [x] Confirm all remaining milestone 6 child issues are in review with
+      relevant documentation attached.
+- [x] Attach relevant milestone 6 documentation to parent issue `IRK-34`,
+      update project status where useful, and move the parent issue to review.
 
 ### Milestone 810: Rust Strictness Promotion
 
