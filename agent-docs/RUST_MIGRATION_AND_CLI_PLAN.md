@@ -476,7 +476,9 @@ Verification:
 
 Deliverables:
 
-- `just` and package scripts call Rust commands for promoted domains;
+- `just` calls Rust commands for promoted domains; package scripts stay only
+  where the JS/Astro ecosystem remains the implementation owner or a temporary
+  compatibility shim is explicitly approved;
 - old TypeScript scripts are removed, parked, or kept as explicit fallback for
   one release cycle;
 - generated docs and command references point to the Rust CLI.
@@ -650,7 +652,8 @@ Issue candidates:
 Acceptance for every promotion:
 
 - old and new outputs have passed dual-run parity;
-- package scripts and `just` call the promoted command;
+- `just` calls the promoted command, with no package-script wrapper unless a
+  temporary compatibility shim has an owner and retirement trigger;
 - release checks pass;
 - docs name the new command;
 - rollback path is documented;

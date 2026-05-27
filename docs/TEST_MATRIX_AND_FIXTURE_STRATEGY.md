@@ -30,7 +30,7 @@ integration behavior that lower layers cannot prove.
 | Docs-site checks                   | `bun run test:docs-site`                                                                           | Validates and builds the public documentation example site as a separate site instance.                                |
 | Fixture site checks                | `bun run test:site-instance`                                                                       | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                                           |
 | Coverage checks                    | `bun run coverage`, `bun run coverage:check`                                                       | Review and enforcement surface for unit-level coverage expectations.                                                   |
-| Rust workspace checks              | `just rust-check`, `bun run rust:check`, direct `cargo fmt/check/clippy/doc/test` commands         | Additive Rust formatting, type, lint, rustdoc, doctest, unit-test, and CI gates before Rust replaces any Bun behavior. |
+| Rust workspace checks              | `just rust-check`, direct `cargo fmt/check/clippy/doc/test` commands                               | Additive Rust formatting, type, lint, rustdoc, doctest, unit-test, and CI gates before Rust replaces any Bun behavior. |
 | Quality dispatcher                 | `bun run quality`, `bun run quality:release`                                                       | Sequential blocking checks followed by nonblocking review checks.                                                      |
 | Payload and optimization workbench | `bun run payload:check`, `bun run payload:*`                                                       | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments.             |
 
@@ -143,10 +143,11 @@ The command ownership manifest is implemented in
 
 - `qaCommandGroups` classifies every package script by command class, domain,
   runtime, mutation behavior, CI usage, and purpose.
-- `qaCiJobRegistry` maps CI jobs back to local commands or documented CI-only
-  reasons.
+- `qaCiJobRegistry` maps CI jobs back to local package scripts, `just`
+  commands, or documented CI-only reasons.
 - `qaDomainCoverageRegistry` maps every command domain to focused/release/CI
-  evidence, or a documented exception for investigation-only/manual domains.
+  evidence, including `just` commands for promoted Rust gates, or a documented
+  exception for investigation-only/manual domains.
 - `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
   aligned with `package.json` and CI workflows.
 - `tests/config/fixture-site-matrix.test.ts` keeps the minimal external site

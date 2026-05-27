@@ -1,11 +1,13 @@
 # Package Scripts
 
-Run scripts with `bun run <script>`. The package scripts are the executable
-source of truth for local checks and GitHub Actions. The typed QA registry in
-`scripts/quality/qa-command-registry.ts` classifies every script, records CI
-parity expectations, and maps command domains to focused/release/CI evidence or
-a documented exception; `test:config` fails when the registry drifts from
-`package.json`, CI workflows, or domain-coverage accountability.
+Run scripts with `bun run <script>`. Package scripts remain the executable
+surface for the current Astro, TypeScript, browser, content, and generated-site
+tooling. Rust and future platform-owned commands are routed through `just`
+instead of package-script wrappers. The typed QA registry in
+`scripts/quality/qa-command-registry.ts` classifies every package script,
+records CI parity expectations, and maps command domains to focused/release/CI
+evidence or a documented exception; `test:config` fails when the registry
+drifts from `package.json`, CI workflows, or domain-coverage accountability.
 
 Dependency audit, secret scan, lockfile, third-party script, and generated
 secret-output expectations are documented in
@@ -96,10 +98,6 @@ Script sources are grouped by responsibility:
 | `references:migrate:mechanical`   | Dry-runs mechanical article-reference cleanup; use `-- --write` to convert simple raw HTML links and simple paragraph wrappers while leaving citation classification for review.                                                |
 | `review:assets`                   | Runs duplicate and unused image review checks without blocking publishing.                                                                                                                                                      |
 | `review:markdown`                 | Runs Markdown/MDX style checks without blocking publishing.                                                                                                                                                                     |
-| `rust:check`                      | Runs the additive Rust workspace blocking gate through `just rust-check`: formatting, type checks, strict Clippy, rustdoc, doctests, unit tests, and cargo-deny supply-chain policy.                                            |
-| `rust:coverage`                   | Runs the review-only Rust coverage signal through `just rust-coverage` when `cargo-llvm-cov` and `llvm-tools-preview` are installed.                                                                                            |
-| `rust:deny`                       | Runs the blocking Rust supply-chain policy through `just rust-deny` when `cargo-deny` is installed.                                                                                                                             |
-| `rust:nextest`                    | Runs the review-only alternate Rust test runner through `just rust-nextest` when `cargo-nextest` is installed.                                                                                                                  |
 | `secrets`                         | Runs Gitleaks against git history. Blocking security gate when available.                                                                                                                                                       |
 | `site:doctor`                     | Validates site-instance config relationships that schema parsing alone cannot catch, with webmaster-readable repair guidance.                                                                                                   |
 | `site:schema`                     | Generates `site/config/site.schema.json` from the platform Zod config schema for editors and future GUI tooling.                                                                                                                |

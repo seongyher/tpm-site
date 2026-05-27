@@ -15,6 +15,108 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 9: Dual-Run Rust Migrations And Command Promotion
+
+This phase migrates deterministic TypeScript/Bun tooling toward Rust and `just`
+through observed behavior, parity-protected cleanup, dual-run reports,
+accepted-difference documentation, and command promotion. The goal is not a
+blind port. Current scripts provide baseline evidence; promoted replacements
+should preserve correct and compatibility-critical behavior while cleaning up
+accidental, duplicated, overbroad, or obsolete script behavior.
+
+### Milestone 900: Milestone 9 Planning And Guardrails
+
+- [x] Re-read milestone 9 Linear issues, Rust operation docs, QA fixture docs,
+      command-router docs, and relevant current scripts.
+- [x] Confirm blockers from milestone 8 are complete and identify any narrow
+      blockers discovered during implementation.
+- [x] Keep this checklist aligned with issue-level milestones and any new
+      sub-milestones discovered while implementing.
+
+### Milestone 901: IRK-170 Baseline And Script Classification
+
+- [x] Inventory first-migration script domains and classify each as Rust
+      replacement, JS/Astro ecosystem command behind `just`, obsolete/delete
+      candidate, or temporary shim.
+- [x] Capture current behavior, output shape, known quirks, cleanup targets,
+      parity targets, and accepted-difference policy in a durable report.
+- [x] Add tests or fixtures that keep the migration baseline deterministic and
+      useful for downstream dual-run work.
+- [x] Verify downstream Rust migration work has concrete parity and cleanup
+      targets before marking IRK-170 complete.
+
+### Milestone 902: IRK-171 Dual-Run Site Doctor Operation
+
+- [x] Implement a Rust site-doctor operation over shared diagnostics and
+      workspace/source contracts.
+- [x] Compare the Rust operation against current `site:doctor` behavior for
+      the active site and fixtures.
+- [x] Document accepted differences and ensure TypeScript remains source of
+      truth until promotion.
+- [x] Add focused Rust and command-surface tests for success, warning, and
+      failure paths.
+
+### Milestone 903: IRK-172 Dual-Run Image Asset Verification
+
+- [x] Implement Rust image asset inventory and location/shared/unused/duplicate
+      verification report shells where practical.
+- [x] Compare Rust evidence against current asset scripts and document accepted
+      non-ported areas or intentional cleanup differences.
+- [x] Keep media policy output compatible with future media inventory commands.
+- [x] Add fixture or operation tests for ignored paths, valid assets, and
+      violations.
+
+### Milestone 904: IRK-173 Dual-Run Redirect Generation And Route Policy
+
+- [x] Implement Rust redirect inventory/generation checks and Cloudflare static
+      redirect policy limits.
+- [x] Compare Rust redirect output against current generated `_redirects`
+      output or document accepted differences.
+- [x] Keep route/redirect policy provider-neutral enough for deployment
+      adapters.
+- [x] Add tests for legacy permalink parsing, configured redirects, duplicate
+      handling, and output formatting.
+
+### Milestone 905: IRK-174 Dual-Run QA Registry And Diagnostic Diff
+
+- [x] Implement Rust QA command registry and diagnostic diff representations
+      that mirror or improve current TypeScript behavior.
+- [x] Compare registry and diff outputs against current script behavior.
+- [x] Preserve CI/local parity visibility and avoid weakening existing gates.
+- [x] Add tests for command classification, CI mapping, diagnostic comparison,
+      and intentional cleanup decisions.
+
+### Milestone 906: IRK-175 Generated-Output Verification Report Bridge
+
+- [x] Add a Rust-owned generated-output report shell without replacing the
+      existing verifier wholesale.
+- [x] Bridge selected current verifier evidence into shared diagnostics/report
+      shape where practical.
+- [x] Identify verifier modules to port later and document accepted non-ported
+      areas.
+- [x] Add tests proving the report shape is useful for release reports, CLI,
+      GUI, MCP, and CI consumers.
+
+### Milestone 907: IRK-176 Promote Proven Rust Commands And Retire Script Debt
+
+- [x] Promote only Rust commands with parity evidence or documented accepted
+      improvements.
+- [x] Update `just`, CI/local parity metadata, package-script inventory, docs,
+      and agent guidance for promoted command ownership.
+- [x] Remove safe `package.json` script debt and classify any remaining Bun
+      usage as temporary migration debt or JS/Astro ecosystem requirement.
+- [x] Verify release checks pass and no source-content behavior changed without
+      migration notes.
+
+### Milestone 908: Milestone 9 Linear Closeout
+
+- [x] Run focused Rust, QA registry, docs, and package-script checks.
+- [x] Run the full release gate and fix any issues.
+- [x] Attach relevant docs to Linear issues and move completed milestone 9
+      issues to In Review.
+- [x] Summarize completed work, accepted differences, remaining script debt,
+      and follow-up blockers.
+
 ## Active Milestone 8: Operation Core And CLI Vertical Slice
 
 This phase implements as much of Linear milestone 8 as is currently unblocked.

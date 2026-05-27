@@ -577,17 +577,24 @@ function qaCommandReferenceSection(): string[] {
     "### Domain Coverage",
     "",
     table(
-      ["Domain", "Focused scripts", "Release scripts", "CI jobs", "Purpose"],
+      ["Domain", "Focused evidence", "Release evidence", "CI jobs", "Purpose"],
       qaDomainCoverageRegistry.map((entry) => [
         entry.domain,
-        entry.focusedScripts.join(", "),
-        entry.releaseScripts.join(", "),
+        qaEvidenceLabel(entry.focusedScripts, entry.focusedCommands ?? []),
+        qaEvidenceLabel(entry.releaseScripts, entry.releaseCommands ?? []),
         entry.ciJobs.join(", "),
         entry.purpose,
       ]),
     ),
     "",
   ];
+}
+
+function qaEvidenceLabel(
+  scripts: readonly string[],
+  commands: readonly string[],
+): string {
+  return [...scripts, ...commands].join(", ");
 }
 
 function schemaFields(schema: unknown): JsonSchemaField[] {

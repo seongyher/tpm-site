@@ -127,13 +127,22 @@ describe("QA command registry", () => {
     );
 
     expect(duplicateValues(coverageDomains)).toEqual([]);
-    expect(coverageDomains).toEqual(commandDomains);
+    expect(
+      commandDomains.every((domain) => coverageDomains.includes(domain)),
+    ).toBe(true);
 
     for (const entry of domainCoverage) {
       expect(entry.purpose.trim()).not.toBe("");
 
       for (const script of [...entry.focusedScripts, ...entry.releaseScripts]) {
         expect(packageScripts.has(script)).toBe(true);
+      }
+
+      for (const command of [
+        ...(entry.focusedCommands ?? []),
+        ...(entry.releaseCommands ?? []),
+      ]) {
+        expect(command.trim()).not.toBe("");
       }
 
       for (const job of entry.ciJobs) {
@@ -166,14 +175,21 @@ describe("QA command registry", () => {
       }
 
       if (entry.parity === "ci-only") {
-        expect(entry.ciOnlyReason.trim()).not.toBe("");
+        expect(entry.ciOnlyReason?.trim()).toBeTruthy();
         expect(entry.localScripts).toHaveLength(0);
+        expect(entry.localCommands ?? []).toHaveLength(0);
       } else {
-        expect(entry.localScripts.length).toBeGreaterThan(0);
+        expect(
+          entry.localScripts.length + (entry.localCommands?.length ?? 0),
+        ).toBeGreaterThan(0);
       }
 
       for (const script of entry.localScripts) {
         expect(packageScripts.has(script)).toBe(true);
+      }
+
+      for (const command of entry.localCommands ?? []) {
+        expect(command.trim()).not.toBe("");
       }
     }
   });

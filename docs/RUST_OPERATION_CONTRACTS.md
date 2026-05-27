@@ -120,17 +120,25 @@ An operation result is a serializable envelope with:
 Operation IDs are lowercase stable identifiers such as `workspace.status`.
 They should name platform operations, not UI buttons or provider calls.
 
-Current first-slice operations:
+Current operations:
 
-| Operation ID       | Purpose                                                                                  |
-| ------------------ | ---------------------------------------------------------------------------------------- |
-| `workspace.status` | Report discovered workspace source roots, required roots, source inventory, and health.  |
-| `workspace.check`  | Run the first Rust workspace diagnostic check over the same operation envelope.          |
-| `workspace.doctor` | Explain workspace diagnostics and remediations through the shared diagnostic model.      |
-| `release.inspect`  | Inspect the conventional generated-output root and report release-readiness diagnostics. |
+| Operation ID          | Purpose                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| `workspace.status`    | Report discovered workspace source roots, required roots, source inventory, and health.  |
+| `workspace.check`     | Run the first Rust workspace diagnostic check over the same operation envelope.          |
+| `workspace.doctor`    | Explain workspace diagnostics and remediations through the shared diagnostic model.      |
+| `site.doctor`         | Run the dual-run Rust site-doctor report over shared workspace diagnostics.              |
+| `migration.baseline`  | Report milestone 9 script-domain classifications and migration cleanup targets.          |
+| `media.images`        | Run the dual-run Rust image asset inventory and verification report.                     |
+| `routes.redirects`    | Run the dual-run Rust redirect inventory and Cloudflare static redirect policy report.   |
+| `qa.registry`         | Report QA command ownership, migration domains, and package-wrapper debt.                |
+| `qa.diagnostics-diff` | Compare normalized diagnostic snapshots using the shared operation envelope.             |
+| `output.verify`       | Bridge generated-output inventory into shared diagnostics without replacing verifiers.   |
+| `release.inspect`     | Inspect the conventional generated-output root and report release-readiness diagnostics. |
 
-These operations are intentionally narrow. They prove CLI/GUI/MCP/CI contract
-shape without claiming parity with the existing Bun/Astro release checks.
+Dual-run operations are intentionally report-first. They prove CLI/GUI/MCP/CI
+contract shape and capture parity evidence without claiming source-of-truth
+status over the existing Bun/Astro release checks until promotion.
 
 The current requesting interfaces are:
 

@@ -137,6 +137,9 @@ behavior until a later parity milestone explicitly promotes a Rust command.
   QA strategy.
 - `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md`: coordinated high-level plan
   for the Rust operation core, CLI, MCP, and Tauri/Astro studio GUI.
+- `agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`: current
+  parity-protected Rust/`just` migration classifications, dual-run report
+  surface, accepted differences, and verification expectations.
 - `agent-docs/rust-migration-research/RUST_QA_TOOLING_EVALUATION.md`:
   source-checked Rust QA/static-analysis tooling evaluation, adoption timing,
   and blocking versus review-only gate guidance.
@@ -1338,12 +1341,15 @@ Keep QA commands simple and transparent. Do not add clever wrapper scripts,
 suppressed output, or copied flags unless their behavior is understood and the
 reason is documented.
 
-The executable command surface is `package.json`. The human-readable command
-map is `PACKAGE_SCRIPTS.md`. The machine-readable QA contract is
-`scripts/quality/qa-command-registry.ts`, which classifies package scripts and
-maps CI jobs to local reproduction commands or documented CI-only reasons.
-Update the registry, docs, and tests together when adding, removing, or changing
-package scripts or CI jobs.
+`just` is the canonical human command router for Rust and cross-tool QA
+orchestration. `package.json` remains the executable command surface for the
+current Astro, TypeScript, content, browser, and generated-site tooling. The
+human-readable package-script map is `PACKAGE_SCRIPTS.md`. The
+machine-readable QA contract is `scripts/quality/qa-command-registry.ts`, which
+classifies package scripts and maps CI jobs to local package scripts, `just`
+commands, or documented CI-only reasons. Update the registry, docs, and tests
+together when adding, removing, or changing package scripts, `just`-owned
+command owners, or CI jobs.
 
 Use `scripts/quality/diagnostic-diff.ts` through `bun run diagnostics:diff`
 when replacing or narrowing a risky QA command. Compare diagnostic codes, files,

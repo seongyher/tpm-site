@@ -1,5 +1,12 @@
 //! Shared operation request and result envelopes for the TPM publishing platform.
 
+mod generated_output;
+mod media;
+mod migration;
+mod qa;
+mod redirects;
+mod site_doctor;
+
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::fs;
 use std::io;
@@ -10,6 +17,15 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tpm_core::Severity;
 use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticLocation, DiagnosticReport};
 use tpm_workspace::{WorkspaceContext, WorkspaceDiscoveryError};
+
+pub use generated_output::run_generated_output_bridge;
+pub use media::run_image_asset_verification;
+pub use migration::{
+    ScriptMigration, ScriptMigrationDisposition, migration_plan, run_migration_baseline,
+};
+pub use qa::{DiagnosticRecord, run_qa_diagnostic_diff, run_qa_registry};
+pub use redirects::run_redirect_report;
+pub use site_doctor::run_site_doctor;
 
 /// Current schema version for serialized operation reports.
 pub const OPERATION_SCHEMA_VERSION: u16 = 1;

@@ -14,7 +14,6 @@ Use `just --list` as the command index.
 just --list
 just fix
 just rust-check
-bun run rust:check
 just check-fast
 just check
 ```
@@ -34,17 +33,21 @@ just cli site status --format json
 ```
 
 The current CLI slice supports `tpm --help`, `tpm --version`,
-`tpm site status`, `tpm check`, `tpm doctor`, and `tpm release inspect`. These
-commands are product-interface proofs over Rust operation contracts. They do
-not replace the existing Bun/Astro authoring, build, verification, release, or
-deployment commands yet.
+`tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
+`tpm migration baseline`, `tpm media images`, `tpm routes redirects`,
+`tpm qa registry`, `tpm qa diagnostics-diff`, `tpm output verify`, and
+`tpm release inspect`. These commands are product-interface proofs over Rust
+operation contracts. Dual-run report commands do not replace the existing
+Bun/Astro authoring, build, verification, release, or deployment commands until
+parity evidence is reviewed and the command owner is promoted.
 
 The current ownership model is:
 
 - `bun run <script>` remains the source of truth for existing Astro, content,
   build, browser, accessibility, performance, and release checks.
 - `cargo` owns direct Rust crate formatting, type checks, lints, and tests.
-- `just` is only orchestration. Do not put domain logic in the `justfile`.
+- `just` is the canonical human command router for Rust and cross-tool QA
+  orchestration. Do not put domain logic in the `justfile`.
 
 ## Workspace Layout
 
@@ -92,8 +95,9 @@ failure patterns, or CLI adapter needs. Add any lint escape locally, narrowly,
 and with a concrete reason.
 
 GitHub Actions runs the same gate in the blocking `Rust` job through
-`just rust-check`. The package script `bun run rust:check` is a convenience
-wrapper for environments that use package scripts as the QA command index.
+`just rust-check`. Rust package-script wrappers were removed during the
+milestone 9 command-promotion pass; use `just rust-*` or direct `cargo`
+commands for Rust work.
 Install the local supply-chain tool with:
 
 ```sh

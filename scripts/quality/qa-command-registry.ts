@@ -50,6 +50,7 @@ export interface QaCiJobEntry {
   ciCommandSnippets: readonly string[];
   ciOnlyReason?: string;
   job: string;
+  localCommands?: readonly string[];
   localScripts: readonly string[];
   notes: string;
   parity: QaParity;
@@ -61,8 +62,10 @@ export interface QaDomainCoverageEntry {
   ciJobs: readonly string[];
   domain: string;
   exception?: string;
+  focusedCommands?: readonly string[];
   focusedScripts: readonly string[];
   purpose: string;
+  releaseCommands?: readonly string[];
   releaseScripts: readonly string[];
 }
 
@@ -370,36 +373,6 @@ export const qaCommandGroups = [
   },
   {
     ciUsage: "blocking",
-    class: "focused",
-    domain: "rust",
-    mutation: "none",
-    runtime: "medium",
-    scope:
-      "Blocking additive Rust workspace formatting, type, lint, doctest, unit-test, and supply-chain gates.",
-    scripts: ["rust:check", "rust:deny"],
-  },
-  {
-    ciUsage: "review",
-    class: "investigation",
-    domain: "rust",
-    mutation: "coverage-output",
-    runtime: "medium",
-    scope:
-      "Review-only Rust coverage signal for operation-core and future CLI/MCP/Tauri crates.",
-    scripts: ["rust:coverage"],
-  },
-  {
-    ciUsage: "review",
-    class: "investigation",
-    domain: "rust",
-    mutation: "none",
-    runtime: "medium",
-    scope:
-      "Review-only alternate Rust test-runner signal until nextest is promoted.",
-    scripts: ["rust:nextest"],
-  },
-  {
-    ciUsage: "blocking",
     class: "release",
     domain: "security",
     mutation: "none",
@@ -523,7 +496,7 @@ export const qaCommandRegistry: Record<string, QaCommandEntry> =
     ),
   );
 
-export const qaCiJobRegistry = [
+export const qaCiJobRegistry: readonly QaCiJobEntry[] = [
   {
     blocking: true,
     ciCommandSnippets: ["bun run check"],
@@ -537,7 +510,8 @@ export const qaCiJobRegistry = [
     blocking: true,
     ciCommandSnippets: ["taiki-e/install-action@cargo-deny", "just rust-check"],
     job: "rust",
-    localScripts: ["rust:check", "rust:deny"],
+    localCommands: ["just rust-check"],
+    localScripts: [],
     notes:
       "Additive Rust workspace and supply-chain gate for operation-core and CLI foundations.",
     parity: "exact",
@@ -550,7 +524,8 @@ export const qaCiJobRegistry = [
       "just rust-coverage",
     ],
     job: "rust-coverage-review",
-    localScripts: ["rust:coverage"],
+    localCommands: ["just rust-coverage"],
+    localScripts: [],
     notes:
       "Review-only Rust coverage signal for operation-core and future CLI foundations.",
     parity: "exact",
@@ -694,9 +669,9 @@ export const qaCiJobRegistry = [
     parity: "approximate",
     workflow: ".github/workflows/security.yml",
   },
-] as const satisfies readonly QaCiJobEntry[];
+] as const;
 
-export const qaDomainCoverageRegistry = [
+export const qaDomainCoverageRegistry: readonly QaDomainCoverageEntry[] = [
   {
     ciJobs: ["quality", "asset-review"],
     domain: "assets",
@@ -826,10 +801,16 @@ export const qaDomainCoverageRegistry = [
   {
     ciJobs: ["rust", "rust-coverage-review"],
     domain: "rust",
-    focusedScripts: ["rust:check", "rust:coverage"],
+    focusedCommands: [
+      "just rust-check",
+      "just rust-coverage",
+      "just rust-nextest",
+    ],
+    focusedScripts: [],
     purpose:
       "Additive Rust workspace checks, operation-core tests, blocking supply-chain policy, and review-only Rust coverage/nextest signals.",
-    releaseScripts: ["rust:check"],
+    releaseCommands: ["just rust-check"],
+    releaseScripts: [],
   },
   {
     ciJobs: ["audit", "audit-review", "dependency-review", "secrets"],
@@ -880,4 +861,4 @@ export const qaDomainCoverageRegistry = [
     purpose: "Generated routes, links, metadata, HTML, and browser output.",
     releaseScripts: ["check:release"],
   },
-] as const satisfies readonly QaDomainCoverageEntry[];
+] as const;
