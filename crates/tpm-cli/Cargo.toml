@@ -10,8 +10,9 @@ publish.workspace = true
 description = "Command-line interface shell for the TPM publishing platform."
 
 [dependencies]
+serde_json.workspace = true
 tpm-core.workspace = true
-tpm-workspace.workspace = true
+tpm-operations.workspace = true
 
 [lints]
 workspace = true

@@ -291,7 +291,7 @@ The first Rust setup should include:
   workspace dependencies, and workspace lints.
 - `.cargo/config.toml` only for repo-wide non-secret settings.
 - `deny.toml` for advisories, licenses, duplicate bans, and allowed sources.
-- `rustfmt.toml` only if default rustfmt behavior is not sufficient.
+- `rustfmt.toml` with stable formatting policy once real Rust code exists.
 - `nextest.toml` once test profiles need timeouts, retries, partitions, or CI
   JUnit output.
 
@@ -299,10 +299,11 @@ Blocking baseline commands:
 
 ```text
 cargo fmt --all --check
-cargo check --workspace --all-targets --all-features
-cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo nextest run --workspace --all-features
-cargo test --workspace --doc
+cargo check --workspace --all-targets --all-features --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
+cargo test --workspace --doc --all-features --locked
+cargo test --workspace --all-features --locked
 cargo deny check
 ```
 
@@ -310,6 +311,7 @@ Review-only or scheduled commands:
 
 ```text
 cargo llvm-cov --workspace --all-features --summary-only
+cargo nextest run --workspace --all-features --locked
 cargo audit
 cargo machete
 ```
@@ -332,34 +334,47 @@ Recommended root lint stance:
 
 ```toml
 [workspace.lints.rust]
+future_incompatible = { level = "deny", priority = -1 }
+missing_debug_implementations = "deny"
+missing_docs = "deny"
+missing_unsafe_on_extern = "deny"
+nonstandard_style = { level = "deny", priority = -1 }
+rust_2018_idioms = { level = "deny", priority = -1 }
+rust_2024_compatibility = { level = "deny", priority = -1 }
 unsafe_code = "forbid"
-missing_docs = "warn"
-rust_2018_idioms = "warn"
-unused_lifetimes = "warn"
-unused_qualifications = "warn"
+unsafe_op_in_unsafe_fn = "deny"
+unreachable_pub = "deny"
+unused_lifetimes = "deny"
+unused_qualifications = "deny"
+warnings = "deny"
+
+[workspace.lints.rustdoc]
+bare_urls = "deny"
+broken_intra_doc_links = "deny"
 
 [workspace.lints.clippy]
-all = "warn"
-cargo = "warn"
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
-todo = "warn"
-unimplemented = "warn"
-dbg_macro = "warn"
+all = { level = "warn", priority = -1 }
+allow_attributes_without_reason = "deny"
+cargo = { level = "warn", priority = -1 }
+dbg_macro = "deny"
+expect_used = "deny"
+mem_forget = "deny"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+print_stderr = "deny"
+print_stdout = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+wildcard_imports = "deny"
 ```
 
-Important nuance: do not blindly `deny` whole Clippy groups from day one.
-Clippy itself recommends cherry-picking some strict groups rather than enabling
-all restriction/nursery lints wholesale. The repo should be strict, but not so
-noisy that normal Rust upgrades become random firefights.
-
-Do not globally enable all `pedantic`, `restriction`, or `nursery` lints in the
-first workspace. Selected lints from those groups can be promoted after real
-code shows they prevent meaningful bugs with low false-positive cost.
-
-The baseline should use `-D warnings` in CI once the initial workspace is clean.
-Allowances should be local, documented, and tied to specific design reasons.
+Important nuance: strictness should catch likely mistakes, not forbid normal
+Rust. `pedantic` and `nursery` are enabled because the current pinned Rust
+slice can absorb the signal. The full `restriction` group stays off because it
+contains contradictory or anti-idiomatic lints; cherry-pick restriction lints
+that prevent real repo bug classes. Allowances should be local, documented, and
+tied to specific design reasons.
 
 ## Dependency Recommendations
 

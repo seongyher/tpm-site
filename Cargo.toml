@@ -12,21 +12,42 @@ readme = "README.md"
 publish = false
 
 [workspace.lints.rust]
-missing_docs = "warn"
-rust_2018_idioms = { level = "warn", priority = -1 }
+future_incompatible = { level = "deny", priority = -1 }
+missing_debug_implementations = "deny"
+missing_docs = "deny"
+missing_unsafe_on_extern = "deny"
+nonstandard_style = { level = "deny", priority = -1 }
+rust_2018_idioms = { level = "deny", priority = -1 }
+rust_2024_compatibility = { level = "deny", priority = -1 }
 unsafe_code = "forbid"
 unsafe_op_in_unsafe_fn = "deny"
-unused_lifetimes = "warn"
-unused_qualifications = "warn"
+unreachable_pub = "deny"
+unused_lifetimes = "deny"
+unused_qualifications = "deny"
+warnings = "deny"
+
+[workspace.lints.rustdoc]
+bare_urls = "deny"
+broken_intra_doc_links = "deny"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
+allow_attributes_without_reason = "deny"
 cargo = { level = "warn", priority = -1 }
 dbg_macro = "deny"
-expect_used = "warn"
-todo = "warn"
-unimplemented = "warn"
-unwrap_used = "warn"
+expect_used = "deny"
+mem_forget = "deny"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+print_stderr = "deny"
+print_stdout = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+wildcard_imports = "deny"
+
+[profile.release]
+overflow-checks = true
 
 [workspace.dependencies]
 serde = { version = "1.0.228", features = ["derive"] }

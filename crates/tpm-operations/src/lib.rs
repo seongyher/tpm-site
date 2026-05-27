@@ -1,10 +1,15 @@
 //! Shared operation request and result envelopes for the TPM publishing platform.
 
 use std::fmt::{Display, Formatter, Result as FormatResult};
+use std::fs;
+use std::io;
+use std::path::{Path, PathBuf};
 
 use serde::de::Error as DeserializeError;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use tpm_diagnostics::{Diagnostic, DiagnosticReport};
+use tpm_core::Severity;
+use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticLocation, DiagnosticReport};
+use tpm_workspace::{WorkspaceContext, WorkspaceDiscoveryError};
 
 /// Current schema version for serialized operation reports.
 pub const OPERATION_SCHEMA_VERSION: u16 = 1;
@@ -17,6 +22,11 @@ impl OperationId {
     /// Builds an operation ID after validating its stable display form.
     ///
     /// IDs must be lowercase domain names such as `workspace.status`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`OperationIdError`] when the value is empty, contains an empty
+    /// dot-separated segment, or contains an unsupported character.
     pub fn parse(value: impl Into<String>) -> Result<Self, OperationIdError> {
         let value = value.into();
 
@@ -348,15 +358,21 @@ impl OperationResult {
         );
 
         if let Some(workspace) = self.request.workspace() {
-            output.push_str(&format!("workspace: {workspace}\n"));
+            output.push_str("workspace: ");
+            output.push_str(workspace);
+            output.push('\n');
         }
 
         for detail in self.summary.details() {
-            output.push_str(&format!("- {detail}\n"));
+            output.push_str("- ");
+            output.push_str(detail);
+            output.push('\n');
         }
 
         if let Some(duration_ms) = self.timing.duration_ms() {
-            output.push_str(&format!("duration: {duration_ms}ms\n"));
+            output.push_str("duration: ");
+            output.push_str(&duration_ms.to_string());
+            output.push_str("ms\n");
         }
 
         let diagnostic_text = self.diagnostics.render_human();
@@ -368,8 +384,238 @@ impl OperationResult {
     }
 
     /// Renders the operation result as stable pretty JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns the underlying [`serde_json::Error`] when serialization fails.
     pub fn render_json_pretty(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string_pretty(self)
+    }
+}
+
+/// Runs the read-only workspace status operation.
+#[must_use]
+pub fn run_workspace_status(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+) -> OperationResult {
+    let start = start.into();
+    run_workspace_inventory_operation(
+        &start,
+        interface,
+        "workspace.status",
+        "Workspace status checked",
+    )
+}
+
+/// Runs the first Rust workspace diagnostic check.
+#[must_use]
+pub fn run_workspace_check(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+) -> OperationResult {
+    let start = start.into();
+    run_workspace_inventory_operation(
+        &start,
+        interface,
+        "workspace.check",
+        "Workspace check completed",
+    )
+}
+
+/// Runs the first Rust workspace doctor operation.
+#[must_use]
+pub fn run_workspace_doctor(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+) -> OperationResult {
+    let start = start.into();
+    run_workspace_inventory_operation(
+        &start,
+        interface,
+        "workspace.doctor",
+        "Workspace diagnostics explained",
+    )
+}
+
+/// Runs a read-only release inspection over the conventional generated output.
+#[must_use]
+pub fn run_release_inspect(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+) -> OperationResult {
+    let start = start.into();
+    let request = OperationRequest::new(operation_id("release.inspect"), interface)
+        .with_workspace(display_path(&start));
+
+    match WorkspaceContext::discover(&start) {
+        Ok(context) => {
+            let output = context.layout().output();
+            let mut diagnostics = context.validate_required_paths();
+            let mut summary = OperationSummary::new("Release inspected")
+                .with_detail(format!("output root: {}", context.display_path(output)));
+
+            if output.is_dir() {
+                match count_files(output) {
+                    Ok(count) => {
+                        summary = summary.with_detail(format!("output artifacts: {count}"));
+                    }
+                    Err(error) => diagnostics.push(io_diagnostic(
+                        "TPM-RELEASE-OUTPUT-READ",
+                        Severity::Error,
+                        format!("Could not inspect generated output: {error}."),
+                        context.display_path(output),
+                        "Check filesystem permissions for the generated output directory.",
+                    )),
+                }
+            } else {
+                diagnostics.push(
+                    Diagnostic::new(
+                        diagnostic_code("TPM-RELEASE-OUTPUT-MISSING"),
+                        Severity::Warning,
+                        format!(
+                            "No generated output directory exists at `{}`.",
+                            context.display_path(output)
+                        ),
+                    )
+                    .with_location(DiagnosticLocation::artifact(context.display_path(output)))
+                    .with_remediation("Build release output before inspecting release artifacts."),
+                );
+            }
+
+            OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
+        }
+        Err(error) => OperationResult::new(
+            request,
+            OperationSummary::new("Release inspection failed").with_detail(format!(
+                "start path: {}",
+                display_path(workspace_discovery_start(&error))
+            )),
+            OperationTiming::default(),
+            DiagnosticReport::from_diagnostics(vec![workspace_not_found_diagnostic(&error)]),
+        ),
+    }
+}
+
+fn run_workspace_inventory_operation(
+    start: &Path,
+    interface: OperationInterface,
+    operation: &'static str,
+    title: &'static str,
+) -> OperationResult {
+    let request = OperationRequest::new(operation_id(operation), interface)
+        .with_workspace(display_path(start));
+
+    match WorkspaceContext::discover(start) {
+        Ok(context) => {
+            let mut diagnostics = context.validate_required_paths();
+            let source_roots = context.source_roots();
+            let mut summary = OperationSummary::new(title)
+                .with_detail(format!("source roots: {}", source_roots.len()))
+                .with_detail(format!(
+                    "required roots: {}",
+                    source_roots.iter().filter(|root| root.required()).count()
+                ));
+
+            match context.inventory_source_artifacts() {
+                Ok(inventory) => {
+                    summary = summary
+                        .with_detail(format!("source artifacts: {}", inventory.artifacts().len()));
+                }
+                Err(error) => diagnostics.push(io_diagnostic(
+                    "TPM-WORKSPACE-INVENTORY",
+                    Severity::Error,
+                    format!("Could not inventory workspace source artifacts: {error}."),
+                    context.display_path(context.site()),
+                    "Check filesystem permissions for the active site workspace.",
+                )),
+            }
+
+            OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
+        }
+        Err(error) => OperationResult::new(
+            request,
+            OperationSummary::new(format!("{title} with errors")).with_detail(format!(
+                "start path: {}",
+                display_path(workspace_discovery_start(&error))
+            )),
+            OperationTiming::default(),
+            DiagnosticReport::from_diagnostics(vec![workspace_not_found_diagnostic(&error)]),
+        ),
+    }
+}
+
+fn workspace_not_found_diagnostic(error: &WorkspaceDiscoveryError) -> Diagnostic {
+    Diagnostic::new(
+        diagnostic_code("TPM-WORKSPACE-NOT-FOUND"),
+        Severity::Error,
+        format!(
+            "Could not find `site/config/site.json` from `{}`.",
+            display_path(workspace_discovery_start(error))
+        ),
+    )
+    .with_location(DiagnosticLocation::source(display_path(
+        workspace_discovery_start(error),
+    )))
+    .with_remediation(
+        "Run the command from a site workspace or pass `--site <path>` for the workspace root.",
+    )
+}
+
+fn io_diagnostic(
+    code: &'static str,
+    severity: Severity,
+    message: String,
+    path: String,
+    remediation: &'static str,
+) -> Diagnostic {
+    Diagnostic::new(diagnostic_code(code), severity, message)
+        .with_location(DiagnosticLocation::source(path))
+        .with_remediation(remediation)
+}
+
+fn count_files(root: &Path) -> io::Result<usize> {
+    let mut count = 0;
+    let mut entries = fs::read_dir(root)?.collect::<Result<Vec<_>, _>>()?;
+    entries.sort_by_key(fs::DirEntry::path);
+
+    for entry in entries {
+        let path = entry.path();
+        let file_type = entry.file_type()?;
+        if file_type.is_dir() {
+            count += count_files(&path)?;
+        } else if file_type.is_file() {
+            count += 1;
+        }
+    }
+
+    Ok(count)
+}
+
+fn operation_id(value: &'static str) -> OperationId {
+    OperationId::parse(value).unwrap_or_else(|error| {
+        panic!("operation ID should be valid: {error}");
+    })
+}
+
+fn diagnostic_code(value: &'static str) -> DiagnosticCode {
+    DiagnosticCode::parse(value).unwrap_or_else(|error| {
+        panic!("diagnostic code should be valid: {error}");
+    })
+}
+
+fn display_path(path: &Path) -> String {
+    if path.as_os_str().is_empty() {
+        return String::from(".");
+    }
+
+    path.to_string_lossy()
+        .replace([std::path::MAIN_SEPARATOR, '\\'], "/")
+}
+
+fn workspace_discovery_start(error: &WorkspaceDiscoveryError) -> &Path {
+    match error {
+        WorkspaceDiscoveryError::NotFound { start } => start,
     }
 }
 
@@ -384,18 +630,21 @@ fn test_operation_id(value: &str) -> OperationId {
 /// Creates a warning diagnostic for operation tests.
 #[cfg(test)]
 fn test_warning(code: &str, message: &str) -> Diagnostic {
-    let code = tpm_diagnostics::DiagnosticCode::parse(code).unwrap_or_else(|error| {
+    let code = DiagnosticCode::parse(code).unwrap_or_else(|error| {
         panic!("test diagnostic code should be valid: {error}");
     });
 
-    Diagnostic::new(code, tpm_core::Severity::Warning, message)
+    Diagnostic::new(code, Severity::Warning, message)
 }
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::{
         OPERATION_SCHEMA_VERSION, OperationInterface, OperationRequest, OperationResult,
-        OperationStatus, OperationSummary, OperationTiming, test_operation_id, test_warning,
+        OperationStatus, OperationSummary, OperationTiming, run_release_inspect,
+        run_workspace_check, run_workspace_status, test_operation_id, test_warning,
     };
     use tpm_core::Severity;
     use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
@@ -412,6 +661,12 @@ mod tests {
             OperationInterface::Test,
         )
         .with_workspace("tests/fixtures/rust-workspace")
+    }
+
+    fn fixture_root() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join("tests/fixtures/rust-workspace")
     }
 
     #[test]
@@ -510,5 +765,47 @@ mod tests {
         let result = serde_json::from_str::<super::OperationId>("\"Workspace Status\"");
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn workspace_status_operation_reports_fixture_inventory() {
+        let result = run_workspace_status(fixture_root(), OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert_eq!(result.request().operation_id().as_str(), "workspace.status");
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "source artifacts: 3")
+        );
+    }
+
+    #[test]
+    fn workspace_check_operation_reports_missing_workspace() {
+        let result = run_workspace_check(
+            PathBuf::from("/tmp/tpm-missing-operation-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert_eq!(result.request().operation_id().as_str(), "workspace.check");
+        assert_eq!(
+            result.diagnostics().errors()[0].code().as_str(),
+            "TPM-WORKSPACE-NOT-FOUND"
+        );
+    }
+
+    #[test]
+    fn release_inspect_operation_warns_when_output_is_missing() {
+        let result = run_release_inspect(fixture_root(), OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Warning);
+        assert_eq!(result.request().operation_id().as_str(), "release.inspect");
+        assert_eq!(
+            result.warnings()[0].code().as_str(),
+            "TPM-RELEASE-OUTPUT-MISSING"
+        );
     }
 }

@@ -38,6 +38,7 @@ export default tseslint.config(
     "dist-catalog/",
     "node_modules/",
     "playwright-report/",
+    "target/",
     "test-results/",
     "tmp/",
     "package-lock.json",

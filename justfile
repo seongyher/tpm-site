@@ -17,10 +17,24 @@ check-fast: js-check-fast rust-check-fast
 # Run the heavier pre-release validation path plus additive Rust checks.
 release-check: js-release-check rust-check
 
-# Run safe automatic fixes for JavaScript/Astro/Tailwind and Rust formatting.
-fix:
+# Run all automatic fixes for JavaScript/TypeScript/Astro/Tailwind, Markdown, and Rust.
+fix: js-fix markdown-fix rust-fix
+
+# Run automatic JavaScript/TypeScript/Astro/Tailwind fixes.
+js-fix:
     bun --silent run fix
+    bun --silent run lint:packages:fix
+
+# Run automatic Markdown/MDX formatting.
+markdown-fix:
+    bun --silent run fix:markdown
+    bun --silent run lint:markdown:fix
+    bun --silent run fix:markdown
+
+# Run automatic Rust formatting and Clippy machine-applicable fixes.
+rust-fix:
     cargo fmt --all
+    cargo clippy --fix --workspace --all-targets --all-features --locked --allow-dirty --allow-staged -- -D warnings
 
 # Build the current static site.
 build:
@@ -43,7 +57,7 @@ js-release-check:
     bun --silent run check:release
 
 # Run all blocking Rust gates.
-rust-check: rust-fmt rust-cargo-check rust-clippy rust-doc-test rust-test rust-deny
+rust-check: rust-fmt rust-cargo-check rust-clippy rust-doc rust-doc-test rust-test rust-deny
 
 # Run the fastest blocking Rust gate.
 rust-check-fast:
@@ -64,6 +78,10 @@ rust-cargo-check:
 # Run strict Rust lints.
 rust-clippy:
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
+# Build Rust docs with warnings treated as errors.
+rust-doc:
+    RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
 
 # Run Rust doctests.
 rust-doc-test:

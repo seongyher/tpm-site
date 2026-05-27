@@ -75,11 +75,15 @@ Run the same local quality path with successful command output hidden:
 bun run quality
 ```
 
-Run safe automatic fixes before checking code and config:
+Run automatic fixes before checking code, Markdown, and Rust:
 
 ```sh
-bun run fix
+just fix
 ```
+
+This runs ESLint fixes, code/config formatting, package sorting,
+Markdownlint fixes, Markdown/MDX formatting, Rust formatting, and Clippy's
+machine-applicable fixes.
 
 Markdown and MDX style checks are review-only, not release blockers:
 

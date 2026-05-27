@@ -36,6 +36,7 @@ describe("ESLint config", () => {
       ".wrangler/",
       "dist/",
       "dist-catalog/",
+      "target/",
     ]) {
       expect(globalIgnorePatterns).toContain(ignoredGeneratedPath);
     }

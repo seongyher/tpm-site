@@ -120,6 +120,18 @@ An operation result is a serializable envelope with:
 Operation IDs are lowercase stable identifiers such as `workspace.status`.
 They should name platform operations, not UI buttons or provider calls.
 
+Current first-slice operations:
+
+| Operation ID       | Purpose                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `workspace.status` | Report discovered workspace source roots, required roots, source inventory, and health.  |
+| `workspace.check`  | Run the first Rust workspace diagnostic check over the same operation envelope.          |
+| `workspace.doctor` | Explain workspace diagnostics and remediations through the shared diagnostic model.      |
+| `release.inspect`  | Inspect the conventional generated-output root and report release-readiness diagnostics. |
+
+These operations are intentionally narrow. They prove CLI/GUI/MCP/CI contract
+shape without claiming parity with the existing Bun/Astro release checks.
+
 The current requesting interfaces are:
 
 - `cli`;
