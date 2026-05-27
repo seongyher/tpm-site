@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "request": {
+    "operationId": "workspace.status",
+    "interface": "test",
+    "workspace": "tests/fixtures/rust-workspace"
+  },
+  "status": "warning",
+  "summary": {
+    "title": "Workspace status checked",
+    "details": []
+  },
+  "timing": {
+    "durationMs": 7
+  },
+  "diagnostics": {
+    "diagnostics": [
+      {
+        "code": "TPM-OP-WARNING",
+        "severity": "warning",
+        "message": "Review this warning."
+      }
+    ]
+  }
+}

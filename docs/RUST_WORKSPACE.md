@@ -13,6 +13,7 @@ Use `just --list` as the command index.
 ```sh
 just --list
 just rust-check
+bun run rust:check
 just check-fast
 just check
 ```
@@ -26,18 +27,20 @@ The current ownership model is:
 
 ## Workspace Layout
 
-| Path                             | Purpose                                                                                |
-| -------------------------------- | -------------------------------------------------------------------------------------- |
-| `Cargo.toml`                     | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy. |
-| `Cargo.lock`                     | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.         |
-| `rust-toolchain.toml`            | Pinned Rust toolchain and required components.                                         |
-| `deny.toml`                      | Initial `cargo-deny` supply-chain policy. Review-only until promoted.                  |
-| `justfile`                       | Local command router over Bun and Cargo commands.                                      |
-| `crates/tpm-core/`               | Shared domain primitives such as severity and command exit categories.                 |
-| `crates/tpm-diagnostics/`        | Structured diagnostic codes, diagnostics, and reports.                                 |
-| `crates/tpm-workspace/`          | Workspace and site-instance path modeling.                                             |
-| `crates/tpm-cli/`                | Additive CLI shell that proves the binary boundary.                                    |
-| `tests/fixtures/rust-workspace/` | Neutral site-like fixture for Rust workspace and future operation tests.               |
+| Path                              | Purpose                                                                                |
+| --------------------------------- | -------------------------------------------------------------------------------------- |
+| `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy. |
+| `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.         |
+| `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                         |
+| `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                             |
+| `justfile`                        | Local command router over Bun and Cargo commands.                                      |
+| `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                 |
+| `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                 |
+| `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
+| `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
+| `crates/tpm-cli/`                 | Additive CLI shell that proves the binary boundary.                                    |
+| `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
+| `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
 
 ## Blocking Rust Gates
 
@@ -49,11 +52,23 @@ cargo check --workspace --all-targets --all-features --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo test --workspace --doc --all-features --locked
 cargo test --workspace --all-features --locked
+cargo deny check
 ```
 
 These gates are intentionally strict and low-noise. The workspace forbids
 unsafe Rust, treats Clippy warnings as blocking during the gate, and avoids
-blanket experimental lint groups that would make routine edits noisy.
+blanket experimental lint groups that would make routine edits noisy. The
+supply-chain gate rejects denied advisories, yanked crates, wildcard
+dependencies, disallowed licenses, and unknown registries or git sources.
+
+GitHub Actions runs the same gate in the blocking `Rust` job through
+`just rust-check`. The package script `bun run rust:check` is a convenience
+wrapper for environments that use package scripts as the QA command index.
+Install the local supply-chain tool with:
+
+```sh
+cargo install cargo-deny --locked
+```
 
 ## Review-Only Rust Tools
 
@@ -62,15 +77,30 @@ or the current release gate:
 
 ```sh
 just rust-coverage
-just rust-deny
 just rust-nextest
 ```
 
 `rust-coverage` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
-available. `rust-deny` and `rust-nextest` print install guidance if their Cargo
-subcommands are not installed. Promote a review-only Rust tool to a blocking
-gate only after it is installed in the shared environment, documented,
-low-noise, and represented in the CI/local parity model.
+available. `rust-nextest` prints install guidance if its Cargo subcommand is
+not installed. Promote a review-only Rust tool to a blocking gate only after it
+is installed in the shared environment, documented, low-noise, and represented
+in the CI/local parity model.
+
+GitHub Actions also runs `just rust-coverage` in a non-blocking
+`Rust coverage review` job. The job installs `cargo-llvm-cov` and
+`llvm-tools-preview` for CI evidence, but coverage remains informational.
+
+Current policy decisions:
+
+- `cargo test` remains the blocking Rust test runner because it is installed
+  with the pinned Rust toolchain and is enough for the current small crate set.
+- `cargo-nextest` remains review-only until the workspace needs retries,
+  partitions, JUnit output, or timeout profiles.
+- `cargo-deny` is blocking. The policy allowlist is intentionally narrow and
+  should only grow when a dependency with a new license is deliberately
+  accepted.
+- Rust coverage remains review-only and should be used to inspect meaningful
+  operation-core gaps before any percentage threshold is considered.
 
 ## Fixture Policy
 
@@ -82,6 +112,27 @@ of the production site.
 - Update fixture notes and assertions together when the fixture shape changes.
 - Add separate invalid fixtures for diagnostic tests instead of breaking the
   default valid fixture.
+
+`tests/fixtures/rust-operations/` stores exact JSON fixtures for
+machine-readable operation contracts. Keep those fixtures stable and exact.
+Human text renderers should usually be tested with focused assertions instead
+of full snapshots so wording can improve without breaking machine contracts.
+
+## Operation Contracts
+
+The first operation-core crates now establish the shared contract documented in
+[`RUST_OPERATION_CONTRACTS.md`](./RUST_OPERATION_CONTRACTS.md):
+
+- diagnostics have stable codes, severity, source/artifact locations,
+  remediation, optional developer notes, human rendering, and JSON rendering;
+- workspace context discovers the active site root, source roots, ignored-path
+  policy, and deterministic source artifact inventory;
+- operation results carry schema version, request metadata, status, summary,
+  timing, diagnostics, and stable human/JSON renderers.
+
+The CLI, future Tauri studio, MCP server, CI reports, and generated-output
+diagnostics should consume these contracts instead of inventing interface-local
+models.
 
 ## Migration Policy
 

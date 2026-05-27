@@ -32,13 +32,18 @@ The studio product architecture and publication workspace model are owned by
 
 ## Current Repo Starting Point
 
-The repo is ready for this plan, but the implementation has not started.
+The repo has started this plan with additive foundations. The implementation
+is still early and must remain parity-driven.
 
 Current facts:
 
-- There is no Rust workspace yet.
-- There is no `justfile` yet.
+- The additive Rust workspace exists with `tpm-core`, `tpm-diagnostics`,
+  `tpm-workspace`, `tpm-operations`, and `tpm-cli`.
+- `justfile` routes Bun and Rust checks while keeping domain logic out of
+  recipes.
 - There is no `apps/studio/` or `src-tauri/` yet.
+- Shared Rust operation contracts are documented in
+  [`../docs/RUST_OPERATION_CONTRACTS.md`](../docs/RUST_OPERATION_CONTRACTS.md).
 - `src/platform/*` already exposes stable internal platform entrypoints for
   deployment, diagnostics, extensions, import/export, interactions,
   localization, media, references, release, routes, security, and starters.

@@ -2,11 +2,14 @@
 
 use std::fmt::{Display, Formatter, Result as FormatResult};
 
+use serde::{Deserialize, Serialize};
+
 /// Human-facing name for the platform layer.
 pub const PLATFORM_NAME: &str = "TPM Platform";
 
 /// Severity for diagnostics emitted by platform operations.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Severity {
     /// Informational output that does not require action.
     Note,
@@ -37,7 +40,8 @@ impl Display for Severity {
 }
 
 /// Process exit categories shared by command-oriented interfaces.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum CommandExit {
     /// The command completed successfully.
     Success,

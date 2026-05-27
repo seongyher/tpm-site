@@ -29,6 +29,9 @@ unimplemented = "warn"
 unwrap_used = "warn"
 
 [workspace.dependencies]
-tpm-core = { path = "crates/tpm-core" }
-tpm-diagnostics = { path = "crates/tpm-diagnostics" }
-tpm-workspace = { path = "crates/tpm-workspace" }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
+tpm-core = { path = "crates/tpm-core", version = "0.1.0" }
+tpm-diagnostics = { path = "crates/tpm-diagnostics", version = "0.1.0" }
+tpm-operations = { path = "crates/tpm-operations", version = "0.1.0" }
+tpm-workspace = { path = "crates/tpm-workspace", version = "0.1.0" }

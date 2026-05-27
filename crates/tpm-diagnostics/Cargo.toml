@@ -10,6 +10,8 @@ publish.workspace = true
 description = "Structured diagnostics for the TPM publishing platform."
 
 [dependencies]
+serde.workspace = true
+serde_json.workspace = true
 tpm-core.workspace = true
 
 [lints]
