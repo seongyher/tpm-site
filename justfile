@@ -1,5 +1,3 @@
-# Repository command router. Keep recipes as orchestration only.
-
 # Show available recipes.
 default:
     @just --list
