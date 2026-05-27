@@ -176,6 +176,7 @@ public/**
         "deny.toml",
         "justfile",
         "rust-toolchain.toml",
+        "rustfmt.toml",
       ],
       rootDir: process.cwd(),
     });

@@ -367,6 +367,7 @@ function isRustWorkspaceAccountedFile(file: string): boolean {
     file === "deny.toml" ||
     file === "justfile" ||
     file === "rust-toolchain.toml" ||
+    file === "rustfmt.toml" ||
     /^crates\/[^/]+\/Cargo\.toml$/u.test(file) ||
     /^crates\/[^/]+\/src\/.+\.rs$/u.test(file)
   );

@@ -90,8 +90,9 @@ dependencies = [
 name = "tpm-cli"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "tpm-core",
- "tpm-workspace",
+ "tpm-operations",
 ]
 
 [[package]]
@@ -118,6 +119,7 @@ dependencies = [
  "serde_json",
  "tpm-core",
  "tpm-diagnostics",
+ "tpm-workspace",
 ]
 
 [[package]]

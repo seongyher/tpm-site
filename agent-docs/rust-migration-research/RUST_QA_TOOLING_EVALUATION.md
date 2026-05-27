@@ -83,8 +83,8 @@ Project rules:
 - use a root Cargo workspace with resolver `3`, workspace package metadata,
   workspace dependencies, and workspace lints;
 - add `rust-version` only after the initial supported Rust version is chosen;
-- avoid a custom `rustfmt.toml` unless default rustfmt behavior is demonstrably
-  insufficient;
+- keep an explicit stable `rustfmt.toml` once the workspace has real Rust code
+  so formatting policy is deterministic and review-neutral;
 - use `.cargo/config.toml` only for repo-wide non-secret settings.
 
 Primary sources:
@@ -100,21 +100,22 @@ Primary sources:
 
 ### Blocking Rust Commands
 
-Initial blocking profile:
+Current blocking profile:
 
 ```text
 cargo fmt --all --check
 cargo check --workspace --all-targets --all-features --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
 cargo test --workspace --doc --all-features --locked
-cargo nextest run --workspace --all-features --locked
+cargo test --workspace --all-features --locked
 cargo deny check
 ```
 
-Add `cargo nextest` as soon as the workspace has non-trivial tests. Standard
-`cargo test` remains useful for doc-test compatibility and for developers who
-do not have nextest installed yet, but nextest should become the default Rust
-test runner once Rust test volume grows.
+Keep `cargo nextest` review-only until Rust test volume, timeout control,
+partitioning, or CI reporting needs justify another installed tool. Standard
+`cargo test` remains the blocking runner for the current additive workspace,
+with doc tests checked separately so public documentation examples stay honest.
 
 Primary sources:
 
@@ -153,40 +154,63 @@ Primary source:
 
 ## Lint Policy
 
-Use strict workspace lint inheritance, but avoid noisy global maximalism.
+Use strict workspace lint inheritance. The default is to enable every stable,
+high-signal check that catches likely mistakes at compile, lint, or
+documentation time. Any omitted check needs a concrete reason.
 
 Recommended starting point:
 
 ```toml
 [workspace.lints.rust]
+future_incompatible = { level = "deny", priority = -1 }
+missing_debug_implementations = "deny"
+missing_docs = "deny"
+missing_unsafe_on_extern = "deny"
+nonstandard_style = { level = "deny", priority = -1 }
+rust_2018_idioms = { level = "deny", priority = -1 }
+rust_2024_compatibility = { level = "deny", priority = -1 }
 unsafe_code = "forbid"
 unsafe_op_in_unsafe_fn = "deny"
-missing_unsafe_on_extern = "deny"
-rust_2018_idioms = "deny"
-unreachable_pub = "warn"
-nonstandard_style = "deny"
+unreachable_pub = "deny"
+unused_lifetimes = "deny"
+unused_qualifications = "deny"
+warnings = "deny"
+
+[workspace.lints.rustdoc]
+bare_urls = "deny"
+broken_intra_doc_links = "deny"
 
 [workspace.lints.clippy]
-all = "warn"
-cargo = "warn"
+all = { level = "warn", priority = -1 }
+allow_attributes_without_reason = "deny"
+cargo = { level = "warn", priority = -1 }
 dbg_macro = "deny"
-todo = "warn"
-unimplemented = "warn"
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
+expect_used = "deny"
+mem_forget = "deny"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+print_stderr = "deny"
+print_stdout = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+wildcard_imports = "deny"
 ```
 
 Policy details:
 
-- Do not globally enable all Clippy `restriction`, `nursery`, or `pedantic`
-  lints. Clippy's own documentation describes those groups as needing
-  selection/judgment rather than blanket use.
-- Promote selected lints to `deny` after seeing real code and false-positive
-  behavior.
-- Allow `print_stdout` and `print_stderr` only in CLI presentation/adapters,
-  not in core libraries.
-- Allow `expect_used` in tests when the message improves failure diagnosis.
+- `pedantic` and `nursery` are enabled because the current Rust slice is small,
+  pinned to a toolchain, and can absorb the extra documentation and style
+  requirements without adding noise.
+- Do not globally enable all Clippy `restriction` lints. Clippy's own
+  documentation describes the group as opt-in and it includes lints that
+  conflict with normal Rust idioms or test failure patterns.
+- Omit `unused_crate_dependencies` for now because package-level dependencies
+  are shared by lib and bin targets; the current `tpm-cli` package layout makes
+  that lint produce false positives for the binary target.
+- Keep `panic` out of the global policy for now because tests and invariant
+  constructors can use panic as an assertion failure mechanism. Revisit this if
+  library code starts using recoverable panics.
 - Keep all allowances local, narrow, and justified.
 - Treat `unsafe_code = "forbid"` as the normal rule. If unsafe or FFI ever
   becomes necessary, isolate it in a crate with a written safety contract and
@@ -365,11 +389,14 @@ Primary sources:
 Do not apply public-crate gates before a public API exists. Add them when a
 crate is published, extracted, or externally consumed.
 
-Adopt with public/package-like crates:
+Already blocking in the current workspace:
 
 - rustdoc warnings as errors for public docs;
-- `missing_docs` promoted from warning to blocking where appropriate;
-- `cargo doc --workspace --all-features --no-deps`;
+- `missing_docs` as a blocking workspace lint;
+- `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked`.
+
+Adopt with public/package-like crates:
+
 - `cargo-semver-checks` against the published baseline;
 - public API snapshots/reviews;
 - `cargo-msrv` after a real MSRV policy exists;
@@ -490,8 +517,10 @@ Primary source:
 
 ```text
 just rust-fmt
-just rust-check
+just rust-cargo-check
 just rust-clippy
+just rust-doc
+just rust-doc-test
 just rust-test
 ```
 
@@ -500,8 +529,10 @@ Equivalent direct commands:
 ```text
 cargo fmt --all
 cargo check --workspace --all-targets --all-features --locked
-cargo clippy --workspace --all-targets --all-features --locked
-cargo nextest run --workspace --all-features --locked
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
+cargo test --workspace --doc --all-features --locked
+cargo test --workspace --all-features --locked
 ```
 
 ### Rust Release Gate
@@ -510,10 +541,10 @@ cargo nextest run --workspace --all-features --locked
 cargo fmt --all --check
 cargo check --workspace --all-targets --all-features --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
 cargo test --workspace --doc --all-features --locked
-cargo nextest run --workspace --all-features --locked
+cargo test --workspace --all-features --locked
 cargo deny check
-cargo llvm-cov --workspace --all-features --summary-only
 ```
 
 ### Scheduled Rust Maintenance

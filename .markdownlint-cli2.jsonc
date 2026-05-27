@@ -13,6 +13,7 @@
     "playwright-report/**",
     "test-results/**",
     "site/unused-assets/**",
+    "target/**",
     "unused-assets/**"
   ],
   "config": {

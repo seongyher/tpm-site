@@ -15,6 +15,11 @@ impl DiagnosticCode {
     ///
     /// Codes must be non-empty and may contain ASCII uppercase letters,
     /// numbers, hyphens, and underscores.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`DiagnosticCodeError`] when the value is empty or contains an
+    /// unsupported character.
     pub fn parse(value: impl Into<String>) -> Result<Self, DiagnosticCodeError> {
         let value = value.into();
 
@@ -336,7 +341,7 @@ impl DiagnosticReport {
 
     /// Builds a report from diagnostics in emission order.
     #[must_use]
-    pub fn from_diagnostics(diagnostics: Vec<Diagnostic>) -> Self {
+    pub const fn from_diagnostics(diagnostics: Vec<Diagnostic>) -> Self {
         Self { diagnostics }
     }
 
@@ -353,7 +358,7 @@ impl DiagnosticReport {
 
     /// Returns whether the report contains no diagnostics.
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.diagnostics.is_empty()
     }
 
@@ -415,6 +420,10 @@ impl DiagnosticReport {
     }
 
     /// Renders the report as stable pretty JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns the underlying [`serde_json::Error`] when serialization fails.
     pub fn render_json_pretty(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string_pretty(self)
     }
@@ -429,15 +438,18 @@ fn render_diagnostic(diagnostic: &Diagnostic) -> String {
     );
 
     if let Some(location) = diagnostic.location() {
-        output.push_str(&format!("\n  at {}", location.render()));
+        output.push_str("\n  at ");
+        output.push_str(&location.render());
     }
 
     if let Some(remediation) = diagnostic.remediation() {
-        output.push_str(&format!("\n  help: {remediation}"));
+        output.push_str("\n  help: ");
+        output.push_str(remediation);
     }
 
     if let Some(message) = diagnostic.developer_message() {
-        output.push_str(&format!("\n  developer: {message}"));
+        output.push_str("\n  developer: ");
+        output.push_str(message);
     }
 
     output

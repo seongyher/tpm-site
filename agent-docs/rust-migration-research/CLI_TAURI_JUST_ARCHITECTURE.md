@@ -297,7 +297,7 @@ check:
 
 release-check:
     bun --silent run check:release
-    just rust-release-check
+    just rust-check
 
 fix:
     bun run fix
@@ -305,12 +305,16 @@ fix:
 
 rust-check:
     cargo fmt --all --check
-    cargo check --workspace --all-targets --all-features
-    cargo clippy --workspace --all-targets --all-features -- -D warnings
+    cargo check --workspace --all-targets --all-features --locked
+    cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+    RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
+    cargo test --workspace --doc --all-features --locked
+    cargo test --workspace --all-features --locked
+    cargo deny check
 
 rust-test:
-    cargo nextest run --workspace --all-features
-    cargo test --workspace --doc
+    cargo test --workspace --doc --all-features --locked
+    cargo test --workspace --all-features --locked
 
 rust-coverage:
     cargo llvm-cov --workspace --all-features --summary-only

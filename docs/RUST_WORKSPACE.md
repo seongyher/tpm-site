@@ -12,11 +12,32 @@ Use `just --list` as the command index.
 
 ```sh
 just --list
+just fix
 just rust-check
 bun run rust:check
 just check-fast
 just check
 ```
+
+`just fix` is the single automatic-fix command. It runs the existing Bun
+ESLint and Prettier fixes, package sorting, Markdownlint fixes, Markdown/MDX
+formatting, Rust formatting, and Clippy's machine-applicable fixes.
+
+The additive `tpm` CLI can be exercised through Cargo or the `just` command
+router:
+
+```sh
+cargo run --package tpm-cli --bin tpm -- --help
+cargo run --package tpm-cli --bin tpm -- site status --format json
+just cli --help
+just cli site status --format json
+```
+
+The current CLI slice supports `tpm --help`, `tpm --version`,
+`tpm site status`, `tpm check`, `tpm doctor`, and `tpm release inspect`. These
+commands are product-interface proofs over Rust operation contracts. They do
+not replace the existing Bun/Astro authoring, build, verification, release, or
+deployment commands yet.
 
 The current ownership model is:
 
@@ -32,13 +53,14 @@ The current ownership model is:
 | `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy. |
 | `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.         |
 | `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                         |
+| `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                |
 | `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                             |
 | `justfile`                        | Local command router over Bun and Cargo commands.                                      |
 | `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                 |
 | `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                 |
 | `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
 | `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
-| `crates/tpm-cli/`                 | Additive CLI shell that proves the binary boundary.                                    |
+| `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
 | `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
 | `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
 
@@ -50,16 +72,24 @@ The current ownership model is:
 cargo fmt --all --check
 cargo check --workspace --all-targets --all-features --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked
 cargo test --workspace --doc --all-features --locked
 cargo test --workspace --all-features --locked
 cargo deny check
 ```
 
-These gates are intentionally strict and low-noise. The workspace forbids
-unsafe Rust, treats Clippy warnings as blocking during the gate, and avoids
-blanket experimental lint groups that would make routine edits noisy. The
-supply-chain gate rejects denied advisories, yanked crates, wildcard
-dependencies, disallowed licenses, and unknown registries or git sources.
+These gates are intentionally strict. The workspace forbids unsafe Rust,
+promotes compiler and rustdoc warnings to blocking failures, denies public API
+documentation gaps, runs Clippy with `all`, `cargo`, `pedantic`, `nursery`, and
+selected high-signal restriction lints, and treats Clippy warnings as blocking
+during the gate. The supply-chain gate rejects denied advisories, yanked
+crates, wildcard dependencies, disallowed licenses, and unknown registries or
+git sources.
+
+Some Clippy `restriction` lints are intentionally not enabled globally because
+the group includes lints that conflict with idiomatic Rust, normal test
+failure patterns, or CLI adapter needs. Add any lint escape locally, narrowly,
+and with a concrete reason.
 
 GitHub Actions runs the same gate in the blocking `Rust` job through
 `just rust-check`. The package script `bun run rust:check` is a convenience

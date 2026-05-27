@@ -108,6 +108,11 @@ impl WorkspaceContext {
     }
 
     /// Discovers the nearest ancestor with the conventional site config path.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`WorkspaceDiscoveryError::NotFound`] when no ancestor contains
+    /// `site/config/site.json`.
     pub fn discover(start: impl AsRef<Path>) -> Result<Self, WorkspaceDiscoveryError> {
         let start = start.as_ref();
         let first_directory = if start.is_file() {
@@ -222,6 +227,11 @@ impl WorkspaceContext {
     }
 
     /// Inventories source artifacts under the active site instance.
+    ///
+    /// # Errors
+    ///
+    /// Returns the underlying [`io::Error`] when a source directory cannot be
+    /// read or a discovered entry cannot be inspected.
     pub fn inventory_source_artifacts(&self) -> io::Result<SourceInventory> {
         let policy = IgnoredPathPolicy::default();
         let mut artifacts = Vec::new();
@@ -306,7 +316,7 @@ impl WorkspaceContext {
         }
 
         let mut entries = fs::read_dir(root)?.collect::<Result<Vec<_>, _>>()?;
-        entries.sort_by_key(|entry| entry.path());
+        entries.sort_by_key(fs::DirEntry::path);
 
         for entry in entries {
             let path = entry.path();
@@ -692,7 +702,7 @@ mod tests {
         let artifacts = inventory.artifacts();
         let display_paths = artifacts
             .iter()
-            .map(|artifact| artifact.display_path())
+            .map(super::SourceArtifact::display_path)
             .collect::<Vec<_>>();
 
         assert_eq!(
@@ -753,7 +763,7 @@ mod tests {
         let display_paths = inventory
             .artifacts()
             .iter()
-            .map(|artifact| artifact.display_path())
+            .map(super::SourceArtifact::display_path)
             .collect::<Vec<_>>();
 
         assert!(report.is_empty());

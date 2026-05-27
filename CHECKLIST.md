@@ -81,28 +81,50 @@ replacing existing Bun/Astro behavior.
 - [x] Verify the strategy avoids brittle snapshots while still protecting
       machine-readable contracts.
 
-### Milestone 806: Blocked Milestone 8 CLI Follow-Ups
+### Milestone 806: IRK-167 CLI Skeleton And Command Grammar
 
-- [x] Document why IRK-167, IRK-168, IRK-169, and any remaining Rust QA review
-      items are not ready, if still blocked after the operation core work.
-- [x] Add Linear comments or blocker notes where useful so parallel work can
-      pick up as soon as prerequisites land.
+- [x] Re-read the accepted CLI product strategy, Rust operation contracts,
+      Rust workspace docs, and current `tpm-cli` crate before implementation.
+- [x] Replace the additive placeholder CLI shell with a thin command grammar
+      over typed operation requests/results.
+- [x] Add shared command parsing for help, version, workspace selection, output
+      format, and first-slice command families without owning domain logic in
+      command handlers.
+- [x] Add focused tests for help, version, shared flags, usage failures, exit
+      code mapping, and sample operation wiring.
+- [x] Verify the CLI skeleton remains additive and does not replace Bun/Astro
+      behavior.
 
-`IRK-167` remains blocked by the accepted CLI product contract from `IRK-141`.
-`IRK-141` is In Review in Linear, but the concrete contract docs referenced by
-the issue are not present in this worktree yet, so public command grammar,
-shared help text, and user-facing CLI output should not be implemented here.
-`IRK-168` remains blocked by `IRK-167`; `IRK-169` remains blocked by `IRK-168`.
-The unblocked Rust QA items under `IRK-210` have been completed and moved to
-In Review.
+### Milestone 807: IRK-168 First CLI Commands
 
-### Milestone 807: Milestone 8 Verification And Linear Closeout
+- [x] Implement `tpm site status --format json` over the workspace operation
+      contract.
+- [x] Implement `tpm check --format json` over the same diagnostic/result
+      envelope without claiming full release-check parity.
+- [x] Implement `tpm doctor` with remediation-focused human output over shared
+      diagnostics.
+- [x] Implement `tpm release inspect` as a read-only release/output inspection
+      operation with explicit transitional diagnostics.
+- [x] Add human and JSON output tests, fixture-site coverage, and failure-path
+      tests for the first command slice.
+
+### Milestone 808: IRK-169 Final Operation Core And CLI Slice Verification
+
+- [x] Verify Rust unit tests, doctests, formatting, clippy, and supply-chain
+      gates.
+- [x] Verify command handlers stay thin and all command output comes from
+      shared operation contracts or explicit CLI renderers.
+- [x] Verify docs and command references match the implemented first slice.
+- [x] Run broader release checks if practical for the touched surfaces.
+
+### Milestone 809: Milestone 8 Linear Closeout
 
 - [x] Run focused Rust, QA registry, and documentation checks.
 - [x] Run broader release checks if practical for the touched surfaces.
 - [x] Attach relevant docs to completed Linear issues and move completed
       issues to In Review.
 - [x] Summarize completed work and remaining blockers.
+
 ## Active Milestone 6: Static Blog Studio Product Planning
 
 This phase completes Linear milestone 6. It is design and planning work only:
@@ -220,6 +242,16 @@ suite.
       relevant documentation attached.
 - [x] Attach relevant milestone 6 documentation to parent issue `IRK-34`,
       update project status where useful, and move the parent issue to review.
+
+### Milestone 810: Rust Strictness Promotion
+
+- [x] Promote Rust compiler, rustdoc, rustfmt, and Clippy strictness so warnings
+      fail in normal gates and high-signal lints are enabled by default.
+- [x] Fix any code or docs surfaced by the stricter Rust policy without adding
+      broad lint escapes.
+- [x] Document the stricter blocking gate and the small set of intentionally
+      omitted checks with their justifications.
+- [x] Verify the stricter Rust gate and release checks pass.
 
 ## Active Milestone 7: Rust Workspace And QA Foundation
 

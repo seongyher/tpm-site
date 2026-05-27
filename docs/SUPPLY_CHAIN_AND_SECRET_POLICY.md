@@ -39,6 +39,12 @@ replacing the lockfile requires an explicit package-manager migration plan.
 default. This keeps urgent supply-chain risk blocking without making every
 local edit wait on low-severity dependency noise.
 
+Use package-manager `overrides` for transitive security fixes when an upstream
+tool has not yet released a dependency bump, and keep the override as narrow as
+the advisory allows. Do not add a direct dependency only to influence the
+resolver if the package is not imported by repo code; unused dependency checks
+should stay clean.
+
 ## Secret Policy
 
 Secret-like data must not enter source, committed local env files, generated

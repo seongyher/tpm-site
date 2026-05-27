@@ -11,11 +11,13 @@ versus review-only adoption states, and staged command profiles.
 ## Tooling Principles
 
 1. Use Rust's compiler and type system as the first QA layer.
-2. Keep strictness high but explainable.
+2. Keep strictness maximally high and explainable.
 3. Prefer stable toolchain checks for normal CI.
 4. Add nightly-only tools only for targeted, non-blocking review jobs.
 5. Avoid cargo-tool sprawl until a tool has a clear job in the repo.
 6. Treat every public command/report as an API with fixtures and snapshots.
+7. Treat omitted compile-time or static-analysis checks as exceptions that need
+   concrete justification.
 
 ## Required Baseline
 
@@ -67,25 +69,26 @@ placeholder.
 
 Use `cargo fmt --all --check` in CI and `cargo fmt --all` in local fixes.
 
-Avoid custom `rustfmt.toml` at first unless the default formatter conflicts
-with project readability. Rustfmt defaults are a strength because they reduce
-style debate.
+Keep an explicit stable `rustfmt.toml` once real Rust code exists. The file
+should mostly encode rustfmt defaults plus project choices such as edition,
+line width, Unix newlines, shorthand use, import/module reordering, and
+explicit ABI formatting. Avoid unstable rustfmt options in normal CI.
 
 ### Linting
 
 Required local and CI command:
 
 ```text
-cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 ```
 
 Recommended lint policy:
 
-- workspace `unsafe_code = "forbid"`;
-- Clippy `all` and `cargo` as warnings;
-- selected restriction lints for known repo problems;
-- selected `pedantic`, `restriction`, or `nursery` lints only after real code
-  shows they add signal without becoming routine noise;
+- compiler warnings, future-incompatible lints, idiom lints, public-doc gaps,
+  rustdoc warnings, and missing debug implementations are blocking;
+- workspace `unsafe_code = "forbid"` and `unsafe_op_in_unsafe_fn = "deny"`;
+- Clippy `all`, `cargo`, `pedantic`, and `nursery` are enabled in normal gates;
+- selected restriction lints are enabled for known repo problems;
 - local `allow` only with a clear reason;
 - no blanket `allow` at crate root without a design note.
 
@@ -93,27 +96,32 @@ Suggested selected Clippy lints:
 
 ```toml
 [workspace.lints.clippy]
-all = "warn"
-cargo = "warn"
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
-unimplemented = "warn"
-todo = "warn"
-dbg_macro = "warn"
-print_stdout = "warn"
-print_stderr = "warn"
+all = { level = "warn", priority = -1 }
+allow_attributes_without_reason = "deny"
+cargo = { level = "warn", priority = -1 }
+dbg_macro = "deny"
+expect_used = "deny"
+mem_forget = "deny"
+nursery = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+print_stdout = "deny"
+print_stderr = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+wildcard_imports = "deny"
 ```
 
 Nuance:
 
-- `print_stdout` and `print_stderr` should be allowed in CLI presentation
-  modules only, not core libraries.
-- `expect_used` may be allowed in tests when the message is useful.
-- `missing_docs` should be warning-level while APIs churn, then promoted for
-  extracted/public crates.
-- Do not enable all `restriction` or `nursery` lints globally. Clippy's docs
-  explicitly recommend cherry-picking many of these.
+- Do not enable the whole `restriction` group globally. It contains lints that
+  intentionally fight idiomatic Rust, normal tests, or CLI adapter needs.
+- `unused_crate_dependencies` should remain out of the blocking policy until
+  package layout prevents lib/bin false positives.
+- `panic` should remain out of the global policy until tests and invariant
+  constructors have a stricter failure strategy.
+- `print_stdout` and `print_stderr` are denied by default; CLI output should go
+  through explicit writers so commands stay testable.
 
 ## Testing Stack
 
@@ -125,19 +133,19 @@ behavior.
 Run:
 
 ```text
-cargo test --workspace --all-features
-cargo test --workspace --doc
+cargo test --workspace --all-features --locked
+cargo test --workspace --doc --all-features --locked
 ```
 
 ### Nextest
 
-Use `cargo-nextest` as the default Rust test runner once there is more than one
-crate or test suite.
+Use `cargo-nextest` as the default Rust test runner once Rust test volume,
+timeout control, partitioning, or CI reporting needs justify the extra tool.
 
 Run:
 
 ```text
-cargo nextest run --workspace --all-features
+cargo nextest run --workspace --all-features --locked
 ```
 
 Recommended later `nextest.toml` uses:
@@ -323,9 +331,11 @@ and docs.
 Blocking:
 
 - `cargo fmt --all --check`
-- `cargo check --workspace --all-targets --all-features`
-- `cargo clippy --workspace --all-targets --all-features -- -D warnings`
-- `cargo test --workspace --all-features`
+- `cargo check --workspace --all-targets --all-features --locked`
+- `cargo clippy --workspace --all-targets --all-features --locked -- -D warnings`
+- `RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps --document-private-items --locked`
+- `cargo test --workspace --doc --all-features --locked`
+- `cargo test --workspace --all-features --locked`
 - `cargo deny check`
 
 Review-only:
@@ -335,9 +345,9 @@ Review-only:
 
 ### Stage 2: Multiple Crates And CLI Exists
 
-Blocking:
+Blocking candidates once installed and stable:
 
-- `cargo nextest run --workspace --all-features`
+- `cargo nextest run --workspace --all-features --locked`
 - CLI snapshot tests
 - docs command transcript tests
 
@@ -348,7 +358,7 @@ Review-only:
 
 ### Stage 3: Public/Extracted Crates Exist
 
-Blocking:
+Blocking once public or extracted crates exist:
 
 - `cargo doc --workspace --all-features --no-deps`
 - rustdoc broken links and warnings as errors;

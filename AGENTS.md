@@ -66,6 +66,7 @@ behavior until a later parity milestone explicitly promotes a Rust command.
 - `Cargo.lock`: committed Rust dependency lockfile for deterministic tool and
   binary builds.
 - `rust-toolchain.toml`: pinned Rust toolchain and required components.
+- `rustfmt.toml`: explicit stable Rust formatting policy.
 - `deny.toml`: Rust supply-chain policy for blocking `cargo-deny` checks.
 - `justfile`: repository command router over existing Bun scripts and Rust
   checks; keep it orchestration-only.
