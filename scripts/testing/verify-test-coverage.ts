@@ -89,7 +89,7 @@ export async function runCoverageVerificationCli(
   rootDir = process.cwd(),
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run coverage:verify [--quiet]
+    console.log(`Usage: just coverage-verify [--quiet]
 
 Verify that every testable TypeScript source file appears in coverage/lcov.info.
 This is intentionally broad: Astro templates, CSS, declarations, browser scripts,

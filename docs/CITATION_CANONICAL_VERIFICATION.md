@@ -171,9 +171,9 @@ The canonical verification ledger must include:
 
 After each correction batch:
 
-1. Run `bun run references:bibtex:audit -- --write --quiet`.
+1. Run `just references-bibtex-audit -- --write --quiet`.
 2. Review `docs/CITATION_BIBTEX_AUDIT.md` for coverage regressions.
 3. Inspect changed article bibliography output.
 4. Inspect `/bibliography/` for grouping and link behavior.
 5. Run focused tests if helper logic changed.
-6. Run `bun run check:release` before handoff after source edits.
+6. Run `just release-check` before handoff after source edits.

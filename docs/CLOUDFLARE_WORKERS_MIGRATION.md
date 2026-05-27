@@ -10,9 +10,9 @@ files by hand.
 The current site is a static Astro build, so the target deployment should be:
 
 ```text
-bun run build
-bun run verify
-bun run validate:html
+just build
+just verify
+just validate-html
 wrangler deploy
 ```
 
@@ -75,23 +75,19 @@ site should stay static-first.
 Do not add the Cloudflare Vite plugin for the first migration. The current
 deployment need is simpler: upload an already verified `dist/` directory.
 
-Recommended package scripts:
+Recommended `just` recipes:
 
-```json
-{
-  "scripts": {
-    "deploy:cloudflare": "wrangler deploy",
-    "preview:cloudflare": "wrangler dev"
-  },
-  "devDependencies": {
-    "wrangler": "<current>"
-  }
-}
+```just
+deploy-cloudflare:
+    wrangler deploy
+
+preview-cloudflare:
+    wrangler dev
 ```
 
-`preview:cloudflare` is optional. It is useful for testing Worker asset routing,
-`_redirects`, and custom 404 behavior locally, but the existing `bun run
-preview` remains the normal Astro preview command.
+`preview-cloudflare` is optional. It is useful for testing Worker asset
+routing, `_redirects`, and custom 404 behavior locally, but `just preview`
+remains the normal Astro preview command.
 
 ## Wrangler Configuration
 
@@ -152,7 +148,7 @@ Why generate instead of hand-authoring:
 
 Implementation options:
 
-1. Generate `dist/_redirects` after `bun run build`.
+1. Generate `dist/_redirects` after `just build`.
    This is lowest risk because it avoids writing generated files into
    `site/public`.
 
@@ -314,9 +310,9 @@ Completed cutover sequence:
 Use the release build script before manual deploys or release verification:
 
 ```text
-bun run build:release
-bun run verify
-bun run validate:html
+just build-release
+just verify
+just validate-html
 ```
 
 `build:release` runs the optimized production build and then runs
@@ -369,13 +365,13 @@ Cloudflare is now the production host. The cleanup state is:
 - `actions/configure-pages`, `actions/upload-pages-artifact`, and
   `actions/deploy-pages` are removed.
 - `site/public/CNAME` is intentionally retained as a harmless static file.
-- Docs and package script descriptions point deployment work at Cloudflare
+- Docs and command descriptions point deployment work at Cloudflare
   Workers.
 
 ## Recommended Migration Milestones
 
 1. **Design and config**
-   Add `wrangler.toml`, package scripts, and tests that encode static-only
+   Add `wrangler.toml`, `just` recipes, and tests that encode static-only
    Workers hosting.
 
 2. **Redirect generation**

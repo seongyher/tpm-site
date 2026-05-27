@@ -40,7 +40,7 @@ medium, wide, short, dense, and awkward states early.
 Astro requires Node.js `22.12.0` or newer. With Bun:
 
 - `bun install`
-- `bun run <script>`
+- `just <recipe>` for repository workflows
 - `bunx astro add <integration>`
 - `bun create astro`
 

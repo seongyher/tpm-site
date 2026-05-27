@@ -82,8 +82,8 @@ replace local release gates.
 The current local build was generated with:
 
 ```sh
-bun --silent run build
-bun --silent run payload:report -- --top 12
+just build
+just payload-report -- --top 12
 ```
 
 Build output summary:
@@ -347,4 +347,4 @@ This design was checked against `lighthouserc.json`, `package.json`,
 `docs/ARTICLE_PDF_EXPORT.md`, `docs/SOCIAL_PREVIEW_IMAGES.md`,
 `site/public/_headers`, `scripts/payload/report-payload.ts`,
 `scripts/build/verify-build.ts`, and a fresh local `dist/` generated with
-`bun --silent run build`.
+`just build`.

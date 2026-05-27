@@ -71,7 +71,7 @@ owner to complete without learning the whole repository.
    Show default visibility, Featured, Start Here, and collections as the first
    curation levers.
 5. **Validate.**
-   Use `bun run author:check` and explain diagnostics in author language.
+   Use `just author-check` and explain diagnostics in author language.
 6. **Publish or submit.**
    For the current repo this means a pull request. Future studio docs should
    translate the same source contracts into "publish" and optional "submit for
@@ -165,7 +165,7 @@ Common article path:
 3. Add optional `tags`, `image`, and `imageAlt` when useful.
 4. Put article images in `site/assets/articles/<slug>/`.
 5. Write body headings starting at `##`.
-6. Run `bun run author:check`.
+6. Run `just author-check`.
 
 Common announcement path:
 
@@ -173,7 +173,7 @@ Common announcement path:
 2. Use article-like metadata.
 3. Rely on default visibility unless the announcement needs a direct URL but
    should stay out of homepage, RSS, search, or directories.
-4. Run `bun run author:check`.
+4. Run `just author-check`.
 
 Common collection path:
 
@@ -181,7 +181,7 @@ Common collection path:
    `site/content/collections/start-here.md`, or create a new collection file.
 2. Add article or announcement slugs in explicit display order.
 3. Use `draft: true` for unfinished collections.
-4. Run `bun run site:doctor` or `bun run author:check` to catch misspelled
+4. Run `just site-doctor` or `just author-check` to catch misspelled
    slugs.
 
 Common image path:
@@ -200,7 +200,7 @@ Common redirect path:
    wrong.
 3. Use redirects for legacy public URLs, moved routes, and compatibility URLs
    that external sites may still cite.
-4. Run `bun run site:doctor` to catch duplicate redirects, chains, and route
+4. Run `just site-doctor` to catch duplicate redirects, chains, and route
    conflicts.
 
 Common site settings path:
@@ -209,7 +209,7 @@ Common site settings path:
    support/social/share, feature flags, metadata defaults, and visibility
    defaults.
 2. Keep hidden metadata truthful and consistent with visible page facts.
-3. Run `bun run site:doctor`.
+3. Run `just site-doctor`.
 4. Regenerate schema references only when schema contracts change.
 
 Advanced pages should describe MDX components, semantic profiles, PDF
@@ -247,5 +247,5 @@ file is the subject of the page.
 2. Reorganize docs-site categories and collections so the homepage teaches the
    intended path.
 3. Update docs-site navigation and README around the public documentation role.
-4. Verify with `bun run docs:check`, markdown review, and affected platform
+4. Verify with `just docs-check`, markdown review, and affected platform
    checks.

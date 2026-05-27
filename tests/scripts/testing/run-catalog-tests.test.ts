@@ -16,7 +16,7 @@ describe("catalog test runner", () => {
 
       expect(exitCode).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run test:catalog",
+        "Usage: just test-catalog",
       );
     } finally {
       log.mockRestore();
@@ -38,8 +38,8 @@ describe("catalog test runner", () => {
       expect(command.env["SITE_OUTPUT_DIR"]).toBe("dist-custom-catalog");
     }
     expect(commands[0]).toMatchObject({
-      args: ["--silent", "run", "build"],
-      command: "bun",
+      args: ["catalog-build"],
+      command: "just",
     });
     expect(commands[1]).toMatchObject({
       args: [

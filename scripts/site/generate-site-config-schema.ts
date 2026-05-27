@@ -78,7 +78,7 @@ export function runGenerateSiteConfigSchemaCli(
     io.stderr.write(
       `Site config schema is stale at ${projectRelativePath(
         outputPath,
-      )}. Run bun run site:schema.\n`,
+      )}. Run just site-schema.\n`,
     );
 
     return 1;

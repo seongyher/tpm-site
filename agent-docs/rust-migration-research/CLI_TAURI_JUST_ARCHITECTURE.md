@@ -288,19 +288,19 @@ setup:
     cargo fetch
 
 check-fast:
-    bun --silent run check:fast
+    just check-fast
     just rust-check
 
 check:
-    bun --silent run check
+    just check
     just rust-check
 
 release-check:
-    bun --silent run check:release
+    just release-check
     just rust-check
 
 fix:
-    bun run fix
+    just fix
     cargo fmt --all
 
 rust-check:

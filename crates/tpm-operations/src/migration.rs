@@ -288,7 +288,9 @@ fn display_path(path: &std::path::Path) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::error::Error;
+    use std::fs;
+    use std::path::{Path, PathBuf};
 
     use super::{ScriptMigrationDisposition, migration_plan, run_migration_baseline};
     use crate::{OperationInterface, OperationStatus};
@@ -301,6 +303,18 @@ mod tests {
 
     fn repo_root() -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
+    }
+
+    fn temp_workspace(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!("tpm-migration-{name}-{}", std::process::id()))
+    }
+
+    fn write_file(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
     }
 
     #[test]
@@ -319,6 +333,19 @@ mod tests {
             "astro renderer",
             ScriptMigrationDisposition::EcosystemWrapper
         )));
+
+        let site_doctor = migration_plan()
+            .iter()
+            .find(|entry| entry.domain() == "site doctor")
+            .unwrap_or_else(|| panic!("site doctor migration entry should exist"));
+        assert_eq!(site_doctor.scripts(), &["site:doctor"]);
+        assert_eq!(site_doctor.target(), "tpm site doctor");
+        assert!(site_doctor.preserve().contains("source-mapped"));
+        assert!(site_doctor.cleanup().contains("shared Rust diagnostics"));
+        assert_eq!(
+            super::disposition_label(ScriptMigrationDisposition::TemporaryShim),
+            "temporary shim"
+        );
     }
 
     #[test]
@@ -347,5 +374,49 @@ mod tests {
                 .iter()
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-MIGRATION-PACKAGE-READ")
         );
+    }
+
+    #[test]
+    fn migration_baseline_reports_retired_script_notes() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("retired-scripts");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(
+            &root.join("package.json"),
+            "{\"scripts\":{\"site:doctor\":\"old\"}}",
+        )?;
+
+        let result = run_migration_baseline(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Warning);
+        assert!(result.diagnostics().diagnostics().iter().any(|diagnostic| {
+            diagnostic.code().as_str() == "TPM-MIGRATION-SCRIPT-ABSENT"
+                && diagnostic.message().contains("image assets")
+        }));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn migration_baseline_reports_missing_workspace() {
+        let result = run_migration_baseline(
+            PathBuf::from("/tmp/tpm-migration-missing-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-MIGRATION-WORKSPACE")
+        );
+    }
+
+    #[test]
+    fn migration_display_path_handles_empty_paths() {
+        assert_eq!(super::display_path(Path::new("")), ".");
     }
 }

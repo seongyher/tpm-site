@@ -94,8 +94,8 @@ repo-specific experiments.
 A minification configuration is not production-eligible if any of the following
 occur:
 
-- `bun run validate:html` fails.
-- `bun run verify` fails.
+- `just validate-html` fails.
+- `just verify` fails.
 - Search page behavior or Pagefind result rendering changes.
 - JSON-LD script content fails to parse or loses required SEO fields.
 - `pre`, `code`, Markdown prose, article references, or bibliography/footnote

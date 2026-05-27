@@ -262,7 +262,7 @@ export async function runSharedAssetsCli(
   rootDir = process.cwd(),
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run assets:shared [--json] [--quiet]
+    console.log(`Usage: just assets-shared [--json] [--quiet]
 
 Detect site assets referenced by more than one source file while living outside
 site/assets/shared/.

@@ -40,7 +40,7 @@ Use this shape for future decisions:
 - Reasoning: A full generated inventory prevents accidental omissions and keeps
   clean/prose-only articles visible during review.
 - Consequences: The catalog is generated from repository content by
-  `bun run references:catalog -- --write`; manual prose should not be added
+  `just references-catalog -- --write`; manual prose should not be added
   directly to generated article entries because it will be overwritten.
 - Verification: The catalog generator test asserts one entry per article in its
   fixture corpus.
@@ -79,10 +79,10 @@ Use this shape for future decisions:
 - Consequences: The mechanical pass converted seven simple raw HTML links and
   two simple paragraph wrappers. It intentionally did not create any `cite-*`,
   `note-*`, or `tpm-bibtex` syntax.
-- Verification: `bun run references:migrate:mechanical -- --write` performed
+- Verification: `just references-migrate-mechanical -- --write` performed
   the pass; a follow-up dry run reports no remaining mechanical-safe changes.
-  The script has focused tests and the site passed `bun run check`,
-  `bun run build`, `bun run verify`, and `bun run validate:html`.
+  The script has focused tests and the site passed `just check`,
+  `just build`, `just verify`, and `just validate-html`.
 
 ### ARD-004: Glossary Named Anchors Are Structural, Not Mechanical Link Cleanup
 
@@ -174,7 +174,7 @@ Use this shape for future decisions:
   `the-memeticists-challenge-remains-open.md`, `what-is-a-meme.md`,
   `how-to-digitally-coauthor-articles-in-philosophy-class.md`, and
   `postnaturalism.md`.
-- Verification: `bun run references:audit` reports eight manual-review
+- Verification: `just references-audit` reports eight manual-review
   candidates after the mechanical pass.
 
 ### ARD-009: Preserve Glossary Anchors Without Legacy Link Markup
@@ -192,7 +192,7 @@ Use this shape for future decisions:
 - Consequences: The article remains semantically the same for readers and
   existing hash links, but it no longer appears as a raw-link migration
   candidate.
-- Verification: `bun run references:audit` no longer reports raw HTML links for
+- Verification: `just references-audit` no longer reports raw HTML links for
   the glossary after the rewrite.
 
 ### ARD-010: Keep Image Credits Visible As Editorial Credit Prose
@@ -210,7 +210,7 @@ Use this shape for future decisions:
   longer appears as a media-credit migration candidate. A future image-credit
   metadata model can still move these credits into structured image data if
   needed.
-- Verification: `bun run references:audit` no longer reports media/source
+- Verification: `just references-audit` no longer reports media/source
   credit candidates for the article after the rewrite.
 
 ### ARD-011: Convert Small Claim-Tied Reference Sections To BibTeX Citations
@@ -230,8 +230,8 @@ Use this shape for future decisions:
 - Consequences: The original reference headings were removed. The generated
   article references now own bibliography rendering for those sources. Reviewers
   should check BibTeX field accuracy, especially names and publication details.
-- Verification: `bun run references:audit` reports no reference-section
-  candidates for these articles, and `bun --silent run build` succeeds with the
+- Verification: `just references-audit` reports no reference-section
+  candidates for these articles, and `just build` succeeds with the
   generated citations.
 
 ### ARD-012: Preserve Long Historical Bibliographies As Visible Source Lists
@@ -252,7 +252,7 @@ Use this shape for future decisions:
   entries do not appear in the global bibliography until a future structured
   source-list model is designed. This is not a parser exception; it is a
   content classification decision.
-- Verification: `bun run references:audit` reports no manual candidates for
+- Verification: `just references-audit` reports no manual candidates for
   these articles, and the generated catalog still inventories their ordinary
   prose links and raw URLs.
 
@@ -282,7 +282,7 @@ Use this shape for future decisions:
   anchors render as bibliography-only article references with no backlinks.
   Reviewers should treat generated field extraction as conservative migration
   scaffolding; the `citation` field is the content-fidelity source of truth.
-- Verification: `bun --silent run references:audit -- --quiet` reports zero
+- Verification: `just references-audit -- --quiet` reports zero
   manual candidates and zero reference-section headings. The regenerated
   catalog classifies these articles as canonical references.
 
@@ -303,7 +303,7 @@ Use this shape for future decisions:
 - Consequences: The notes are now canonical and release-valid. The historical
   numbered source list feeds article-local bibliography rendering and the
   global bibliography instead of remaining as a visible Markdown section.
-- Verification: `bun run references:audit` reports no noncanonical footnotes
+- Verification: `just references-audit` reports no noncanonical footnotes
   for the article, and the strict Markdown build succeeds.
 
 ### ARD-014: Convert Source-Only Numeric Footnotes To BibTeX Citations
@@ -322,8 +322,8 @@ Use this shape for future decisions:
   source lines. Ambiguous web-only or DOI-only references use conservative
   fallback titles and identifiers so the data remains parseable and reviewable.
   Reviewers should refine any fallback titles where better metadata is known.
-- Verification: `bun run references:audit` reports no noncanonical footnotes
-  and no reference-section heading for the article. `bun --silent run build`
+- Verification: `just references-audit` reports no noncanonical footnotes
+  and no reference-section heading for the article. `just build`
   succeeds with all citation markers matched to BibTeX keys.
 
 ### ARD-015: Enable Strict Legacy Footnote Validation
@@ -342,8 +342,8 @@ Use this shape for future decisions:
   bibliography citations must use `cite-*` plus matching hidden BibTeX.
   Bibliography-only BibTeX entries are valid for broad source-list entries.
   Existing ordinary links remain valid article content.
-- Verification: `bun run references:audit` reports zero manual candidates, and
-  `bun --silent run build` succeeds with strict validation enabled.
+- Verification: `just references-audit` reports zero manual candidates, and
+  `just build` succeeds with strict validation enabled.
 
 ### ARD-016: Keep Bibliography Backlink Groups Out Of Page Landmarks
 
@@ -361,7 +361,7 @@ Use this shape for future decisions:
 - Consequences: Readers still see a clear "Cited by" label and semantic list of
   article links, while assistive-technology landmark navigation stays focused
   on the page's meaningful regions.
-- Verification: `bun --silent run validate:html` passes on the rebuilt
+- Verification: `just validate-html` passes on the rebuilt
   bibliography page, and `BibliographySourceArticles` has a render test for the
   non-landmark contract.
 
@@ -380,7 +380,7 @@ Use this shape for future decisions:
   should fail tooling instead of being hidden behind temporary allowlists.
   Reviewers should treat new exceptions as a separate explicit editorial and
   technical decision.
-- Verification: `bun --silent run references:audit` reports zero manual-review
+- Verification: `just references-audit` reports zero manual-review
   candidates, zero noncanonical footnote definitions, zero noncanonical
   footnote markers, zero reference headings, and zero visible BibTeX blocks.
 

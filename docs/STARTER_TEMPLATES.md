@@ -34,11 +34,11 @@ copy flow:
 2. Copy the starter directory into a new site-instance directory.
 3. Set `SITE_INSTANCE_ROOT` to that directory.
 4. Edit `config/site.json`, `theme.css`, `content/`, `assets/`, and `public/`.
-5. Run `bun run starters:check` from the platform repo to verify maintained
+5. Run `just starters-check` from the platform repo to verify maintained
    starter contracts.
 6. Run the normal site-instance checks for the copied site, starting with
-   `bun run author:check` or `bun run site:doctor`.
-7. Build with `SITE_INSTANCE_ROOT=<your-site> bun run build`.
+   `just author-check` or `just site-doctor`.
+7. Build with `SITE_INSTANCE_ROOT=<your-site> just build`.
 
 Future CLI, MCP, and studio workflows should consume the same starter matrix
 instead of introducing a separate template model.
@@ -56,9 +56,9 @@ Every maintained starter must:
 - declare source, build, and release checks in the starter matrix;
 - stay small enough to maintain during platform refactors.
 
-`bun run starters:check` enforces the source-level subset. Full build checks can
+`just starters-check` enforces the source-level subset. Full build checks can
 be run directly with the starter's declared `SITE_INSTANCE_ROOT` command, and
-the docs starter is also covered by `bun run test:docs-site`.
+the docs starter is also covered by `just test-docs-site`.
 
 ## Release Compatibility
 

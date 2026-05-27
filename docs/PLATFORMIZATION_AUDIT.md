@@ -26,7 +26,7 @@ The platform should consume the site instance through an explicit
 `SITE_INSTANCE_ROOT` setting:
 
 ```sh
-SITE_INSTANCE_ROOT=../tpm-site bun run build
+SITE_INSTANCE_ROOT=../tpm-site just build
 ```
 
 This is cleaner than making the public platform repo contain a private submodule.
@@ -315,8 +315,8 @@ Development flow:
 
 ```sh
 cd blog-platform
-SITE_INSTANCE_ROOT=../tpm-site bun run dev
-SITE_INSTANCE_ROOT=../tpm-site bun run check:release
+SITE_INSTANCE_ROOT=../tpm-site just dev
+SITE_INSTANCE_ROOT=../tpm-site just release-check
 ```
 
 Deployment flow:
@@ -348,13 +348,13 @@ validates. That means:
 Useful future commands:
 
 ```sh
-bun run site:validate
-bun run site:normalize
-bun run site:doctor
-bun run site:preview
+just site-doctor
+just author-check
+just author-fix
+just dev
 ```
 
-`site:doctor` should explain what is wrong in non-technical language. The admin
+`just site-doctor` should explain what is wrong in non-technical language. The admin
 UI can call the same validation layer.
 
 ## Migration Sequence
@@ -400,7 +400,7 @@ Acceptance gates:
 
 - all content, build, asset, and route verification scripts can run against a
   fixture instance root outside `src/`;
-- package scripts remain stable;
+- `just` command recipes remain stable;
 - error messages report instance-relative paths that a non-technical editor can
   find.
 
@@ -434,7 +434,7 @@ Acceptance gates:
 Copy or move `site/` to a sibling repo and run:
 
 ```sh
-SITE_INSTANCE_ROOT=../tpm-site bun run check:release
+SITE_INSTANCE_ROOT=../tpm-site just release-check
 ```
 
 Blockers to resolve here:
@@ -562,7 +562,7 @@ The near-term command should stay:
 
 ```sh
 cd blog-platform
-SITE_INSTANCE_ROOT=../tpm-site bun run build
+SITE_INSTANCE_ROOT=../tpm-site just build
 ```
 
 A later package-style architecture, where a thin site repo imports the platform

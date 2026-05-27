@@ -211,7 +211,7 @@ describe("standalone post-build optimization suite", () => {
     try {
       expect(await runPostBuildOptimizationSuiteCli(["--help"])).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run payload:postbuild:experiments",
+        "Usage: just payload-postbuild-experiments",
       );
     } finally {
       log.mockRestore();

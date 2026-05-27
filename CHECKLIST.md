@@ -97,25 +97,114 @@ accidental, duplicated, overbroad, or obsolete script behavior.
 - [x] Add tests proving the report shape is useful for release reports, CLI,
       GUI, MCP, and CI consumers.
 
-### Milestone 907: IRK-176 Promote Proven Rust Commands And Retire Script Debt
+### Milestone 907: IRK-219 Command Inventory And End-State Policy
 
-- [x] Promote only Rust commands with parity evidence or documented accepted
-      improvements.
-- [x] Update `just`, CI/local parity metadata, package-script inventory, docs,
-      and agent guidance for promoted command ownership.
-- [x] Remove safe `package.json` script debt and classify any remaining Bun
-      usage as temporary migration debt or JS/Astro ecosystem requirement.
-- [x] Verify release checks pass and no source-content behavior changed without
-      migration notes.
+- [x] Inventory every current `package.json` script and custom repository
+      TypeScript/Bun script.
+- [x] Classify each command as Rust-owned, `just` orchestration over a
+      JS/Astro ecosystem tool, temporary TypeScript fallback, review-only
+      experiment, or obsolete/delete candidate.
+- [x] Define the milestone 9 end-state policy for allowed package scripts,
+      allowed Bun usage, and remaining TypeScript tooling debt.
+- [x] Verify the policy is explicit enough to guide command promotion,
+      cleanup, CI migration, docs, and follow-up issue state.
 
-### Milestone 908: Milestone 9 Linear Closeout
+### Milestone 908: IRK-229 Ergonomic `just` Command Surface
 
-- [x] Run focused Rust, QA registry, docs, and package-script checks.
+- [x] Design the human command menu for setup, development, authoring,
+      source checks, formatting, linting, tests, builds, release checks,
+      review-only checks, Rust gates, CLI, docs, and deploy operations.
+- [x] Implement aggregate and focused `just` recipes without putting domain
+      logic in the `justfile`.
+- [x] Ensure `just --list` is useful enough to replace package scripts as the
+      developer command index.
+- [x] Verify representative focused and aggregate `just` recipes work.
+
+### Milestone 909: IRK-220 `just` Command Registry And CI Parity
+
+- [x] Replace package-script registry assumptions with a command registry that
+      classifies `just` recipes and any remaining direct tool adapters.
+- [x] Keep CI/local parity, command domain coverage, runtime, mutation, and
+      review/blocking metadata explicit.
+- [x] Add or update tests that fail when `justfile`, CI workflows, or the
+      command registry drift.
+- [x] Verify registry tests and generated references are green.
+
+### Milestone 910: IRK-221 CI, Docs, And Developer Workflow Migration
+
+- [x] Move GitHub Actions command invocations from package scripts to `just`
+      recipes while preserving artifact reuse and review-only behavior.
+- [x] Update root, site, agent, Rust, QA, and generated-reference docs so
+      human-facing instructions use `just`.
+- [x] Keep ecosystem tool setup explicit: Bun installs JS dependencies,
+      Astro/browser tools remain adapters, Rust/CLI checks use Cargo through
+      `just`.
+- [x] Verify CI workflow tests, docs reference checks, and config tests pass.
+
+### Milestone 911: IRK-222 Through IRK-225 Tooling Ports And Fallbacks
+
+- [x] Promote already-proven Rust operations for author/content/site,
+      media/assets, routes/redirects, QA diagnostics, and generated-output
+      report surfaces where parity evidence exists.
+- [x] Move deterministic repository-owned orchestration into `just` or Rust
+      and remove package-script wrappers for those paths.
+- [x] Classify any remaining repository-owned TypeScript tools as
+      time-boxed fallbacks with explicit owner, reason, and promotion target.
+- [x] Keep JS/Astro ecosystem commands behind `just` recipes when Rust is not
+      the right boundary.
+- [x] Verify no source-content behavior changed without migration notes.
+
+### Milestone 912: IRK-228 And IRK-226 Retire Legacy Script Surface
+
+- [x] Remove package-script entries that have migrated to `just`.
+- [x] Remove obsolete repository-owned TypeScript/Bun orchestration helpers
+      that are no longer called.
+- [x] Add a no-regression guard preventing new package scripts without an
+      explicit, reviewed exception.
+- [x] Verify package ordering, dead-code checks, command-registry checks, and
+      focused tests pass.
+
+### Milestone 913: IRK-230 And IRK-227 Final Docs, Verification, And Linear Closeout
+
+- [x] Update final milestone 9 docs with package-script shrinkage, remaining
+      Bun/TypeScript adapters, accepted differences, and follow-up debt.
+- [x] Run focused command, Rust, registry, docs, and config checks.
 - [x] Run the full release gate and fix any issues.
 - [x] Attach relevant docs to Linear issues and move completed milestone 9
       issues to In Review.
-- [x] Summarize completed work, accepted differences, remaining script debt,
-      and follow-up blockers.
+- [x] Summarize completed work, accepted differences, remaining adapters, and
+      follow-up blockers.
+
+## Active Rust Coverage Pass
+
+This pass raises Rust coverage as close to 100% useful coverage as practical.
+Uncovered code should be treated as design feedback: add tests where seams are
+clean, refactor where coverage is blocked by mixed concerns, and leave only
+explicitly justified gaps.
+
+### Milestone R01: Measure And Classify Coverage Gaps
+
+- [x] Run detailed Rust coverage and identify uncovered lines/branches by
+      crate and module.
+- [x] Classify each gap as missing useful coverage, defensive/external glue,
+      or design friction requiring refactor.
+- [x] Decide whether uncovered code should get tests, refactors, or an
+      explicit remaining-gap justification.
+
+### Milestone R02: Improve Rust Test Coverage
+
+- [x] Add focused Rust tests for uncovered behavior without test-only exports
+      or brittle output snapshots.
+- [x] Refactor any poorly separated Rust code where coverage gaps reveal mixed
+      concerns or awkward seams.
+- [x] Re-run coverage until no genuine useful coverage improvements remain.
+
+### Milestone R03: Verify And Report
+
+- [x] Run blocking Rust gates and relevant release checks after coverage
+      changes.
+- [x] Record final Rust coverage status and justify any remaining uncovered
+      code.
 
 ## Active Milestone 8: Operation Core And CLI Vertical Slice
 

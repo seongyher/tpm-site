@@ -80,7 +80,7 @@ Every CI gate should map to one local command or a documented CI-only reason.
 
 Implemented outputs:
 
-- `scripts/quality/qa-command-registry.ts` classifies every package script by
+- `scripts/quality/qa-command-registry.ts` classifies every `just` recipe by
   domain, command class, mutation behavior, CI usage, runtime expectation, and
   scope.
 - The same registry maps every CI job in `.github/workflows/ci.yml` and
@@ -88,13 +88,13 @@ Implemented outputs:
   scripts, or a documented CI-only reason.
 - The registry also maps every command domain to focused/release/CI evidence,
   or an explicit exception for investigation-only/manual domains.
-- `tests/scripts/quality/qa-command-registry.test.ts` verifies package script
+- `tests/scripts/quality/qa-command-registry.test.ts` verifies `just` recipe
   coverage, duplicate registry entries, actionable metadata, domain
   accountability, CI snippets, local script references, and complete CI job
   coverage.
 - `test:config` runs the registry test so `check:fast` catches registry and CI
   parity drift before full lint/test stages.
-- `PACKAGE_SCRIPTS.md` points maintainers to the registry as the command
+- `COMMANDS.md` points maintainers to the registry as the command
   classification source.
 
 ### 3. Failure-Probe Fixtures (`IRK-38`)
@@ -170,7 +170,7 @@ Only after the previous milestones exist:
 
 - tighten overbroad scopes;
 - split fast local and release commands where useful;
-- update `PACKAGE_SCRIPTS.md` and related docs;
+- update `COMMANDS.md` and related docs;
 - record before/after runtime and diagnostic differences;
 - verify coverage with probes and release checks.
 
@@ -183,7 +183,7 @@ Implemented outputs:
 - No high-risk replacement of `eslint .`, broad Prettier globs, Knip roots, or
   Markdown review scope was accepted in this preflight. Those changes require a
   baseline/candidate diagnostic snapshot through `diagnostics:diff`.
-- `PACKAGE_SCRIPTS.md` is the human command map, backed by the typed QA command
+- `COMMANDS.md` is the human command map, backed by the typed QA command
   registry. `test:config` now runs registry, probe, and diagnostic-diff contract
   tests as part of `check:fast`.
 - Runtime observation for the expanded `test:config` gate: 44 tests in roughly
@@ -199,7 +199,7 @@ or overlaps need follow-up.
 
 ### Current Command Surface
 
-`package.json` currently exposes 95 scripts. `PACKAGE_SCRIPTS.md` is the
+`justfile` currently exposes the repository command surface. `COMMANDS.md` is the
 human-readable per-script purpose reference and is broadly up to date. The
 inventory below classifies the current commands by domain and risk so the next
 milestones can turn the classification into an enforceable registry.
@@ -214,7 +214,7 @@ milestones can turn the classification into an enforceable registry.
 | Catalog                    | `catalog:*`, `test:catalog`, `test:catalog:site-instance`, `catalog:check`                                                                                                  | `focused`                                              | generated output                         | blocking CI for catalog tests; `check:fast` for catalog accountability                | Uses isolated `dist-catalog` or fixture output paths.                                                         |
 | Check orchestration        | `check:fast`, `check`, `check:release`, `quality`, `quality:release`                                                                                                        | `fast-local` or `release`                              | no, except called builds                 | `check` blocks CI; release wrapper is local                                           | `quality:*` adds quieter output and review-only trailing checks.                                              |
 | Coverage                   | `coverage`, `coverage:unit`, `coverage:check`, `coverage:verify`                                                                                                            | `investigation`                                        | coverage output                          | review-only CI                                                                        | Coverage is review/accountability, not the normal blocking `check`.                                           |
-| Deploy and preview         | `deploy:cloudflare`, `preview:*`, `dev`, `docs-site:*`, `catalog:dev`                                                                                                       | `investigation` or deploy                              | external deploy or local server/output   | deploy uses Wrangler action on `main`                                                 | CI deploy uses `cloudflare/wrangler-action`, not the package script directly.                                 |
+| Deploy and preview         | `deploy:cloudflare`, `preview:*`, `dev`, `docs-site:*`, `catalog:dev`                                                                                                       | `investigation` or deploy                              | external deploy or local server/output   | deploy uses Wrangler action on `main`                                                 | CI deploy uses `cloudflare/wrangler-action`, not the `just` recipe directly.                                  |
 | Formatting                 | `format:*`, `fix`, `fix:markdown`                                                                                                                                           | `fast-local` or `mutation`                             | write variants mutate                    | `check` via `format`; review markdown via `review:markdown`                           | Code formatting is blocking; Markdown formatting is review-only around content.                               |
 | Lint and dead code         | `lint`, `lint:fix`, `lint:mdx`, `lint:markdown`, `lint:packages`, `deadcode`                                                                                                | `fast-local` or `focused`                              | fix variant mutates                      | `check`; markdown review-only CI                                                      | ESLint ignores generated dirs and Markdown/MDX in the main run; MDX has a focused lint command.               |
 | Payload experiments        | `payload:*`                                                                                                                                                                 | `investigation`                                        | temp/copied output                       | no                                                                                    | Explicit experiment commands; not part of release gates.                                                      |
@@ -230,34 +230,34 @@ milestones can turn the classification into an enforceable registry.
 `.github/workflows/ci.yml` has one blocking quality/build/browser/catalog/audit
 spine and several review-only jobs.
 
-| CI job              | Blocking                         | Local reproduction                                                                                         | Notes                                                          |
-| ------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `quality`           | yes                              | `bun run check`                                                                                            | Main PR gate after install.                                    |
-| `markdown-review`   | no                               | `bun run review:markdown`                                                                                  | Review-only style signal for Markdown/MDX.                     |
-| `asset-review`      | no                               | `bun run review:assets`                                                                                    | Review-only duplicate/unused image signal.                     |
-| `build`             | yes                              | `bun run build`, `bun run build:cloudflare`, `bun run verify`, `bun run validate:html`                     | Uploads `verified-dist` for downstream checks.                 |
-| `browser`           | yes                              | `bun run test:e2e:built` after a verified build                                                            | Downloads `verified-dist`; does not rebuild.                   |
-| `catalog`           | yes                              | `bun run test:catalog` and `bun run test:catalog:site-instance`                                            | Exercises platform component catalog and fixture site catalog. |
-| `accessibility`     | no                               | `bun run test:a11y:built` after a verified build                                                           | Review-only axe scan against `verified-dist`.                  |
-| `lighthouse`        | no                               | `bun run test:perf:built` after a verified build                                                           | Review-only Lighthouse CI output to `.lighthouseci/`.          |
-| `audit`             | yes                              | `bun run audit`                                                                                            | High-severity dependency audit.                                |
-| `audit-review`      | no                               | `bun run audit:all`                                                                                        | All-severity maintenance signal.                               |
-| `coverage-review`   | no                               | `bun run coverage`                                                                                         | Review-only LCOV and coverage inventory.                       |
-| `deploy-cloudflare` | yes on `main` after dependencies | `bun run deploy:cloudflare` is closest, but CI uses `cloudflare/wrangler-action@v3` with `command: deploy` | Deploys the verified artifact, not a rebuilt output.           |
+| CI job              | Blocking                         | Local reproduction                                                                                      | Notes                                                          |
+| ------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `quality`           | yes                              | `just check`                                                                                            | Main PR gate after install.                                    |
+| `markdown-review`   | no                               | `just review-markdown`                                                                                  | Review-only style signal for Markdown/MDX.                     |
+| `asset-review`      | no                               | `just review-assets`                                                                                    | Review-only duplicate/unused image signal.                     |
+| `build`             | yes                              | `just build`, `just build-cloudflare`, `just verify`, `just validate-html`                              | Uploads `verified-dist` for downstream checks.                 |
+| `browser`           | yes                              | `just test-e2e-built` after a verified build                                                            | Downloads `verified-dist`; does not rebuild.                   |
+| `catalog`           | yes                              | `just test-catalog` and `just test-catalog-site-instance`                                               | Exercises platform component catalog and fixture site catalog. |
+| `accessibility`     | no                               | `just test-a11y-built` after a verified build                                                           | Review-only axe scan against `verified-dist`.                  |
+| `lighthouse`        | no                               | `just test-perf-built` after a verified build                                                           | Review-only Lighthouse CI output to `.lighthouseci/`.          |
+| `audit`             | yes                              | `just audit`                                                                                            | High-severity dependency audit.                                |
+| `audit-review`      | no                               | `just audit-all`                                                                                        | All-severity maintenance signal.                               |
+| `coverage-review`   | no                               | `just coverage`                                                                                         | Review-only LCOV and coverage inventory.                       |
+| `deploy-cloudflare` | yes on `main` after dependencies | `just deploy-cloudflare` is closest, but CI uses `cloudflare/wrangler-action@v3` with `command: deploy` | Deploys the verified artifact, not a rebuilt output.           |
 
 `.github/workflows/security.yml` adds:
 
 - `dependency-review`: PR-only GitHub Dependency Review action; CI-only because
   it depends on GitHub pull request metadata.
 - `secrets`: Gitleaks action against git history. Local approximation is
-  `bun run secrets`, while the CI action owns SARIF/security-event integration.
+  `just secrets`, while the CI action owns SARIF/security-event integration.
 
 ### Config And Scope Inventory
 
 | Config or policy                                          | Scope owner                       | Include scope                                                                             | Exclude scope                                                                                                                     | Current tests                                                                   |
 | --------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | `eslint.config.ts`                                        | lint/type/style contracts         | Flat config for JS, TS, Astro, MDX, React, Tailwind, tests, data, component boundaries    | `.astro/`, `.lighthouseci/`, `coverage/`, `dist/`, `dist-catalog/`, `node_modules/`, Playwright artifacts, `tmp/`, lockfile noise | `tests/config/eslint.config.test.ts`                                            |
-| `prettier.config.mjs` and `.prettierignore`               | code/config formatting            | Code/config globs in package scripts; Markdown through separate scripts                   | Generated output, local skills, coverage, Lighthouse, Playwright artifacts, `tmp/`, `unused-assets/`                              | `tests/config/prettier.config.test.ts`                                          |
+| `prettier.config.mjs` and `.prettierignore`               | code/config formatting            | Code/config globs in `just` recipes; Markdown through separate scripts                    | Generated output, local skills, coverage, Lighthouse, Playwright artifacts, `tmp/`, `unused-assets/`                              | `tests/config/prettier.config.test.ts`                                          |
 | `.markdownlint-cli2.jsonc`                                | Markdown style review             | `**/*.md`                                                                                 | Generated output, local skills, coverage, Lighthouse, Playwright artifacts, `unused-assets/**`                                    | `tests/config/markdownlint.config.test.ts`                                      |
 | `.htmlvalidate.json` and `scripts/build/validate-html.ts` | generated HTML validity           | Representative built HTML chosen by validator script                                      | Not a full-site HTML crawl                                                                                                        | HTML validation is part of `build` CI and release check                         |
 | `tsconfig.json`                                           | app/static site TypeScript        | Astro config, `site/content`, `src`                                                       | `dist`, `node_modules`                                                                                                            | `tests/config/tsconfig.test.ts`                                                 |
@@ -276,7 +276,7 @@ spine and several review-only jobs.
 ### Current Scope Observations
 
 1. The repo already has config tests for the highest-risk command contracts:
-   package script entrypoints, CI artifact reuse, Cloudflare deployment shape,
+   `just` recipe entrypoints, CI artifact reuse, Cloudflare deployment shape,
    strict TypeScript settings, Playwright built-output testing, and generated
    output ignores.
 2. Main local linting uses `eslint .`, which is simple and strict, but it makes
@@ -292,7 +292,7 @@ spine and several review-only jobs.
    documented as approximations, not exact reproductions.
 6. Review-only gates are intentionally not blocking in CI. The registry should
    preserve this distinction instead of treating every command as equal.
-7. The current inventory does not reveal stale package scripts, but it does show
+7. The current inventory does not reveal stale `just` recipes, but it does show
    that script metadata lives only in prose. `IRK-37` should move command
    contracts into data and derive/check prose from that data where practical.
 

@@ -73,8 +73,8 @@ export function catalogTestCommands(
 
   return [
     {
-      args: ["--silent", "run", "build"],
-      command: "bun",
+      args: ["catalog-build"],
+      command: "just",
       env,
       label: "Catalog build",
     },
@@ -144,7 +144,7 @@ function runCommand(command: CatalogTestCommand): number {
 }
 
 function usage(): string {
-  return `Usage: bun run test:catalog [--dir <dir>] [-- <playwright-args>]
+  return `Usage: just test-catalog [--dir <dir>] [-- <playwright-args>]
 
 Build the private component catalog into an isolated output directory, then run
 catalog-specific Playwright invariants against that output.

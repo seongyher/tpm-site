@@ -9,10 +9,7 @@ import {
   type QaDomainCoverageEntry,
   qaDomainCoverageRegistry,
 } from "../../../scripts/quality/qa-command-registry";
-
-interface PackageJson {
-  scripts: Record<string, string>;
-}
+import { parseJustRecipes } from "../../helpers/justfile";
 
 function compareStrings(left: string, right: string): number {
   return left.localeCompare(right);
@@ -32,16 +29,6 @@ function duplicateValues(values: readonly string[]): string[] {
   return Array.from(duplicates).sort(compareStrings);
 }
 
-function isPackageJson(value: unknown): value is PackageJson {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "scripts" in value &&
-    typeof value.scripts === "object" &&
-    value.scripts !== null
-  );
-}
-
 function jobBlock(workflow: string, jobName: string): string {
   const start = workflow.indexOf(`  ${jobName}:\n`);
 
@@ -55,18 +42,16 @@ function jobBlock(workflow: string, jobName: string): string {
   return nextJob === -1 ? rest : rest.slice(0, nextJob);
 }
 
-async function readPackageJson(): Promise<PackageJson> {
-  const parsed: unknown = JSON.parse(await readFile("package.json", "utf8"));
-
-  if (!isPackageJson(parsed)) {
-    throw new TypeError("package.json does not contain a scripts object.");
-  }
-
-  return parsed;
+async function readJustfile(): Promise<string> {
+  return readFile("justfile", "utf8");
 }
 
 async function readWorkflow(path: string): Promise<string> {
   return readFile(path, "utf8");
+}
+
+function justRecipes(justfile: string): string[] {
+  return parseJustRecipes(justfile).sort(compareStrings);
 }
 
 function workflowJobs(workflow: string): string[] {
@@ -85,24 +70,21 @@ function workflowJobs(workflow: string): string[] {
 }
 
 describe("QA command registry", () => {
-  test("classifies every package script exactly once", async () => {
-    const packageJson = await readPackageJson();
-    const packageScripts = Object.keys(packageJson.scripts).sort(
-      compareStrings,
-    );
-    const registeredScripts = qaCommandGroups.flatMap((group) =>
-      Array.from(group.scripts),
+  test("classifies every just recipe exactly once", async () => {
+    const recipes = justRecipes(await readJustfile());
+    const registeredCommands = qaCommandGroups.flatMap((group) =>
+      Array.from(group.commands),
     );
 
-    expect(duplicateValues(registeredScripts)).toEqual([]);
+    expect(duplicateValues(registeredCommands)).toEqual([]);
     expect(Object.keys(qaCommandRegistry).sort(compareStrings)).toEqual(
-      packageScripts,
+      recipes,
     );
   });
 
   test("keeps registry entries actionable", () => {
-    for (const [script, entry] of Object.entries(qaCommandRegistry)) {
-      expect(script.trim()).not.toBe("");
+    for (const [command, entry] of Object.entries(qaCommandRegistry)) {
+      expect(command.trim()).not.toBe("");
       expect(entry.domain.trim()).not.toBe("");
       expect(entry.scope.trim()).not.toBe("");
       expect(entry.runtime.trim()).not.toBe("");
@@ -121,7 +103,7 @@ describe("QA command registry", () => {
     const coverageDomains = domainCoverage
       .map((entry) => entry.domain)
       .sort(compareStrings);
-    const packageScripts = new Set(Object.keys(qaCommandRegistry));
+    const justCommands = new Set(Object.keys(qaCommandRegistry));
     const ciJobs: ReadonlySet<string> = new Set(
       qaCiJobRegistry.map((entry) => entry.job),
     );
@@ -134,30 +116,26 @@ describe("QA command registry", () => {
     for (const entry of domainCoverage) {
       expect(entry.purpose.trim()).not.toBe("");
 
-      for (const script of [...entry.focusedScripts, ...entry.releaseScripts]) {
-        expect(packageScripts.has(script)).toBe(true);
-      }
-
       for (const command of [
-        ...(entry.focusedCommands ?? []),
-        ...(entry.releaseCommands ?? []),
+        ...entry.focusedCommands,
+        ...entry.releaseCommands,
       ]) {
-        expect(command.trim()).not.toBe("");
+        const recipe = command.replace(/^just\s+/u, "");
+        expect(justCommands.has(recipe), `${command} should exist`).toBe(true);
       }
 
       for (const job of entry.ciJobs) {
         expect(ciJobs.has(job)).toBe(true);
       }
 
-      if (entry.releaseScripts.length === 0 && entry.ciJobs.length === 0) {
+      if (entry.releaseCommands.length === 0 && entry.ciJobs.length === 0) {
         expect(entry.exception?.trim()).toBeTruthy();
       }
     }
   });
 
-  test("maps every CI job to local scripts or a documented CI-only reason", async () => {
-    const packageJson = await readPackageJson();
-    const packageScripts = new Set(Object.keys(packageJson.scripts));
+  test("maps every CI job to local just commands or a documented CI-only reason", async () => {
+    const justCommands = new Set(justRecipes(await readJustfile()));
     const workflows = new Map<string, string>();
 
     for (const entry of qaCiJobRegistry) {
@@ -176,20 +154,14 @@ describe("QA command registry", () => {
 
       if (entry.parity === "ci-only") {
         expect(entry.ciOnlyReason?.trim()).toBeTruthy();
-        expect(entry.localScripts).toHaveLength(0);
-        expect(entry.localCommands ?? []).toHaveLength(0);
+        expect(entry.localCommands).toHaveLength(0);
       } else {
-        expect(
-          entry.localScripts.length + (entry.localCommands?.length ?? 0),
-        ).toBeGreaterThan(0);
+        expect(entry.localCommands.length).toBeGreaterThan(0);
       }
 
-      for (const script of entry.localScripts) {
-        expect(packageScripts.has(script)).toBe(true);
-      }
-
-      for (const command of entry.localCommands ?? []) {
-        expect(command.trim()).not.toBe("");
+      for (const command of entry.localCommands) {
+        const recipe = command.replace(/^just\s+/u, "");
+        expect(justCommands.has(recipe), `${command} should exist`).toBe(true);
       }
     }
   });

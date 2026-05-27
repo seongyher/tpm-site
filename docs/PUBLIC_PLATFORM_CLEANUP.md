@@ -39,7 +39,7 @@ surface and lets `platform:check` scan catalog code for site-specific literals.
 
 The catalog build flag is renamed to `PLATFORM_COMPONENT_CATALOG`. The tracked
 `.env.catalog` file owns that detail for normal scripts, so users keep running
-`bun run catalog:dev`, `bun run catalog:build`, and `bun run test:catalog`.
+`just catalog-dev`, `just catalog-build`, and `just test-catalog`.
 
 ### Docs Site
 

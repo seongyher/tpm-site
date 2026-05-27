@@ -397,7 +397,7 @@ function toPosix(file: string) {
 }
 
 function usage(rootDir: string) {
-  return `Usage: bun run assets:duplicates [--json] [--quiet] [--review] [--fail-on-duplicates] [--ignore-file path] [dir ...]
+  return `Usage: just assets-duplicates [--json] [--quiet] [--review] [--fail-on-duplicates] [--ignore-file path] [dir ...]
 
 Find image files with identical byte content.
 

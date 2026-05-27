@@ -215,7 +215,7 @@ describe("image asset location script", () => {
 
       expect(exitCode).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run assets:locations",
+        "Usage: just assets-locations",
       );
     } finally {
       log.mockRestore();
@@ -395,7 +395,7 @@ describe("duplicate image script", () => {
 
       expect(exitCode).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run assets:duplicates",
+        "Usage: just assets-duplicates",
       );
     } finally {
       log.mockRestore();
@@ -567,7 +567,7 @@ describe("unused image script", () => {
 
         expect(exitCode).toBe(0);
         expect(String(log.mock.calls[0]?.[0])).toContain(
-          "Usage: bun run assets:unused",
+          "Usage: just assets-unused",
         );
       } finally {
         log.mockRestore();

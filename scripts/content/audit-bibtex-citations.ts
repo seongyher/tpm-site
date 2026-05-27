@@ -397,7 +397,7 @@ export function formatBibtexCitationAudit(audit: BibtexCitationAudit): string {
     "4. Merge duplicate clusters only after confirming they refer to the same",
     "   source. Similar titles and reused URLs are review signals, not automatic",
     "   proof.",
-    "5. Re-run `bun run references:bibtex:audit -- --write` after each cleanup",
+    "5. Re-run `just references-bibtex-audit -- --write` after each cleanup",
     "   pass to prove that no citation markers or entries were skipped.",
     "",
     "## Article Coverage",
@@ -1015,7 +1015,7 @@ function formatDiagnosticRows(
     ...counts,
     "",
     "Detailed diagnostics are available from",
-    "`bun run references:bibtex:audit -- --json`; the inventory table below",
+    "`just references-bibtex-audit -- --json`; the inventory table below",
     "keeps per-entry review flags beside the source records authors need to",
     "repair.",
   ];

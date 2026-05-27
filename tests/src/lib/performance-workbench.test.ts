@@ -6,10 +6,7 @@ import {
   performanceWorkbenchScriptNames,
   performanceWorkbenchTracks,
 } from "../../../src/lib/performance-workbench";
-
-interface PackageJson {
-  scripts: Record<string, string>;
-}
+import { parseJustRecipes } from "../../helpers/justfile";
 
 describe("performance workbench policy", () => {
   test("keeps track identifiers unique and promotion rules actionable", () => {
@@ -25,51 +22,33 @@ describe("performance workbench policy", () => {
     }
   });
 
-  test("references existing docs and package scripts", () => {
-    const packageJson = readPackageJson();
-    const scripts = new Set(Object.keys(packageJson.scripts));
+  test("references existing docs and just commands", () => {
+    const commands = new Set(justRecipes(readFileSync("justfile", "utf8")));
 
     for (const track of performanceWorkbenchTracks) {
       for (const docPath of track.docs) {
         expect(existsSync(docPath), `${docPath} should exist`).toBe(true);
       }
 
-      for (const script of track.scripts) {
-        expect(scripts.has(script), `${script} should exist`).toBe(true);
+      for (const command of track.commands) {
+        expect(commands.has(command), `${command} should exist`).toBe(true);
       }
     }
   });
 
   test("keeps workbench script ownership explicit", () => {
     expect(performanceWorkbenchScriptNames()).toEqual([
-      "payload:check",
-      "payload:critical-css:experiment",
-      "payload:minify-html:experiment",
-      "payload:minify-html:experiments",
-      "payload:postbuild:experiments",
-      "payload:report",
-      "payload:vite:experiments",
+      "payload-check",
+      "payload-critical-css-experiment",
+      "payload-minify-html-experiment",
+      "payload-minify-html-experiments",
+      "payload-postbuild-experiments",
+      "payload-report",
+      "payload-vite-experiments",
     ]);
   });
 });
 
-function readPackageJson(): PackageJson {
-  const parsed: unknown = JSON.parse(readFileSync("package.json", "utf8"));
-
-  if (!isPackageJson(parsed)) {
-    throw new TypeError("package.json has an unexpected shape.");
-  }
-
-  return parsed;
-}
-
-function isPackageJson(value: unknown): value is PackageJson {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "scripts" in value &&
-    typeof value.scripts === "object" &&
-    value.scripts !== null &&
-    Object.values(value.scripts).every((script) => typeof script === "string")
-  );
+function justRecipes(justfile: string): string[] {
+  return parseJustRecipes(justfile);
 }

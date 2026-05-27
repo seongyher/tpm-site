@@ -68,7 +68,7 @@ export function runBuildRawCli(
       "--glob",
       `{${options.pagefindGlobs.join(",")}}`,
     ],
-    command: "pagefind",
+    command: localBinary(rootDir, "pagefind"),
     env: process.env,
   });
 }
@@ -150,8 +150,14 @@ function routeTreeHtmlGlob(route: string): string {
   return routePath.length === 0 ? "index.html" : `${routePath}/**/*.html`;
 }
 
+function localBinary(rootDir: string, binary: string): string {
+  const executable = process.platform === "win32" ? `${binary}.cmd` : binary;
+
+  return path.join(rootDir, "node_modules", ".bin", executable);
+}
+
 function usage(): string {
-  return `Usage: bun run build:raw [--dir <dir>] [--quiet]
+  return `Usage: just build-raw [--dir <dir>] [--quiet]
 
 Build the active Astro site instance and create a Pagefind index in the same
 output directory.

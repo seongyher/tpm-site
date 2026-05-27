@@ -577,8 +577,8 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     use super::{
-        SourceArtifactKind, WorkspaceContext, WorkspaceDiscoveryError, WorkspaceLayout,
-        WorkspaceSourceRootKind,
+        IgnoredPathPolicy, SourceArtifact, SourceArtifactKind, WorkspaceContext,
+        WorkspaceDiscoveryError, WorkspaceLayout, WorkspaceSourceRoot, WorkspaceSourceRootKind,
     };
 
     fn fixture_root() -> PathBuf {
@@ -692,6 +692,36 @@ mod tests {
         assert_eq!(roots[4].kind(), WorkspaceSourceRootKind::Output);
         assert_eq!(roots[4].display_path(), "dist");
         assert!(!roots[4].required());
+        assert!(roots[0].path().ends_with("site/config/site.json"));
+    }
+
+    #[test]
+    fn source_root_and_artifact_accessors_expose_paths() {
+        let root = WorkspaceSourceRoot::new(
+            WorkspaceSourceRootKind::Assets,
+            "site/assets",
+            "site/assets",
+            true,
+        );
+        let artifact = SourceArtifact::new(
+            SourceArtifactKind::Asset,
+            "site/assets/hero.jpg",
+            "site/assets/hero.jpg",
+        );
+
+        assert_eq!(root.path(), Path::new("site/assets"));
+        assert_eq!(artifact.path(), Path::new("site/assets/hero.jpg"));
+        assert_eq!(artifact.display_path(), "site/assets/hero.jpg");
+    }
+
+    #[test]
+    fn ignored_path_policy_matches_known_parking_files() {
+        let policy = IgnoredPathPolicy::default();
+
+        assert!(policy.is_ignored(Path::new("site/assets/.DS_Store")));
+        assert!(policy.is_ignored(Path::new("site/public/.gitkeep")));
+        assert!(policy.is_ignored(Path::new("site/public/Thumbs.db")));
+        assert!(!policy.is_ignored(Path::new("site/public/robots.txt")));
     }
 
     #[test]
@@ -702,7 +732,7 @@ mod tests {
         let artifacts = inventory.artifacts();
         let display_paths = artifacts
             .iter()
-            .map(super::SourceArtifact::display_path)
+            .map(SourceArtifact::display_path)
             .collect::<Vec<_>>();
 
         assert_eq!(
@@ -749,6 +779,37 @@ mod tests {
     }
 
     #[test]
+    fn missing_workspace_shape_reports_site_and_config_paths() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("missing-workspace-shape");
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root)?;
+
+        let context = WorkspaceContext::from_root(&root);
+        let report = context.validate_required_paths();
+        let codes = report
+            .diagnostics()
+            .iter()
+            .map(|diagnostic| diagnostic.code().as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            codes,
+            vec![
+                "TPM-WORKSPACE-SITE",
+                "TPM-WORKSPACE-CONFIG",
+                "TPM-WORKSPACE-CONTENT",
+                "TPM-WORKSPACE-ASSETS",
+                "TPM-WORKSPACE-PUBLIC",
+            ]
+        );
+        assert_eq!(context.display_path(context.root()), ".");
+        assert!(context.inventory_source_artifacts()?.artifacts().is_empty());
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
     fn starter_like_workspace_inventory_uses_the_same_contract() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("starter-like");
         let _ = fs::remove_dir_all(&root);
@@ -763,7 +824,7 @@ mod tests {
         let display_paths = inventory
             .artifacts()
             .iter()
-            .map(super::SourceArtifact::display_path)
+            .map(SourceArtifact::display_path)
             .collect::<Vec<_>>();
 
         assert!(report.is_empty());

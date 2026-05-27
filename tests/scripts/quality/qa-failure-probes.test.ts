@@ -32,14 +32,14 @@ describe("QA failure probes", () => {
       expect(probe.bugClass.trim()).not.toBe("");
       expect(probe.expectedSignal.trim()).not.toBe("");
       expect(probe.leakPrevention.trim()).not.toBe("");
-      expect(probe.intendedScripts.length).toBeGreaterThan(0);
+      expect(probe.intendedCommands.length).toBeGreaterThan(0);
       expect(probe.testPaths.length).toBeGreaterThan(0);
     }
   });
 
   test("points probes at real QA scripts and tests", () => {
     for (const probe of qaFailureProbes) {
-      for (const script of probe.intendedScripts) {
+      for (const script of probe.intendedCommands) {
         expect(Object.hasOwn(qaCommandRegistry, script)).toBe(true);
       }
 

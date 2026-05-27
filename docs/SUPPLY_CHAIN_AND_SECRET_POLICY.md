@@ -13,9 +13,9 @@ starter-template consumers.
 
 | Check                          | Command                       | Local  | PR     | Release  | Package/starter  |
 | ------------------------------ | ----------------------------- | ------ | ------ | -------- | ---------------- |
-| High-severity dependency audit | `bun --silent run audit`      | no     | yes    | blocking | blocking         |
-| All-severity dependency audit  | `bun --silent run audit:all`  | review | review | no       | review           |
-| Secret scan                    | `bun --silent run secrets`    | no     | yes    | blocking | blocking         |
+| High-severity dependency audit | `just audit`                  | no     | yes    | blocking | blocking         |
+| All-severity dependency audit  | `just audit-all`              | review | review | no       | review           |
+| Secret scan                    | `just secrets`                | no     | yes    | blocking | blocking         |
 | Bun lockfile present           | committed `bun.lock`          | yes    | yes    | blocking | package blocking |
 | Secret-like `PUBLIC_*` names   | policy diagnostic             | yes    | yes    | blocking | blocking         |
 | Third-party script policy      | static-output diagnostics     | no     | yes    | blocking | blocking         |
@@ -34,8 +34,9 @@ replacing the lockfile requires an explicit package-manager migration plan.
 
 ## Dependency Audit Policy
 
-`audit` runs `bun audit --audit-level=high` and is part of `check:release`.
-`audit:all` runs all severities and remains review/maintenance signal by
+`just audit` runs `bun audit --audit-level=high` and is part of
+`just release-check`. `just audit-all` runs all severities and remains
+review/maintenance signal by
 default. This keeps urgent supply-chain risk blocking without making every
 local edit wait on low-severity dependency noise.
 

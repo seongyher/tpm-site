@@ -65,7 +65,7 @@ describe("extension manifest contracts", () => {
       summary: "Generate scholarly article PDFs.",
       tests: [
         {
-          command: "bun --silent run test:e2e:built -- article-pdf",
+          command: "just test-e2e-built -- article-pdf",
           kind: "build",
         },
       ],

@@ -530,6 +530,8 @@ const fn help_text(topic: HelpTopic) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    use std::error::Error;
+    use std::fs;
     use std::path::{Path, PathBuf};
 
     use super::run;
@@ -574,6 +576,18 @@ mod tests {
         args
     }
 
+    fn temp_workspace(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!("tpm-cli-{name}-{}", std::process::id()))
+    }
+
+    fn write_file(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
+    }
+
     #[test]
     fn help_command_prints_first_slice_usage() {
         let (exit, output) = run_text(vec![String::from("--help")]);
@@ -594,8 +608,40 @@ mod tests {
     }
 
     #[test]
+    fn command_help_covers_all_topics_and_unknown_topics() {
+        for topic in [
+            "doctor",
+            "media",
+            "migration",
+            "output",
+            "qa",
+            "release",
+            "routes",
+            "site",
+        ] {
+            let (exit, output) = run_text(vec![String::from("help"), String::from(topic)]);
+
+            assert_eq!(exit, CommandExit::Success);
+            assert!(output.contains(&format!("tpm {topic}")));
+        }
+
+        let (exit, output) = run_text(vec![String::from("--help"), String::from("unknown")]);
+
+        assert_eq!(exit, CommandExit::UsageError);
+        assert!(output.contains("Unknown help topic `unknown`."));
+    }
+
+    #[test]
     fn version_command_prints_platform_name() {
         let (exit, output) = run_text(vec![String::from("--version")]);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("TPM Platform"));
+    }
+
+    #[test]
+    fn short_version_command_prints_platform_name() {
+        let (exit, output) = run_text(vec![String::from("-V")]);
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("TPM Platform"));
@@ -610,6 +656,24 @@ mod tests {
     }
 
     #[test]
+    fn invalid_options_return_usage_errors() {
+        for (args, expected) in [
+            (vec!["--bogus"], "Unknown option `--bogus`."),
+            (vec!["--site"], "Missing value for --site."),
+            (vec!["--format"], "Missing value for --format."),
+            (
+                vec!["--format", "xml"],
+                "Unsupported output format `xml`. Use text, json, or ndjson.",
+            ),
+        ] {
+            let (exit, output) = run_text(args.into_iter().map(String::from).collect());
+
+            assert_eq!(exit, CommandExit::UsageError);
+            assert!(output.contains(expected));
+        }
+    }
+
+    #[test]
     fn site_status_renders_json_operation_output() {
         let mut args = command_with_site(&["site", "status"], &fixture_root());
         args.push(String::from("--format"));
@@ -621,6 +685,24 @@ mod tests {
         assert!(output.contains("\"operationId\": \"workspace.status\""));
         assert!(output.contains("\"status\": \"success\""));
         assert!(output.contains("\"source artifacts: 3\""));
+    }
+
+    #[test]
+    fn site_status_accepts_equals_site_format_and_automation_flags() {
+        let (exit, output) = run_text(vec![
+            String::from("site"),
+            String::from("status"),
+            format!("--site={}", fixture_root().to_string_lossy()),
+            String::from("--format=ndjson"),
+            String::from("--ci"),
+            String::from("--quiet"),
+            String::from("--verbose"),
+            String::from("--no-color"),
+        ]);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.starts_with("{\"schemaVersion\":"));
+        assert!(output.contains("\"operationId\":\"workspace.status\""));
     }
 
     #[test]
@@ -655,6 +737,23 @@ mod tests {
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("release.inspect"));
         assert!(output.contains("TPM-RELEASE-OUTPUT-MISSING"));
+    }
+
+    #[test]
+    fn command_aliases_route_to_expected_operations() {
+        for (command, operation) in [
+            (&["check", "all"][..], "workspace.check"),
+            (&["check", "workspace"], "workspace.check"),
+            (&["doctor", "workspace"], "workspace.doctor"),
+            (&["release", "inspect", "latest"], "release.inspect"),
+            (&["routes", "redirects"], "routes.redirects"),
+        ] {
+            let args = command_with_site(command, &fixture_root());
+            let (exit, output) = run_text(args);
+
+            assert_ne!(exit, CommandExit::UsageError);
+            assert!(output.contains(operation));
+        }
     }
 
     #[test]
@@ -711,5 +810,35 @@ mod tests {
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("output.verify"));
         assert!(output.contains("TPM-OUTPUT-DUAL-RUN"));
+    }
+
+    #[test]
+    fn qa_diagnostic_diff_command_uses_snapshot_operation() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("diagnostic-diff");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("expected.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"old"}]"#,
+        )?;
+        write_file(
+            &root.join("actual.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"old"}]"#,
+        )?;
+
+        let expected = root.join("expected.json").to_string_lossy().into_owned();
+        let actual = root.join("actual.json").to_string_lossy().into_owned();
+        let args = command_with_site(&["qa", "diagnostics-diff", &expected, &actual], &root);
+        let (exit, output) = run_text(args);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("qa.diagnostics-diff"));
+        assert!(output.contains("missing: 0"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
     }
 }

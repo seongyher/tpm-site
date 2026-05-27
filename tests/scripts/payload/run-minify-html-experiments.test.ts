@@ -167,7 +167,7 @@ describe("minify-html experiment suite", () => {
     try {
       expect(await runMinifyHtmlExperimentSuiteCli(["--help"])).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run payload:minify-html:experiments",
+        "Usage: just payload-minify-html-experiments",
       );
     } finally {
       log.mockRestore();

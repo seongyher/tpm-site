@@ -314,7 +314,7 @@ export function runPlatformBoundaryCli(
   rootDir = process.cwd(),
 ): number {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run platform:check [--quiet]
+    console.log(`Usage: just platform-check [--quiet]
 
 Verify reusable platform modules do not regain site-specific coupling.`);
     return 0;

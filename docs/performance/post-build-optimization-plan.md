@@ -33,7 +33,7 @@ as normal output.
 
 ## Experiment Harness
 
-`bun run payload:postbuild:experiments` copies `dist/` into temporary scenario
+`just payload-postbuild-experiments` copies `dist/` into temporary scenario
 directories and applies standalone transforms to those copies only. Each
 scenario then runs:
 
@@ -56,12 +56,12 @@ generated-code quote style.
 
 The selected production stack is the `safe-stack` scenario: Lightning CSS,
 SVGO, conservative Oxc JS whitespace optimization, and unreferenced generated
-Astro raster asset cleanup. `bun run build` now runs the raw Astro/Pagefind
-build and then applies that stack to `dist/` through `bun run build:optimize`.
-The raw build remains available as `bun run build:raw` so payload experiments
+Astro raster asset cleanup. `just build` now runs the raw Astro/Pagefind
+build and then applies that stack to `dist/` through `just build-optimize`.
+The raw build remains available as `just build-raw` so payload experiments
 can keep comparing optimizer candidates against an unoptimized baseline.
 
-`bun run preview:release:fresh` builds optimized output, verifies generated
+`just preview-release-fresh` builds optimized output, verifies generated
 pages/links/scripts, validates representative HTML, and then starts Astro
 preview for release-like local inspection.
 

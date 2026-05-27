@@ -18,7 +18,10 @@ describe("Knip config", () => {
     expect(config.ignore).toContain("coverage/**");
     expect(config.ignoreBinaries).toContain("gitleaks");
     expect(config.ignoreBinaries).toContain("just");
+    expect(config.ignoreDependencies).toContain("@astrojs/check");
+    expect(config.ignoreDependencies).toContain("@lhci/cli");
     expect(config.ignoreDependencies).toContain("html-validate");
     expect(config.ignoreDependencies).toContain("pagefind");
+    expect(config.ignoreDependencies).toContain("wrangler");
   });
 });

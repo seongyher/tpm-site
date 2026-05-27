@@ -68,19 +68,19 @@ Generated output size after the benchmark:
 
 Before Milestone 100, the CI workflow ran these PR jobs:
 
-- `quality`: installs dependencies and runs `bun run check`.
+- `quality`: installs dependencies and runs `just check`.
 - `markdown-review`: installs dependencies and runs Markdown review checks.
 - `asset-review`: installs dependencies and runs duplicate/unused asset review.
 - `build`: installs dependencies, installs Playwright Chromium, runs
-  `bun run build`, `bun run verify`, and `bun run validate:html`.
+  `just build`, `just verify`, and `just validate-html`.
 - `browser`: installs dependencies, installs Playwright Chromium, runs
-  `bun run test:e2e`.
+  `just test-e2e`.
 - `catalog`: installs dependencies, installs Playwright Chromium, runs
-  `bun run test:catalog` and `bun run test:catalog:site-instance`.
+  `just test-catalog` and `just test-catalog-site-instance`.
 - `accessibility`: review-only, installs dependencies, installs Playwright
-  Chromium, runs `bun run test:a11y`.
+  Chromium, runs `just test-a11y`.
 - `lighthouse`: review-only, installs dependencies, installs Playwright
-  Chromium, runs `bun run test:perf`.
+  Chromium, runs `just test-perf`.
 - `audit`: installs dependencies and runs the high-severity dependency audit.
 - `audit-review`: review-only, installs dependencies and runs all-severity
   audit.
@@ -93,7 +93,7 @@ build, build verification, and HTML validation before uploading `dist/`.
 
 ### Production Build Repeats Too Often
 
-`bun run build` currently runs:
+`just build` currently runs:
 
 1. raw Astro/Pagefind build;
 2. article PDF generation through Playwright Chromium;
@@ -104,9 +104,9 @@ That is roughly 57 seconds locally before `verify` and `validate:html`.
 In PR CI, the production build runs independently in:
 
 - `build`;
-- `browser`, because `test:e2e` runs `bun run build`;
-- `accessibility`, because `test:a11y` runs `bun run build`;
-- `lighthouse`, because `test:perf` runs `bun run build`.
+- `browser`, because `test:e2e` runs `just build`;
+- `accessibility`, because `test:a11y` runs `just build`;
+- `lighthouse`, because `test:perf` runs `just build`.
 
 That means the same production output is rebuilt four times on PRs, including
 the 42-second PDF step. On `main`, deploy builds a fifth time instead of using
@@ -126,9 +126,9 @@ PDFs no longer need Chrome, the normal build can stop provisioning Playwright.
 
 The pre-refactor scripts were safe but inflexible:
 
-- `test:e2e` always runs `bun --silent run build` first.
-- `test:a11y` always runs `bun --silent run build` first.
-- `test:perf` always runs `bun --silent run build` first.
+- `test:e2e` always runs `just build` first.
+- `test:a11y` always runs `just build` first.
+- `test:perf` always runs `just build` first.
 
 This is convenient locally when starting from no `dist/`, but it blocks CI from
 reusing a verified build artifact and blocks developers from intentionally
@@ -359,7 +359,7 @@ tests, ESLint, and Astro typechecking.
 - Add `test:e2e:built`, `test:a11y:built`, and `test:perf:built`.
 - Update existing `test:e2e`, `test:a11y`, and `test:perf` to delegate after
   building.
-- Update `PACKAGE_SCRIPTS.md`.
+- Update `COMMANDS.md`.
 - Add package-script tests for the new entries.
 
 ### Milestone 2: CI Artifact Reuse

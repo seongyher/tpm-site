@@ -265,7 +265,7 @@ public/**
 
         expect(exitCode).toBe(0);
         expect(String(log.mock.calls[0]?.[0])).toContain(
-          "Usage: bun run test:accountability",
+          "Usage: just test-accountability",
         );
       } finally {
         log.mockRestore();

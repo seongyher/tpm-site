@@ -334,7 +334,7 @@ files.
 
 ## Build Verification
 
-`bun run verify` should enforce:
+`just verify` should enforce:
 
 - every PDF-eligible published article has `articles/<slug>/<slug>.pdf`;
 - every generated PDF has useful title/author document metadata;
@@ -395,12 +395,12 @@ Browser tests:
 
 Release checks:
 
-- `bun run check`;
-- `bun run build`;
-- `bun run verify`;
-- `bun run validate:html`;
+- `just check`;
+- `just build`;
+- `just verify`;
+- `just validate-html`;
 - focused Playwright PDF/export invariants;
-- `bun run check:release` before release handoff.
+- `just release-check` before release handoff.
 
 ## Critical Review
 

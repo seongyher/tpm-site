@@ -107,8 +107,8 @@ and tutorials.
 The example lives at `examples/docs-site/` and is documentation-oriented: it
 exercises config, articles, announcements, authors, categories, collections,
 pages, assets, search, feeds, and PDFs while teaching the same contracts.
-`bun run docs-site:dev` serves it locally, and
-`bun run test:docs-site` validates and builds it with
+`just docs-site-dev` serves it locally, and
+`just test-docs-site` validates and builds it with
 `SITE_INSTANCE_ROOT=examples/docs-site`.
 
 ### 3. Multi-Site Command Cleanup

@@ -224,7 +224,7 @@ describe("Vite build experiment suite", () => {
     try {
       expect(await runViteBuildExperimentSuiteCli(["--help"])).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run payload:vite:experiments",
+        "Usage: just payload-vite-experiments",
       );
     } finally {
       log.mockRestore();

@@ -322,7 +322,7 @@ function toPosix(file: string) {
 }
 
 function usage() {
-  return `Usage: bun run assets:unused [--json] [--quiet] [--review] [--fail-on-unused] [--ignore-file path]
+  return `Usage: just assets-unused [--json] [--quiet] [--review] [--fail-on-unused] [--ignore-file path]
 
 Find images in site/assets that no source file appears to reference.
 

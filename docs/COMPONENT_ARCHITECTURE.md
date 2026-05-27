@@ -1388,13 +1388,13 @@ reasonable way to separate them.
 
 Every component extraction should keep these checks green:
 
-- `bun run typecheck`
-- `bun --silent run lint`
-- `bun --silent run format:code`
+- `just typecheck`
+- `just lint`
+- `just format-code`
 - relevant pure logic tests;
 - relevant Astro component render tests once that harness exists;
 - `catalog:check` once the catalog exists;
-- `bun run build`
+- `just build`
 
 Before merging a navigation/sidebar redesign, also run browser checks and
 manually inspect:
@@ -1415,7 +1415,7 @@ When catalog examples exist for changed components, inspect the catalog in a
 fresh production preview. Prefer a command like:
 
 ```shell
-bun run catalog:preview:fresh
+just catalog-preview-fresh
 ```
 
 ## Open Questions

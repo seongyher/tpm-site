@@ -8,13 +8,13 @@ protecting the repository from accidental unrelated changes.
 ## Proposed Command
 
 ```sh
-bun run submit:article -- --file <path-to-markdown> --assets <path-to-assets> --category <category-slug>
+just submit-article --file <path-to-markdown> --assets <path-to-assets> --category <category-slug>
 ```
 
 The command should also support an interactive mode:
 
 ```sh
-bun run submit:article
+just submit-article
 ```
 
 Missing options should be prompted for in plain terminal text.
@@ -38,7 +38,9 @@ This tool must work on macOS, Windows, and Linux.
 
 Use:
 
-- Bun/TypeScript.
+- a `just` recipe as the human command surface.
+- Rust operations or a temporary TypeScript fallback behind that recipe while
+  the article-submission workflow is being promoted.
 - Node/Bun filesystem APIs.
 - `node:path` for filesystem operations.
 - `spawn`/`spawnSync` with argument arrays.
@@ -108,7 +110,7 @@ Prepare mode must not commit, push, or open a pull request.
 Explicit opt-in:
 
 ```sh
-bun run submit:article -- --submit
+just submit-article --submit
 ```
 
 Submit mode should run prepare mode first, then:
@@ -269,16 +271,16 @@ tool-specific checks for author-friendly messages.
 Blocking checks:
 
 ```sh
-bun run check
-bun run build
-bun run verify
+just check
+just build
+just verify
 ```
 
 Review-only checks:
 
 ```sh
-bun run review:markdown
-bun run review:assets
+just review-markdown
+just review-assets
 ```
 
 Submit mode should require blocking checks to pass.
@@ -291,13 +293,13 @@ submission unless the author chooses to stop.
 If blocking checks fail with formatting or linting issues, the tool may offer:
 
 ```sh
-bun run fix
+just fix
 ```
 
 If Markdown review reports formatting issues, the tool may offer:
 
 ```sh
-bun run fix:markdown
+just fix-markdown
 ```
 
 Markdown fixing should require confirmation because it may reformat article

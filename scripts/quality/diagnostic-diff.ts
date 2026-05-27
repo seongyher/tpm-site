@@ -114,7 +114,7 @@ export async function runDiagnosticDiffCli(
   args = process.argv.slice(2),
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run diagnostics:diff [--quiet] <expected.json> <actual.json>
+    console.log(`Usage: just diagnostics-diff [--quiet] <expected.json> <actual.json>
 
 Compare two JSON arrays of normalized diagnostics. Records are matched by
 tool, code, severity, file, route, and message; counts are compared separately.`);

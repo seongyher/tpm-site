@@ -94,8 +94,7 @@ Implementation should verify:
 
 - the generator output is deterministic;
 - `--check` fails when the generated file differs from source-of-truth output;
-- package scripts, `just`-owned command evidence, QA registry, and
-  `PACKAGE_SCRIPTS.md` stay aligned;
+- `just` command evidence, QA registry, and `COMMANDS.md` stay aligned;
 - generated references mention all current route keys, feature flags, semantic
   profile kinds, and QA command domains;
 - the implementation does not read built `dist/` output or depend on a running

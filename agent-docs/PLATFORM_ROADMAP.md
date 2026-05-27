@@ -516,7 +516,7 @@ Work:
   screenshots, coverage output, dependency folders, and parked unused assets.
 - Compare local commands against CI commands and document the exact local
   reproduction path for every CI gate.
-- Add or update `PACKAGE_SCRIPTS.md` and related docs so developers know which
+- Add or update `COMMANDS.md` and related docs so developers know which
   command to run while editing, before handoff, before release, and during CI
   failure triage.
 - Measure before/after runtime for expensive checks where practical.
@@ -638,7 +638,7 @@ Verification:
   failures are still caught.
 - Before/after runtime and diagnostic diffs are recorded for scoped or split
   checks.
-- `bun --silent run review:markdown` and the final selected release command pass
+- `just review-markdown` and the final selected release command pass
   after cleanup.
 
 ## Phase 1: Source Contracts
@@ -1159,7 +1159,7 @@ Verification:
 Current evidence:
 
 - Root docs, `site/README.md`, public docs-site notes, platform module docs,
-  package scripts, audits, and generated schema already exist.
+  command docs, audits, and generated schema already exist.
 - Documentation has multiple audiences and needs explicit ownership.
 
 Mature contract:

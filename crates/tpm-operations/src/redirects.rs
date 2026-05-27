@@ -368,8 +368,15 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
-    use super::{format_redirects, legacy_permalink, normalize_path, run_redirect_report};
+    use std::collections::BTreeMap;
+
+    use super::{
+        RedirectRule, collect_legacy_rules, configured_redirects, display_path, format_redirects,
+        insert_rule, legacy_permalink, markdown_path, normalize_path, redirect_diagnostics,
+        run_redirect_report,
+    };
     use crate::{OperationInterface, OperationStatus};
+    use tpm_workspace::WorkspaceContext;
 
     fn temp_workspace(name: &str) -> PathBuf {
         std::env::temp_dir().join(format!("tpm-redirects-{name}-{}", std::process::id()))
@@ -387,6 +394,7 @@ mod tests {
     fn normalizes_redirect_paths_like_current_generator() {
         assert_eq!(normalize_path("2015/example"), "/2015/example/");
         assert_eq!(normalize_path("//2015//example"), "/2015/example/");
+        assert_eq!(normalize_path("/already/"), "/already/");
     }
 
     #[test]
@@ -397,11 +405,28 @@ mod tests {
             legacy_permalink(markdown),
             Some(String::from("/2015/example/"))
         );
+        assert_eq!(
+            legacy_permalink("---\nlegacyPermalink: '/quoted/example/'\n---"),
+            Some(String::from("/quoted/example/"))
+        );
+        assert_eq!(legacy_permalink("# No frontmatter"), None);
+        assert_eq!(legacy_permalink("---\ntitle: Missing\n---"), None);
+        assert_eq!(
+            legacy_permalink("---\ntitle: Missing closing marker\n"),
+            None
+        );
+    }
+
+    #[test]
+    fn detects_markdown_paths() {
+        assert!(markdown_path(Path::new("article.md")));
+        assert!(markdown_path(Path::new("article.mdx")));
+        assert!(!markdown_path(Path::new("article.txt")));
     }
 
     #[test]
     fn formats_cloudflare_redirect_output() {
-        let output = format_redirects(&[super::RedirectRule {
+        let output = format_redirects(&[RedirectRule {
             destination: String::from("/articles/example/"),
             source: String::from("/2015/example/"),
         }]);
@@ -440,5 +465,210 @@ mod tests {
 
         let _ = fs::remove_dir_all(root);
         Ok(())
+    }
+
+    #[test]
+    fn configured_redirects_trim_and_normalize_sources() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("configured");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(
+            &root.join("site/config/redirects.json"),
+            "{\" old/path \":\" /new/path/ \"}",
+        )?;
+        let context = WorkspaceContext::from_root(&root);
+
+        let redirects = configured_redirects(&context)?;
+
+        assert_eq!(
+            redirects,
+            vec![(String::from("/old/path/"), String::from("/new/path/"))]
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn collect_legacy_rules_handles_nested_announcements_and_missing_dirs()
+    -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("legacy");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(
+            &root.join("site/content/announcements/nested/update.mdx"),
+            "---\nlegacyPermalink: /legacy/update/\n---\n# Update",
+        )?;
+        let context = WorkspaceContext::from_root(&root);
+        let mut rules = BTreeMap::new();
+
+        collect_legacy_rules(
+            &context,
+            &root.join("site/content/articles"),
+            "/articles/",
+            &mut rules,
+        )?;
+        collect_legacy_rules(
+            &context,
+            &root.join("site/content/announcements"),
+            "/announcements/",
+            &mut rules,
+        )?;
+
+        assert_eq!(rules.len(), 1);
+        assert_eq!(
+            rules
+                .get("/legacy/update/")
+                .unwrap_or_else(|| panic!("legacy update redirect should exist"))
+                .destination,
+            "/announcements/update/"
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn conflicting_redirects_are_rejected() {
+        let mut rules = BTreeMap::new();
+
+        let first = insert_rule(
+            &mut rules,
+            String::from("/old/"),
+            String::from("/articles/one/"),
+        );
+        let second = insert_rule(
+            &mut rules,
+            String::from("/old/"),
+            String::from("/articles/two/"),
+        );
+
+        assert!(first.is_ok());
+        assert!(second.is_err());
+    }
+
+    #[test]
+    fn legacy_redirect_conflicts_include_source_file_context() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("legacy-conflict");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(
+            &root.join("site/content/articles/one.md"),
+            "---\nlegacyPermalink: /legacy/conflict/\n---\n# One",
+        )?;
+        write_file(
+            &root.join("site/content/articles/two.md"),
+            "---\nlegacyPermalink: /legacy/conflict/\n---\n# Two",
+        )?;
+        let context = WorkspaceContext::from_root(&root);
+        let mut rules = BTreeMap::new();
+
+        let error = match collect_legacy_rules(
+            &context,
+            &root.join("site/content/articles"),
+            "/articles/",
+            &mut rules,
+        ) {
+            Ok(()) => panic!("conflicting legacy redirects should fail"),
+            Err(error) => error,
+        };
+
+        assert!(error.to_string().contains("site/content/articles/two.md"));
+        assert!(error.to_string().contains("conflicting redirect"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn redirect_report_surfaces_collect_and_workspace_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("collect-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(&root.join("site/config/redirects.json"), "not-json")?;
+
+        let result = run_redirect_report(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-REDIRECTS-COLLECT")
+        );
+
+        let missing = run_redirect_report(
+            PathBuf::from("/tmp/tpm-redirects-missing-workspace"),
+            OperationInterface::Test,
+        );
+        assert_eq!(missing.status(), OperationStatus::Failed);
+        assert!(
+            missing
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-REDIRECTS-WORKSPACE")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn redirect_report_surfaces_legacy_conflicts() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("report-legacy-conflict");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(&root.join("site/config/redirects.json"), "{}")?;
+        write_file(
+            &root.join("site/content/articles/one.md"),
+            "---\nlegacyPermalink: /legacy/conflict/\n---\n# One",
+        )?;
+        write_file(
+            &root.join("site/content/articles/two.md"),
+            "---\nlegacyPermalink: /legacy/conflict/\n---\n# Two",
+        )?;
+
+        let result = run_redirect_report(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(result.diagnostics().diagnostics().iter().any(|diagnostic| {
+            diagnostic.code().as_str() == "TPM-REDIRECTS-COLLECT"
+                && diagnostic
+                    .message()
+                    .contains("conflicting redirect destinations")
+        }));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn redirect_diagnostics_report_cloudflare_limits() {
+        let root = temp_workspace("limits");
+        let context = WorkspaceContext::from_root(&root);
+        let mut rules = (0..=super::CLOUDFLARE_STATIC_REDIRECT_LIMIT)
+            .map(|index| RedirectRule {
+                destination: String::from("/new/"),
+                source: format!("/old-{index}/"),
+            })
+            .collect::<Vec<_>>();
+        rules.push(RedirectRule {
+            destination: format!("/{}", "a".repeat(super::CLOUDFLARE_REDIRECT_LINE_LIMIT)),
+            source: String::from("/too-long/"),
+        });
+
+        let diagnostics = redirect_diagnostics(&context, &rules, "one\ntwo");
+        let codes = diagnostics
+            .diagnostics()
+            .iter()
+            .map(|diagnostic| diagnostic.code().as_str())
+            .collect::<Vec<_>>();
+
+        assert!(codes.contains(&"TPM-REDIRECTS-CLOUDFLARE-COUNT"));
+        assert!(codes.contains(&"TPM-REDIRECTS-CLOUDFLARE-LINE"));
+        assert!(codes.contains(&"TPM-REDIRECTS-DUAL-RUN"));
+        assert_eq!(display_path(Path::new("")), ".");
     }
 }

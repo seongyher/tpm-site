@@ -46,7 +46,7 @@ describe("production build output optimizer CLI", () => {
     try {
       expect(runOptimizeBuildOutputCli(["--help"])).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run build:optimize",
+        "Usage: just build-optimize",
       );
     } finally {
       log.mockRestore();

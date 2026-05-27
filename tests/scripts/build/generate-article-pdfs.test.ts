@@ -261,9 +261,7 @@ describe("article PDF generator", () => {
       const exitCode = await runGenerateArticlePdfsCli(["--help"]);
 
       expect(exitCode).toBe(0);
-      expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun run build:pdf",
-      );
+      expect(String(log.mock.calls[0]?.[0])).toContain("Usage: just build-pdf");
     } finally {
       log.mockRestore();
     }

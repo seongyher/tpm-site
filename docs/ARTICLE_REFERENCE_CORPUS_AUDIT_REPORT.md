@@ -1,6 +1,6 @@
 # Article Reference Corpus Audit Report
 
-Generated from `bun run references:audit` on May 5, 2026.
+Generated from `just references-audit` on May 5, 2026.
 
 This is the current corpus status after article-reference normalization. The
 generated per-article catalog contains the detailed inventory; the migration

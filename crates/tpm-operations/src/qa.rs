@@ -166,18 +166,19 @@ pub fn run_qa_registry(
                     .with_detail(format!("package scripts: {}", scripts.len()))
                     .with_detail(format!("migration domains: {}", migration_plan().len()))
                     .with_detail(format!("rust package-wrapper debt: {rust_wrapper_debt}"))
-                    .with_detail("command owner target: just and Rust operations");
+                    .with_detail("command owner target: just and Rust operations")
+                    .with_detail("package-script surface: retired");
                 let diagnostics = DiagnosticReport::from_diagnostics(vec![
                     Diagnostic::new(
                         diagnostic_code("TPM-QA-DUAL-RUN"),
                         Severity::Note,
-                        "Rust QA registry reporting is in dual-run mode; TypeScript registry tests remain source of truth until promotion.",
+                        "Rust QA registry reporting is in dual-run mode; the TypeScript registry now guards the just command surface during promotion.",
                     )
                     .with_location(DiagnosticLocation::source(
                         context.display_path(&context.root().join("scripts/quality/qa-command-registry.ts")),
                     ))
                     .with_remediation(
-                        "Keep CI/local parity evidence explicit while package-script wrappers are retired.",
+                        "Keep CI/local parity evidence explicit while remaining TypeScript fallback tools are promoted or time-boxed.",
                     ),
                 ]);
 
@@ -198,9 +199,7 @@ pub fn run_qa_registry(
                     .with_location(DiagnosticLocation::source(
                         context.display_path(&context.root().join("package.json")),
                     ))
-                    .with_remediation(
-                        "Check package.json exists, is readable, and contains a scripts object.",
-                    ),
+                    .with_remediation("Check package.json exists and is valid JSON."),
                 ]),
             ),
         },
@@ -260,10 +259,13 @@ pub fn run_qa_diagnostic_diff(
 fn package_scripts(path: &Path) -> io::Result<BTreeMap<String, String>> {
     let contents = fs::read_to_string(path)?;
     let parsed: serde_json::Value = serde_json::from_str(&contents).map_err(io::Error::other)?;
-    let scripts = parsed
-        .get("scripts")
-        .and_then(serde_json::Value::as_object)
-        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "missing scripts object"))?;
+    let Some(scripts_value) = parsed.get("scripts") else {
+        return Ok(BTreeMap::new());
+    };
+
+    let scripts = scripts_value.as_object().ok_or_else(|| {
+        io::Error::new(io::ErrorKind::InvalidData, "scripts field is not an object")
+    })?;
 
     scripts
         .iter()
@@ -484,7 +486,10 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
-    use super::{DiagnosticRecord, compare_diagnostics, run_qa_diagnostic_diff, run_qa_registry};
+    use super::{
+        DiagnosticRecord, compare_diagnostics, diagnostic_buckets, package_scripts,
+        run_qa_diagnostic_diff, run_qa_registry,
+    };
     use crate::{OperationInterface, OperationStatus};
 
     fn repo_root() -> PathBuf {
@@ -536,6 +541,75 @@ mod tests {
     }
 
     #[test]
+    fn diagnostic_records_validate_required_fields_and_counts() {
+        for record in [
+            DiagnosticRecord::new("", "A", "warning", "message"),
+            DiagnosticRecord::new("tool", "", "warning", "message"),
+            DiagnosticRecord::new("tool", "A", "", "message"),
+            DiagnosticRecord::new("tool", "A", "warning", ""),
+            DiagnosticRecord::new("tool", "A", "warning", "message").with_count(0),
+        ] {
+            assert!(record.validate().is_err());
+        }
+
+        let record = DiagnosticRecord::new("tool", "A", "warning", "message")
+            .with_file("article.md")
+            .with_route("/article/");
+
+        assert_eq!(record.count(), 1);
+        assert_eq!(record.location_label(), "article.md");
+        assert!(record.validate().is_ok());
+    }
+
+    #[test]
+    fn diagnostic_buckets_aggregate_duplicate_records() {
+        let records = vec![
+            DiagnosticRecord::new("tool", "A", "warning", "same").with_count(2),
+            DiagnosticRecord::new("tool", "A", "warning", "same").with_count(3),
+        ];
+        let buckets = diagnostic_buckets(&records);
+        let bucket = buckets
+            .values()
+            .next()
+            .unwrap_or_else(|| panic!("bucket should exist"));
+
+        assert_eq!(bucket.count, 5);
+    }
+
+    #[test]
+    fn diagnostic_diff_operation_succeeds_for_matching_snapshots() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("same");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        let snapshot =
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"same","count":2}]"#;
+        write_file(&root.join("expected.json"), snapshot)?;
+        write_file(&root.join("actual.json"), snapshot)?;
+
+        let result = run_qa_diagnostic_diff(
+            &root,
+            root.join("expected.json"),
+            root.join("actual.json"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "missing: 0")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
     fn diagnostic_diff_operation_fails_on_changed_snapshots() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("diff");
         let _ = fs::remove_dir_all(&root);
@@ -570,5 +644,172 @@ mod tests {
 
         let _ = fs::remove_dir_all(root);
         Ok(())
+    }
+
+    #[test]
+    fn diagnostic_diff_operation_reports_count_changes() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("count-change");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("expected.json"),
+            r#"[
+              {"tool":"tool","code":"A","severity":"warning","message":"same"},
+              {"tool":"tool","code":"A","severity":"warning","message":"same"}
+            ]"#,
+        )?;
+        write_file(
+            &root.join("actual.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"same"}]"#,
+        )?;
+
+        let result = run_qa_diagnostic_diff(
+            &root,
+            root.join("expected.json"),
+            root.join("actual.json"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-COUNT")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn diagnostic_diff_operation_reports_read_and_validation_failures() -> Result<(), Box<dyn Error>>
+    {
+        let root = temp_workspace("read-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("expected.json"),
+            r#"[{"tool":"","code":"A","severity":"warning","message":"bad"}]"#,
+        )?;
+
+        let result = run_qa_diagnostic_diff(
+            &root,
+            root.join("expected.json"),
+            root.join("actual.json"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn diagnostic_diff_operation_reports_actual_read_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("actual-read-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("expected.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"ok"}]"#,
+        )?;
+
+        let result = run_qa_diagnostic_diff(
+            &root,
+            root.join("expected.json"),
+            root.join("actual.json"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn qa_registry_reports_package_and_workspace_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("invalid-package");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(&root.join("package.json"), "{\"scripts\":[]}")?;
+
+        let result = run_qa_registry(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-PACKAGE-READ")
+        );
+
+        let missing = run_qa_registry(
+            PathBuf::from("/tmp/tpm-qa-missing-workspace"),
+            OperationInterface::Test,
+        );
+        assert_eq!(missing.status(), OperationStatus::Failed);
+        assert!(
+            missing
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-WORKSPACE")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn package_scripts_accepts_missing_scripts_and_rejects_non_string_scripts()
+    -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("package-scripts");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("empty.json"), "{}")?;
+        write_file(
+            &root.join("invalid.json"),
+            "{\"scripts\":{\"check\":false}}",
+        )?;
+
+        let empty = package_scripts(&root.join("empty.json"))?;
+        assert!(empty.is_empty());
+        let invalid = package_scripts(&root.join("invalid.json"));
+        assert!(invalid.is_err());
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn qa_display_path_handles_empty_paths() {
+        assert_eq!(super::display_path(Path::new("")), ".");
     }
 }

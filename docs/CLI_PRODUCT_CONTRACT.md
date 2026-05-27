@@ -5,9 +5,9 @@ line product contract, feature set, command language, output policy, and safety
 model.
 
 The CLI is a first-class interface over the headless studio core. It is not a
-replacement name for current repo-local `bun run` scripts. Bun scripts remain
-developer and repository automation until specific behavior is promoted through
-the shared operation core.
+replacement name for current repo-local `just` recipes. Repository command
+orchestration remains `just` until specific behavior is promoted through the
+shared operation core.
 
 Related documents:
 
@@ -33,7 +33,7 @@ Related documents:
 
 - This document does not implement the CLI.
 - This document does not freeze every final flag.
-- This document does not replace current package scripts.
+- This document does not replace current repository `just` recipes.
 - This document does not require GitHub, Cloudflare, Wrangler, or repo-local
   assets.
 
@@ -285,9 +285,9 @@ Future promotion path:
 
 Examples:
 
-- `bun run check:release` may remain a developer/repo gate while `tpm check`
+- `just release-check` may remain a developer/repo gate while `tpm check`
   becomes the product validation command.
-- `bun run preview` may remain an Astro local script while `tpm preview`
+- `just preview` may remain an Astro local script while `tpm preview`
   orchestrates workspace, provider, and artifact-aware preview.
 
 ## Verification Plan

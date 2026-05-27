@@ -112,7 +112,7 @@ export async function runImageAssetLocationCli(
   rootDir = process.cwd(),
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run assets:locations [--json] [--quiet]
+    console.log(`Usage: just assets-locations [--json] [--quiet]
 
 Require image assets to live under site/assets/.
 

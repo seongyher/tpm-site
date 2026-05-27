@@ -444,7 +444,7 @@ development assets or unbuilt source files.
 
 The production build contract is:
 
-- `bun run build` runs `astro build` and generates the Pagefind search index.
+- `just build` runs `astro build` and generates the Pagefind search index.
 - `astro build` writes deployable static output to `dist/`.
 - Astro/Vite owns bundled CSS and processed client JavaScript from project
   source.
@@ -669,7 +669,7 @@ bar.
 
 Use automated checks before release.
 
-Concrete script usage lives in `PACKAGE_SCRIPTS.md`. This section defines the
+Concrete script usage lives in `COMMANDS.md`. This section defines the
 quality bar those scripts should enforce.
 
 Required checks should include:

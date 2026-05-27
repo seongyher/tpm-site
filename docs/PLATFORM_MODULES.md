@@ -154,7 +154,7 @@ work in the wrong layer.
 
 ## CI Invariants
 
-`bun run platform:check` verifies the current enforceable subset:
+`just platform-check` verifies the current enforceable subset:
 
 - every `src/lib` module is assigned to a platform domain;
 - every `src/platform` internal entrypoint is assigned to a platform domain;

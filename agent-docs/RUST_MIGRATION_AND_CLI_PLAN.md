@@ -476,9 +476,10 @@ Verification:
 
 Deliverables:
 
-- `just` calls Rust commands for promoted domains; package scripts stay only
-  where the JS/Astro ecosystem remains the implementation owner or a temporary
-  compatibility shim is explicitly approved;
+- `just` calls Rust commands for promoted domains and calls JS/Astro ecosystem
+  tools directly where those tools remain the implementation owner; package
+  scripts remain retired unless a temporary compatibility shim is explicitly
+  approved;
 - old TypeScript scripts are removed, parked, or kept as explicit fallback for
   one release cycle;
 - generated docs and command references point to the Rust CLI.
@@ -647,7 +648,7 @@ Issue candidates:
 3. Promote redirect generation.
 4. Promote QA registry reporting.
 5. Add release manifest shell and generated-output report bridge.
-6. Update package scripts, `just`, docs, and CI parity registry.
+6. Update `just`, docs, and CI parity registry.
 
 Acceptance for every promotion:
 

@@ -22,7 +22,7 @@ we can rerun it after Astro, Vite, Tailwind, or site-content changes.
 
 ## Experiment Harness
 
-`bun run payload:vite:experiments` builds temporary Astro config files under
+`just payload-vite-experiments` builds temporary Astro config files under
 `tmp/vite-build-experiments/`. Each scenario:
 
 - imports the real `astro.config.ts`;
@@ -56,5 +56,5 @@ scenario only improves raw bytes or only changes an internal temporary bundle,
 leave production config alone.
 
 Any production adoption must then pass the normal release gates, especially
-`bun run check:release`, browser invariants, accessibility checks, HTML
+`just release-check`, browser invariants, accessibility checks, HTML
 validation, and payload reporting.

@@ -30,30 +30,38 @@ Default priorities:
 
 ## Bun Usage
 
-Default to Bun for package management, scripts, tests, and local tooling.
+Bun remains the JavaScript package manager, lockfile owner, JS test runner, and
+adapter for TypeScript/Astro ecosystem tooling. It is no longer the repository
+command surface.
 
-- Use `bun install` instead of `npm install`, `yarn install`, or `pnpm install`.
-- Use `bun run <script>` instead of `npm run <script>`, `yarn run <script>`, or
-  `pnpm run <script>`.
+- Use `bun install` for dependency installation, normally through
+  `just setup`.
+- Use `just <recipe>` for repository workflows instead of `bun run <script>`.
+- Use `bun test` where the `just` recipe intentionally runs JS/TS tests.
+- Use `bun scripts/...` only for repository-owned TypeScript tooling that is
+  explicitly classified as a migration fallback behind a `just` recipe.
 - Use `bunx <package> <command>` instead of `npx <package> <command>` when a
   package runner is needed.
-- Prefer Bun scripts for repository automation when the script can run cleanly
-  under Bun.
+- Do not reintroduce package scripts unless the task explicitly requires a
+  temporary compatibility shim with documented ownership and an expiry trigger.
 - Do not introduce unrelated build toolchains into the Astro build path.
 
-When an existing script currently uses `node`, keep it working unless the task
-explicitly includes converting the script to Bun. Avoid churn that is unrelated
-to the active milestone.
+When an existing script currently uses `node` or `bun`, keep it working unless
+the task explicitly includes converting the script to Rust or a direct `just`
+recipe. Avoid churn that is unrelated to the active milestone.
 
 ## Rust And Just Usage
 
 The Rust workspace is additive infrastructure for the future platform core,
-CLI, MCP, and Tauri studio backend. It does not replace existing Bun/Astro
-behavior until a later parity milestone explicitly promotes a Rust command.
+CLI, MCP, and Tauri studio backend. Rust owns promoted deterministic operation
+contracts, while Astro/Bun ecosystem tools remain adapters where they are still
+the correct boundary.
 
 - Use `cargo` for direct Rust formatting, checks, lints, and tests.
 - Use `just --list` to discover repository command-router recipes.
 - Keep `justfile` recipes as orchestration only; do not put domain logic there.
+- Prefer promoting deterministic repository-owned tooling to Rust operations
+  with parity evidence or documented accepted differences.
 - Keep Rust crates dependency-light and strict. Unsafe Rust is forbidden by
   default.
 - Do not weaken existing Bun, Astro, TypeScript, browser, accessibility,
@@ -68,8 +76,8 @@ behavior until a later parity milestone explicitly promotes a Rust command.
 - `rust-toolchain.toml`: pinned Rust toolchain and required components.
 - `rustfmt.toml`: explicit stable Rust formatting policy.
 - `deny.toml`: Rust supply-chain policy for blocking `cargo-deny` checks.
-- `justfile`: repository command router over existing Bun scripts and Rust
-  checks; keep it orchestration-only.
+- `justfile`: canonical repository command router over Rust operations and
+  JS/Astro ecosystem adapters; keep it orchestration-only.
 - `crates/`: additive Rust platform crates. Rust code here is not source of
   truth for existing site behavior until parity promotion.
 - `crates/tpm-operations/`: shared operation request/result envelopes for
@@ -125,7 +133,8 @@ behavior until a later parity milestone explicitly promotes a Rust command.
   hand.
 - `CHECKLIST.md`: implementation milestone tracker.
 - `DEFERRED.md`: postponed work with reasons and resume triggers.
-- `PACKAGE_SCRIPTS.md`: brief reference for every `package.json` script.
+- `COMMANDS.md`: brief reference for repository `just` recipes and remaining
+  TypeScript fallback adapters.
 - `agent-docs/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
   strictness, modularity, type-driven design, and testing philosophy.
 - `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
@@ -140,6 +149,9 @@ behavior until a later parity milestone explicitly promotes a Rust command.
 - `agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`: current
   parity-protected Rust/`just` migration classifications, dual-run report
   surface, accepted differences, and verification expectations.
+- `agent-docs/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`: current milestone 9
+  command-surface inventory, package-script retirement policy, allowed Bun
+  adapter rules, and remaining migration fallback plan.
 - `agent-docs/rust-migration-research/RUST_QA_TOOLING_EVALUATION.md`:
   source-checked Rust QA/static-analysis tooling evaluation, adoption timing,
   and blocking versus review-only gate guidance.
@@ -296,7 +308,7 @@ adding or changing starters:
 - keep default copy generic, inclusive, and suitable for a new publication;
 - verify every starter uses only supported source contracts and no accidental
   TPM-only assumptions;
-- run `bun run starters:check` or a broader check that includes it.
+- run `just starters-check` or a broader check that includes it.
 
 When adding a new platform-facing domain, update `docs/PLATFORM_MODULES.md` and
 the relevant contract document before relying on the seam from examples,
@@ -1263,7 +1275,7 @@ Font rules:
 
 Treat production output as the performance source of truth.
 
-- `bun run build` produces the deployable `dist/` directory.
+- `just build` produces the deployable `dist/` directory.
 - Astro/Vite own project CSS and processed client JavaScript.
 - Built project assets should appear under hashed `_astro/` filenames when they
   are emitted as files.
@@ -1341,76 +1353,74 @@ Keep QA commands simple and transparent. Do not add clever wrapper scripts,
 suppressed output, or copied flags unless their behavior is understood and the
 reason is documented.
 
-`just` is the canonical human command router for Rust and cross-tool QA
-orchestration. `package.json` remains the executable command surface for the
-current Astro, TypeScript, content, browser, and generated-site tooling. The
-human-readable package-script map is `PACKAGE_SCRIPTS.md`. The
-machine-readable QA contract is `scripts/quality/qa-command-registry.ts`, which
-classifies package scripts and maps CI jobs to local package scripts, `just`
-commands, or documented CI-only reasons. Update the registry, docs, and tests
-together when adding, removing, or changing package scripts, `just`-owned
-command owners, or CI jobs.
+`just` is the canonical human command router for repository workflows, Rust
+operations, and cross-tool QA orchestration. `package.json` is dependency
+metadata, not the executable command surface. The human-readable command map is
+`COMMANDS.md`. The machine-readable QA contract is
+`scripts/quality/qa-command-registry.ts`, which classifies every `just` recipe
+and maps CI jobs to local `just` commands or documented CI-only reasons.
+Update the registry, docs, and tests together when adding, removing, or
+changing `just` recipes, command owners, or CI jobs.
 
-Use `scripts/quality/diagnostic-diff.ts` through `bun run diagnostics:diff`
-when replacing or narrowing a risky QA command. Compare diagnostic codes, files,
-severities, messages, and counts rather than trusting exit-code parity alone.
+Use `just diagnostics-diff` when replacing or narrowing a risky QA command.
+Compare diagnostic codes, files, severities, messages, and counts rather than
+trusting exit-code parity alone.
 
-Current baseline scripts:
+Current baseline commands:
 
-- `bun run dev`: start Astro dev server.
-- `bun run check:fast`: run cheap high-signal invariants for early feedback,
+- `just dev`: start Astro dev server.
+- `just check-fast`: run cheap high-signal invariants for early feedback,
   including starter-template, generated-reference, platform-boundary, and
   command/config contract tests.
-- `bun run check`: run content validation, Astro and tooling typechecking,
-  ESLint, asset validation, package ordering, code/config Prettier check, Knip,
-  test-accountability verification, Bun unit tests, and Astro component tests.
-- `bun run test`: run test-accountability verification, Bun unit tests, and
-  Astro component tests.
-- `bun run test:unit`: run Bun unit/script/component/page tests.
-- `bun run test:astro`: run Astro component and page tests through Vitest and
-  the Astro container API.
-- `bun run test:config`: run repository config and QA registry contract tests
-  that catch script, workflow, and tooling drift before heavier checks.
-- `bun run test:accountability`: verify every repository file is covered by a
+- `just check`: run content validation, Astro and tooling typechecking, ESLint,
+  asset validation, package ordering, code/config Prettier check, Knip,
+  test-accountability verification, Bun unit tests, Astro component tests, and
+  fast Rust type checks.
+- `just test`: run test-accountability verification, Bun unit tests, and Astro
+  component tests.
+- `just test-unit`: run Bun unit/script/component/page tests.
+- `just test-astro`: run Astro component and page tests through Vitest and the
+  Astro container API.
+- `just test-config`: run repository config and QA registry contract tests that
+  catch command, workflow, and tooling drift before heavier checks.
+- `just test-accountability`: verify every repository file is covered by a
   mirrored test or documented accountability rule.
-- `bun run test:accountability:release`: run the same accountability check and
+- `just test-accountability-release`: run the same accountability check and
   fail on requested-permission exceptions.
-- `bun run coverage`: run unit tests with LCOV, then report code-like files
-  that are not represented by LCOV coverage, a mirrored accountability test, or
-  an approved exception.
-- `bun run typecheck`: run Astro checks silently while failing on warnings, then
-  run TypeScript tool checks.
-- `bun run quality`: run the local quality path quietly, printing only failures
-  and review warnings.
-- `bun run build`: build Astro and generate Pagefind index.
-- `bun run preview`: preview built output locally after `bun run build`.
-- `bun run preview:fresh`: build and then preview built output locally.
-- `bun run verify`: verify built output.
-- `bun run validate:html`: validate built HTML output.
-- `bun run test:e2e`: run Playwright smoke/responsive/search tests.
-- `bun run test:a11y`: run axe accessibility review tests.
-- `bun run test:perf`: run Lighthouse CI review.
-- `bun run diagnostics:diff`: compare normalized diagnostic snapshots for QA
-  scope-change reviews.
-- `bun run starters:check`: verify starter templates and example site
-  instances stay aligned with the starter registry and supported source
-  contracts.
-- `bun run check:release`: run the blocking pre-release validation gate.
-- `bun run quality:release`: run the heavy pre-release gate quietly, printing
-  only failures and review warnings.
-- `bun run fix`: run safe automatic fixes for code and config.
-- `bun run review:markdown`: run non-blocking Markdown/MDX style feedback.
-- `bun run review:assets`: run non-blocking duplicate/unused image review
+- `just coverage`: run unit tests with LCOV, then report code-like files that
+  are not represented by LCOV coverage, a mirrored accountability test, or an
+  approved exception.
+- `just typecheck`: run Astro checks while failing on warnings, then run
+  TypeScript tool checks.
+- `just quality`: run the local quality path plus review-only signals.
+- `just build`: build Astro, generate Pagefind index, generate PDFs, and
+  optimize output.
+- `just preview`: preview built output locally after `just build`.
+- `just preview-fresh`: build and then preview built output locally.
+- `just verify`: verify built output.
+- `just validate-html`: validate built HTML output.
+- `just test-e2e`: run Playwright smoke/responsive/search tests.
+- `just test-a11y`: run axe accessibility review tests.
+- `just test-perf`: run Lighthouse CI review.
+- `just starters-check`: verify starter templates and example site instances
+  stay aligned with the starter registry and supported source contracts.
+- `just release-check`: run the blocking pre-release validation gate.
+- `just quality-release`: run the heavy pre-release gate plus review-only
+  signals.
+- `just fix`: run safe automatic fixes for code, config, Markdown, package
+  ordering, and Rust.
+- `just review-markdown`: run non-blocking Markdown/MDX style feedback.
+- `just review-assets`: run non-blocking duplicate/unused image review
   feedback.
-- `bun run audit:all`: run dependency audit review across all severities.
-- `bun run fix:markdown`: run mechanical Markdown/MDX formatting.
+- `just audit-all`: run dependency audit review across all severities.
+- `just markdown-fix`: run mechanical Markdown/MDX formatting.
 
 For code and config changes, prefer running the safe automatic fixer before the
 normal check when safe for the task:
 
 ```sh
-bun run fix
-bun run check
+just fix
+just check
 ```
 
 This keeps mechanical formatting, import ordering, and safe lint autofixes out
@@ -1536,9 +1546,9 @@ nearby code comment, reported during handoff, and accepted by the user after
 handoff. Do not silently leave testable code uncovered.
 
 Developer checks are practical iteration gates, not permission to leave
-coverage weak. Passing `bun run check` does not prove coverage is sufficient;
+coverage weak. Passing `just check` does not prove coverage is sufficient;
 developers must still add meaningful tests for every sensible behavior path
-they touch and push coverage upward wherever practical. `bun run coverage` is a
+they touch and push coverage upward wherever practical. `just coverage` is a
 broad review inventory, not a release gate.
 
 When a remaining uncovered path is genuinely a process boundary,
@@ -1618,7 +1628,7 @@ design/tooling/project document when the intended work should be reviewable
 before code changes.
 
 Do not create planning docs for routine QA commands. Routine tooling
-expectations belong in this file, `PACKAGE_SCRIPTS.md`, and the QA command
+expectations belong in this file, `COMMANDS.md`, and the QA command
 registry. Use `agent-docs/QA_PREFLIGHT.md` only when changing the QA foundation
 or resuming scoped QA-tooling work from the roadmap.
 

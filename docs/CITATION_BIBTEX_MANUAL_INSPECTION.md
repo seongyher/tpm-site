@@ -17,7 +17,7 @@ The manual source-verification standard for that correction pass is defined in
 
 ## Coverage Proof
 
-- Structural source: `bun run references:bibtex:audit -- --json`.
+- Structural source: `just references-bibtex-audit -- --json`.
 - Manual working inventory: rows 1 through 246 from the parsed audit inventory.
 - Entries manually inspected: 246 of 246.
 - Article source files with hidden `tpm-bibtex` blocks inspected: 23 of 23.
@@ -170,9 +170,9 @@ source lists as a supported authoring mode.
 
 Each correction pass should end with:
 
-1. `bun run references:bibtex:audit -- --write --quiet`
+1. `just references-bibtex-audit -- --write --quiet`
 2. A diff review of `docs/CITATION_BIBTEX_AUDIT.md` to prove marker/entry
    coverage did not regress.
 3. Sitewide bibliography inspection for duplicate collapse.
 4. Article-level inspection for at least one affected article page.
-5. `bun run check:release` before handoff if article source files changed.
+5. `just release-check` before handoff if article source files changed.

@@ -11,7 +11,7 @@ export interface QaFailureProbe {
   fixturePaths: readonly string[];
   fixtureStrategy: QaFailureFixtureStrategy;
   id: string;
-  intendedScripts: readonly string[];
+  intendedCommands: readonly string[];
   leakPrevention: string;
   testPaths: readonly string[];
 }
@@ -24,7 +24,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "invalid-content-source",
-    intendedScripts: ["verify:content", "tags:check"],
+    intendedCommands: ["content-check", "tags-check"],
     leakPrevention: "temporary source trees under the OS temp directory",
     testPaths: [
       "tests/scripts/content/verify-content.test.ts",
@@ -38,7 +38,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "remote-rendered-article-image",
-    intendedScripts: ["verify:content"],
+    intendedCommands: ["content-check"],
     leakPrevention: "temporary source tree, no live article content",
     testPaths: ["tests/scripts/content/verify-content.test.ts"],
   },
@@ -49,7 +49,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "misplaced-image-asset",
-    intendedScripts: ["assets:locations"],
+    intendedCommands: ["assets-locations"],
     leakPrevention: "temporary repository root with disposable image bytes",
     testPaths: [
       "tests/scripts/assets/verify-image-asset-locations.test.ts",
@@ -63,7 +63,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "shared-asset-violation",
-    intendedScripts: ["assets:shared"],
+    intendedCommands: ["assets-shared"],
     leakPrevention:
       "temporary repository root with disposable source and image files",
     testPaths: ["tests/scripts/assets/find-shared-assets.test.ts"],
@@ -75,7 +75,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "malformed-legacy-redirect",
-    intendedScripts: ["build:cloudflare", "verify"],
+    intendedCommands: ["build-cloudflare", "verify"],
     leakPrevention: "temporary content and output directories",
     testPaths: [
       "tests/scripts/build/generate-cloudflare-redirects.test.ts",
@@ -89,7 +89,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "generated-output",
     id: "broken-generated-output-link",
-    intendedScripts: ["verify"],
+    intendedCommands: ["verify"],
     leakPrevention: "temporary dist shell, not the real production output",
     testPaths: [
       "tests/scripts/build/build-verifier.test.ts",
@@ -103,7 +103,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "generated-output",
     id: "invalid-generated-metadata",
-    intendedScripts: ["verify"],
+    intendedCommands: ["verify"],
     leakPrevention: "temporary dist shell, not the real production output",
     testPaths: ["tests/scripts/build/build-verifier.test.ts"],
   },
@@ -113,7 +113,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "generated-output",
     id: "invalid-html-output",
-    intendedScripts: ["validate:html"],
+    intendedCommands: ["validate-html"],
     leakPrevention: "temporary dist shell and explicit validator options",
     testPaths: ["tests/scripts/build/validate-html.test.ts"],
   },
@@ -124,7 +124,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "generated-output",
     id: "payload-budget-regression",
-    intendedScripts: ["payload:check"],
+    intendedCommands: ["payload-check"],
     leakPrevention: "temporary dist shell, not the real production output",
     testPaths: ["tests/scripts/payload/report-payload.test.ts"],
   },
@@ -137,7 +137,7 @@ export const qaFailureProbes = [
     ],
     fixtureStrategy: "static-fixture",
     id: "malformed-article-reference",
-    intendedScripts: ["test:unit", "test:astro"],
+    intendedCommands: ["test-unit", "test-astro"],
     leakPrevention: "static fixture collection outside site content roots",
     testPaths: [
       "tests/src/remark-plugins/articleReferences.test.ts",
@@ -151,7 +151,7 @@ export const qaFailureProbes = [
     fixturePaths: [],
     fixtureStrategy: "temporary-fixture",
     id: "invalid-site-config",
-    intendedScripts: ["site:doctor", "site:schema:check", "test:unit"],
+    intendedCommands: ["site-doctor", "site-schema-check", "test-unit"],
     leakPrevention: "inline config objects or temporary site roots",
     testPaths: [
       "tests/src/lib/site-config.test.ts",
@@ -165,7 +165,7 @@ export const qaFailureProbes = [
     fixturePaths: ["src/catalog/examples/hostile-fixtures.ts"],
     fixtureStrategy: "static-fixture",
     id: "hostile-responsive-layout",
-    intendedScripts: ["test:catalog", "test:e2e:built"],
+    intendedCommands: ["test-catalog", "test-e2e-built"],
     leakPrevention: "private component catalog fixture, not production content",
     testPaths: [
       "tests/src/catalog/examples/hostile-fixtures.test.ts",

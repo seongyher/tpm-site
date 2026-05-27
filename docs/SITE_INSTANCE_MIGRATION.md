@@ -183,7 +183,7 @@ operate outside both `src/` and the live `site/` directory.
 The stronger proof is a full fixture build:
 
 ```sh
-bun --silent run test:site-instance
+just test-site-instance
 ```
 
 That command sets `SITE_INSTANCE_ROOT=tests/fixtures/site-instance` and runs the

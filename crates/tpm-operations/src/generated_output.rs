@@ -171,7 +171,7 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
-    use super::run_generated_output_bridge;
+    use super::{display_path, run_generated_output_bridge};
     use crate::{OperationInterface, OperationStatus};
 
     fn temp_workspace(name: &str) -> PathBuf {
@@ -219,6 +219,11 @@ mod tests {
         fs::create_dir_all(root.join("site/assets"))?;
         fs::create_dir_all(root.join("site/public"))?;
         write_file(&root.join("dist/index.html"), "<!doctype html>")?;
+        write_file(
+            &root.join("dist/articles/example/index.html"),
+            "<!doctype html>",
+        )?;
+        write_file(&root.join("dist/assets/site.css"), "body{}")?;
         write_file(&root.join("dist/_redirects"), "/old/ /new/ 301")?;
         write_file(&root.join("dist/sitemap-index.xml"), "<sitemapindex />")?;
 
@@ -230,7 +235,14 @@ mod tests {
                 .summary()
                 .details()
                 .iter()
-                .any(|detail| detail == "html files: 1")
+                .any(|detail| detail == "output files: 5")
+        );
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "html files: 2")
         );
         assert!(
             result
@@ -242,5 +254,26 @@ mod tests {
 
         let _ = fs::remove_dir_all(root);
         Ok(())
+    }
+
+    #[test]
+    fn output_bridge_reports_workspace_discovery_failure() {
+        let root = PathBuf::from("/tmp/tpm-output-missing-workspace");
+
+        let result = run_generated_output_bridge(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-OUTPUT-WORKSPACE")
+        );
+    }
+
+    #[test]
+    fn generated_output_display_path_handles_empty_paths() {
+        assert_eq!(display_path(Path::new("")), ".");
     }
 }

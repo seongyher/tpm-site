@@ -187,7 +187,7 @@ export async function runTestAccountabilityCli(
   rootDir = process.cwd(),
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run test:accountability [--release] [--quiet]
+    console.log(`Usage: just test-accountability [--release] [--quiet]
 
 Verify every repository file is either represented by a mirrored test file or
 matched by a gitignore-style accountability rule in ${defaultIgnoreFile}.`);

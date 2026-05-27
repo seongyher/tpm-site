@@ -92,9 +92,9 @@ fn display_path(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::path::{Path, PathBuf};
 
-    use super::run_site_doctor;
+    use super::{display_path, run_site_doctor};
     use crate::{OperationInterface, OperationStatus};
 
     fn fixture_root() -> PathBuf {
@@ -125,5 +125,14 @@ mod tests {
         );
 
         assert_eq!(result.status(), OperationStatus::Failed);
+        assert_eq!(
+            result.diagnostics().errors()[0].code().as_str(),
+            "TPM-SITE-DOCTOR-WORKSPACE"
+        );
+    }
+
+    #[test]
+    fn site_doctor_display_path_handles_empty_paths() {
+        assert_eq!(display_path(Path::new("")), ".");
     }
 }

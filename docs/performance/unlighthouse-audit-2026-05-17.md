@@ -108,9 +108,9 @@ Baseline routes to sample after implementation:
 Release-level verification remains:
 
 ```sh
-bun run check:release
-bun run test:a11y
-bun run test:perf
+just release-check
+just test-a11y
+just test-perf
 ```
 
 For experiment passes, compare Lighthouse reports before and after on at least
@@ -403,7 +403,7 @@ Recommended implementation:
 Tests:
 
 - Component tests for each changed primitive/block.
-- Re-run `bun run test:a11y` and a focused homepage/article Lighthouse sample.
+- Re-run `just test-a11y` and a focused homepage/article Lighthouse sample.
 
 ### Critical Request Chain
 
@@ -503,7 +503,7 @@ Acceptance criteria:
 
 Experiment result:
 
-- `bun run payload:critical-css:experiment` now runs a bounded Beasties
+- `just payload-critical-css-experiment` now runs a bounded Beasties
   experiment against a copied build output and writes a reproducible report
   under `tmp/critical-css-experiment/report.md`.
 - The first-pass Beasties scenario processed 303 HTML files and increased HTML
@@ -715,9 +715,9 @@ Implementation outcome:
 After implementing fixes, run:
 
 ```sh
-bun run check:release
-bun run test:a11y
-bun run test:perf
+just release-check
+just test-a11y
+just test-perf
 ```
 
 Then re-run the full Unlighthouse scan against the deployed Worker so the

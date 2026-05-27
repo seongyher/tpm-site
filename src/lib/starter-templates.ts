@@ -45,11 +45,9 @@ export interface StarterTemplate {
 export const starterTemplates = [
   {
     acceptanceChecks: {
-      build: [
-        "SITE_INSTANCE_ROOT=examples/starters/minimal-blog bun run build",
-      ],
-      release: ["bun run starters:check"],
-      source: ["bun run starters:check", "bun run site:doctor"],
+      build: ["SITE_INSTANCE_ROOT=examples/starters/minimal-blog just build"],
+      release: ["just starters-check"],
+      source: ["just starters-check", "just site-doctor"],
     },
     capabilities: [
       capability(
@@ -77,10 +75,10 @@ export const starterTemplates = [
   {
     acceptanceChecks: {
       build: [
-        "SITE_INSTANCE_ROOT=examples/starters/editorial-magazine bun run build",
+        "SITE_INSTANCE_ROOT=examples/starters/editorial-magazine just build",
       ],
-      release: ["bun run starters:check"],
-      source: ["bun run starters:check", "bun run site:doctor"],
+      release: ["just starters-check"],
+      source: ["just starters-check", "just site-doctor"],
     },
     capabilities: [
       capability("articles", "required", "Multiple categories and authors."),
@@ -104,10 +102,10 @@ export const starterTemplates = [
   {
     acceptanceChecks: {
       build: [
-        "SITE_INSTANCE_ROOT=examples/starters/scholarly-publication bun run build",
+        "SITE_INSTANCE_ROOT=examples/starters/scholarly-publication just build",
       ],
-      release: ["bun run starters:check"],
-      source: ["bun run starters:check", "bun run site:doctor"],
+      release: ["just starters-check"],
+      source: ["just starters-check", "just site-doctor"],
     },
     capabilities: [
       capability(
@@ -138,9 +136,9 @@ export const starterTemplates = [
   },
   {
     acceptanceChecks: {
-      build: ["bun run test:docs-site"],
-      release: ["bun run docs:check", "bun run starters:check"],
-      source: ["bun run starters:check", "bun run test:docs-site"],
+      build: ["just test-docs-site"],
+      release: ["just docs-check", "just starters-check"],
+      source: ["just starters-check", "just test-docs-site"],
     },
     capabilities: [
       capability(
@@ -171,11 +169,9 @@ export const starterTemplates = [
   },
   {
     acceptanceChecks: {
-      build: [
-        "SITE_INSTANCE_ROOT=examples/starters/kitchen-sink bun run build",
-      ],
-      release: ["bun run starters:check"],
-      source: ["bun run starters:check", "bun run site:doctor"],
+      build: ["SITE_INSTANCE_ROOT=examples/starters/kitchen-sink just build"],
+      release: ["just starters-check"],
+      source: ["just starters-check", "just site-doctor"],
     },
     capabilities: [
       capability(

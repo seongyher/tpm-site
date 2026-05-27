@@ -108,7 +108,12 @@ describe("raw build runner", () => {
           "--glob",
           "{index.html,about/**/*.html,articles/**/*.html,announcements/**/*.html,authors/**/*.html,bibliography/**/*.html,categories/**/*.html,collections/**/*.html,search/**/*.html,tags/**/*.html}",
         ],
-        command: "pagefind",
+        command: path.join(
+          "/repo",
+          "node_modules",
+          ".bin",
+          process.platform === "win32" ? "pagefind.cmd" : "pagefind",
+        ),
         outputDir: undefined,
       },
     ]);

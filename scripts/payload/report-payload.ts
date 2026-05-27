@@ -283,7 +283,7 @@ export function runPayloadReportCli(
   cwd = process.cwd(),
 ): number {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run payload:report [--dist <path>] [--json] [--top <count>] [--check]
+    console.log(`Usage: just payload-report [--dist <path>] [--json] [--top <count>] [--check]
 
 Report raw, gzip, and Brotli sizes for generated static build output. Run bun
 run build first unless a custom --dist directory is supplied. Add --check to

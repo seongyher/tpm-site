@@ -42,7 +42,7 @@ export function runValidateHtmlCli(
 
   return runCommand({
     args: ["--max-warnings=0", ...options.targets],
-    command: "html-validate",
+    command: localBinary(rootDir, "html-validate"),
   });
 }
 
@@ -134,8 +134,14 @@ function routeTreeHtmlTarget(outputDir: string, route: string): string {
     : path.join(outputDir, routePath, "**", "*.html");
 }
 
+function localBinary(rootDir: string, binary: string): string {
+  const executable = process.platform === "win32" ? `${binary}.cmd` : binary;
+
+  return path.join(rootDir, "node_modules", ".bin", executable);
+}
+
 function usage(): string {
-  return `Usage: bun run validate:html [--dir <dir>]
+  return `Usage: just validate-html [--dir <dir>]
 
 Validate representative generated HTML for the active site instance.
 

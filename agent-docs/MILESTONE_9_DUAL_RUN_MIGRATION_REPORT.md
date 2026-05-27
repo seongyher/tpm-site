@@ -1,16 +1,22 @@
 # Milestone 9 Dual-Run Migration Report
 
 This milestone moves deterministic tooling toward Rust operations and `just`
-without blindly porting accidental script behavior. The target state is a
-cleaner command surface:
+without blindly porting accidental script behavior. The corrected target state
+is a cleaner command surface:
 
 - `just` is the human command router for Rust and cross-tool QA orchestration;
+- GitHub Actions calls `just` recipes instead of package scripts;
+- `package.json` no longer exposes the developer workflow surface;
 - Rust operations provide typed, reusable reports for CLI, future Tauri GUI,
   MCP, CI, and generated-output tooling;
-- `package.json` remains for current Astro, TypeScript, content, browser, and
-  generated-site ecosystem commands while Rust-only wrappers are retired;
-- old Bun/TypeScript scripts remain source of truth until each replacement has
-  parity evidence or an explicitly accepted improvement.
+- Bun remains the package manager and JS test runner, plus an adapter for
+  Astro/browser ecosystem tools where Rust is not the right boundary;
+- old repository-owned TypeScript tooling remains only as explicitly
+  classified, time-boxed fallback debt until each replacement has parity
+  evidence or an explicitly accepted improvement.
+
+The full command-surface inventory, end-state policy, and fallback rules are in
+[`MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`](./MILESTONE_9_COMMAND_SURFACE_MIGRATION.md).
 
 ## Migration Classification
 
@@ -72,8 +78,8 @@ cargo fmt --all --check
 cargo check --workspace --all-targets --all-features --locked
 cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 cargo test --workspace --all-features --locked
-bun run test:config
-bun run docs:references:check
+just test-config
+just docs-references-check --quiet
 just release-check
 ```
 

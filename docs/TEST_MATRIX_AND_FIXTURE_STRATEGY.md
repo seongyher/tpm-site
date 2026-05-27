@@ -12,27 +12,27 @@ integration behavior that lower layers cannot prove.
 
 ### Current Check Layers
 
-| Layer                              | Current command or source                                                                          | Current role                                                                                                           |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Content verification               | `bun run verify:content`, `bun run tags:check`, `bun run site:doctor`, `bun run site:schema:check` | Fast source and authoring contract checks before expensive builds.                                                     |
-| Platform boundary checks           | `bun run platform:check`                                                                           | Fast architectural check for site/platform separation.                                                                 |
-| Asset checks                       | `bun run assets:locations`, `bun run assets:shared`, `bun run review:assets`                       | Fast required asset policy plus review-only duplicate/unused asset reports.                                            |
-| Package and config tests           | `bun run lint:packages`, `bun run test:config`                                                     | Fast package ordering and tool/config contract checks.                                                                 |
-| Unit tests                         | `bun run test:unit`                                                                                | Pure logic, helper, script, route helper, and source-contract tests.                                                   |
-| Astro component tests              | `bun run test:astro`                                                                               | Rendered component markup, slots, variants, data hooks, and compile-time Astro contracts.                              |
-| Test accountability                | `bun run test:accountability`, `bun run test:accountability:release`                               | Ensures test files are covered by the expected command layer and blocks broad untracked test drift.                    |
-| Component catalog checks           | `bun run catalog:check`, `bun run test:catalog`, `bun run test:catalog:site-instance`              | Verifies catalog coverage, catalog examples, and private catalog behavior against a non-TPM site instance.             |
-| Build checks                       | `bun run build`, `bun run build:release`                                                           | Produces static output, PDFs, optimized assets, and Cloudflare redirect output.                                        |
-| Generated-output verification      | `bun run verify`, `bun run validate:html`                                                          | Checks built files, generated routes, metadata, assets, links, and HTML validity.                                      |
-| Browser invariants                 | `bun run test:e2e`, `bun run test:e2e:built`                                                       | Built-site layout, routing, interaction, and browser-only integration checks.                                          |
-| Accessibility checks               | `bun run test:a11y`, `bun run test:a11y:built`                                                     | Axe/Playwright accessibility scans over built output.                                                                  |
-| Lighthouse checks                  | `bun run test:perf`, `bun run test:perf:built`                                                     | Lighthouse CI assertions and resource budgets over representative built routes.                                        |
-| Docs-site checks                   | `bun run test:docs-site`                                                                           | Validates and builds the public documentation example site as a separate site instance.                                |
-| Fixture site checks                | `bun run test:site-instance`                                                                       | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                                           |
-| Coverage checks                    | `bun run coverage`, `bun run coverage:check`                                                       | Review and enforcement surface for unit-level coverage expectations.                                                   |
-| Rust workspace checks              | `just rust-check`, direct `cargo fmt/check/clippy/doc/test` commands                               | Additive Rust formatting, type, lint, rustdoc, doctest, unit-test, and CI gates before Rust replaces any Bun behavior. |
-| Quality dispatcher                 | `bun run quality`, `bun run quality:release`                                                       | Sequential blocking checks followed by nonblocking review checks.                                                      |
-| Payload and optimization workbench | `bun run payload:check`, `bun run payload:*`                                                       | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments.             |
+| Layer                              | Current command or source                                                             | Current role                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Content verification               | `just content-check`, `just tags-check`, `just site-doctor`, `just site-schema-check` | Fast source and authoring contract checks before expensive builds.                                                     |
+| Platform boundary checks           | `just platform-check`                                                                 | Fast architectural check for site/platform separation.                                                                 |
+| Asset checks                       | `just assets-locations`, `just assets-shared`, `just review-assets`                   | Fast required asset policy plus review-only duplicate/unused asset reports.                                            |
+| Package and config tests           | `just package-check`, `just test-config`                                              | Fast package ordering, command-surface guard, and tool/config contract checks.                                         |
+| Unit tests                         | `just test-unit`                                                                      | Pure logic, helper, script, route helper, and source-contract tests.                                                   |
+| Astro component tests              | `just test-astro`                                                                     | Rendered component markup, slots, variants, data hooks, and compile-time Astro contracts.                              |
+| Test accountability                | `just test-accountability`, `just test-accountability-release`                        | Ensures test files are covered by the expected command layer and blocks broad untracked test drift.                    |
+| Component catalog checks           | `just catalog-check`, `just test-catalog`, `just test-catalog-site-instance`          | Verifies catalog coverage, catalog examples, and private catalog behavior against a non-TPM site instance.             |
+| Build checks                       | `just build`, `just build-release`                                                    | Produces static output, PDFs, optimized assets, and Cloudflare redirect output.                                        |
+| Generated-output verification      | `just verify`, `just validate-html`                                                   | Checks built files, generated routes, metadata, assets, links, and HTML validity.                                      |
+| Browser invariants                 | `just test-e2e`, `just test-e2e-built`                                                | Built-site layout, routing, interaction, and browser-only integration checks.                                          |
+| Accessibility checks               | `just test-a11y`, `just test-a11y-built`                                              | Axe/Playwright accessibility scans over built output.                                                                  |
+| Lighthouse checks                  | `just test-perf`, `just test-perf-built`                                              | Lighthouse CI assertions and resource budgets over representative built routes.                                        |
+| Docs-site checks                   | `just test-docs-site`                                                                 | Validates and builds the public documentation example site as a separate site instance.                                |
+| Fixture site checks                | `just test-site-instance`                                                             | Builds the minimal non-TPM site fixture through raw/PDF/optimization stages.                                           |
+| Coverage checks                    | `just coverage`, `just coverage-check`                                                | Review and enforcement surface for unit-level coverage expectations.                                                   |
+| Rust workspace checks              | `just rust-check`, direct `cargo fmt/check/clippy/doc/test` commands                  | Additive Rust formatting, type, lint, rustdoc, doctest, unit-test, and CI gates before Rust replaces any Bun behavior. |
+| Quality dispatcher                 | `just quality`, `just quality-release`                                                | Sequential blocking checks followed by nonblocking review checks.                                                      |
+| Payload and optimization workbench | `just payload-check`, `just payload-*`                                                | Release-gated deterministic payload/cache budgets plus investigation tooling for optimization experiments.             |
 
 ### Current Fixture Surfaces
 
@@ -50,14 +50,14 @@ integration behavior that lower layers cannot prove.
 
 ### Current Placement
 
-| Placement            | Current commands                                                                                          | Intended use                                                                                      |
-| -------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Fast local           | `check:fast`, focused `bun test`, focused `test:astro`                                                    | Cheap validation while editing; catches schema, source, and platform-contract failures early.     |
-| Normal local         | `check`                                                                                                   | Default pre-handoff gate for most code changes.                                                   |
-| Focused built output | `build`, `verify`, `validate:html`, focused `test:e2e:built`                                              | Used when a change touches output, layout, metadata, links, browser behavior, or generated files. |
-| Release blocking     | `check:release`, `payload:check`                                                                          | Full release gate for platform/site changes plus deterministic route-class payload/cache budgets. |
-| Review-only release  | `quality:release` review steps: assets, markdown, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.     |
-| Investigation-only   | `payload:*:experiment`, full-site Unlighthouse scans, ad hoc browser profiling                            | Data collection for future budgets, experiments, and roadmap planning.                            |
+| Placement            | Current commands                                                                                               | Intended use                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Fast local           | `just check-fast`, focused `bun test`, focused `just test-astro`                                               | Cheap validation while editing; catches schema, source, and platform-contract failures early.     |
+| Normal local         | `just check`                                                                                                   | Default pre-handoff gate for most code changes.                                                   |
+| Focused built output | `just build`, `just verify`, `just validate-html`, focused `just test-e2e-built`                               | Used when a change touches output, layout, metadata, links, browser behavior, or generated files. |
+| Release blocking     | `just release-check`, `just payload-check`                                                                     | Full release gate for platform/site changes plus deterministic route-class payload/cache budgets. |
+| Review-only release  | `just quality-release` review steps: assets, markdown, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.     |
+| Investigation-only   | `just payload-*experiment*`, full-site Unlighthouse scans, ad hoc browser profiling                            | Data collection for future budgets, experiments, and roadmap planning.                            |
 
 ## Target Ownership Principles
 
@@ -76,21 +76,21 @@ integration behavior that lower layers cannot prove.
 
 ## Target Test-Layer Ownership Matrix
 
-| Domain                 | Primary owner                                                  | What belongs there                                                                                                                           | What does not belong there                                                                           |
-| ---------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Source contracts       | Content schemas, config schemas, site doctor, content verifier | Frontmatter shape, feature defaults, visibility rules, broken author input, route/config invariants.                                         | Browser layout, rendered CSS, or page-specific visual behavior.                                      |
-| Pure domain logic      | `test:unit`                                                    | Route builders, metadata builders, reference parsing, citation normalization, image policy helpers, budget calculators, manifest generation. | Astro slots, browser APIs, CSS layout, or filesystem-heavy workflows unless injected behind seams.   |
-| Tooling orchestration  | `test:unit` plus script-level tests                            | CLI parsing, command selection, quality workflow ordering, generated file contracts, test-accountability policy.                             | Full builds unless the command specifically owns build orchestration.                                |
-| Astro component markup | `test:astro`                                                   | Semantic HTML, slots, variants, data hooks, ARIA attributes, component-owned empty/error/long-content states.                                | End-to-end route behavior, visual screenshots, or testing private helpers through test-only exports. |
-| Catalog examples       | `catalog:check`, `test:catalog`                                | Primitive states, component recipes, hostile content rendering, reusable block states, design-system visibility.                             | Publication-specific content correctness or source schema validation.                                |
-| Built output           | `verify`, `validate:html`, targeted built-output tests         | Generated routes, metadata, sitemap/feed/redirect/PDF/search output, HTML validity, links, asset references.                                 | Runtime browser interaction unless browser APIs are required.                                        |
-| Browser interactions   | `test:e2e:built`                                               | Navigation, popovers, carousel controls, scroll controls, layout containment, focus behavior, hydrated or scripted UI.                       | Pure helper logic already covered by unit tests.                                                     |
-| Accessibility          | `test:a11y:built`, focused axe tests, semantic component tests | Page-level accessibility regressions, landmark/heading/focus/label issues, scanner coverage over built pages.                                | Styling preferences that are not accessibility issues.                                               |
-| Performance            | `test:perf:built`, payload reports, Unlighthouse scans         | Lighthouse assertions, route-class budgets, payload budgets, cache policy, critical request chains, Core Web Vitals.                         | Non-performance visual redesign work unless it changes measured budgets.                             |
-| Docs and examples      | `test:docs-site`, docs lint/format                             | Public author/developer docs accuracy, example-site completeness, commands and config examples.                                              | TPM-specific editorial policy unless the docs explicitly discuss it.                                 |
-| Deployment             | `build:release`, `build:cloudflare`, deploy config tests       | Cloudflare redirect generation, worker static asset config, deploy script contracts, host compatibility files.                               | Runtime server behavior; the site remains static-first.                                              |
-| Rust operation core    | `cargo test`, `just rust-check`, exact JSON fixtures           | Serializable diagnostics, workspace discovery, operation envelopes, deterministic source references, and machine contracts.                  | Browser UI behavior, Astro rendering, or provider actions before adapters exist.                     |
-| Future studio/CLI/MCP  | Future contract tests plus fixture-site smoke tests            | Serializable edit operations, generated patches, validation feedback, preview/build/deploy workflows.                                        | Direct mutation of platform internals outside stable site-instance contracts.                        |
+| Domain                 | Primary owner                                                       | What belongs there                                                                                                                           | What does not belong there                                                                           |
+| ---------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Source contracts       | Content schemas, config schemas, site doctor, content verifier      | Frontmatter shape, feature defaults, visibility rules, broken author input, route/config invariants.                                         | Browser layout, rendered CSS, or page-specific visual behavior.                                      |
+| Pure domain logic      | `just test-unit`                                                    | Route builders, metadata builders, reference parsing, citation normalization, image policy helpers, budget calculators, manifest generation. | Astro slots, browser APIs, CSS layout, or filesystem-heavy workflows unless injected behind seams.   |
+| Tooling orchestration  | `just test-unit` plus script-level tests                            | CLI parsing, command selection, quality workflow ordering, generated file contracts, test-accountability policy.                             | Full builds unless the command specifically owns build orchestration.                                |
+| Astro component markup | `just test-astro`                                                   | Semantic HTML, slots, variants, data hooks, ARIA attributes, component-owned empty/error/long-content states.                                | End-to-end route behavior, visual screenshots, or testing private helpers through test-only exports. |
+| Catalog examples       | `just catalog-check`, `just test-catalog`                           | Primitive states, component recipes, hostile content rendering, reusable block states, design-system visibility.                             | Publication-specific content correctness or source schema validation.                                |
+| Built output           | `just verify`, `just validate-html`, targeted built-output tests    | Generated routes, metadata, sitemap/feed/redirect/PDF/search output, HTML validity, links, asset references.                                 | Runtime browser interaction unless browser APIs are required.                                        |
+| Browser interactions   | `just test-e2e-built`                                               | Navigation, popovers, carousel controls, scroll controls, layout containment, focus behavior, hydrated or scripted UI.                       | Pure helper logic already covered by unit tests.                                                     |
+| Accessibility          | `just test-a11y-built`, focused axe tests, semantic component tests | Page-level accessibility regressions, landmark/heading/focus/label issues, scanner coverage over built pages.                                | Styling preferences that are not accessibility issues.                                               |
+| Performance            | `just test-perf-built`, payload reports, Unlighthouse scans         | Lighthouse assertions, route-class budgets, payload budgets, cache policy, critical request chains, Core Web Vitals.                         | Non-performance visual redesign work unless it changes measured budgets.                             |
+| Docs and examples      | `just test-docs-site`, docs lint/format                             | Public author/developer docs accuracy, example-site completeness, commands and config examples.                                              | TPM-specific editorial policy unless the docs explicitly discuss it.                                 |
+| Deployment             | `just build-release`, `just build-cloudflare`, deploy config tests  | Cloudflare redirect generation, worker static asset config, deploy script contracts, host compatibility files.                               | Runtime server behavior; the site remains static-first.                                              |
+| Rust operation core    | `cargo test`, `just rust-check`, exact JSON fixtures                | Serializable diagnostics, workspace discovery, operation envelopes, deterministic source references, and machine contracts.                  | Browser UI behavior, Astro rendering, or provider actions before adapters exist.                     |
+| Future studio/CLI/MCP  | Future contract tests plus fixture-site smoke tests                 | Serializable edit operations, generated patches, validation feedback, preview/build/deploy workflows.                                        | Direct mutation of platform internals outside stable site-instance contracts.                        |
 
 ## Target Fixture-Site Matrix
 
@@ -141,19 +141,19 @@ the correct fixture whenever a new domain needs proof.
 The command ownership manifest is implemented in
 `scripts/quality/qa-command-registry.ts`:
 
-- `qaCommandGroups` classifies every package script by command class, domain,
+- `qaCommandGroups` classifies every `just` recipe by command class, domain,
   runtime, mutation behavior, CI usage, and purpose.
-- `qaCiJobRegistry` maps CI jobs back to local package scripts, `just`
-  commands, or documented CI-only reasons.
+- `qaCiJobRegistry` maps CI jobs back to local `just` commands or documented
+  CI-only reasons.
 - `qaDomainCoverageRegistry` maps every command domain to focused/release/CI
   evidence, including `just` commands for promoted Rust gates, or a documented
   exception for investigation-only/manual domains.
 - `tests/scripts/quality/qa-command-registry.test.ts` keeps those registries
-  aligned with `package.json` and CI workflows.
+  aligned with `justfile` and CI workflows.
 - `tests/config/fixture-site-matrix.test.ts` keeps the minimal external site
   fixture and maintained starter roots aligned with required content,
   public-file, redirect, and theme coverage.
-- `bun run starters:check` verifies starter source files, parseable config,
+- `just starters-check` verifies starter source files, parseable config,
   site-doctor compatibility, declared checks, and TPM branding leakage.
 - `scripts/quality/qa-failure-probes.ts` records intentional bad-input probes
   for source, generated-output, layout, citation, config, and payload budget
@@ -174,8 +174,8 @@ The remaining implementation work should:
 
 ## Verification
 
-This design is grounded in the current `package.json` scripts,
-`scripts/testing/*`, `scripts/quality/run-quality.ts`,
+This design is grounded in the current `justfile`,
+`scripts/testing/*`, `scripts/quality/*`,
 `tests/fixtures/site-instance/`, `examples/docs-site/`, `src/catalog/`, and the
 existing performance and component-audit docs. Before implementation starts,
 developers should re-check those files if the script surface changes.

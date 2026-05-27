@@ -373,7 +373,10 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
-    use super::run_image_asset_verification;
+    use super::{
+        display_path, fnv64, glob_matches, image_is_under, is_image_path, load_ignore_patterns,
+        relative_path, run_image_asset_verification, wildcard_matches,
+    };
     use crate::{OperationInterface, OperationStatus};
 
     fn temp_workspace(name: &str) -> PathBuf {
@@ -469,6 +472,71 @@ mod tests {
                 .diagnostics()
                 .iter()
                 .all(|diagnostic| diagnostic.code().as_str() != "TPM-MEDIA-IMAGE-LOCATION")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn image_operation_reports_workspace_failure() {
+        let result = run_image_asset_verification(
+            PathBuf::from("/tmp/tpm-media-missing-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-MEDIA-WORKSPACE")
+        );
+    }
+
+    #[test]
+    fn image_helpers_cover_globs_extensions_and_display_paths() -> Result<(), Box<dyn Error>> {
+        assert!(is_image_path(Path::new("photo.JPG")));
+        assert!(is_image_path(Path::new("icon.svg")));
+        assert!(!is_image_path(Path::new("article.md")));
+        assert!(image_is_under("site/assets/photo.jpg", "site/assets"));
+        assert!(!image_is_under("site/public/photo.jpg", "site/assets"));
+        assert!(glob_matches("site/assets/hero.jpg", "site/assets/hero.jpg"));
+        assert!(glob_matches(
+            "examples/**/assets/*.svg",
+            "examples/demo/assets/hero.svg"
+        ));
+        assert!(glob_matches("site/assets/hero.???", "site/assets/hero.jpg"));
+        assert!(!glob_matches(
+            "site/assets/*.jpg",
+            "site/assets/nested/hero.jpg"
+        ));
+        assert!(wildcard_matches(b"hero.*", b"hero.jpg"));
+        assert!(!wildcard_matches(b"hero.?", b"hero.jpeg"));
+        assert_eq!(display_path(Path::new("")), ".");
+        assert_eq!(
+            relative_path(
+                Path::new("/workspace"),
+                Path::new("/workspace/site/assets/a.png")
+            ),
+            "site/assets/a.png"
+        );
+        assert_eq!(fnv64(b"same"), fnv64(b"same"));
+
+        let root = temp_workspace("helpers");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("scripts/invalid-ignore.json"), b"not-json")?;
+        write_file(
+            &root.join("scripts/valid-ignore.json"),
+            br#"["site/public/**"]"#,
+        )?;
+
+        assert!(load_ignore_patterns(&root, "scripts/missing.json").is_empty());
+        assert!(load_ignore_patterns(&root, "scripts/invalid-ignore.json").is_empty());
+        assert_eq!(
+            load_ignore_patterns(&root, "scripts/valid-ignore.json"),
+            vec![String::from("site/public/**")]
         );
 
         let _ = fs::remove_dir_all(root);

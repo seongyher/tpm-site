@@ -58,14 +58,29 @@ export function formatRandomizedTestFailure(
 }
 
 /**
- * Builds one seeded `test:unit` command.
+ * Builds one seeded unit-test command.
  *
  * @param seed Bun test randomization seed.
- * @returns Command that reuses the repository's canonical unit-test script.
+ * @returns Command matching the `just test-unit` recipe.
  */
 export function randomizedUnitTestCommand(seed: number): RandomizedTestCommand {
   return {
-    args: ["--silent", "run", "test:unit", "--", "--seed", String(seed)],
+    args: [
+      "test",
+      "tests/config",
+      "tests/eslint",
+      "tests/src",
+      "tests/types",
+      "tests/lib",
+      "tests/scripts",
+      "tests/components",
+      "tests/pages",
+      "--reporter=dots",
+      "--randomize",
+      "--concurrent",
+      "--seed",
+      String(seed),
+    ],
     label: `Randomized unit tests seed ${seed}`,
     seed,
   };
@@ -225,8 +240,8 @@ function testSeed(): number {
 }
 
 function usage(): string {
-  return `Usage: bun --silent run test:flake -- [runs]
-       bun --silent run test:flake -- --runs <runs>
+  return `Usage: just test-flake [runs]
+       just test-flake --runs <runs>
 
 Run unit tests in N randomized orders. Passing attempts stay silent. The first
 failure prints the attempt number, seed, command, and captured test output.`;

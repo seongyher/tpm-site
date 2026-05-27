@@ -93,7 +93,7 @@ export function runComponentCatalogCli(
   rootDir = process.cwd(),
 ): number {
   if (args.includes("--help") || args.includes("-h")) {
-    console.log(`Usage: bun run catalog:check [--quiet]
+    console.log(`Usage: just catalog-check [--quiet]
 
 Verify that every public component in src/components has either a catalog
 example or a documented ignore reason.`);

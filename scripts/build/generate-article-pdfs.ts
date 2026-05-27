@@ -846,7 +846,7 @@ function toPosix(file: string): string {
 }
 
 function usage(): string {
-  return `Usage: bun run build:pdf [--dir <dir>] [--articles <dir>] [--quiet]
+  return `Usage: just build-pdf [--dir <dir>] [--articles <dir>] [--quiet]
 
 Generate same-directory static article PDFs from an already-built Astro dist
 directory.

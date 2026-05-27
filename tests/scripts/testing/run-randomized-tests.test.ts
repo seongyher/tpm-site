@@ -18,7 +18,7 @@ describe("randomized test runner", () => {
 
       expect(exitCode).toBe(0);
       expect(String(log.mock.calls[0]?.[0])).toContain(
-        "Usage: bun --silent run test:flake",
+        "Usage: just test-flake",
       );
     } finally {
       log.mockRestore();
@@ -54,12 +54,15 @@ describe("randomized test runner", () => {
     }
   });
 
-  test("builds seeded unit-test commands from the canonical package script", () => {
-    expect(randomizedUnitTestCommand(1234)).toEqual({
-      args: ["--silent", "run", "test:unit", "--", "--seed", "1234"],
-      label: "Randomized unit tests seed 1234",
-      seed: 1234,
-    });
+  test("builds seeded unit-test commands from the canonical just recipe behavior", () => {
+    const command = randomizedUnitTestCommand(1234);
+
+    expect(command.args).toContain("tests/config");
+    expect(command.args).toContain("--randomize");
+    expect(command.args).toContain("--concurrent");
+    expect(command.args.slice(-2)).toEqual(["--seed", "1234"]);
+    expect(command.label).toBe("Randomized unit tests seed 1234");
+    expect(command.seed).toBe(1234);
   });
 
   test("stays silent when every randomized attempt passes", async () => {
@@ -112,13 +115,14 @@ describe("randomized test runner", () => {
   });
 
   test("formats failures with command lines and captured output", () => {
-    expect(
-      formatRandomizedTestFailure(
-        failingResult(randomizedUnitTestCommand(99), "document is not defined"),
-        1,
-        10,
-      ),
-    ).toContain("$ bun --silent run test:unit -- --seed 99");
+    const report = formatRandomizedTestFailure(
+      failingResult(randomizedUnitTestCommand(99), "document is not defined"),
+      1,
+      10,
+    );
+
+    expect(report).toContain("$ bun test tests/config");
+    expect(report).toContain("--seed 99");
   });
 });
 

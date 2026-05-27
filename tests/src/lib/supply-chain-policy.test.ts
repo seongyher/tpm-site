@@ -6,9 +6,10 @@ import {
   assessSupplyChainPolicy,
   redactSecretLikeValues,
 } from "../../../src/lib/supply-chain-policy";
+import { parseJustRecipes } from "../../helpers/justfile";
 
-const packageScripts = packageScriptsFromPackageJson(
-  JSON.parse(readFileSync("package.json", "utf8")) as unknown,
+const availableCommands = new Set(
+  justRecipes(readFileSync("justfile", "utf8")),
 );
 const gitignoreText = readFileSync(".gitignore", "utf8");
 // Assemble provider-shaped fake tokens at runtime so these tests exercise the
@@ -20,9 +21,9 @@ const fakeOpenAiKey = ["sk", "-", "1".repeat(24)].join("");
 describe("supply-chain policy", () => {
   test("accepts current release security command ownership", () => {
     const assessment = assessSupplyChainPolicy({
+      availableCommands,
       gitignoreText,
       lockfilePresent: existsSync("bun.lock"),
-      packageScripts,
     });
 
     expect(assessment.diagnostics).toEqual([]);
@@ -33,7 +34,7 @@ describe("supply-chain policy", () => {
         workflowStages,
       })),
     ).toContainEqual({
-      command: "bun --silent run audit",
+      command: "just audit",
       id: "dependency-audit-high",
       workflowStages: ["pr", "release", "package-release", "starter-template"],
     });
@@ -41,13 +42,14 @@ describe("supply-chain policy", () => {
 
   test("reports missing release gates, lockfile, and ignored secret env files", () => {
     const assessment = assessSupplyChainPolicy({
+      availableCommands: new Set(["check"]),
       gitignoreText: "node_modules/\n",
       lockfilePresent: false,
-      packageScripts: { "check:release": "bun --silent run check" },
     });
 
     expect(assessment.diagnostics.map((diagnostic) => diagnostic.code)).toEqual(
       [
+        "security.release-security-command-missing",
         "security.release-security-command-missing",
         "security.release-security-command-missing",
         "security.secret-env-ignore-missing",
@@ -59,6 +61,7 @@ describe("supply-chain policy", () => {
 
   test("rejects secret-like public env names and generated output values", () => {
     const assessment = assessSupplyChainPolicy({
+      availableCommands,
       generatedOutputSamples: [
         {
           outputPath: "dist/index.html",
@@ -67,7 +70,6 @@ describe("supply-chain policy", () => {
       ],
       gitignoreText,
       lockfilePresent: true,
-      packageScripts,
       publicEnvNames: ["PUBLIC_ANALYTICS_TOKEN"],
     });
 
@@ -102,23 +104,6 @@ describe("supply-chain policy", () => {
   });
 });
 
-function packageScriptsFromPackageJson(value: unknown): Record<string, string> {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "scripts" in value &&
-    isStringRecord(value.scripts)
-  ) {
-    return value.scripts;
-  }
-
-  throw new Error("package.json must contain a string-valued scripts object.");
-}
-
-function isStringRecord(value: unknown): value is Record<string, string> {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    Object.values(value).every((entry) => typeof entry === "string")
-  );
+function justRecipes(justfile: string): string[] {
+  return parseJustRecipes(justfile);
 }

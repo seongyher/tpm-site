@@ -213,7 +213,7 @@ function declaredCheckIssues(
   }
 
   return checks.some(
-    (check) => check.includes(root) || check.includes("starters:check"),
+    (check) => check.includes(root) || check.includes("starters-check"),
   )
     ? []
     : [

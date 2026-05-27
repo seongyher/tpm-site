@@ -165,7 +165,7 @@ checks.
 ## Import Boundaries
 
 Extensions are expected to import platform APIs through `src/platform/*`
-entrypoints. `bun run platform:check` now has a narrow guardrail for future
+entrypoints. `just platform-check` now has a narrow guardrail for future
 extension source files under `extensions/` or `site/extensions/`:
 
 - local extension-relative imports are allowed;

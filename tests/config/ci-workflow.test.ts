@@ -28,10 +28,10 @@ describe("CI workflow", () => {
     const workflow = await readCiWorkflow();
     const build = jobBlock(workflow, "build");
 
-    expect(build).toContain("bun run build");
-    expect(build).toContain("bun run build:cloudflare");
-    expect(build).toContain("bun run verify");
-    expect(build).toContain("bun run validate:html");
+    expect(build).toContain("just build");
+    expect(build).toContain("just build-cloudflare");
+    expect(build).toContain("just verify");
+    expect(build).toContain("just validate-html");
     expect(build).toContain("actions/upload-artifact@v4");
     expect(build).toContain("name: verified-dist");
     expect(build).toContain("path: dist");
@@ -50,12 +50,12 @@ describe("CI workflow", () => {
       expect(job).toContain("actions/download-artifact@v4");
       expect(job).toContain("name: verified-dist");
       expect(job).toContain("path: dist");
-      expect(job).not.toContain("bun run build");
+      expect(job).not.toContain("just build");
     }
 
-    expect(browser).toContain("bun run test:e2e:built");
-    expect(accessibility).toContain("bun run test:a11y:built");
-    expect(lighthouse).toContain("bun run test:perf:built");
+    expect(browser).toContain("just test-e2e-built");
+    expect(accessibility).toContain("just test-a11y-built");
+    expect(lighthouse).toContain("just test-perf-built");
   });
 
   test("does not keep a GitHub Pages deploy job after Cloudflare cutover", async () => {
@@ -96,8 +96,8 @@ describe("CI workflow", () => {
     expect(deploy).not.toContain("environment:");
     expect(deploy).not.toContain("oven-sh/setup-bun@v2");
     expect(deploy).not.toContain("NPM_CONFIG_LEGACY_PEER_DEPS");
-    expect(deploy).not.toContain("bun run build");
-    expect(deploy).not.toContain("bun run verify");
-    expect(deploy).not.toContain("bun run validate:html");
+    expect(deploy).not.toContain("just build");
+    expect(deploy).not.toContain("just verify");
+    expect(deploy).not.toContain("just validate-html");
   });
 });

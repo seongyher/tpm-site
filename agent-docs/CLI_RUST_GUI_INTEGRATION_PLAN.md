@@ -605,7 +605,7 @@ Verification:
 
 - current Bun script and Rust operation agree;
 - mismatch reports are source-mapped and actionable;
-- package scripts are updated only after promotion.
+- `just` commands and docs are updated only after promotion.
 
 ### Stage 5: Adapter Contracts
 

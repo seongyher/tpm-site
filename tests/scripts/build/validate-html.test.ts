@@ -81,7 +81,14 @@ describe("HTML validation runner", () => {
 
     expect(exitCode).toBe(0);
     expect(runs).toHaveLength(1);
-    expect(runs[0]?.command).toBe("html-validate");
+    expect(runs[0]?.command).toBe(
+      path.join(
+        "/repo",
+        "node_modules",
+        ".bin",
+        process.platform === "win32" ? "html-validate.cmd" : "html-validate",
+      ),
+    );
     expect(runs[0]?.args).toContain("--max-warnings=0");
     expect(runs[0]?.args).toContain(
       path.join("/repo", "dist", "docs", "index.html"),

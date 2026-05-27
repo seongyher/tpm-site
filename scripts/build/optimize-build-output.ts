@@ -82,7 +82,7 @@ function readValueArg(args: string[], flag: string): string | undefined {
 }
 
 function usage(): string {
-  return `Usage: bun run build:optimize [--dir <dir>] [--quiet]
+  return `Usage: just build-optimize [--dir <dir>] [--quiet]
 
 Apply the production generated-output optimization stack to an existing static
 build directory. The production stack prunes disabled feature routes, runs

@@ -655,12 +655,15 @@ fn test_warning(code: &str, message: &str) -> Diagnostic {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::error::Error;
+    use std::fs;
+    use std::path::{Path, PathBuf};
 
     use super::{
         OPERATION_SCHEMA_VERSION, OperationInterface, OperationRequest, OperationResult,
         OperationStatus, OperationSummary, OperationTiming, run_release_inspect,
-        run_workspace_check, run_workspace_status, test_operation_id, test_warning,
+        run_workspace_check, run_workspace_doctor, run_workspace_status, test_operation_id,
+        test_warning,
     };
     use tpm_core::Severity;
     use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
@@ -685,14 +688,48 @@ mod tests {
             .join("tests/fixtures/rust-workspace")
     }
 
+    fn temp_workspace(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!("tpm-operations-{name}-{}", std::process::id()))
+    }
+
+    fn write_file(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
+    }
+
     #[test]
     fn operation_ids_reject_invalid_values() {
         assert_eq!(
             test_operation_id("workspace.status").as_str(),
             "workspace.status"
         );
-        assert!(super::OperationId::parse("Workspace Status").is_err());
-        assert!(super::OperationId::parse("workspace..status").is_err());
+        assert_eq!(
+            super::OperationId::parse("").err(),
+            Some(super::OperationIdError::Empty)
+        );
+        assert_eq!(
+            super::OperationIdError::Empty.to_string(),
+            "operation ID must not be empty"
+        );
+        assert_eq!(
+            super::OperationId::parse("workspace..status").err(),
+            Some(super::OperationIdError::EmptySegment)
+        );
+        assert_eq!(
+            super::OperationIdError::EmptySegment.to_string(),
+            "operation ID must not contain empty segments"
+        );
+        assert_eq!(
+            super::OperationId::parse("Workspace Status").err(),
+            Some(super::OperationIdError::InvalidCharacter)
+        );
+        assert_eq!(
+            super::OperationIdError::InvalidCharacter.to_string(),
+            "operation ID may only contain ASCII lowercase letters, numbers, dots, and hyphens"
+        );
     }
 
     #[test]
@@ -770,6 +807,12 @@ mod tests {
         let rendered = result.render_json_pretty()?;
 
         assert_eq!(result.schema_version(), OPERATION_SCHEMA_VERSION);
+        assert_eq!(result.request().interface(), OperationInterface::Test);
+        assert_eq!(
+            result.request().workspace(),
+            Some("tests/fixtures/rust-workspace")
+        );
+        assert_eq!(result.timing().duration_ms(), Some(7));
         assert_eq!(result.warnings().len(), 1);
         assert_eq!(rendered, expected.trim_end());
 
@@ -823,5 +866,50 @@ mod tests {
             result.warnings()[0].code().as_str(),
             "TPM-RELEASE-OUTPUT-MISSING"
         );
+    }
+
+    #[test]
+    fn release_inspect_counts_nested_output_artifacts() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("release-output");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(&root.join("dist/index.html"), "<!doctype html>")?;
+        write_file(
+            &root.join("dist/articles/example/index.html"),
+            "<!doctype html>",
+        )?;
+
+        let result = run_release_inspect(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "output artifacts: 2")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn operation_display_path_handles_empty_paths() {
+        assert_eq!(super::display_path(Path::new("")), ".");
+    }
+
+    #[test]
+    fn workspace_doctor_reports_missing_workspace() {
+        let result = run_workspace_doctor(
+            PathBuf::from("/tmp/tpm-missing-doctor-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert_eq!(result.request().operation_id().as_str(), "workspace.doctor");
     }
 }
