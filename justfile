@@ -23,12 +23,12 @@ fix: js-fix markdown-fix rust-fix
 # Run automatic JavaScript/TypeScript/Astro/Tailwind fixes.
 js-fix:
     bun --silent run fix
-    bun --silent run lint:packages:fix
+    ./node_modules/.bin/sort-package-json package.json
 
 # Run automatic Markdown/MDX formatting.
 markdown-fix:
     bun --silent run fix:markdown
-    bun --silent run lint:markdown:fix
+    ./node_modules/.bin/markdownlint-cli2 --fix
     bun --silent run fix:markdown
 
 # Run automatic Rust formatting and Clippy machine-applicable fixes.
