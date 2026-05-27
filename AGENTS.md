@@ -164,6 +164,24 @@ behavior until a later parity milestone explicitly promotes a Rust command.
   and compatibility planning.
 - `docs/DEPLOYMENT_ADAPTER_CONTRACT.md`: deploy target capability model and
   adapter expectations.
+- `docs/STUDIO_EDITING_SURFACES.md`: schema-driven editing, media, metadata,
+  preview, source-view, and extension-owned GUI surface design.
+- `docs/STUDIO_PROVIDER_CAPABILITY_MATRIX.md`: provider capability taxonomy,
+  unsupported-operation behavior, adapter sequencing, and runtime handoff.
+- `docs/STUDIO_PUBLISH_WORKFLOWS.md`: provider-backed publish, rollback,
+  credential, permission, audit, and release workflow design.
+- `docs/HEADLESS_STUDIO_CORE_CONTRACT.md`: shared studio operation core and
+  GUI/CLI/MCP/CI adapter contract.
+- `docs/STUDIO_PROGRESSIVE_ADOPTION_PATHS.md`: migration and upgrade paths
+  from simple local publishing to complex provider-backed workflows.
+- `docs/CLI_PRODUCT_CONTRACT.md`: future `tpm` CLI command language, output,
+  safety, workspace discovery, and product-contract design.
+- `docs/STUDIO_MCP_SAFETY_MODEL.md`: MCP resource/tool, permission,
+  plan/apply, redaction, and agent safety model.
+- `docs/STUDIO_PRODUCT_TEST_PLAN.md`: mocked-provider product test matrix for
+  studio workflows, accessibility, recovery, security, and provider failures.
+- `docs/STUDIO_PARITY_FIXTURE_STRATEGY.md`: GUI/CLI/MCP/CI parity fixture
+  strategy over shared studio operation results.
 - `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`: import/export and content
   preservation contracts.
 - `docs/LOCALIZATION_CONTRACTS.md`: locale and inclusive-defaults contracts.
