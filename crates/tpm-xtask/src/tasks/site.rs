@@ -1,5 +1,6 @@
 use std::fs;
 use std::io::{self, Write};
+use std::path::{Path, PathBuf};
 
 use serde_json::Value;
 use tpm_core::CommandExit;
@@ -321,15 +322,67 @@ where
     }
 }
 
+struct AstroTestStoreSyncReport {
+    bytes: u64,
+    destination: PathBuf,
+    source: PathBuf,
+}
+
+enum AstroTestStoreSync {
+    MissingSource { source: PathBuf },
+    Synced(AstroTestStoreSyncReport),
+}
+
+fn astro_test_store_paths(root: &Path) -> (PathBuf, PathBuf) {
+    (
+        root.join("node_modules/.astro/data-store.json"),
+        root.join(".astro/data-store.json"),
+    )
+}
+
+fn sync_astro_test_store_file(workspace: &Workspace) -> io::Result<AstroTestStoreSync> {
+    let (source, destination) = astro_test_store_paths(&workspace.root);
+    if !source.is_file() {
+        return Ok(AstroTestStoreSync::MissingSource { source });
+    }
+
+    if let Some(parent) = destination.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let bytes = fs::copy(&source, &destination)?;
+
+    Ok(AstroTestStoreSync::Synced(AstroTestStoreSyncReport {
+        bytes,
+        destination,
+        source,
+    }))
+}
+
 pub(super) fn sync_astro_test_store<W>(_args: NoArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    writeln!(
-        output,
-        "Astro content store sync is handled by `astro sync --force`."
-    )?;
-    Ok(CommandExit::Success)
+    let workspace = Workspace::discover()?;
+    match sync_astro_test_store_file(&workspace)? {
+        AstroTestStoreSync::Synced(report) => {
+            writeln!(
+                output,
+                "Synced Astro test content store: {} -> {} ({} bytes).",
+                relative_display(&workspace.root, &report.source),
+                relative_display(&workspace.root, &report.destination),
+                report.bytes
+            )?;
+            Ok(CommandExit::Success)
+        }
+        AstroTestStoreSync::MissingSource { source } => {
+            writeln!(
+                output,
+                "Astro production content store is missing at {}. Run `astro sync --force` before syncing the test store.",
+                relative_display(&workspace.root, &source)
+            )?;
+            Ok(CommandExit::Failure)
+        }
+    }
 }
 
 pub(super) fn payload_report<W>(

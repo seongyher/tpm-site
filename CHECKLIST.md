@@ -72,7 +72,7 @@ explicitly justified at the item.
       yet.
 - [x] Add useful examples or justified local exceptions for every new rustdoc
       failure.
-- [ ] Run Rust and release-relevant checks after the rustdoc policy change.
+- [x] Run Rust and release-relevant checks after the rustdoc policy change.
 
 ## Active Large-File Refactor Pass
 

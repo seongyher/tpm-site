@@ -914,6 +914,10 @@ fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(),
     )?;
     write_text(&root.join("package.json"), r#"{"scripts":{}}"#)?;
     write_text(&root.join("astro.config.ts"), "export default {};\n")?;
+    write_text(
+        &root.join("node_modules/.astro/data-store.json"),
+        r#"{"collections":true}"#,
+    )?;
     fs::create_dir_all(root.join("eslint"))?;
     write_text(&root.join("eslint.config.ts"), "export default [];\n")?;
     write_text(&root.join("knip.ts"), "export default {};\n")?;
@@ -1037,6 +1041,10 @@ fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(),
         let (exit, output) = run_text(command.clone());
         assert_eq!(exit, expected, "{command:?} output: {output}");
     }
+    assert_eq!(
+        fs::read_to_string(root.join(".astro/data-store.json"))?,
+        r#"{"collections":true}"#
+    );
 
     write_text(
         &root.join("site/config/site.json"),
@@ -1154,6 +1162,24 @@ fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(),
     let (exit, output) = run_text(vec!["validate-html", "--dir", "dist"]);
     assert_eq!(exit, CommandExit::Failure);
     assert!(output.contains("HTML validation failed"));
+
+    remove_test_dir(root);
+    Ok(())
+}
+
+#[test]
+fn sync_astro_test_store_reports_missing_production_store() -> Result<(), Box<dyn Error>> {
+    let _lock = lock_process_state();
+    let root = temp_workspace("sync-astro-test-store-missing");
+    remove_test_dir(&root);
+    fs::create_dir_all(&root)?;
+
+    let _cwd = CurrentDirGuard::enter(&root)?;
+    let (exit, output) = run_text(vec!["sync-astro-test-store"]);
+
+    assert_eq!(exit, CommandExit::Failure);
+    assert!(output.contains("node_modules/.astro/data-store.json"));
+    assert!(output.contains("astro sync --force"));
 
     remove_test_dir(root);
     Ok(())

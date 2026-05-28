@@ -245,19 +245,19 @@ APIs, but `rustdoc::missing_doc_code_examples` is unstable on Rust `1.95.0`.
 It cannot be a stable blocking lint until it stabilizes or the repo deliberately
 adds a separate custom documentation-examples checker.
 
-| Lint                                  | Decision                | Reason                                                                                                                                           |
-| ------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `rustdoc::bare_urls`                  | Already blocking        | Bare URLs should be rendered as explicit links.                                                                                                  |
-| `rustdoc::broken_intra_doc_links`     | Already blocking        | Broken internal documentation links make generated docs misleading.                                                                              |
-| `rustdoc::invalid_codeblock_attributes` | Enable now            | Invalid code-fence attributes usually mean examples or snippets will render/test incorrectly.                                                     |
-| `rustdoc::invalid_html_tags`          | Enable now              | Invalid HTML in docs should fail before publication.                                                                                             |
-| `rustdoc::invalid_rust_codeblocks`    | Enable now              | Rust code blocks in docs should parse or be explicitly marked as text/ignore/no_run when appropriate.                                             |
-| `rustdoc::missing_crate_level_docs`   | Enable now              | Every crate should explain its role in the workspace and future platform.                                                                        |
-| `rustdoc::missing_doc_code_examples`  | Not available on stable | The lint exists in rustdoc help but stable `1.95.0` rejects it as unstable. Revisit on toolchain upgrades or enforce through a custom checker.   |
-| `rustdoc::private_doc_tests`          | Do not enable globally  | Private doctest behavior is less useful while docs are built with `--document-private-items`; add targeted doctests where private examples help. |
-| `rustdoc::private_intra_doc_links`    | Enable now              | Public docs should not rely on private items as link targets.                                                                                    |
-| `rustdoc::redundant_explicit_links`   | Enable now              | Keeps docs easier to maintain by removing redundant explicit link targets.                                                                       |
-| `rustdoc::unescaped_backticks`        | Enable now              | Ambiguous backticks make docs render poorly and should be fixed early.                                                                           |
+| Lint                                    | Decision                | Reason                                                                                                                                           |
+| --------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `rustdoc::bare_urls`                    | Already blocking        | Bare URLs should be rendered as explicit links.                                                                                                  |
+| `rustdoc::broken_intra_doc_links`       | Already blocking        | Broken internal documentation links make generated docs misleading.                                                                              |
+| `rustdoc::invalid_codeblock_attributes` | Enable now              | Invalid code-fence attributes usually mean examples or snippets will render/test incorrectly.                                                    |
+| `rustdoc::invalid_html_tags`            | Enable now              | Invalid HTML in docs should fail before publication.                                                                                             |
+| `rustdoc::invalid_rust_codeblocks`      | Enable now              | Rust code blocks in docs should parse or be explicitly marked as text/ignore/no_run when appropriate.                                            |
+| `rustdoc::missing_crate_level_docs`     | Enable now              | Every crate should explain its role in the workspace and future platform.                                                                        |
+| `rustdoc::missing_doc_code_examples`    | Not available on stable | The lint exists in rustdoc help but stable `1.95.0` rejects it as unstable. Revisit on toolchain upgrades or enforce through a custom checker.   |
+| `rustdoc::private_doc_tests`            | Do not enable globally  | Private doctest behavior is less useful while docs are built with `--document-private-items`; add targeted doctests where private examples help. |
+| `rustdoc::private_intra_doc_links`      | Enable now              | Public docs should not rely on private items as link targets.                                                                                    |
+| `rustdoc::redundant_explicit_links`     | Enable now              | Keeps docs easier to maintain by removing redundant explicit link targets.                                                                       |
+| `rustdoc::unescaped_backticks`          | Enable now              | Ambiguous backticks make docs render poorly and should be fixed early.                                                                           |
 
 ### Recommended Rustdoc Additions
 
