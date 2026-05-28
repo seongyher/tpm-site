@@ -1421,12 +1421,13 @@ Current baseline commands:
 - `just test-perf`: run Lighthouse CI review.
 - `just starters-check`: verify starter templates and example site instances
   stay aligned with the starter registry and supported source contracts.
-- `just release-check`: run the blocking pre-release validation gate.
+- `just release-check`: run the blocking pre-release validation gate,
+  including Markdown/MDX style review.
 - `just quality-release`: run the heavy pre-release gate plus review-only
   signals.
 - `just fix`: run safe automatic fixes for code, config, Markdown, package
   ordering, and Rust.
-- `just review-markdown`: run non-blocking Markdown/MDX style feedback.
+- `just review-markdown`: run focused Markdown/MDX style feedback.
 - `just review-assets`: run non-blocking duplicate/unused image review
   feedback.
 - `just audit-all`: run dependency audit review across all severities.
@@ -1441,8 +1442,8 @@ just check
 ```
 
 This keeps mechanical formatting, import ordering, and safe lint autofixes out
-of the reasoning path. Markdown/MDX style is review-only; do not block author
-publishing on prose formatting if the content is valid and builds.
+of the reasoning path. Markdown/MDX style is part of the release handoff gate;
+use `just markdown-fix` for mechanical repairs before rerunning the check.
 
 If a check cannot be run, say so in the final handoff with the reason. Also
 report any coverage ignore annotations, coverage tool excludes, or `Coverage

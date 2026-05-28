@@ -55,7 +55,7 @@ used by browser-backed tests.
 | `just preview-fresh` | Build, then preview the current site.                                      |
 | `just check-fast`    | Run cheap high-signal source/config/registry checks.                       |
 | `just check`         | Run normal PR-quality validation plus fast Rust type checking.             |
-| `just release-check` | Run the full release gate used before handoff.                             |
+| `just release-check` | Run the full release gate used before handoff, including Markdown review.  |
 | `just fix`           | Run automatic JS/TS/Astro/Tailwind, Markdown/MDX, package, and Rust fixes. |
 
 ## Author And Site Checks
@@ -106,7 +106,7 @@ used by browser-backed tests.
 | `just coverage-ts`     | Run TypeScript/Astro coverage plus broad coverage accountability.   |
 | `just coverage-rust`   | Run Rust coverage with missing-line output when installed.          |
 | `just review-assets`   | Run duplicate and unused image review checks.                       |
-| `just review-markdown` | Run Markdown/MDX style review.                                      |
+| `just review-markdown` | Run focused Markdown/MDX style review.                              |
 
 ## Rust And CLI
 

@@ -28,7 +28,7 @@ check-fast: content-check tags-check site-doctor site-schema-check starters-chec
 check: check-fast typecheck lint format deadcode test rust-check-fast
 
 # Run the heavier pre-release validation path.
-release-check: test-accountability-release check docs-check test-catalog test-catalog-site-instance build-release payload-check verify validate-html test-e2e-built audit secrets rust-check
+release-check: test-accountability-release check review-markdown docs-check test-catalog test-catalog-site-instance build-release payload-check verify validate-html test-e2e-built audit secrets rust-check
 
 # Run all automatic fixes for JS/TS/Astro/Tailwind, Markdown/MDX, package ordering, and Rust.
 fix: js-fix markdown-fix rust-fix
@@ -408,7 +408,6 @@ quality:
 quality-release:
     just release-check
     -just review-assets
-    -just review-markdown
     -just test-a11y-built
     -just test-perf-built
     -just audit-all

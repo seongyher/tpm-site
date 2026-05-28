@@ -50,14 +50,14 @@ integration behavior that lower layers cannot prove.
 
 ### Current Placement
 
-| Placement            | Current commands                                                                                               | Intended use                                                                                      |
-| -------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Fast local           | `just check-fast`, focused `bun test`, focused `just test-astro`                                               | Cheap validation while editing; catches schema, source, and platform-contract failures early.     |
-| Normal local         | `just check`                                                                                                   | Default pre-handoff gate for most code changes.                                                   |
-| Focused built output | `just build`, `just verify`, `just validate-html`, focused `just test-e2e-built`                               | Used when a change touches output, layout, metadata, links, browser behavior, or generated files. |
-| Release blocking     | `just release-check`, `just payload-check`                                                                     | Full release gate for platform/site changes plus deterministic route-class payload/cache budgets. |
-| Review-only release  | `just quality-release` review steps: assets, markdown, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.     |
-| Investigation-only   | full-site Unlighthouse scans, ad hoc browser profiling, explicitly restored experiment harnesses               | Data collection for future budgets, experiments, and roadmap planning.                            |
+| Placement            | Current commands                                                                                     | Intended use                                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Fast local           | `just check-fast`, focused `bun test`, focused `just test-astro`                                     | Cheap validation while editing; catches schema, source, and platform-contract failures early.                      |
+| Normal local         | `just check`                                                                                         | Default pre-handoff gate for most code changes.                                                                    |
+| Focused built output | `just build`, `just verify`, `just validate-html`, focused `just test-e2e-built`                     | Used when a change touches output, layout, metadata, links, browser behavior, or generated files.                  |
+| Release blocking     | `just release-check`, `just payload-check`                                                           | Full release gate for platform/site changes, Markdown review, and deterministic route-class payload/cache budgets. |
+| Review-only release  | `just quality-release` review steps: assets, accessibility, Lighthouse, all-severity audit, coverage | Nonblocking signals that should be investigated and may become blocking after budgets mature.                      |
+| Investigation-only   | full-site Unlighthouse scans, ad hoc browser profiling, explicitly restored experiment harnesses     | Data collection for future budgets, experiments, and roadmap planning.                                             |
 
 ## Target Ownership Principles
 

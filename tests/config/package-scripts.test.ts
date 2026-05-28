@@ -186,6 +186,7 @@ describe("command surface", () => {
     expect(docsCheck).toContain("test-docs-site");
     expect(releaseCheck).toContain("build-release");
     expect(releaseCheck).toContain("docs-check");
+    expect(releaseCheck).toContain("review-markdown");
     expect(releaseCheck).toContain("payload-check");
     expect(releaseCheck).toContain("test-e2e-built");
     expect(releaseCheck).not.toContain("test-e2e ");
