@@ -281,6 +281,9 @@ export function createStudioPreviewRequest(
     (candidate) => candidate.id === options.domain,
   );
 
+  // Coverage note: `options.domain` is a closed `StudioEditableDomain` union.
+  // This guard catches registry drift if document descriptors ever fall out of
+  // sync with the type-level domain list.
   if (document === undefined) {
     throw new Error(`Missing studio editor document "${options.domain}".`);
   }

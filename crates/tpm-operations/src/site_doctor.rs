@@ -49,16 +49,20 @@ pub fn run_site_doctor(
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "site-doctor operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("site doctor operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("site doctor operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "site-doctor diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("site doctor diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("site doctor diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {

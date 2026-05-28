@@ -2,7 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -16,11 +16,15 @@ use tpm_operations::{
 };
 
 use crate::accountability::{format_test_accountability_report, verify_test_accountability};
-use crate::args::{value_arg, wants_help};
-use crate::command::{InternalTask, TaskParseResult};
+use crate::cli::args::{
+    DiagnosticsDiffArgs, DuplicateAssetsArgs, HtmlDirArgs, NoArgs, OperationArgs, OutputDirArgs,
+    QuietArgs, SchemaArgs, TestCatalogArgs, TestFlakeArgs, UnusedAssetsArgs,
+};
+use crate::cli::commands::XtaskCommand;
+use crate::cli::{compatibility::handle_compatibility, error::write_clap_error, parse_command};
 use crate::coverage::{format_coverage_inventory_report, verify_coverage_inventory};
 use crate::frontmatter::Frontmatter;
-use crate::operation_adapter::{parse_operation_task_options, write_operation_result};
+use crate::operation_adapter::write_operation_result;
 use crate::redirects::{
     RedirectRule, format_redirects, normalize_redirect_path, with_trailing_slash,
 };
@@ -49,19 +53,6 @@ const RASTER_EXTENSIONS: &[&str] = &["avif", "gif", "jpeg", "jpg", "png", "webp"
 const CATALOG_OUTPUT_DIR: &str = "dist-catalog";
 const CATALOG_PLAYWRIGHT_SPEC: &str = "tests/e2e/catalog-invariants.pw.ts";
 
-const HELP: &str = "\
-tpm-xtask - internal repository automation for TPM development
-
-Usage:
-  tpm-xtask <task> [task options]
-  tpm-xtask --help
-
-This binary is internal plumbing for repository `just` recipes. It is not the
-user-facing `tpm` product CLI.
-
-Run `just --list` for supported developer workflows.
-";
-
 /// Runs the internal xtask command dispatcher.
 ///
 /// # Errors
@@ -70,254 +61,126 @@ Run `just --list` for supported developer workflows.
 pub fn run<I, S, W>(args: I, mut output: W) -> io::Result<CommandExit>
 where
     I: IntoIterator<Item = S>,
-    S: AsRef<str>,
+    S: Into<OsString>,
     W: Write,
 {
-    let args = args
-        .into_iter()
-        .map(|argument| argument.as_ref().to_owned())
-        .collect::<Vec<_>>();
+    let args = args.into_iter().map(Into::into).collect::<Vec<_>>();
 
-    match args.as_slice() {
-        [] => {
-            write!(output, "{HELP}")?;
-            Ok(CommandExit::UsageError)
-        }
-        [flag] if matches!(flag.as_str(), "--help" | "-h" | "help") => {
-            write!(output, "{HELP}")?;
-            Ok(CommandExit::Success)
-        }
-        [name, task_args @ ..] => run_task(name, task_args, &mut output),
+    if let Some(exit) = handle_compatibility(&args, &mut output)? {
+        return Ok(exit);
+    }
+
+    match parse_command(args) {
+        Ok(command) => run_active_task(command, &mut output),
+        Err(error) => write_clap_error(&error, &mut output),
     }
 }
 
-fn run_task<W>(name: &str, args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn run_active_task<W>(command: XtaskCommand, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    match InternalTask::parse(name) {
-        TaskParseResult::Active(task) => run_active_task(task, args, output),
-        TaskParseResult::Removed(task) => {
-            writeln!(
-                output,
-                "Task `{}` was retired during the Rust/just migration and is no longer part of the active command surface.",
-                task.name()
-            )?;
-            writeln!(
-                output,
-                "Use `just --list` for current commands, or restore this workflow explicitly before relying on it."
-            )?;
-            Ok(CommandExit::UsageError)
-        }
-        TaskParseResult::Unknown(name) => {
-            writeln!(output, "Unknown task `{name}`.")?;
-            Ok(CommandExit::UsageError)
-        }
+    let mut external_runner = SystemCommandRunner;
+
+    match command {
+        XtaskCommand::AssetsDuplicates(args) => assets_duplicates(&args, output),
+        XtaskCommand::AssetsLocations(args) => assets_locations(&args, output),
+        XtaskCommand::AssetsShared(args) => assets_shared(&args, output),
+        XtaskCommand::AssetsUnused(args) => assets_unused(&args, output),
+        XtaskCommand::BuildCloudflare(args) => build_cloudflare(&args, output),
+        XtaskCommand::BuildOptimize(args) => build_optimize(&args, output),
+        XtaskCommand::BuildRaw(args) => build_raw(&args, output, &mut external_runner),
+        XtaskCommand::CatalogCheck(args) => catalog_check(&args, output),
+        XtaskCommand::ContentCheck(args) => content_check(&args, output),
+        XtaskCommand::CoverageVerify(args) => coverage_verify(&args, output),
+        XtaskCommand::DiagnosticsDiff(args) => diagnostics_diff(args, output),
+        XtaskCommand::DocsReferences(args) => docs_references(&args, false, output),
+        XtaskCommand::DocsReferencesCheck(args) => docs_references(&args, true, output),
+        XtaskCommand::MigrationBaseline(args) => migration_baseline(args, output),
+        XtaskCommand::OutputVerify(args) => output_verify(args, output),
+        XtaskCommand::PayloadCheck(args) => payload_report(&args, true, output),
+        XtaskCommand::PayloadReport(args) => payload_report(&args, false, output),
+        XtaskCommand::PlatformCheck(args) => platform_check(&args, output),
+        XtaskCommand::QaRegistry(args) => qa_registry(args, output),
+        XtaskCommand::SiteSchema(args) => site_schema(args, false, output),
+        XtaskCommand::SiteSchemaCheck(args) => site_schema(args, true, output),
+        XtaskCommand::StartersCheck(args) => starters_check(&args, output),
+        XtaskCommand::SyncAstroTestStore(args) => sync_astro_test_store(args, output),
+        XtaskCommand::TagsCheck(args) => tags_check(&args, false, output),
+        XtaskCommand::TagsNormalize(args) => tags_check(&args, true, output),
+        XtaskCommand::TestAccountability(args) => test_accountability(&args, false, output),
+        XtaskCommand::TestAccountabilityRelease(args) => test_accountability(&args, true, output),
+        XtaskCommand::TestCatalog(args) => test_catalog(args, output, &mut external_runner),
+        XtaskCommand::TestFlake(args) => test_flake(&args, output, &mut external_runner),
+        XtaskCommand::ValidateHtml(args) => validate_html(&args, output, &mut external_runner),
+        XtaskCommand::Verify(args) => verify_generated_output(&args, output),
     }
 }
 
-fn run_active_task<W>(
-    task: InternalTask,
-    args: &[String],
-    output: &mut W,
-) -> io::Result<CommandExit>
+fn migration_baseline<W>(args: OperationArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    match task {
-        InternalTask::AssetsDuplicates => assets_duplicates(args, output),
-        InternalTask::AssetsLocations => assets_locations(args, output),
-        InternalTask::AssetsShared => assets_shared(args, output),
-        InternalTask::AssetsUnused => assets_unused(args, output),
-        InternalTask::BuildCloudflare => build_cloudflare(args, output),
-        InternalTask::BuildOptimize => build_optimize(args, output),
-        InternalTask::BuildRaw => build_raw(args, output),
-        InternalTask::CatalogCheck => catalog_check(args, output),
-        InternalTask::ContentCheck => content_check(args, output),
-        InternalTask::CoverageVerify => coverage_verify(args, output),
-        InternalTask::DiagnosticsDiff => diagnostics_diff(args, output),
-        InternalTask::DocsReferences => docs_references(args, false, output),
-        InternalTask::DocsReferencesCheck => docs_references(args, true, output),
-        InternalTask::MigrationBaseline => migration_baseline(args, output),
-        InternalTask::OutputVerify => output_verify(args, output),
-        InternalTask::PayloadCheck => payload_report(args, true, output),
-        InternalTask::PayloadReport => payload_report(args, false, output),
-        InternalTask::PlatformCheck => platform_check(args, output),
-        InternalTask::QaRegistry => qa_registry(args, output),
-        InternalTask::SiteSchema => site_schema(args, false, output),
-        InternalTask::SiteSchemaCheck => site_schema(args, true, output),
-        InternalTask::StartersCheck => starters_check(args, output),
-        InternalTask::SyncAstroTestStore => sync_astro_test_store(output),
-        InternalTask::TagsCheck => tags_check(args, false, output),
-        InternalTask::TagsNormalize => tags_check(args, true, output),
-        InternalTask::TestAccountability => test_accountability(args, false, output),
-        InternalTask::TestAccountabilityRelease => test_accountability(args, true, output),
-        InternalTask::TestCatalog => test_catalog(args, output),
-        InternalTask::TestFlake => test_flake(args, output),
-        InternalTask::ValidateHtml => validate_html(args, output),
-        InternalTask::Verify => verify_generated_output(args, output),
-    }
-}
-
-fn migration_baseline<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
-where
-    W: Write,
-{
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just migration-baseline [--site <path>] [--format <text|json|ndjson>]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
-    let options = match parse_operation_task_options(args) {
-        Ok(options) => options,
-        Err(error) => {
-            writeln!(output, "{error}")?;
-            return Ok(CommandExit::UsageError);
-        }
-    };
-
-    if !options.positionals.is_empty() {
-        writeln!(
-            output,
-            "Unexpected argument `{}`.",
-            options.positionals.join(" ")
-        )?;
-        return Ok(CommandExit::UsageError);
-    }
-
+    let options = args.into_options();
     let result = run_migration_baseline(options.site, OperationInterface::Ci);
     write_operation_result(&result, options.format, output)
 }
 
-fn qa_registry<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn qa_registry<W>(args: OperationArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just qa-registry [--site <path>] [--format <text|json|ndjson>]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
-    let options = match parse_operation_task_options(args) {
-        Ok(options) => options,
-        Err(error) => {
-            writeln!(output, "{error}")?;
-            return Ok(CommandExit::UsageError);
-        }
-    };
-
-    if !options.positionals.is_empty() {
-        writeln!(
-            output,
-            "Unexpected argument `{}`.",
-            options.positionals.join(" ")
-        )?;
-        return Ok(CommandExit::UsageError);
-    }
-
+    let options = args.into_options();
     let result = run_qa_registry(options.site, OperationInterface::Ci);
     write_operation_result(&result, options.format, output)
 }
 
-fn diagnostics_diff<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn diagnostics_diff<W>(args: DiagnosticsDiffArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just diagnostics-diff <expected.json> <actual.json> [--site <path>] [--format <text|json|ndjson>]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
-    let options = match parse_operation_task_options(args) {
-        Ok(options) => options,
-        Err(error) => {
-            writeln!(output, "{error}")?;
-            return Ok(CommandExit::UsageError);
-        }
-    };
-
-    let [expected, actual] = options.positionals.as_slice() else {
-        writeln!(
-            output,
-            "Expected exactly two snapshot paths: <expected.json> <actual.json>."
-        )?;
-        return Ok(CommandExit::UsageError);
-    };
-
+    let options = args.operation.into_options();
     let result = run_qa_diagnostic_diff(
         options.site,
-        PathBuf::from(expected),
-        PathBuf::from(actual),
+        args.expected,
+        args.actual,
         OperationInterface::Ci,
     );
     write_operation_result(&result, options.format, output)
 }
 
-fn output_verify<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn output_verify<W>(args: OperationArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just output-verify [--site <path>] [--format <text|json|ndjson>]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
-    let options = match parse_operation_task_options(args) {
-        Ok(options) => options,
-        Err(error) => {
-            writeln!(output, "{error}")?;
-            return Ok(CommandExit::UsageError);
-        }
-    };
-
-    if !options.positionals.is_empty() {
-        writeln!(
-            output,
-            "Unexpected argument `{}`.",
-            options.positionals.join(" ")
-        )?;
-        return Ok(CommandExit::UsageError);
-    }
-
+    let options = args.into_options();
     let result = run_generated_output_bridge(options.site, OperationInterface::Ci);
     write_operation_result(&result, options.format, output)
 }
 
-fn build_raw<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn build_raw<W, R>(
+    args: &OutputDirArgs,
+    _output: &mut W,
+    external_runner: &mut R,
+) -> io::Result<CommandExit>
 where
     W: Write,
+    R: ExternalCommandRunner,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just build-raw [--dir <dir>] [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let output_dir = output_dir_arg(args, &workspace)?;
+    let output_dir = output_dir_arg(args.dir.as_deref(), &workspace);
     let output_relative = relative_display(&workspace.root, &output_dir);
     let astro = local_binary(&workspace.root, "astro");
     let pagefind = local_binary(&workspace.root, "pagefind");
 
-    let build_exit = run_external(
+    let build_exit = external_runner.run(external_command(
         &astro,
         ["build", "--force"],
         &[(
             OsString::from("SITE_OUTPUT_DIR"),
             OsString::from(&output_relative),
         )],
-    )?;
+    ))?;
 
     if build_exit != CommandExit::Success {
         return Ok(build_exit);
@@ -336,24 +199,19 @@ where
         String::from("--glob"),
         glob_arg,
     ];
-    if args.iter().any(|arg| arg == "--quiet") {
+    if args.quiet {
         pagefind_args.insert(2, String::from("--quiet"));
     }
 
-    run_external_owned(&pagefind, &pagefind_args, &[])
+    external_runner.run(external_command(&pagefind, &pagefind_args, &[]))
 }
 
-fn build_optimize<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn build_optimize<W>(args: &OutputDirArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just build-optimize [--dir <dir>] [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let output_dir = output_dir_arg(args, &workspace)?;
+    let output_dir = output_dir_arg(args.dir.as_deref(), &workspace);
     if !output_dir.is_dir() {
         writeln!(
             output,
@@ -364,7 +222,7 @@ where
     }
 
     let removed = remove_unreferenced_astro_rasters(&output_dir)?;
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(
             output,
             "Optimized generated output: {removed} unreferenced Astro raster assets removed."
@@ -374,27 +232,19 @@ where
     Ok(CommandExit::Success)
 }
 
-fn build_cloudflare<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn build_cloudflare<W>(args: &OutputDirArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just build-cloudflare [--dir <dir>] [--quiet]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let output_dir = output_dir_arg(args, &workspace)?;
+    let output_dir = output_dir_arg(args.dir.as_deref(), &workspace);
     let redirects = collect_redirects(&workspace)?;
     let text = format_redirects(&redirects);
     fs::create_dir_all(&output_dir)?;
     let output_path = output_dir.join("_redirects");
     fs::write(&output_path, text)?;
 
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(
             output,
             "Wrote {} Cloudflare redirects to {}.",
@@ -406,17 +256,17 @@ where
     Ok(CommandExit::Success)
 }
 
-fn validate_html<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn validate_html<W, R>(
+    args: &HtmlDirArgs,
+    output: &mut W,
+    external_runner: &mut R,
+) -> io::Result<CommandExit>
 where
     W: Write,
+    R: ExternalCommandRunner,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just validate-html [--dir <dir>]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let output_dir = output_dir_arg(args, &workspace)?;
+    let output_dir = output_dir_arg(args.dir.as_deref(), &workspace);
     let config = workspace.site_config_json().unwrap_or(Value::Null);
     let targets = html_validation_targets(&config, &output_dir);
     let html_validate = local_binary(&workspace.root, "html-validate");
@@ -427,7 +277,7 @@ where
             .map(|target| target.to_string_lossy().into_owned()),
     );
 
-    let exit = run_external_owned(&html_validate, &command_args, &[])?;
+    let exit = external_runner.run(external_command(&html_validate, &command_args, &[]))?;
     if exit == CommandExit::Failure {
         writeln!(output, "HTML validation failed.")?;
     }
@@ -435,19 +285,14 @@ where
     Ok(exit)
 }
 
-fn content_check<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn content_check<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just content-check [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let result = verify_content(&workspace)?;
     if result.issues.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(
                 output,
                 "Content verification passed: {} published articles, {} drafts.",
@@ -464,16 +309,10 @@ where
     }
 }
 
-fn tags_check<W>(args: &[String], write: bool, output: &mut W) -> io::Result<CommandExit>
+fn tags_check<W>(args: &QuietArgs, write: bool, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just tags-check [--quiet]")?;
-        writeln!(output, "Usage: just tags-normalize [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let result = normalize_tags(&workspace, write)?;
     if !result.issues.is_empty() {
@@ -501,7 +340,7 @@ where
         return Ok(CommandExit::Success);
     }
 
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(
             output,
             "Article tag normalization passed: {} article files scanned.",
@@ -512,23 +351,14 @@ where
     Ok(CommandExit::Success)
 }
 
-fn site_schema<W>(args: &[String], check: bool, output: &mut W) -> io::Result<CommandExit>
+fn site_schema<W>(args: SchemaArgs, check: bool, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just site-schema [--output <path>] [--quiet]\nUsage: just site-schema-check [--output <path>] [--quiet]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let schema_path = value_arg(args, "--output").map_or_else(
-        || workspace.site.join("config/site.schema.json"),
-        PathBuf::from,
-    );
+    let schema_path = args
+        .output
+        .unwrap_or_else(|| workspace.site.join("config/site.schema.json"));
     let schema = fs::read_to_string(&schema_path)?;
     let parsed: Value = serde_json::from_str(&schema).map_err(io::Error::other)?;
     let ok = parsed
@@ -550,7 +380,7 @@ where
         fs::write(&schema_path, schema)?;
     }
 
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         let verb = if check { "current" } else { "written" };
         writeln!(
             output,
@@ -562,15 +392,10 @@ where
     Ok(CommandExit::Success)
 }
 
-fn starters_check<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn starters_check<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just starters-check [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let starters = workspace.root.join("examples/starters");
     let mut issues = Vec::new();
@@ -589,7 +414,7 @@ where
     }
 
     if issues.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(
                 output,
                 "Starter template verification passed: {count} starters checked."
@@ -605,15 +430,10 @@ where
     }
 }
 
-fn assets_locations<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn assets_locations<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just assets-locations [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let images = image_files(
         &workspace.root,
@@ -627,7 +447,7 @@ where
         .collect::<Vec<_>>();
 
     if violations.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(
                 output,
                 "Image asset location verification passed: {} image files scanned.",
@@ -648,18 +468,10 @@ where
     }
 }
 
-fn assets_duplicates<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn assets_duplicates<W>(args: &DuplicateAssetsArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just assets-duplicates [--quiet] [--fail-on-duplicates]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let scan_roots = [
         workspace.site.join("assets"),
@@ -669,7 +481,7 @@ where
     let ignores = load_ignore_list(&workspace.root, "scripts/duplicate-image-ignore.json")?;
     let groups = duplicate_image_groups(&workspace.root, &scan_roots, &ignores)?;
     if groups.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(output, "No duplicate images found.")?;
         }
         return Ok(CommandExit::Success);
@@ -684,27 +496,22 @@ where
         writeln!(output, "- {}", group.join(", "))?;
     }
 
-    if args.iter().any(|arg| arg == "--fail-on-duplicates") {
+    if args.fail_on_duplicates {
         Ok(CommandExit::Failure)
     } else {
         Ok(CommandExit::Success)
     }
 }
 
-fn assets_shared<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn assets_shared<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just assets-shared [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let references = collect_asset_references(&workspace)?;
     let violations = shared_asset_violations(&references);
     if violations.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(
                 output,
                 "No shared site assets found outside site/assets/shared ({} referenced assets scanned).",
@@ -728,18 +535,10 @@ where
     Ok(CommandExit::Failure)
 }
 
-fn assets_unused<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn assets_unused<W>(args: &UnusedAssetsArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just assets-unused [--quiet] [--fail-on-unused]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let ignores = load_ignore_list(&workspace.root, "scripts/unused-image-ignore.json")?;
     let images = image_files(&workspace.root, &workspace.site.join("assets"), &ignores)?;
@@ -753,7 +552,7 @@ where
         .collect::<Vec<_>>();
 
     if unused.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(output, "No unused site images found.")?;
         }
         return Ok(CommandExit::Success);
@@ -768,24 +567,19 @@ where
         writeln!(output, "- {image}")?;
     }
 
-    if args.iter().any(|arg| arg == "--fail-on-unused") {
+    if args.fail_on_unused {
         Ok(CommandExit::Failure)
     } else {
         Ok(CommandExit::Success)
     }
 }
 
-fn verify_generated_output<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn verify_generated_output<W>(args: &OutputDirArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just verify [--dir <dir>] [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let output_dir = output_dir_arg(args, &workspace)?;
+    let output_dir = output_dir_arg(args.dir.as_deref(), &workspace);
     let mut issues = Vec::new();
     require_file(&workspace.root, &output_dir.join("index.html"), &mut issues);
     require_file(&workspace.root, &output_dir.join("404.html"), &mut issues);
@@ -817,7 +611,7 @@ where
     }
 
     if issues.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(
                 output,
                 "Generated output verification passed: {} HTML files checked.",
@@ -834,20 +628,10 @@ where
     }
 }
 
-fn docs_references<W>(args: &[String], check: bool, output: &mut W) -> io::Result<CommandExit>
+fn docs_references<W>(args: &QuietArgs, check: bool, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        let command = if check {
-            "docs-references-check"
-        } else {
-            "docs-references"
-        };
-        writeln!(output, "Usage: just {command} [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let reference = workspace.root.join("docs/generated/platform-reference.md");
     if !reference.is_file() {
@@ -862,7 +646,7 @@ where
         let existing = fs::read_to_string(&reference)?;
         fs::write(&reference, existing)?;
     }
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(
             output,
             "Generated platform reference is current at {}.",
@@ -872,15 +656,10 @@ where
     Ok(CommandExit::Success)
 }
 
-fn catalog_check<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn catalog_check<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just catalog-check [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let catalog_docs = workspace.root.join("docs/components");
     let component_root = workspace.root.join("src/components");
@@ -893,7 +672,7 @@ where
         )?;
         return Ok(CommandExit::Failure);
     }
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(
             output,
             "Component catalog verification passed: {} components, {} docs.",
@@ -904,15 +683,10 @@ where
     Ok(CommandExit::Success)
 }
 
-fn platform_check<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn platform_check<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just platform-check [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let files = collect_files_with_extensions(&workspace.root.join("src/platform"), &["ts"])?;
     let banned = [
@@ -935,7 +709,7 @@ where
         }
     }
     if issues.is_empty() {
-        if !args.iter().any(|arg| arg == "--quiet") {
+        if !args.quiet {
             writeln!(output, "Platform boundary verification passed.")?;
         }
         Ok(CommandExit::Success)
@@ -948,7 +722,7 @@ where
     }
 }
 
-fn sync_astro_test_store<W>(output: &mut W) -> io::Result<CommandExit>
+fn sync_astro_test_store<W>(_args: NoArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
@@ -959,18 +733,14 @@ where
     Ok(CommandExit::Success)
 }
 
-fn test_accountability<W>(args: &[String], release: bool, output: &mut W) -> io::Result<CommandExit>
+fn test_accountability<W>(
+    args: &QuietArgs,
+    release: bool,
+    output: &mut W,
+) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just test-accountability [--quiet]\nUsage: just test-accountability-release"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let result = verify_test_accountability(&workspace.root)?;
     let report = format_test_accountability_report(&result, release);
@@ -980,33 +750,29 @@ where
         return Ok(CommandExit::Failure);
     }
 
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(output, "{report}")?;
     }
 
     Ok(CommandExit::Success)
 }
 
-fn test_flake<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn test_flake<W, R>(
+    args: &TestFlakeArgs,
+    output: &mut W,
+    external_runner: &mut R,
+) -> io::Result<CommandExit>
 where
     W: Write,
+    R: ExternalCommandRunner,
 {
-    if wants_help(args) {
-        writeln!(
-            output,
-            "Usage: just test-flake [--runs <count>] [--seed <seed>]"
-        )?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let runs = value_arg(args, "--runs").unwrap_or_else(|| String::from("3"));
-    let seed = value_arg(args, "--seed").unwrap_or_else(|| String::from("random"));
     writeln!(
         output,
-        "Running randomized Bun test pass ({runs} runs, seed {seed})."
+        "Running randomized Bun test pass ({} runs, seed {}).",
+        args.runs, args.seed
     )?;
-    run_external_owned(
+    external_runner.run(external_command(
         Path::new("bun"),
         &[
             String::from("test"),
@@ -1021,34 +787,37 @@ where
             String::from("--randomize"),
         ],
         &[(OsString::from("PWD"), workspace.root.into_os_string())],
-    )
+    ))
 }
 
-fn test_catalog<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn test_catalog<W, R>(
+    args: TestCatalogArgs,
+    output: &mut W,
+    external_runner: &mut R,
+) -> io::Result<CommandExit>
 where
     W: Write,
+    R: ExternalCommandRunner,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just test-catalog [playwright args...]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let build = run_external_owned(
+    let build = external_runner.run(external_command(
         Path::new("just"),
         &[String::from("catalog-build")],
         &[(
             OsString::from("PWD"),
             workspace.root.clone().into_os_string(),
         )],
-    )?;
+    ))?;
     if build != CommandExit::Success {
         return Ok(build);
     }
-    let mut playwright_args = vec![String::from("test"), String::from(CATALOG_PLAYWRIGHT_SPEC)];
-    playwright_args.extend(args.iter().cloned());
+    let mut playwright_args = vec![
+        OsString::from("test"),
+        OsString::from(CATALOG_PLAYWRIGHT_SPEC),
+    ];
+    playwright_args.extend(args.extra_args);
     let playwright = local_binary(&workspace.root, "playwright");
-    let exit = run_external_owned(
+    let exit = external_runner.run(external_command(
         &playwright,
         &playwright_args,
         &[
@@ -1061,22 +830,17 @@ where
                 OsString::from(CATALOG_OUTPUT_DIR),
             ),
         ],
-    )?;
+    ))?;
     if exit != CommandExit::Success {
         writeln!(output, "Catalog tests failed.")?;
     }
     Ok(exit)
 }
 
-fn coverage_verify<W>(args: &[String], output: &mut W) -> io::Result<CommandExit>
+fn coverage_verify<W>(args: &QuietArgs, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        writeln!(output, "Usage: just coverage-verify [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
     let result = verify_coverage_inventory(&workspace.root)?;
     let report = format_coverage_inventory_report(&result);
@@ -1086,32 +850,19 @@ where
         return Ok(CommandExit::Failure);
     }
 
-    if !args.iter().any(|arg| arg == "--quiet") {
+    if !args.quiet {
         writeln!(output, "{report}")?;
     }
 
     Ok(CommandExit::Success)
 }
 
-fn payload_report<W>(args: &[String], check: bool, output: &mut W) -> io::Result<CommandExit>
+fn payload_report<W>(args: &OutputDirArgs, check: bool, output: &mut W) -> io::Result<CommandExit>
 where
     W: Write,
 {
-    if wants_help(args) {
-        let command = if check {
-            "payload-check"
-        } else {
-            "payload-report"
-        };
-        writeln!(output, "Usage: just {command} [--dir <dir>] [--quiet]")?;
-        return Ok(CommandExit::Success);
-    }
-
     let workspace = Workspace::discover()?;
-    let dist = value_arg(args, "--dist").map_or_else(
-        || workspace.output.clone(),
-        |value| workspace.root.join(value),
-    );
+    let dist = output_dir_arg(args.dir.as_deref(), &workspace);
     if !dist.is_dir() {
         writeln!(
             output,
@@ -1192,6 +943,41 @@ struct AssetReference {
     source: String,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ExternalCommand {
+    args: Vec<OsString>,
+    envs: Vec<(OsString, OsString)>,
+    program: PathBuf,
+}
+
+trait ExternalCommandRunner {
+    fn run(&mut self, command: ExternalCommand) -> io::Result<CommandExit>;
+}
+
+struct SystemCommandRunner;
+
+impl ExternalCommandRunner for SystemCommandRunner {
+    fn run(&mut self, command: ExternalCommand) -> io::Result<CommandExit> {
+        run_external_owned(&command.program, &command.args, &command.envs)
+    }
+}
+
+fn external_command<P, A, S>(program: P, args: A, envs: &[(OsString, OsString)]) -> ExternalCommand
+where
+    P: AsRef<Path>,
+    A: IntoIterator<Item = S>,
+    S: AsRef<OsStr>,
+{
+    ExternalCommand {
+        args: args
+            .into_iter()
+            .map(|arg| arg.as_ref().to_os_string())
+            .collect(),
+        envs: envs.to_vec(),
+        program: program.as_ref().to_path_buf(),
+    }
+}
+
 fn absolutize(root: &Path, path: &Path) -> PathBuf {
     if path.is_absolute() {
         path.to_path_buf()
@@ -1200,10 +986,10 @@ fn absolutize(root: &Path, path: &Path) -> PathBuf {
     }
 }
 
-fn output_dir_arg(args: &[String], workspace: &Workspace) -> io::Result<PathBuf> {
-    value_arg(args, "--dir").map_or_else(
-        || Ok(workspace.output.clone()),
-        |value| Ok(absolutize(&workspace.root, Path::new(&value))),
+fn output_dir_arg(path: Option<&Path>, workspace: &Workspace) -> PathBuf {
+    path.map_or_else(
+        || workspace.output.clone(),
+        |value| absolutize(&workspace.root, value),
     )
 }
 
@@ -1214,8 +1000,12 @@ fn run_external<I, S>(
 ) -> io::Result<CommandExit>
 where
     I: IntoIterator<Item = S>,
-    S: AsRef<std::ffi::OsStr>,
+    S: AsRef<OsStr>,
 {
+    // Coverage note: this is the intentionally thin process-spawn boundary for
+    // repository tooling. Tests cover command planning and fake local binaries
+    // where practical; host command execution, inherited stdio, and OS process
+    // status failures are left to integration/release gates.
     let mut command = Command::new(program);
     command.args(args);
     for (key, value) in envs {
@@ -1233,16 +1023,23 @@ where
     })
 }
 
-fn run_external_owned(
+fn run_external_owned<S>(
     program: &Path,
-    args: &[String],
+    args: &[S],
     envs: &[(OsString, OsString)],
-) -> io::Result<CommandExit> {
+) -> io::Result<CommandExit>
+where
+    S: AsRef<OsStr>,
+{
     run_external(program, args, envs)
 }
 
 fn local_binary(root: &Path, binary: &str) -> PathBuf {
-    let executable = if cfg!(windows) {
+    local_binary_for_platform(root, binary, cfg!(windows))
+}
+
+fn local_binary_for_platform(root: &Path, binary: &str, windows: bool) -> PathBuf {
+    let executable = if windows {
         format!("{binary}.cmd")
     } else {
         binary.to_owned()
@@ -1968,25 +1765,46 @@ fn require_dir(root: &Path, path: &Path, issues: &mut Vec<String>) {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    #![expect(
+        clippy::expect_used,
+        reason = "task tests assert fixture commands, locks, and output contracts"
+    )]
+
+    use std::collections::{BTreeMap, BTreeSet, VecDeque};
+    use std::error::Error;
+    use std::ffi::OsString;
+    use std::fs;
+    use std::io;
+    use std::num::NonZeroUsize;
+    use std::path::{Path, PathBuf};
+    use std::sync::Mutex;
 
     use super::{
-        CATALOG_OUTPUT_DIR, CATALOG_PLAYWRIGHT_SPEC, glob_matches, quoted_or_parenthesized_values,
-        run, wildcard_matches,
+        AssetReference, CATALOG_OUTPUT_DIR, CATALOG_PLAYWRIGHT_SPEC, ExternalCommand,
+        ExternalCommandRunner, Workspace, absolutize, build_raw, collect_asset_references,
+        collect_files_with_extensions, collect_redirects, duplicate_image_groups, extension_in,
+        extension_is, fnv64, glob_matches, ignored_dir, ignored_path, image_files, is_inside,
+        load_ignore_list, local_binary, local_binary_for_platform, normalize_path_components,
+        normalize_tags, output_dir_arg, path_has_extension, quoted_or_parenthesized_values,
+        relative_display, remove_unreferenced_astro_rasters, require_dir, require_file,
+        resolve_asset_reference, run, shared_asset_violations, test_catalog, test_flake,
+        validate_html, verify_content, wildcard_matches,
     };
+    use crate::cli::args::{HtmlDirArgs, OutputDirArgs, TestCatalogArgs, TestFlakeArgs};
     use tpm_core::CommandExit;
+
+    static PROCESS_STATE_LOCK: Mutex<()> = Mutex::new(());
+
+    fn lock_process_state() -> std::sync::MutexGuard<'static, ()> {
+        PROCESS_STATE_LOCK
+            .lock()
+            .expect("process state lock should not be poisoned")
+    }
 
     fn run_text(args: Vec<&str>) -> (CommandExit, String) {
         let mut output = Vec::new();
-        let result = run(args, &mut output);
-        let exit = match result {
-            Ok(exit) => exit,
-            Err(error) => panic!("xtask test should not emit io errors: {error}"),
-        };
-        let text = match String::from_utf8(output) {
-            Ok(text) => text,
-            Err(error) => panic!("xtask output should be valid UTF-8: {error}"),
-        };
+        let exit = run(args, &mut output).expect("xtask test should not emit io errors");
+        let text = String::from_utf8(output).expect("xtask output should be valid UTF-8");
 
         (exit, text)
     }
@@ -1998,12 +1816,116 @@ mod tests {
             .into_owned()
     }
 
+    fn temp_workspace(name: &str) -> PathBuf {
+        let temp = std::env::temp_dir()
+            .canonicalize()
+            .unwrap_or_else(|_| std::env::temp_dir());
+        temp.join(format!("tpm-xtask-{name}-{}", std::process::id()))
+    }
+
+    fn write_text(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
+    }
+
+    fn write_bytes(path: &Path, contents: &[u8]) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    fn write_executable(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        use std::os::unix::fs::PermissionsExt;
+
+        write_text(path, contents)?;
+        let mut permissions = fs::metadata(path)?.permissions();
+        permissions.set_mode(0o755);
+        fs::set_permissions(path, permissions)?;
+        Ok(())
+    }
+
+    #[cfg(not(unix))]
+    fn write_executable(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        write_text(path, contents)
+    }
+
+    fn workspace(root: &Path) -> Workspace {
+        Workspace {
+            output: root.join("dist"),
+            root: root.to_path_buf(),
+            site: root.join("site"),
+        }
+    }
+
+    struct CurrentDirGuard {
+        previous: PathBuf,
+    }
+
+    impl CurrentDirGuard {
+        fn enter(path: &Path) -> Result<Self, Box<dyn Error>> {
+            let previous = std::env::current_dir()?;
+            std::env::set_current_dir(path)?;
+            Ok(Self { previous })
+        }
+    }
+
+    impl Drop for CurrentDirGuard {
+        fn drop(&mut self) {
+            let _ = std::env::set_current_dir(&self.previous);
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingExternalRunner {
+        commands: Vec<ExternalCommand>,
+        exits: VecDeque<CommandExit>,
+    }
+
+    impl RecordingExternalRunner {
+        fn with_exits(exits: impl IntoIterator<Item = CommandExit>) -> Self {
+            Self {
+                commands: Vec::new(),
+                exits: exits.into_iter().collect(),
+            }
+        }
+    }
+
+    impl ExternalCommandRunner for RecordingExternalRunner {
+        fn run(&mut self, command: ExternalCommand) -> io::Result<CommandExit> {
+            self.commands.push(command);
+            Ok(self.exits.pop_front().unwrap_or(CommandExit::Success))
+        }
+    }
+
+    fn os_args(args: &[OsString]) -> Vec<String> {
+        args.iter()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect()
+    }
+
+    fn os_envs(envs: &[(OsString, OsString)]) -> BTreeMap<String, String> {
+        envs.iter()
+            .map(|(key, value)| {
+                (
+                    key.to_string_lossy().into_owned(),
+                    value.to_string_lossy().into_owned(),
+                )
+            })
+            .collect()
+    }
+
     #[test]
     fn xtask_help_is_explicitly_internal() {
         let (exit, output) = run_text(vec!["--help"]);
 
         assert_eq!(exit, CommandExit::Success);
-        assert!(output.contains("internal repository automation"));
+        assert!(output.contains("Internal repository automation"));
         assert!(output.contains("not the\nuser-facing `tpm` product CLI"));
     }
 
@@ -2012,7 +1934,7 @@ mod tests {
         let (exit, output) = run_text(vec!["missing-task"]);
 
         assert_eq!(exit, CommandExit::UsageError);
-        assert!(output.contains("Unknown task `missing-task`."));
+        assert!(output.contains("unrecognized subcommand 'missing-task'"));
     }
 
     #[test]
@@ -2093,6 +2015,249 @@ mod tests {
     }
 
     #[test]
+    fn build_raw_plans_astro_and_pagefind_without_spawning_tools() -> Result<(), Box<dyn Error>> {
+        let _lock = lock_process_state();
+        let root = temp_workspace("build-raw-plan");
+        let _ = fs::remove_dir_all(&root);
+        write_text(
+            &root.join("site/config/site.json"),
+            r#"{"features":{"search":true,"tags":true}}"#,
+        )?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner = RecordingExternalRunner::default();
+
+        let exit = build_raw(
+            &OutputDirArgs {
+                dir: Some(PathBuf::from("custom-dist")),
+                quiet: true,
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Success);
+        assert_eq!(runner.commands.len(), 2);
+        assert_eq!(runner.commands[0].program, local_binary(&root, "astro"));
+        assert_eq!(os_args(&runner.commands[0].args), vec!["build", "--force"]);
+        assert_eq!(
+            os_envs(&runner.commands[0].envs).get("SITE_OUTPUT_DIR"),
+            Some(&String::from("custom-dist"))
+        );
+        assert_eq!(runner.commands[1].program, local_binary(&root, "pagefind"));
+        let pagefind_args = os_args(&runner.commands[1].args);
+        assert_eq!(pagefind_args[0], "--site");
+        assert_eq!(pagefind_args[1], root.join("custom-dist").to_string_lossy());
+        assert!(pagefind_args.contains(&String::from("--quiet")));
+        assert!(
+            pagefind_args
+                .iter()
+                .any(|arg| arg.contains("articles/**/*.html") && arg.contains("tags/**/*.html")),
+            "pagefind args: {pagefind_args:?}"
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn build_raw_skips_pagefind_when_astro_build_fails() -> Result<(), Box<dyn Error>> {
+        let _lock = lock_process_state();
+        let root = temp_workspace("build-raw-build-fails");
+        let _ = fs::remove_dir_all(&root);
+        write_text(
+            &root.join("site/config/site.json"),
+            r#"{"features":{"search":true}}"#,
+        )?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner = RecordingExternalRunner::with_exits([CommandExit::Failure]);
+
+        let exit = build_raw(
+            &OutputDirArgs {
+                dir: None,
+                quiet: false,
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Failure);
+        assert_eq!(runner.commands.len(), 1);
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn validate_html_plans_targets_and_reports_external_failures() -> Result<(), Box<dyn Error>> {
+        let _lock = lock_process_state();
+        let root = temp_workspace("validate-html-plan");
+        let _ = fs::remove_dir_all(&root);
+        write_text(
+            &root.join("site/config/site.json"),
+            r#"{"features":{"search":true},"routes":{"articles":"/writing/","search":"/find/"}}"#,
+        )?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner = RecordingExternalRunner::with_exits([CommandExit::Failure]);
+
+        let exit = validate_html(
+            &HtmlDirArgs {
+                dir: Some(PathBuf::from("public")),
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Failure);
+        assert_eq!(runner.commands.len(), 1);
+        assert_eq!(
+            runner.commands[0].program,
+            local_binary(&root, "html-validate")
+        );
+        let args = os_args(&runner.commands[0].args);
+        assert_eq!(args[0], "--max-warnings=0");
+        assert!(
+            args.iter()
+                .any(|arg| arg.ends_with("public/writing/index.html")),
+            "html-validate args: {args:?}"
+        );
+        assert!(
+            args.iter()
+                .any(|arg| arg.ends_with("public/find/**/*.html")),
+            "html-validate args: {args:?}"
+        );
+        assert_eq!(
+            String::from_utf8(output)?,
+            String::from("HTML validation failed.\n")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn test_catalog_plans_build_then_playwright_and_reports_failures() -> Result<(), Box<dyn Error>>
+    {
+        let _lock = lock_process_state();
+        let root = temp_workspace("catalog-plan");
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root)?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner =
+            RecordingExternalRunner::with_exits([CommandExit::Success, CommandExit::Failure]);
+
+        let exit = test_catalog(
+            TestCatalogArgs {
+                extra_args: vec![OsString::from("--project=chromium")],
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Failure);
+        assert_eq!(runner.commands.len(), 2);
+        assert_eq!(runner.commands[0].program, PathBuf::from("just"));
+        assert_eq!(os_args(&runner.commands[0].args), vec!["catalog-build"]);
+        assert_eq!(
+            os_envs(&runner.commands[0].envs).get("PWD"),
+            Some(&root.to_string_lossy().into_owned())
+        );
+        assert_eq!(
+            runner.commands[1].program,
+            local_binary(&root, "playwright")
+        );
+        assert_eq!(
+            os_args(&runner.commands[1].args),
+            vec![
+                String::from("test"),
+                String::from(CATALOG_PLAYWRIGHT_SPEC),
+                String::from("--project=chromium"),
+            ]
+        );
+        let playwright_env = os_envs(&runner.commands[1].envs);
+        assert_eq!(
+            playwright_env.get("PLATFORM_COMPONENT_CATALOG"),
+            Some(&String::from("true"))
+        );
+        assert_eq!(
+            playwright_env.get("SITE_OUTPUT_DIR"),
+            Some(&String::from(CATALOG_OUTPUT_DIR))
+        );
+        assert_eq!(String::from_utf8(output)?, "Catalog tests failed.\n");
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn test_catalog_stops_when_catalog_build_fails() -> Result<(), Box<dyn Error>> {
+        let _lock = lock_process_state();
+        let root = temp_workspace("catalog-build-fails");
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root)?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner = RecordingExternalRunner::with_exits([CommandExit::Failure]);
+
+        let exit = test_catalog(
+            TestCatalogArgs {
+                extra_args: Vec::new(),
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Failure);
+        assert_eq!(runner.commands.len(), 1);
+        assert!(output.is_empty());
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn test_flake_plans_randomized_bun_test_pass() -> Result<(), Box<dyn Error>> {
+        let _lock = lock_process_state();
+        let root = temp_workspace("flake-plan");
+        let _ = fs::remove_dir_all(&root);
+        fs::create_dir_all(&root)?;
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        let mut output = Vec::new();
+        let mut runner = RecordingExternalRunner::default();
+
+        let exit = test_flake(
+            &TestFlakeArgs {
+                runs: NonZeroUsize::new(5).unwrap_or(NonZeroUsize::MIN),
+                seed: String::from("seed-1"),
+            },
+            &mut output,
+            &mut runner,
+        )?;
+
+        assert_eq!(exit, CommandExit::Success);
+        assert_eq!(
+            String::from_utf8(output)?,
+            "Running randomized Bun test pass (5 runs, seed seed-1).\n"
+        );
+        assert_eq!(runner.commands.len(), 1);
+        assert_eq!(runner.commands[0].program, PathBuf::from("bun"));
+        let args = os_args(&runner.commands[0].args);
+        assert!(args.contains(&String::from("test")));
+        assert!(args.contains(&String::from("--randomize")));
+        assert!(args.contains(&String::from("tests/components")));
+        assert_eq!(
+            os_envs(&runner.commands[0].envs).get("PWD"),
+            Some(&root.to_string_lossy().into_owned())
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
     fn glob_and_wildcard_helpers_match_ignore_files() {
         assert!(glob_matches("site/assets/**/*.png", "site/assets/a/b.png"));
         assert!(!glob_matches("site/assets/*.png", "site/assets/a/b.png"));
@@ -2106,5 +2271,671 @@ mod tests {
             quoted_or_parenthesized_values("![alt](../assets/hero.png)")
                 .contains(&String::from("../assets/hero.png"))
         );
+    }
+
+    #[test]
+    fn workspace_path_and_filesystem_helpers_cover_policy_edges() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("workspace-helpers");
+        let _ = fs::remove_dir_all(&root);
+        let ws = workspace(&root);
+        write_text(&root.join("src/b.md"), "b")?;
+        write_text(&root.join("src/a.TS"), "a")?;
+        write_text(&root.join("src/nested/c.txt"), "c")?;
+        write_text(&root.join("src/target/ignored.ts"), "ignored")?;
+        write_text(
+            &root.join("scripts/ignore.json"),
+            r#"["src/nested/**", "src/*.tmp"]"#,
+        )?;
+
+        assert_eq!(absolutize(&root, Path::new("site")), root.join("site"));
+        assert_eq!(absolutize(&root, &root.join("site")), root.join("site"));
+        assert_eq!(output_dir_arg(None, &ws), root.join("dist"));
+        assert_eq!(
+            output_dir_arg(Some(Path::new("custom-dist")), &ws),
+            root.join("custom-dist")
+        );
+        assert!(
+            local_binary(&root, "astro")
+                .to_string_lossy()
+                .contains("node_modules/.bin/astro")
+        );
+        assert_eq!(
+            local_binary_for_platform(&root, "astro", false),
+            root.join("node_modules/.bin/astro")
+        );
+        assert_eq!(
+            local_binary_for_platform(&root, "astro", true),
+            root.join("node_modules/.bin/astro.cmd")
+        );
+        assert_eq!(relative_display(&root, &root.join("src/a.TS")), "src/a.TS");
+
+        let files = collect_files_with_extensions(&root.join("src"), &["ts", "md"])?;
+        let display = files
+            .iter()
+            .map(|file| relative_display(&root, file))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            display,
+            vec![String::from("src/a.TS"), String::from("src/b.md")]
+        );
+        assert!(collect_files_with_extensions(&root.join("missing"), &["ts"])?.is_empty());
+        assert!(extension_in(Path::new("photo.JPG"), &["jpg"]));
+        assert!(extension_is(Path::new("index.HTML"), "html"));
+        assert!(path_has_extension("site/assets/hero.WebP", &["webp"]));
+        assert!(ignored_dir(Path::new("node_modules")));
+        assert!(ignored_path("src/.secret/file.txt", &[]));
+        assert!(ignored_path(
+            "src/nested/c.txt",
+            &[String::from("src/nested/**")]
+        ));
+        assert_eq!(
+            load_ignore_list(&root, "scripts/ignore.json")?,
+            vec![String::from("src/nested/**"), String::from("src/*.tmp")]
+        );
+        assert!(load_ignore_list(&root, "scripts/missing.json")?.is_empty());
+
+        let mut issues = Vec::new();
+        require_file(&root, &root.join("missing.txt"), &mut issues);
+        require_dir(&root, &root.join("missing-dir"), &mut issues);
+        assert_eq!(issues.len(), 2);
+
+        assert!(is_inside(
+            &root.join("site/assets/hero.png"),
+            &root.join("site")
+        ));
+        assert_eq!(
+            normalize_path_components(Path::new("/root/site/../site/assets/./hero.png")),
+            PathBuf::from("/root/site/assets/hero.png")
+        );
+        assert_eq!(fnv64(b"same"), fnv64(b"same"));
+        assert_ne!(fnv64(b"same"), fnv64(b"different"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn redirect_collection_merges_configured_and_legacy_rules() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("redirects");
+        let _ = fs::remove_dir_all(&root);
+        let ws = workspace(&root);
+        write_text(
+            &root.join("site/config/redirects.json"),
+            r#"{"/memeculture": "/categories/culture/"}"#,
+        )?;
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            "---\nlegacyPermalink: /2015/11/03/essay\n---\nBody",
+        )?;
+        write_text(
+            &root.join("site/content/announcements/update.mdx"),
+            "---\nlegacyPermalink: /updates/old\n---\nBody",
+        )?;
+
+        let rules = collect_redirects(&ws)?;
+        let by_source = rules
+            .into_iter()
+            .map(|rule| (rule.source, rule.destination))
+            .collect::<BTreeMap<_, _>>();
+
+        assert_eq!(
+            by_source.get("/memeculture/"),
+            Some(&String::from("/categories/culture/"))
+        );
+        assert_eq!(
+            by_source.get("/2015/11/03/essay/"),
+            Some(&String::from("/articles/essay/"))
+        );
+        assert_eq!(
+            by_source.get("/updates/old/"),
+            Some(&String::from("/announcements/update/"))
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn content_verification_reports_author_tag_path_and_media_issues() -> Result<(), Box<dyn Error>>
+    {
+        let root = temp_workspace("content");
+        let _ = fs::remove_dir_all(&root);
+        let ws = workspace(&root);
+        write_text(
+            &root.join("site/content/authors/seong.md"),
+            "---\ndisplayName: Seong Young Her\naliases:\n  - Seong\n---\n",
+        )?;
+        write_text(
+            &root.join("site/content/authors/missing-name.md"),
+            "---\n---\n",
+        )?;
+        write_text(&root.join("site/content/categories/culture.json"), "{}")?;
+        write_text(
+            &root.join("site/content/categories/Bad Category.json"),
+            "{}",
+        )?;
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            "---\nauthor: Seong\ndraft: true\ntags:\n  - meme culture\n---\nBody",
+        )?;
+        write_text(
+            &root.join("site/content/articles/history/essay.md"),
+            "---\nauthor: Missing Person\ntags:\n  - Meme Culture\n  - meme/culture\n---\n![alt](image.png) trailing",
+        )?;
+        write_text(
+            &root.join("site/content/articles/Bad Category/Bad Slug!.md"),
+            "---\ntags:\n  - meme culture\n---\nBody",
+        )?;
+
+        let result = verify_content(&ws)?;
+        let issues = result.issues.join("\n");
+
+        assert_eq!(result.draft_count, 1);
+        assert_eq!(result.published_count, 2);
+        assert!(issues.contains("author metadata needs a displayName"));
+        assert!(issues.contains("category metadata filename stem is not URL-safe"));
+        assert!(issues.contains("duplicate article slug"));
+        assert!(issues.contains("article author `Missing Person` does not match"));
+        assert!(issues.contains("article needs an author"));
+        assert!(issues.contains("tag must be canonical"));
+        assert!(issues.contains("tag must not contain"));
+        assert!(issues.contains("Markdown image paragraph has trailing content"));
+        assert!(issues.contains("filename stem is not URL-safe"));
+        assert!(issues.contains("category folder is not URL-safe"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn tag_normalization_handles_dry_run_write_and_invalid_tags() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("tags");
+        let _ = fs::remove_dir_all(&root);
+        let ws = workspace(&root);
+        let article = root.join("site/content/articles/culture/essay.md");
+        write_text(
+            &article,
+            "---\ntitle: Example\ntags:\n  - Meme Culture\n  - meme culture\nsummary: Kept\n---\nBody",
+        )?;
+
+        let dry_run = normalize_tags(&ws, false)?;
+        assert_eq!(dry_run.scanned_files, 1);
+        assert_eq!(
+            dry_run.changed_files,
+            vec![String::from("site/content/articles/culture/essay.md")]
+        );
+        assert!(dry_run.issues.is_empty());
+        assert!(fs::read_to_string(&article)?.contains("- Meme Culture"));
+
+        let written = normalize_tags(&ws, true)?;
+        assert_eq!(written.changed_files.len(), 1);
+        let text = fs::read_to_string(&article)?;
+        assert!(text.contains("tags:\n  - \"meme culture\"\nsummary: Kept"));
+
+        write_text(&article, "---\ntags:\n  - meme/culture\n---\nBody")?;
+        let invalid = normalize_tags(&ws, true)?;
+        assert_eq!(invalid.issues.len(), 1);
+        assert!(invalid.issues[0].contains("tag must not contain"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn asset_reference_helpers_resolve_shared_unused_and_ignored_images()
+    -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("assets");
+        let _ = fs::remove_dir_all(&root);
+        let ws = workspace(&root);
+        write_bytes(&root.join("site/assets/hero.png"), b"hero")?;
+        write_bytes(&root.join("site/assets/shared/logo.png"), b"logo")?;
+        write_bytes(&root.join("site/assets/ignored.png"), b"ignored")?;
+        write_text(
+            &root.join("src/components/Hero.astro"),
+            r#"const hero = "/site/assets/hero.png";
+const logo = "@site/assets/shared/logo.png";"#,
+        )?;
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            r"![Hero](../../../assets/hero.png)",
+        )?;
+        write_text(
+            &root.join("scripts/unused-image-ignore.json"),
+            r#"["site/assets/ignored.png"]"#,
+        )?;
+
+        let references = collect_asset_references(&ws)?;
+        assert!(
+            references.iter().any(|reference| {
+                reference.asset == "site/assets/hero.png"
+                    && reference.source == "site/content/articles/culture/essay.md"
+            }),
+            "references: {references:?}"
+        );
+        assert!(
+            references.iter().any(|reference| {
+                reference.asset == "site/assets/shared/logo.png"
+                    && reference.source == "src/components/Hero.astro"
+            }),
+            "references: {references:?}"
+        );
+        assert_eq!(
+            resolve_asset_reference(
+                &ws,
+                &root.join("src/components/Hero.astro"),
+                "https://example.com/remote.png"
+            ),
+            None
+        );
+        assert_eq!(
+            resolve_asset_reference(
+                &ws,
+                &root.join("src/components/Hero.astro"),
+                "${dynamic}.png"
+            ),
+            None
+        );
+        assert_eq!(
+            shared_asset_violations(&[
+                AssetReference {
+                    asset: String::from("site/assets/hero.png"),
+                    source: String::from("a.md"),
+                },
+                AssetReference {
+                    asset: String::from("site/assets/hero.png"),
+                    source: String::from("b.md"),
+                },
+                AssetReference {
+                    asset: String::from("site/assets/shared/logo.png"),
+                    source: String::from("a.md"),
+                },
+                AssetReference {
+                    asset: String::from("site/assets/shared/logo.png"),
+                    source: String::from("b.md"),
+                },
+            ])
+            .keys()
+            .cloned()
+            .collect::<BTreeSet<_>>(),
+            BTreeSet::from([String::from("site/assets/hero.png")])
+        );
+
+        let ignored = load_ignore_list(&root, "scripts/unused-image-ignore.json")?;
+        assert_eq!(
+            image_files(&root, &root.join("site/assets"), &ignored)?,
+            vec![
+                String::from("site/assets/hero.png"),
+                String::from("site/assets/shared/logo.png")
+            ]
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn image_duplicate_and_optimizer_helpers_cover_review_paths() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("images");
+        let _ = fs::remove_dir_all(&root);
+        write_bytes(&root.join("site/assets/a.png"), b"same")?;
+        write_bytes(&root.join("site/assets/b.png"), b"same")?;
+        write_bytes(&root.join("site/assets/c.png"), b"different")?;
+        write_bytes(&root.join("site/unused-assets/parked.png"), b"same")?;
+        write_text(
+            &root.join("scripts/duplicate-image-ignore.json"),
+            r#"["site/unused-assets/**"]"#,
+        )?;
+
+        let groups = duplicate_image_groups(
+            &root,
+            &[root.join("site/assets"), root.join("site/unused-assets")],
+            &load_ignore_list(&root, "scripts/duplicate-image-ignore.json")?,
+        )?;
+        assert_eq!(
+            groups,
+            vec![vec![
+                String::from("site/assets/a.png"),
+                String::from("site/assets/b.png")
+            ]]
+        );
+
+        write_bytes(&root.join("dist/_astro/used.png"), b"used")?;
+        write_bytes(&root.join("dist/_astro/unused.png"), b"unused")?;
+        write_bytes(&root.join("dist/_astro/vector.svg"), b"<svg />")?;
+        write_text(
+            &root.join("dist/index.html"),
+            "<img src=\"/_astro/used.png\">",
+        )?;
+        write_text(&root.join("dist/_astro/app.js"), "console.log('used.png');")?;
+        let removed = remove_unreferenced_astro_rasters(&root.join("dist"))?;
+        assert_eq!(removed, 1);
+        assert!(root.join("dist/_astro/used.png").is_file());
+        assert!(!root.join("dist/_astro/unused.png").is_file());
+        assert!(root.join("dist/_astro/vector.svg").is_file());
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "broad repository command fixture covers the remaining process-planning paths until this legacy module is split further"
+    )]
+    fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(), Box<dyn Error>>
+    {
+        let _lock = PROCESS_STATE_LOCK
+            .lock()
+            .expect("process state lock should not be poisoned");
+        let root = temp_workspace("commands");
+        let _ = fs::remove_dir_all(&root);
+
+        write_text(
+            &root.join("site/config/site.json"),
+            r#"{"features":{"search":false}}"#,
+        )?;
+        write_text(
+            &root.join("site/config/site.schema.json"),
+            r#"{"title":"Site Config","properties":{}}"#,
+        )?;
+        write_text(
+            &root.join("site/config/redirects.json"),
+            r#"{"/old-category": "/categories/new-category/"}"#,
+        )?;
+        write_text(
+            &root.join("site/content/authors/seong.md"),
+            "---\ndisplayName: Seong Young Her\naliases:\n  - Seong\n---\n",
+        )?;
+        write_text(&root.join("site/content/categories/culture.json"), "{}")?;
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            "---\nauthor: Seong\ntags:\n  - meme culture\nlegacyPermalink: /2015/essay\n---\n![Hero](../../../assets/hero.png)",
+        )?;
+        write_bytes(&root.join("site/assets/hero.png"), b"hero")?;
+        write_bytes(&root.join("site/assets/duplicate-a.png"), b"same")?;
+        write_bytes(&root.join("site/assets/duplicate-b.png"), b"same")?;
+        write_text(
+            &root.join("src/components/Hero.astro"),
+            r#"const hero = "/site/assets/hero.png";"#,
+        )?;
+        write_text(
+            &root.join("src/platform/index.ts"),
+            "export const ok = true;\n",
+        )?;
+        write_text(
+            &root.join("docs/generated/platform-reference.md"),
+            "# Platform\n",
+        )?;
+        write_text(&root.join("docs/components/button.md"), "# Button\n")?;
+        write_text(
+            &root.join("src/components/Button.astro"),
+            "<button><slot /></button>",
+        )?;
+        write_text(&root.join("package.json"), r#"{"scripts":{}}"#)?;
+        write_text(&root.join("astro.config.ts"), "export default {};\n")?;
+        fs::create_dir_all(root.join("eslint"))?;
+        write_text(&root.join("eslint.config.ts"), "export default [];\n")?;
+        write_text(&root.join("knip.ts"), "export default {};\n")?;
+        write_text(&root.join("playwright.config.ts"), "export default {};\n")?;
+        write_text(&root.join("prettier.config.mjs"), "export default {};\n")?;
+        fs::create_dir_all(root.join("types"))?;
+        write_text(&root.join("scripts/coverage-exceptions.json"), "[]")?;
+        write_text(
+            &root.join("coverage/lcov.info"),
+            [
+                "SF:astro.config.ts",
+                "SF:eslint.config.ts",
+                "SF:knip.ts",
+                "SF:playwright.config.ts",
+                "SF:prettier.config.mjs",
+                "SF:src/components/Button.astro",
+                "SF:src/components/Hero.astro",
+                "SF:src/platform/index.ts",
+                "",
+            ]
+            .join("\n")
+            .as_str(),
+        )?;
+        write_text(&root.join("examples/starters/basic/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("examples/starters/basic/content"))?;
+        fs::create_dir_all(root.join("examples/starters/basic/assets"))?;
+        fs::create_dir_all(root.join("examples/starters/basic/public"))?;
+        write_text(
+            &root.join("dist/index.html"),
+            "<!doctype html><title>Home</title>",
+        )?;
+        write_text(
+            &root.join("dist/404.html"),
+            "<!doctype html><title>Missing</title>",
+        )?;
+        write_text(&root.join("dist/articles/index.html"), "<!doctype html>")?;
+        write_text(&root.join("dist/sitemap-index.xml"), "<sitemapindex />")?;
+        write_text(&root.join("dist/feed.xml"), "<rss />")?;
+        write_text(&root.join("dist/_redirects"), "/old /new 301\n")?;
+        write_bytes(&root.join("dist/_astro/unused.png"), b"unused")?;
+        let snapshot =
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"same","count":2}]"#;
+        write_text(&root.join("expected-diagnostics.json"), snapshot)?;
+        write_text(&root.join("actual-diagnostics.json"), snapshot)?;
+        write_text(&root.join("node_modules/.bin/astro"), "#!/bin/sh\nexit 0\n")?;
+        write_executable(&root.join("node_modules/.bin/astro"), "#!/bin/sh\nexit 0\n")?;
+        write_executable(
+            &root.join("node_modules/.bin/pagefind"),
+            "#!/bin/sh\nexit 0\n",
+        )?;
+        write_executable(
+            &root.join("node_modules/.bin/html-validate"),
+            "#!/bin/sh\nexit 0\n",
+        )?;
+
+        let _cwd = CurrentDirGuard::enter(&root)?;
+        for (command, expected) in [
+            (
+                vec!["migration-baseline", "--format", "json"],
+                CommandExit::Success,
+            ),
+            (
+                vec!["qa-registry", "--format", "json"],
+                CommandExit::Success,
+            ),
+            (
+                vec!["output-verify", "--format", "json"],
+                CommandExit::Success,
+            ),
+            (
+                vec![
+                    "diagnostics-diff",
+                    "expected-diagnostics.json",
+                    "actual-diagnostics.json",
+                    "--format",
+                    "json",
+                ],
+                CommandExit::Success,
+            ),
+            (vec!["content-check"], CommandExit::Success),
+            (vec!["tags-check"], CommandExit::Success),
+            (vec!["tags-normalize"], CommandExit::Success),
+            (vec!["site-schema-check"], CommandExit::Success),
+            (vec!["site-schema"], CommandExit::Success),
+            (vec!["starters-check"], CommandExit::Success),
+            (vec!["assets-locations"], CommandExit::Success),
+            (vec!["assets-shared"], CommandExit::Failure),
+            (vec!["assets-duplicates"], CommandExit::Success),
+            (
+                vec!["assets-duplicates", "--fail-on-duplicates"],
+                CommandExit::Failure,
+            ),
+            (vec!["assets-unused"], CommandExit::Success),
+            (
+                vec!["assets-unused", "--fail-on-unused"],
+                CommandExit::Failure,
+            ),
+            (vec!["verify", "--dir", "dist"], CommandExit::Success),
+            (vec!["docs-references-check"], CommandExit::Success),
+            (vec!["docs-references"], CommandExit::Success),
+            (vec!["catalog-check"], CommandExit::Success),
+            (vec!["platform-check"], CommandExit::Success),
+            (vec!["sync-astro-test-store"], CommandExit::Success),
+            (vec!["coverage-verify"], CommandExit::Success),
+            (
+                vec!["payload-report", "--dir", "dist"],
+                CommandExit::Success,
+            ),
+            (vec!["payload-check", "--dir", "dist"], CommandExit::Success),
+            (
+                vec!["build-cloudflare", "--dir", "dist"],
+                CommandExit::Success,
+            ),
+            (
+                vec!["build-optimize", "--dir", "dist"],
+                CommandExit::Success,
+            ),
+            (vec!["build-raw", "--dir", "dist"], CommandExit::Success),
+            (vec!["validate-html", "--dir", "dist"], CommandExit::Success),
+        ] {
+            let (exit, output) = run_text(command.clone());
+            assert_eq!(exit, expected, "{command:?} output: {output}");
+        }
+
+        write_text(
+            &root.join("site/config/site.json"),
+            r#"{"features":{"search":true}}"#,
+        )?;
+        let (exit, _output) = run_text(vec!["build-raw", "--dir", "dist", "--quiet"]);
+        assert_eq!(exit, CommandExit::Success);
+
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            "---\nauthor: Seong\ntags:\n  - Meme Culture\nlegacyPermalink: /2015/essay\n---\n![Hero](../../../assets/hero.png)",
+        )?;
+        let (exit, output) = run_text(vec!["tags-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Would update 1 article tag blocks"));
+        let (exit, output) = run_text(vec!["tags-normalize"]);
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("Updated 1 article tag blocks"));
+
+        write_text(
+            &root.join("src/components/Hero.astro"),
+            "export const noAsset = true;\n",
+        )?;
+        let (exit, output) = run_text(vec!["assets-shared"]);
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("No shared site assets found"));
+
+        write_text(
+            &root.join("scripts/duplicate-image-ignore.json"),
+            r#"["site/assets/duplicate-*.png"]"#,
+        )?;
+        let (exit, output) = run_text(vec!["assets-duplicates"]);
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("No duplicate images found"));
+
+        write_text(
+            &root.join("scripts/unused-image-ignore.json"),
+            r#"["site/assets/duplicate-*.png"]"#,
+        )?;
+        let (exit, output) = run_text(vec!["assets-unused"]);
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("No unused site images found"));
+
+        write_bytes(&root.join("loose.png"), b"loose")?;
+        let (exit, output) = run_text(vec!["assets-locations"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("outside site/assets"));
+
+        write_text(
+            &root.join("dist/index.html"),
+            r#"<a href="http://thephilosophersmeme.com/legacy/">legacy</a>"#,
+        )?;
+        let (exit, output) = run_text(vec!["verify", "--dir", "dist"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("generated HTML is missing a doctype"));
+        assert!(output.contains("insecure same-site URL"));
+
+        let (exit, output) = run_text(vec!["verify", "--dir", "missing"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("required file is missing"));
+
+        write_text(
+            &root.join("site/config/site.schema.json"),
+            r#"{"title":"Wrong","properties":{}}"#,
+        )?;
+        let (exit, output) = run_text(vec!["site-schema-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Site config schema is invalid"));
+
+        write_text(
+            &root.join("site/content/articles/culture/essay.md"),
+            "---\nauthor: Missing\ntags:\n  - Meme/Culture\n---\nBody",
+        )?;
+        let (exit, output) = run_text(vec!["content-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Content verification failed"));
+
+        let (exit, output) = run_text(vec!["tags-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Article tag normalization failed"));
+
+        write_text(
+            &root.join("src/platform/bad.ts"),
+            "export { Button } from \"../components/Button.astro\";\n",
+        )?;
+        let (exit, output) = run_text(vec!["platform-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Platform boundary verification failed"));
+
+        let (exit, output) = run_text(vec!["coverage-verify"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("unapproved coverage gap"));
+
+        fs::remove_file(root.join("docs/generated/platform-reference.md"))?;
+        let (exit, output) = run_text(vec!["docs-references-check"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Generated platform reference is missing"));
+
+        let (exit, output) = run_text(vec!["build-optimize", "--dir", "missing"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Build output directory does not exist"));
+
+        let (exit, output) = run_text(vec!["payload-check", "--dir", "missing"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("Build output directory not found"));
+
+        write_executable(&root.join("node_modules/.bin/astro"), "#!/bin/sh\nexit 1\n")?;
+        let (exit, _output) = run_text(vec!["build-raw", "--dir", "dist"]);
+        assert_eq!(exit, CommandExit::Failure);
+
+        write_executable(
+            &root.join("node_modules/.bin/html-validate"),
+            "#!/bin/sh\nexit 1\n",
+        )?;
+        let (exit, output) = run_text(vec!["validate-html", "--dir", "dist"]);
+        assert_eq!(exit, CommandExit::Failure);
+        assert!(output.contains("HTML validation failed"));
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn repository_accountability_tasks_cover_quiet_success_paths() -> Result<(), Box<dyn Error>> {
+        let _lock = PROCESS_STATE_LOCK
+            .lock()
+            .expect("process state lock should not be poisoned");
+        let root = PathBuf::from(repo_root());
+        let _cwd = CurrentDirGuard::enter(&root)?;
+
+        for command in [
+            vec!["test-accountability", "--quiet"],
+            vec!["test-accountability-release", "--quiet"],
+        ] {
+            let (exit, output) = run_text(command.clone());
+
+            assert_eq!(exit, CommandExit::Success, "{command:?} output: {output}");
+            assert!(output.is_empty());
+        }
+
+        Ok(())
     }
 }

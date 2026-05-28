@@ -75,6 +75,76 @@ describe("studio forms and previews", () => {
     });
   });
 
+  test("keeps code-only studio fields behind an explicit source-edit escape hatch", () => {
+    const article = requiredStudioDocument("article");
+    const codeOnlyField: StudioFieldDescriptor = {
+      diagnostics: ["content"],
+      editability: "code-only",
+      effects: ["route"],
+      fieldPath: "mdx.customWidget",
+      id: "mdx.customWidget",
+      input: "textarea",
+      label: "Custom widget",
+      owner: "author",
+      required: false,
+      source: article.source,
+    };
+    const document = {
+      ...article,
+      fields: [...article.fields, codeOnlyField],
+    };
+    const patch = {
+      fieldPath: "mdx.customWidget",
+      value: "<CustomWidget />",
+    };
+
+    const blocked = normalizeStudioFieldPatches(document, [patch]);
+    const allowed = normalizeStudioFieldPatches(document, [patch], {
+      allowCodeOnly: true,
+    });
+
+    expect(blocked).toMatchObject({
+      normalizedPatches: [],
+      unsupportedFields: ["mdx.customWidget"],
+    });
+    expect(blocked.diagnostics[0]).toMatchObject({
+      code: "content.studio-preview-unsupported",
+      location: { fieldPath: "mdx.customWidget" },
+    });
+    expect(allowed.normalizedPatches).toHaveLength(1);
+    expect(allowed.normalizedPatches[0]).toMatchObject({
+      fieldPath: "mdx.customWidget",
+      writeMode: "source-edit",
+    });
+  });
+
+  test("ignores invalid empty patch paths before mutating source objects", () => {
+    const article = requiredStudioDocument("article");
+    const emptyPathField: StudioFieldDescriptor = {
+      diagnostics: ["content"],
+      editability: "beginner",
+      effects: ["route"],
+      fieldPath: "",
+      id: "empty-path",
+      input: "text",
+      label: "Empty path",
+      owner: "author",
+      required: false,
+      source: article.source,
+    };
+    const result = normalizeStudioFieldPatches(
+      {
+        ...article,
+        fields: [...article.fields, emptyPathField],
+      },
+      [{ fieldPath: "", value: "Ignored" }],
+    );
+
+    expect(
+      applyStudioFieldPatches({ title: "Original" }, result.normalizedPatches),
+    ).toEqual({ title: "Original" });
+  });
+
   test("creates preview requests and responses from dirty editor state", () => {
     const request = createStudioPreviewRequest({
       artifacts: ["html", "metadata", "pdf"],

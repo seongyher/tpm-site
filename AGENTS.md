@@ -1375,13 +1375,10 @@ trusting exit-code parity alone.
 
 Before PR handoff, run the strongest relevant local gate and fix all automated
 failures. For normal code/config changes, run `just fix` when safe, then
-`just release-check`. For TypeScript, Astro, or Rust behavior changes, also run
-the matching coverage command (`just coverage-ts`, `just coverage-rust`, or
-aggregate `just coverage`), inspect any missing lines, and add meaningful tests
-or refactor weak seams before accepting a coverage exception. If a gate cannot
-run locally, retry with the appropriate permission when practical, then report
-the command, failure reason, and any narrower substitute checks in the final
-handoff.
+`just release-check`. For TypeScript, Astro, or Rust behavior changes, also
+follow the Coverage Policy before handoff. If a gate cannot run locally, retry
+with the appropriate permission when practical, then report the command,
+failure reason, and any narrower substitute checks in the final handoff.
 
 Current baseline commands:
 
@@ -1450,6 +1447,29 @@ publishing on prose formatting if the content is valid and builds.
 If a check cannot be run, say so in the final handoff with the reason. Also
 report any coverage ignore annotations, coverage tool excludes, or `Coverage
 note:` comments added or relied on during the change.
+
+## Coverage Policy
+
+Coverage is a pre-handoff requirement for Rust, TypeScript, and Astro behavior
+changes.
+
+- Run `just coverage-rust` for Rust changes.
+- Run `just coverage-ts` for TypeScript or Astro behavior changes.
+- Run `just coverage` for mixed Rust and TypeScript/Astro changes.
+- Inspect the missing-line output before handoff.
+- Add meaningful tests for uncovered behavior, edge cases, and failure modes.
+- If uncovered code is hard to test, first consider whether the design should
+  be refactored into smaller pure seams instead of accepting the gap.
+- Do not add brittle tests, test-only exports, weakened runtime code, or broad
+  ignores to satisfy coverage.
+- Coverage exceptions must be narrow, explicitly justified near the code or in
+  the coverage config, and reported in the final handoff.
+- Do not mark work done or ready for review while meaningful testable coverage
+  gaps remain.
+
+Final handoffs for code changes must state which coverage command ran, the
+important remaining gaps or exceptions, and why any remaining uncovered code is
+acceptable.
 
 ## Coding Policy
 
@@ -1699,6 +1719,9 @@ Final handoffs should include:
 
 - what changed;
 - which checks were run;
+- which coverage command ran for Rust, TypeScript, or Astro behavior changes;
+- any remaining coverage gaps, ignores, excludes, or `Coverage note:`
+  comments;
 - which checks were not run and why;
 - any remaining risks or follow-up work.
 

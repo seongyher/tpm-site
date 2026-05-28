@@ -215,6 +215,7 @@ describe("anchored disclosure controller", () => {
 
     installAnchoredDisclosure(runtimeFor(window));
 
+    expect(dispatchKeyboardEvent(window, "keydown", "Enter")).toBe(true);
     expect(dispatchKeyboardEvent(window, "keydown", "Escape")).toBe(true);
     expect(
       window.document.dispatchEvent(
@@ -224,6 +225,40 @@ describe("anchored disclosure controller", () => {
         }),
       ),
     ).toBe(true);
+    expect(
+      window.document.dispatchEvent(
+        new window.FocusEvent("focusin", {
+          bubbles: true,
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      window.document.dispatchEvent(
+        new window.FocusEvent("focusout", {
+          bubbles: true,
+        }),
+      ),
+    ).toBe(true);
+  });
+
+  test("ignores disclosure events that have no trigger or root contract", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <button id="outside">Outside</button>
+      <button id="orphan" data-disclosure-trigger aria-expanded="false">Orphan</button>
+    `;
+
+    const outside = requiredElement(window, "#outside");
+    const orphan = requiredElement(window, "#orphan");
+
+    installAnchoredDisclosure(runtimeFor(window));
+
+    expect(dispatchMouseEvent(outside, window, "click")).toBe(true);
+    expect(dispatchMouseEvent(orphan, window, "click")).toBe(true);
+    expect(dispatchFocusEvent(outside, window, "focusout")).toBe(true);
+    expect(orphan.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("coarse pointer link activation opens the disclosure instead of navigating", () => {

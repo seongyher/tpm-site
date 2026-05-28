@@ -458,16 +458,20 @@ fn diagnostic_diff_read_failure(
     )
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "QA operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("QA operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("QA operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "QA diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("QA diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("QA diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {
@@ -481,6 +485,11 @@ fn display_path(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "QA tests use fixture lookups whose presence is the asserted precondition"
+    )]
+
     use std::error::Error;
     use std::fs;
     use std::path::{Path, PathBuf};
@@ -567,10 +576,7 @@ mod tests {
             DiagnosticRecord::new("tool", "A", "warning", "same").with_count(3),
         ];
         let buckets = diagnostic_buckets(&records);
-        let bucket = buckets
-            .values()
-            .next()
-            .unwrap_or_else(|| panic!("bucket should exist"));
+        let bucket = buckets.values().next().expect("bucket should exist");
 
         assert_eq!(bucket.count, 5);
     }
@@ -747,6 +753,41 @@ mod tests {
                 .iter()
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ")
         );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
+    fn diagnostic_diff_operation_reports_actual_validation_failures() -> Result<(), Box<dyn Error>>
+    {
+        let root = temp_workspace("actual-validation-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("expected.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"ok"}]"#,
+        )?;
+        write_file(
+            &root.join("actual.json"),
+            r#"[{"tool":"tool","code":"A","severity":"warning","message":"","route":"/"}]"#,
+        )?;
+
+        let result = run_qa_diagnostic_diff(
+            &root,
+            root.join("expected.json"),
+            root.join("actual.json"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(result.diagnostics().diagnostics().iter().any(|diagnostic| {
+            diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ"
+                && diagnostic.message().contains("message must not be empty")
+        }));
 
         let _ = fs::remove_dir_all(root);
         Ok(())

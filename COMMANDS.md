@@ -103,8 +103,8 @@ used by browser-backed tests.
 | `just test-perf`       | Build, then run Lighthouse CI review.                               |
 | `just test-perf-built` | Run Lighthouse CI against existing built output.                    |
 | `just coverage`        | Run all coverage review signals.                                    |
-| `just coverage-ts`     | Run TypeScript/Astro coverage plus broad coverage accountability.    |
-| `just coverage-rust`   | Run Rust coverage with missing-line output when installed.           |
+| `just coverage-ts`     | Run TypeScript/Astro coverage plus broad coverage accountability.   |
+| `just coverage-rust`   | Run Rust coverage with missing-line output when installed.          |
 | `just review-assets`   | Run duplicate and unused image review checks.                       |
 | `just review-markdown` | Run Markdown/MDX style review.                                      |
 

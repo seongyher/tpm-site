@@ -7,7 +7,10 @@ import {
   type DeploymentReleaseArtifact,
   type DeploymentTargetConfig,
 } from "../../../src/lib/deployment-adapters";
-import { createOutputVerificationReport } from "../../../src/lib/output-verification";
+import {
+  createOutputDiagnostic,
+  createOutputVerificationReport,
+} from "../../../src/lib/output-verification";
 import {
   createReleaseGovernanceReport,
   formatReleaseGovernanceMarkdownReport,
@@ -172,5 +175,148 @@ describe("release governance", () => {
       severity: "error",
       source: "example-worker",
     });
+  });
+
+  test("formats empty releases and output verifier summaries explicitly", () => {
+    const report = createReleaseGovernanceReport({
+      changes: [],
+      deploymentResults: [],
+      outputVerification: createOutputVerificationReport([
+        createOutputDiagnostic({
+          category: "html",
+          code: "html.invalid",
+          message: "Broken | table\ncell.",
+          moduleId: "html-validate",
+          severity: "error",
+        }),
+        createOutputDiagnostic({
+          category: "metadata",
+          code: "metadata.preview-warning",
+          message: "Preview warning.",
+          moduleId: "metadata",
+          severity: "warning",
+        }),
+      ]),
+      releaseId: "release-empty",
+      title: "Custom Release Gate",
+      version: "0.6.0",
+    });
+    const markdown = formatReleaseGovernanceMarkdownReport(report);
+
+    expect(report.summary).toMatchObject({
+      blockingDiagnostics: 0,
+      breakingChanges: 0,
+      changeCount: 0,
+      deploymentStatuses: {},
+      outputErrors: 1,
+      outputWarnings: 1,
+    });
+    expect(markdown).toContain("# Custom Release Gate");
+    expect(markdown).toContain("No deployment adapter results supplied.");
+    expect(markdown).toContain("No release changes recorded.");
+    expect(markdown).toContain("- [ ] (required, developer)");
+  });
+
+  test("warns for deprecations without notes and sorts diagnostics deterministically", () => {
+    const diagnostics = releaseGovernanceDiagnostics({
+      changes: [
+        {
+          area: "metadata",
+          impact: "deprecation",
+          source: "site/content/articles/deprecated.md",
+          summary: "Deprecate a legacy metadata field.",
+        },
+        breakingRouteChange,
+      ],
+      deploymentResults: [],
+    });
+
+    expect(diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      "release.breaking-compatibility-note-missing",
+      "release.breaking-migration-note-missing",
+      "release.breaking-rollback-note-missing",
+      "release.deprecation-note-missing",
+    ]);
+    expect(diagnostics.at(-1)).toMatchObject({
+      severity: "warning",
+      source: "site/content/articles/deprecated.md",
+    });
+  });
+
+  test("sorts release report rows and escapes Markdown table cells deterministically", () => {
+    const report = createReleaseGovernanceReport({
+      changes: [
+        {
+          area: "metadata",
+          impact: "minor",
+          source: "site/content/articles/b.md",
+          summary: "Updates a value with | and\na newline.",
+        },
+        {
+          area: "metadata",
+          impact: "minor",
+          source: "site/content/articles/a.md",
+          summary: "Updates another value.",
+        },
+        {
+          area: "routes",
+          compatibilityNote: "Redirects stay in place.",
+          impact: "breaking",
+          migrationNote: "Regenerate route manifests.",
+          rollbackNote: "Restore the previous manifest.",
+          source: "src/lib/routes.ts",
+          summary: "Changes routes.",
+        },
+      ],
+      deploymentResults: [
+        createStaticFolderDeploymentPlan({
+          action: "publish",
+          mode: "dry-run",
+          releaseArtifact,
+          target: staticTarget,
+        }),
+      ],
+      releaseId: "release-sorted",
+      version: "0.7.0",
+    });
+    const markdown = formatReleaseGovernanceMarkdownReport(report);
+
+    expect(markdown.indexOf("site/content/articles/a.md")).toBeLessThan(
+      markdown.indexOf("site/content/articles/b.md"),
+    );
+    expect(markdown).toContain("Updates a value with \\| and a newline.");
+    expect(markdown).toContain(
+      "| local-export | static-folder | ok-with-warnings | 4 | 2 |",
+    );
+  });
+
+  test("formats sorted release diagnostics with escaped table cells", () => {
+    const report = createReleaseGovernanceReport({
+      changes: [
+        {
+          area: "metadata",
+          deprecationNote: "Legacy readers keep compatibility.",
+          impact: "deprecation",
+          source: "site/content/articles/deprecated.md",
+          summary: "Deprecate a metadata value.",
+        },
+        {
+          area: "routes",
+          impact: "breaking",
+          source: "src/lib/routes.ts",
+          summary: "Route message with | and\nnewline.",
+        },
+      ],
+      deploymentResults: [],
+      releaseId: "release-diagnostics",
+      version: "0.8.0",
+    });
+    const markdown = formatReleaseGovernanceMarkdownReport(report);
+
+    expect(markdown).toContain("| Severity | Code | Source | Message |");
+    expect(
+      markdown.indexOf("release.breaking-compatibility-note-missing"),
+    ).toBeLessThan(markdown.indexOf("release.breaking-migration-note-missing"));
+    expect(markdown).toContain("Route message with \\| and newline.");
   });
 });

@@ -141,6 +141,23 @@ mod tests {
                 .iter()
                 .any(|target| target.to_string_lossy().contains("articles/index.html"))
         );
+
+        let root_route_config = json!({
+            "features": {
+                "search": true
+            },
+            "routes": {
+                "articles": "/",
+                "search": "/"
+            }
+        });
+        let targets = html_validation_targets(&root_route_config, std::path::Path::new("dist"));
+        assert!(
+            targets
+                .iter()
+                .any(|target| target == std::path::Path::new("dist/index.html"))
+        );
+        assert!(pagefind_globs(&root_route_config).contains(&String::from("index.html")));
     }
 
     #[test]

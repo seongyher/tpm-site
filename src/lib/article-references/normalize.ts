@@ -610,10 +610,6 @@ function definitionFromBibtex(entry: ParsedBibtexEntry): {
     appendText(children, ".");
   }
 
-  if (children.length === 0) {
-    appendText(children, entry.key);
-  }
-
   return paragraphDefinition(children);
 }
 
@@ -706,7 +702,7 @@ function literalCitationContent(
       const url = normalizeBracketedUrl(bracketedUrl);
 
       appendText(children, "<");
-      appendLiteralCitationUrl(children, url, bracketedUrl);
+      appendLiteralCitationUrl(children, url);
       appendText(children, ">");
       cursor = index + raw.length;
       continue;
@@ -714,7 +710,7 @@ function literalCitationContent(
 
     const { trailing, url } = trimTrailingUrlPunctuation(raw);
 
-    appendLiteralCitationUrl(children, url, raw);
+    appendLiteralCitationUrl(children, url);
     appendText(children, trailing);
     cursor = index + raw.length;
   }
@@ -727,13 +723,7 @@ function literalCitationContent(
 function appendLiteralCitationUrl(
   children: ArticleReferenceInlineContent[],
   url: string,
-  fallbackText: string,
 ): void {
-  if (!isHttpUrl(url)) {
-    appendText(children, fallbackText);
-    return;
-  }
-
   appendLink(children, url, url);
 }
 
@@ -751,10 +741,6 @@ function trimTrailingUrlPunctuation(url: string): {
     trailing: url.slice(trimmedUrl.length),
     url: trimmedUrl,
   };
-}
-
-function isHttpUrl(value: string): boolean {
-  return /^https?:\/\/[^\s<>]+$/iu.test(value);
 }
 
 function paragraphDefinition(

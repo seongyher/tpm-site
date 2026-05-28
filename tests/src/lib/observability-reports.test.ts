@@ -141,28 +141,84 @@ describe("observability reports", () => {
           summary: "External provider warning.",
           url: "https://scanner.example/report?id=secret",
         }),
+        createObservabilityFinding({
+          category: "unknown",
+          confidence: "low",
+          fixability: "investigate",
+          noise: "unclear",
+          owner: "external",
+          severity: "info",
+          source: "manual",
+          summary: "Unmapped global warning.",
+        }),
       ],
       { routeRegistry },
     );
 
     expect(report.summary).toMatchObject({
       byDisposition: {
-        "needs-triage": 1,
+        "needs-triage": 2,
         noise: 2,
       },
       byRouteMatch: {
         external: 1,
+        unmapped: 1,
         "unknown-internal-route": 2,
       },
-      total: 3,
+      total: 4,
     });
     expect(report.findings.map((finding) => finding.disposition)).toEqual([
+      "needs-triage",
       "needs-triage",
       "noise",
       "noise",
     ]);
-    expect(report.findings[2]?.finding.url).toBe(
+    expect(report.findings[3]?.finding.url).toBe(
       "https://scanner.example/report/",
+    );
+  });
+
+  test("sorts same-route findings by source and summary before formatting", () => {
+    const report = createRouteLinkedObservabilityReport(
+      [
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          remediation: "Fix line one.\nThen retry.",
+          route: "/writing/example-post/",
+          severity: "warning",
+          source: "search-console",
+          summary: "Z warning.",
+        }),
+        createObservabilityFinding({
+          category: "links",
+          confidence: "high",
+          fixability: "source-edit",
+          noise: "actionable",
+          owner: "author",
+          providerCode: "broken|pipe",
+          remediation: "Update the URL.",
+          route: "/writing/example-post/",
+          severity: "warning",
+          source: "bing",
+          summary: "A | warning.",
+        }),
+      ],
+      { routeRegistry },
+    );
+
+    expect(report.findings.map((finding) => finding.finding.source)).toEqual([
+      "bing",
+      "search-console",
+    ]);
+    expect(formatRouteLinkedObservabilityMarkdownReport(report)).toContain(
+      "| warning | links | /writing/example-post/ (articles) | author | bing:broken\\|pipe | A \\| warning. | Update the URL. |",
+    );
+    expect(formatRouteLinkedObservabilityMarkdownReport(report)).toContain(
+      "Fix line one. Then retry.",
     );
   });
 

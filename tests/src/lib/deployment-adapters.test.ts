@@ -134,6 +134,68 @@ describe("deployment adapters", () => {
     ).toBe(true);
   });
 
+  test("allows execute deploys with scoped credential references", async () => {
+    const result = createCloudflareWorkersStaticAssetsDeploymentPlan({
+      action: "publish",
+      credentials: [
+        {
+          id: "cloudflare-production-token",
+          label: "Cloudflare production token",
+          scopes: ["deploy.publish"],
+        },
+      ],
+      headersText: await readFile("site/public/_headers", "utf8"),
+      mode: "execute",
+      redirectsText: formatCloudflareRedirects([]),
+      releaseArtifact: { ...releaseArtifact, redirectCount: 0 },
+      target,
+      wranglerConfig: parseCloudflareWorkersStaticAssetsConfig(
+        await readFile("wrangler.toml", "utf8"),
+      ),
+    });
+
+    expect(result.status).toBe("ok");
+    expect(
+      result.diagnostics.some(
+        (diagnostic) => diagnostic.code === "DEPLOY_CREDENTIAL_MISSING",
+      ),
+    ).toBe(false);
+  });
+
+  test("reports preview command and missing custom-domain warnings", async () => {
+    const result = createCloudflareWorkersStaticAssetsDeploymentPlan({
+      action: "preview",
+      credentials: [
+        {
+          id: "cloudflare-preview-token",
+          label: "Cloudflare preview token",
+          scopes: ["deploy.publish"],
+        },
+      ],
+      headersText: await readFile("site/public/_headers", "utf8"),
+      mode: "execute",
+      redirectsText: formatCloudflareRedirects([]),
+      releaseArtifact: { ...releaseArtifact, redirectCount: 0 },
+      target: { ...target, domains: [] },
+      wranglerConfig: parseCloudflareWorkersStaticAssetsConfig(
+        await readFile("wrangler.toml", "utf8"),
+      ),
+    });
+
+    expect(result.status).toBe("ok-with-warnings");
+    expect(result.providerReports).toContainEqual({
+      label: "command",
+      value: "wrangler dev",
+    });
+    expect(
+      result.diagnostics.some(
+        (diagnostic) =>
+          diagnostic.code === "DEPLOY_DOMAIN_NOT_CONFIGURED" &&
+          diagnostic.severity === "warning",
+      ),
+    ).toBe(true);
+  });
+
   test("reports provider config, cache, redirect, and rollback warnings", () => {
     const result = createCloudflareWorkersStaticAssetsDeploymentPlan({
       action: "rollback",
@@ -234,5 +296,50 @@ describe("deployment adapters", () => {
       ),
     ).toBe(true);
     expect(staticFolderDeploymentCapabilities.cachePurge).toBe("unsupported");
+  });
+
+  test("models static-folder rollback and present generated files", () => {
+    const result = createStaticFolderDeploymentPlan({
+      action: "rollback",
+      includesHeadersFile: true,
+      includesRedirectsFile: true,
+      mode: "dry-run",
+      releaseArtifact,
+      target: staticFolderTarget,
+    });
+
+    expect(result.status).toBe("ok-with-warnings");
+    expect(result.diagnostics.map((diagnostic) => diagnostic.code)).toEqual([
+      "DEPLOY_ROLLBACK_UNAVAILABLE",
+    ]);
+    expect(result.providerReports).toContainEqual({
+      label: "headersFile",
+      value: "present",
+    });
+    expect(result.providerReports).toContainEqual({
+      label: "redirectsFile",
+      value: "present",
+    });
+    expect(result.manualSteps.every((step) => !step.required)).toBe(true);
+  });
+
+  test("rejects incomplete or unsupported Wrangler static-asset config", () => {
+    expect(() =>
+      parseCloudflareWorkersStaticAssetsConfig(`
+        name = "missing-assets"
+        compatibility_date = "2026-05-08"
+      `),
+    ).toThrow('Missing required Wrangler config key "directory".');
+    expect(() =>
+      parseCloudflareWorkersStaticAssetsConfig(`
+        name = "bad-not-found"
+        compatibility_date = "2026-05-08"
+        [assets]
+        directory = "./dist"
+        not_found_handling = "redirect-everything"
+      `),
+    ).toThrow(
+      'Unsupported Cloudflare not_found_handling value "redirect-everything".',
+    );
   });
 });

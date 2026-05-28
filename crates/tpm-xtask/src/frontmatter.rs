@@ -75,19 +75,23 @@ fn strip_quotes(value: &str) -> &str {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "frontmatter tests assert a known-valid fixture parses"
+    )]
+
     use super::{Frontmatter, strip_quotes};
 
     #[test]
     fn parses_scalars_booleans_and_lists() {
         let frontmatter = Frontmatter::parse(
-            "---\ntitle: \"Example\"\ndraft: true\ntags:\n  - Philosophy\n  - memes\n---\nBody",
+            "---\ntitle: \"Example\"\ndraft: false\ntags:\n  - Philosophy\n\n  # comment\n  - memes\nsummary: End\n---\nBody",
         );
-        let Some(data) = frontmatter else {
-            panic!("frontmatter should parse");
-        };
+        let data = frontmatter.expect("frontmatter should parse");
 
         assert_eq!(data.scalar("title"), Some(String::from("Example")));
-        assert_eq!(data.bool_value("draft"), Some(true));
+        assert_eq!(data.bool_value("draft"), Some(false));
+        assert_eq!(data.bool_value("title"), None);
         assert_eq!(
             data.list("tags"),
             Some(vec![String::from("Philosophy"), String::from("memes")])

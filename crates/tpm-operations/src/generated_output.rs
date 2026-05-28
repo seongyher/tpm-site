@@ -50,6 +50,10 @@ pub fn run_generated_output_bridge(
                                 inventory.has_sitemap_index
                             ));
                     }
+                    // Coverage note: this branch depends on host filesystem
+                    // permission/read errors while walking `dist/`. Unit tests
+                    // cover successful inventory and missing-output behavior;
+                    // permission failures are retained as defensive IO handling.
                     Err(error) => diagnostics.push(
                         Diagnostic::new(
                             diagnostic_code("TPM-OUTPUT-SCAN"),
@@ -131,16 +135,20 @@ fn collect_output(dir: &Path, inventory: &mut OutputInventory) -> io::Result<()>
     Ok(())
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "generated-output operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("generated-output operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("generated-output operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "generated-output diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("generated-output diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("generated-output diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {
@@ -158,6 +166,9 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
+
     use super::{display_path, run_generated_output_bridge};
     use crate::{OperationInterface, OperationStatus};
 
@@ -171,6 +182,13 @@ mod tests {
         }
         fs::write(path, contents)?;
         Ok(())
+    }
+
+    #[cfg(unix)]
+    fn make_unreadable(path: &Path) -> Result<fs::Permissions, Box<dyn Error>> {
+        let original = fs::metadata(path)?.permissions();
+        fs::set_permissions(path, fs::Permissions::from_mode(0o000))?;
+        Ok(original)
     }
 
     #[test]
@@ -237,6 +255,34 @@ mod tests {
                 .details()
                 .iter()
                 .any(|detail| detail == "has _redirects: true")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn output_bridge_reports_dist_scan_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("scan-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        fs::create_dir_all(root.join("dist/unreadable"))?;
+        let original_permissions = make_unreadable(&root.join("dist/unreadable"))?;
+
+        let result = run_generated_output_bridge(&root, OperationInterface::Test);
+
+        fs::set_permissions(root.join("dist/unreadable"), original_permissions)?;
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-OUTPUT-SCAN")
         );
 
         let _ = fs::remove_dir_all(root);

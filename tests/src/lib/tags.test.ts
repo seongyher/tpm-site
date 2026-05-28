@@ -35,14 +35,27 @@ describe("tag helpers", () => {
       diagnostics: [],
       tags: ["memes", "digital art"],
     });
+    expect(normalizeTagList(["Meme History"])).toMatchObject({
+      changed: true,
+      tags: ["meme history"],
+    });
+    expect(normalizeTagList(["meme history"])).toMatchObject({
+      changed: false,
+      tags: ["meme history"],
+    });
   });
 
   test("keeps invalid slash tags as diagnostics for manual repair", () => {
-    expect(normalizeTagList(["/pol/"])).toMatchObject({
-      changed: false,
+    expect(normalizeTagList(["", "/pol/"])).toMatchObject({
+      changed: true,
       diagnostics: [
         {
           index: 0,
+          message: "tag must not be empty",
+          value: "",
+        },
+        {
+          index: 1,
           message: 'tag must not contain "/"',
           value: "/pol/",
         },

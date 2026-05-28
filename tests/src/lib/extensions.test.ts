@@ -58,7 +58,7 @@ describe("extension manifest contracts", () => {
           verifierRef: "article-pdf-output",
         },
       ],
-      id: "official.pdf",
+      id: "@official/pdf",
       kind: "optional-official",
       name: "Article PDF",
       permissions: ["generated.output.write"],
@@ -130,6 +130,17 @@ describe("extension manifest contracts", () => {
       "extension.dependency-self",
       "extension.conflict-self",
     ]);
+
+    const scoped = defineExtensionManifest({
+      ...manifest,
+      conflicts: [],
+      dependencies: [],
+      id: "@bad/scope/extra",
+    } satisfies ExtensionManifest);
+
+    expect(
+      validateExtensionManifest(scoped).map((error) => error.code),
+    ).toContain("extension.id-invalid");
   });
 
   test("requires capabilities and permissions for extension-owned surfaces", () => {
@@ -418,6 +429,11 @@ describe("extension manifest contracts", () => {
         fixtureMigratingImporterExtension,
         deprecated,
         fixtureCalloutExtension,
+        {
+          ...fixtureCalloutExtension,
+          id: "fixture.installable-callout",
+          name: "Fixture Installable Callout",
+        },
       ],
       {
         installed: ["fixture.legacy-importer", "fixture.deprecated-embed"],
@@ -438,5 +454,8 @@ describe("extension manifest contracts", () => {
       "deprecated",
     );
     expect(rowsById.get("fixture.callout")?.lifecycle).toBe("removed");
+    expect(rowsById.get("fixture.installable-callout")?.lifecycle).toBe(
+      "installable",
+    );
   });
 });

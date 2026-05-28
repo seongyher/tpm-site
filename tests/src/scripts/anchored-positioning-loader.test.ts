@@ -83,6 +83,70 @@ describe("anchored positioning loader", () => {
 
     expect(loadCalls.count).toBe(0);
   });
+
+  test("does not install twice on the same document", async () => {
+    const { document, loadCalls, scheduledTargets, window } = loaderFixture();
+    const trigger = requiredElement(document, "[data-anchor-trigger]");
+    const runtime = {
+      document: browserDocument(document),
+      loadAnchoredPositioning: loadCalls.load,
+      window: browserWindow(window),
+    };
+
+    installAnchoredPositioningLoader(runtime);
+    installAnchoredPositioningLoader(runtime);
+    trigger.dispatchEvent(
+      browserEvent(new window.Event("pointerdown", { bubbles: true })),
+    );
+    await flushAsyncTasks();
+
+    expect(loadCalls.count).toBe(1);
+    expect(scheduledTargets).toHaveLength(1);
+  });
+
+  test("uses timeout warmup when requestIdleCallback is unavailable", async () => {
+    const { document, loadCalls, scheduledTargets, window } = loaderFixture();
+    let timeoutCallback: (() => void) | undefined;
+
+    installAnchoredPositioningLoader({
+      document: browserDocument(document),
+      loadAnchoredPositioning: loadCalls.load,
+      window: {
+        setTimeout: (callback, timeout) => {
+          expect(timeout).toBe(1500);
+          timeoutCallback = callback;
+
+          return 1;
+        },
+      },
+    });
+
+    timeoutCallback?.();
+    await flushAsyncTasks();
+
+    expect(window.document.documentElement.dataset).toBeDefined();
+    expect(loadCalls.count).toBe(1);
+    expect(scheduledTargets).toEqual([null]);
+  });
+
+  test("keeps loader failures quiet after user intent", async () => {
+    const { document, window } = loaderFixture();
+    const trigger = requiredElement(document, "[data-anchor-trigger]");
+
+    installAnchoredPositioningLoader({
+      document: browserDocument(document),
+      loadAnchoredPositioning: async () => {
+        await Promise.resolve();
+        throw new Error("dynamic import unavailable");
+      },
+      window: browserWindow(window),
+    });
+    trigger.dispatchEvent(
+      browserEvent(new window.Event("pointerdown", { bubbles: true })),
+    );
+
+    await flushAsyncTasks();
+  });
 });
 
 function loaderFixture(): {

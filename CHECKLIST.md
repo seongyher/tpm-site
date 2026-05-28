@@ -77,6 +77,59 @@ Rust seams without reintroducing TypeScript automation.
 - [x] Verify Rust coverage, Rust gates, command-surface tests, docs checks,
       and release checks before handoff.
 
+### Milestone TQ05: Implement Xtask Clap Parser And Dispatch
+
+- [x] Add `clap` as a Rust workspace dependency for `tpm-xtask` only and
+      introduce the focused `cli/` parser modules from the design.
+- [x] Model every active xtask command and retained retired-command
+      compatibility behavior with typed parser coverage.
+- [x] Replace top-level string dispatch and repeated help/value parsing with
+      parsed command dispatch.
+- [x] Preserve intended `just` behavior while applying documented parser
+      cleanups such as strict unknown flags and deterministic format conflicts.
+- [x] Add focused tests for active command args, help behavior, unknown flags,
+      retired commands, pass-through args, and accepted cleanups.
+- [x] Verify Rust checks, command-surface tests, coverage signals, and relevant
+      docs after the migration.
+
+### Milestone TQ06: Workspace Coverage Remediation Pass
+
+- [x] Re-run Rust coverage and identify meaningful testable gaps across the
+      full Rust workspace, not only `tpm-xtask`.
+- [x] Re-run TypeScript/Astro coverage and identify meaningful testable gaps
+      outside Rust, including parser, workflow, catalog, and content-domain
+      helpers.
+- [x] Improve coverage in already modular crates with focused tests for
+      uncovered behavior, edge cases, and failure modes.
+- [x] Refactor hard-to-test Rust seams where missing coverage points to weak
+      separation of concerns, especially process-heavy task orchestration.
+- [x] Extract or isolate reusable xtask path, filesystem, content, media, and
+      external-command planning seams out of direct dispatcher behavior with
+      private tests.
+- [x] Add meaningful tests without test-only exports, brittle
+      command-execution assertions, weakened runtime code, or broad ignores.
+- [x] Add narrow `Coverage note:` comments only for genuinely untestable
+      process/IO boundaries that remain after refactoring.
+- [x] Re-run TypeScript/Astro and Rust coverage and continue iterating until no
+      sensible coverage improvements remain anywhere in the workspace.
+- [x] Run the full release gate and document remaining coverage gaps before
+      handoff.
+
+### Milestone TQ07: Final Whole-Workspace Coverage Audit
+
+- [x] Re-run current-tree aggregate coverage after the latest type and test
+      fixes.
+- [x] Classify the remaining TypeScript/Astro and Rust gaps as actionable
+      tests, refactor candidates, defensive invariants, or external/process
+      boundaries.
+- [x] Add any remaining useful tests or refactors without test-only exports or
+      brittle command assertions.
+- [x] Add or keep narrow coverage notes only where the gap is genuinely
+      untestable in unit coverage.
+- [x] Re-run aggregate coverage, docs checks, and release checks after the
+      final pass.
+- [x] Report final coverage totals and remaining justified gaps before handoff.
+
 ### Milestone TS00: Inventory, Tracking, And Parity Strategy
 
 - [x] Create a durable replacement map documenting every TypeScript automation

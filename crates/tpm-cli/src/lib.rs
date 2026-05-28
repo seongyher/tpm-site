@@ -433,6 +433,11 @@ const fn help_text(topic: HelpTopic) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "CLI tests assert fixture commands emit valid output without IO errors"
+    )]
+
     use std::path::{Path, PathBuf};
 
     use super::run;
@@ -450,15 +455,8 @@ mod tests {
 
     fn run_text(args: Vec<String>) -> (CommandExit, String) {
         let mut output = Vec::new();
-        let result = run(args, &mut output);
-        let exit = match result {
-            Ok(exit) => exit,
-            Err(error) => panic!("CLI test should not emit io errors: {error}"),
-        };
-        let text = match String::from_utf8(output) {
-            Ok(text) => text,
-            Err(error) => panic!("CLI output should be valid UTF-8: {error}"),
-        };
+        let exit = run(args, &mut output).expect("CLI test should not emit io errors");
+        let text = String::from_utf8(output).expect("CLI output should be valid UTF-8");
 
         (exit, text)
     }

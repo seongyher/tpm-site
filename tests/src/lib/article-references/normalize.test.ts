@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import type {
+  ArticleReferenceBlockContent,
   ArticleReferenceDefinitionInput,
   ArticleReferenceInlineContent,
   ArticleReferenceOccurrenceInput,
@@ -137,6 +138,34 @@ describe("article reference normalization", () => {
     ]);
   });
 
+  test("rejects malformed and empty note definitions before rendering", () => {
+    const result = normalizeArticleReferences(
+      [reference("note-bad-display-label"), reference("note-empty")],
+      [
+        definition("note-bad-display-label", "[@] Bad label."),
+        definition("note-empty", ""),
+      ],
+      [],
+    );
+
+    expect(result.ok).toBe(false);
+
+    if (result.ok) {
+      throw new Error("Expected malformed note definition diagnostics.");
+    }
+
+    expect(result.diagnostics).toEqual([
+      {
+        code: "malformed-display-label",
+        label: "note-bad-display-label",
+      },
+      {
+        code: "empty-definition",
+        label: "note-empty",
+      },
+    ]);
+  });
+
   test("keeps uncited BibTeX entries as bibliography-only sources", () => {
     const result = normalizeArticleReferences(
       [reference("cite-used")],
@@ -237,6 +266,61 @@ describe("article reference normalization", () => {
     );
   });
 
+  test("derives readable citations from DOI, editor/date, and sparse BibTeX fields", () => {
+    const result = normalizeArticleReferences(
+      [
+        reference("cite-doi-source"),
+        reference("cite-edited-source"),
+        reference("cite-key-only"),
+      ],
+      [],
+      [
+        bibtex("doi-source", {
+          author: "Ada Lovelace",
+          date: "1843-08-01",
+          doi: "10.1234/example",
+          title: "Analytical Notes",
+        }),
+        bibtex("edited-source", {
+          booktitle: "Collected Meme Studies",
+          date: "2021-03-04",
+          editor: "Curator, C.",
+          publisher: "Archive Press",
+        }),
+        bibtex("key-only", {}),
+      ],
+    );
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) {
+      throw new Error("Expected derived BibTeX citations to normalize.");
+    }
+
+    expect(
+      result.data.citations.map((citation) => citation.displayLabel),
+    ).toEqual(["Lovelace 1843", "Curator 2021", undefined]);
+
+    const [doiDefinition, editedDefinition, sparseDefinition] =
+      result.data.citations.map((citation) => citation.definition.children[0]);
+
+    expect(doiDefinition?.text).toBe(
+      "Ada Lovelace. Analytical Notes. 1843. 10.1234/example.",
+    );
+    assertInlineChildren(doiDefinition);
+    expect(
+      doiDefinition.children.some(
+        (child) =>
+          child.kind === "link" &&
+          child.url === "https://doi.org/10.1234/example",
+      ),
+    ).toBe(true);
+    expect(editedDefinition?.text).toBe(
+      "Curator, C.. edited-source. Collected Meme Studies. Archive Press. 2021. ",
+    );
+    expect(sparseDefinition?.text).toBe("key-only. ");
+  });
+
   test("rejects literal citation fields without source text", () => {
     const result = normalizeArticleReferences(
       [],
@@ -259,6 +343,17 @@ describe("article reference normalization", () => {
     ]);
   });
 });
+
+function assertInlineChildren(
+  value: ArticleReferenceBlockContent | undefined,
+): asserts value is Extract<
+  ArticleReferenceBlockContent,
+  { readonly children: readonly ArticleReferenceInlineContent[] }
+> {
+  if (value === undefined || !("children" in value)) {
+    throw new Error("Expected reference definition with inline children.");
+  }
+}
 
 function reference(label: string): ArticleReferenceOccurrenceInput {
   return { label };

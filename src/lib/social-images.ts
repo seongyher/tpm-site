@@ -1,5 +1,6 @@
 import type { ImageMetadata } from "astro";
 
+import { imageMetadataOrUndefined } from "./content-images";
 import {
   socialPreviewMediaPolicy,
   type SocialPreviewMediaTransform,
@@ -40,7 +41,7 @@ interface SocialPreviewImageViewModelInput {
   alt?: string | undefined;
   fallback: ImageMetadata;
   optimize: SocialPreviewImageOptimizer;
-  source?: ImageMetadata | undefined;
+  source?: ImageMetadata | string | undefined;
 }
 
 /**
@@ -52,7 +53,7 @@ interface SocialPreviewImageViewModelInput {
 export async function socialPreviewImageViewModel(
   input: SocialPreviewImageViewModelInput,
 ): Promise<SocialPreviewImage> {
-  const image = input.source ?? input.fallback;
+  const image = imageMetadataOrUndefined(input.source) ?? input.fallback;
   const optimized = await input.optimize(socialPreviewMediaTransform(image));
   const alt = input.alt?.trim();
 

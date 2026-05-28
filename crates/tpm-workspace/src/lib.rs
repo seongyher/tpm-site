@@ -547,10 +547,12 @@ impl Default for IgnoredPathPolicy {
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "workspace diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(code: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(code).unwrap_or_else(|error| {
-        panic!("workspace diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(code).expect("workspace diagnostic code should be valid")
 }
 
 fn display_path_from(root: &Path, path: &Path) -> String {
@@ -576,6 +578,9 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
+
     use super::{
         IgnoredPathPolicy, SourceArtifact, SourceArtifactKind, WorkspaceContext,
         WorkspaceDiscoveryError, WorkspaceLayout, WorkspaceSourceRoot, WorkspaceSourceRootKind,
@@ -597,6 +602,13 @@ mod tests {
         }
         fs::write(path, contents)?;
         Ok(())
+    }
+
+    #[cfg(unix)]
+    fn make_unreadable(path: &Path) -> Result<fs::Permissions, Box<dyn Error>> {
+        let original = fs::metadata(path)?.permissions();
+        fs::set_permissions(path, fs::Permissions::from_mode(0o000))?;
+        Ok(original)
     }
 
     #[test]
@@ -746,6 +758,36 @@ mod tests {
         assert_eq!(artifacts[0].kind(), SourceArtifactKind::SiteConfig);
         assert_eq!(artifacts[1].kind(), SourceArtifactKind::Content);
         assert_eq!(artifacts[2].kind(), SourceArtifactKind::PublicFile);
+
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn inventory_source_artifacts_reports_unreadable_source_roots() -> Result<(), Box<dyn Error>> {
+        for (name, unreadable_path) in [
+            ("content", "site/content/unreadable"),
+            ("assets", "site/assets/unreadable"),
+            ("public", "site/public/unreadable"),
+        ] {
+            let root = temp_workspace(&format!("unreadable-{name}"));
+            let _ = fs::remove_dir_all(&root);
+            write_file(&root.join("site/config/site.json"), "{}")?;
+            fs::create_dir_all(root.join("site/content"))?;
+            fs::create_dir_all(root.join("site/assets"))?;
+            fs::create_dir_all(root.join("site/public"))?;
+            fs::create_dir_all(root.join(unreadable_path))?;
+            let original_permissions = make_unreadable(&root.join(unreadable_path))?;
+
+            let result = WorkspaceContext::from_root(&root).inventory_source_artifacts();
+
+            fs::set_permissions(root.join(unreadable_path), original_permissions)?;
+            assert!(
+                result.is_err(),
+                "expected unreadable {name} source root to fail inventory"
+            );
+            let _ = fs::remove_dir_all(root);
+        }
 
         Ok(())
     }

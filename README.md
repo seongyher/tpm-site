@@ -8,7 +8,7 @@ Astro static site for The Philosopher's Meme.
 
 - Bun
 - Node.js `>=22.12.0`
-- Rust `1.93.0` through `rustup` for additive Rust workspace checks
+- Rust `1.95.0` through `rustup` for additive Rust workspace checks
 - `just` for the repository command router
 
 Install dependencies:

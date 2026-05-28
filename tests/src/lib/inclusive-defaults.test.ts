@@ -116,4 +116,38 @@ describe("inclusiveDefaultIssues", () => {
       issues.some((issue) => issue.code === "config.identity-locale-invalid"),
     ).toBe(true);
   });
+
+  test("validates language subtags beyond the primary language", () => {
+    const validSubtagIssues = inclusiveDefaultIssues(
+      parseSiteConfig({
+        ...baseConfig,
+        identity: {
+          ...baseConfig.identity,
+          language: "fr-hans",
+          locale: "fr_FR",
+        },
+      }),
+    );
+    const invalidSubtagIssues = inclusiveDefaultIssues(
+      parseSiteConfig({
+        ...baseConfig,
+        identity: {
+          ...baseConfig.identity,
+          language: "fr-a",
+          locale: "fr_FR",
+        },
+      }),
+    );
+
+    expect(
+      validSubtagIssues.some(
+        (issue) => issue.code === "config.identity-language-invalid",
+      ),
+    ).toBe(false);
+    expect(
+      invalidSubtagIssues.some(
+        (issue) => issue.code === "config.identity-language-invalid",
+      ),
+    ).toBe(true);
+  });
 });

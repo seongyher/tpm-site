@@ -1,7 +1,7 @@
 //! Internal repository automation library for TPM development.
 
 pub(crate) mod accountability;
-pub(crate) mod args;
+pub(crate) mod cli;
 pub(crate) mod command;
 pub(crate) mod coverage;
 pub(crate) mod frontmatter;

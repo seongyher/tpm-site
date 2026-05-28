@@ -10,7 +10,7 @@ fn xtask_binary_help_identifies_internal_surface() -> Result<(), Box<dyn Error>>
         .output()?;
 
     assert!(output.status.success());
-    assert!(String::from_utf8_lossy(&output.stdout).contains("internal repository automation"));
+    assert!(String::from_utf8_lossy(&output.stdout).contains("Internal repository automation"));
 
     Ok(())
 }
@@ -22,7 +22,9 @@ fn xtask_binary_maps_unknown_task_to_usage_exit_code() -> Result<(), Box<dyn Err
         .output()?;
 
     assert_eq!(output.status.code(), Some(64));
-    assert!(String::from_utf8_lossy(&output.stdout).contains("Unknown task `missing-task`."));
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("unrecognized subcommand 'missing-task'")
+    );
 
     Ok(())
 }

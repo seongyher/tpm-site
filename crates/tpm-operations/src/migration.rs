@@ -265,16 +265,20 @@ const fn disposition_label(disposition: ScriptMigrationDisposition) -> &'static 
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "migration operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("migration operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("migration operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "migration diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("migration diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("migration diagnostic code should be valid")
 }
 
 fn display_path(path: &std::path::Path) -> String {
@@ -288,6 +292,11 @@ fn display_path(path: &std::path::Path) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "migration tests assert required fixture rows with static lookup keys"
+    )]
+
     use std::error::Error;
     use std::fs;
     use std::path::{Path, PathBuf};
@@ -337,7 +346,7 @@ mod tests {
         let site_doctor = migration_plan()
             .iter()
             .find(|entry| entry.domain() == "site doctor")
-            .unwrap_or_else(|| panic!("site doctor migration entry should exist"));
+            .expect("site doctor migration entry should exist");
         assert_eq!(site_doctor.scripts(), &["site:doctor"]);
         assert_eq!(site_doctor.target(), "tpm site doctor");
         assert!(site_doctor.preserve().contains("source-mapped"));

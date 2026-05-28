@@ -526,6 +526,49 @@ ignored-pattern
 
     #[test]
     fn generates_mirrored_test_candidates_for_special_paths() {
+        for (file, expected) in [
+            ("astro.config.ts", "tests/config/astro.config.test.ts"),
+            ("eslint.config.ts", "tests/config/eslint.config.test.ts"),
+            ("knip.ts", "tests/config/knip.test.ts"),
+            (
+                "playwright.config.ts",
+                "tests/config/playwright.config.test.ts",
+            ),
+            (
+                "prettier.config.mjs",
+                "tests/config/prettier.config.test.ts",
+            ),
+            (
+                "eslint/tsconfig.json",
+                "tests/config/tooling-tsconfigs.test.ts",
+            ),
+            (
+                "scripts/tsconfig.json",
+                "tests/config/tooling-tsconfigs.test.ts",
+            ),
+            (
+                "tests/tsconfig.json",
+                "tests/config/tooling-tsconfigs.test.ts",
+            ),
+            ("tsconfig.json", "tests/config/tsconfig.test.ts"),
+            ("tsconfig.tools.json", "tests/config/tsconfig.tools.test.ts"),
+            ("vitest.config.ts", "tests/config/vitest.config.test.ts"),
+            ("wrangler.toml", "tests/config/wrangler.config.test.ts"),
+            (
+                "scripts/build/generate-article-pdfs.ts",
+                "tests/build/generate-article-pdfs.test.ts",
+            ),
+            (
+                "examples/platform-entrypoint-consumer/platform-consumer.ts",
+                "tests/src/platform/example-consumer.test.ts",
+            ),
+        ] {
+            assert_eq!(expected_mirror_tests(file), vec![String::from(expected)]);
+        }
+        assert_eq!(
+            expected_mirror_tests("types/generated.d.ts"),
+            vec![String::from("tests/types/generated.test.ts")]
+        );
         assert_eq!(
             expected_mirror_tests("src/platform/content.ts"),
             vec![
@@ -557,13 +600,24 @@ ignored-pattern
 # Approved exception: Markdown docs are reviewed by documentation checks.
 *.md
 
-# Requested permission: temporary generated docs exception awaiting review.
-docs/generated/**
-",
+	# Requested permission: temporary generated docs exception awaiting review.
+	docs/generated/**
+
+	# Approved exception: deliberately unmatched pattern catches stale rules.
+	stale/**
+	",
         )?;
         let files = vec![
             ".test-accountability-ignore",
+            ".git/ignored.ts",
+            "coverage/ignored.ts",
+            "node_modules/pkg/ignored.ts",
+            "Cargo.toml",
+            "crates/tpm-core/src/lib.rs",
             "src/lib/missing.ts",
+            "src/lib/covered.ts",
+            "tests/src/lib/covered.test.ts",
+            "tests/src/lib/standalone.test.ts",
             "README.md",
             "docs/generated/platform-reference.md",
         ]
@@ -584,11 +638,15 @@ docs/generated/**
         let result = verify_test_accountability_with_files(&root, Some(files))?;
 
         assert_eq!(result.missing_mirrors.len(), 1);
+        assert_eq!(result.accountability_files.len(), 3);
+        assert_eq!(result.unmatched_rules.len(), 1);
         assert_eq!(
             result.unaccounted_files,
             vec![String::from("src/lib/missing.ts")]
         );
         assert_eq!(result.requested_permission_rules.len(), 1);
+        assert!(!result.files.iter().any(|file| file.contains(".git/")));
+        assert!(!result.files.iter().any(|file| file.contains("coverage/")));
 
         fs::remove_dir_all(root)?;
         Ok(())
@@ -597,21 +655,55 @@ docs/generated/**
     #[test]
     fn formats_success_and_failure_reports() {
         let result = super::TestAccountabilityResult {
-            accountability_files: Vec::new(),
+            accountability_files: vec![String::from("README.md")],
             files: vec![String::from("src/lib/example.ts")],
-            invalid_rules: Vec::new(),
+            invalid_rules: vec![String::from(
+                ".test-accountability-ignore:2 pattern \"bad\" needs a reason.",
+            )],
             missing_mirrors: vec![super::MissingMirror {
                 expected: vec![String::from("tests/src/lib/example.test.ts")],
                 file: String::from("src/lib/example.ts"),
             }],
-            requested_permission_rules: Vec::new(),
-            unmatched_rules: Vec::new(),
-            unaccounted_files: Vec::new(),
+            requested_permission_rules: vec![super::AccountabilityIgnoreRule {
+                line: 4,
+                pattern: String::from("docs/generated/**"),
+                reason: String::from(
+                    "Requested permission: temporary generated docs exception awaiting review.",
+                ),
+                requested_permission: true,
+            }],
+            unmatched_rules: vec![super::AccountabilityIgnoreRule {
+                line: 6,
+                pattern: String::from("stale/**"),
+                reason: String::from("Approved exception: stale rule coverage."),
+                requested_permission: false,
+            }],
+            unaccounted_files: vec![String::from("README.md")],
         };
 
         let report = format_test_accountability_report(&result, false);
 
+        assert!(report.contains("Invalid accountability ignore rules:"));
+        assert!(report.contains("Accountability ignore patterns"));
         assert!(report.contains("Code files missing mirrored tests:"));
+        assert!(report.contains("Repository files without test accountability:"));
+        assert!(report.contains("Requested-permission accountability exceptions to report"));
         assert!(result.has_blocking_problems(false));
+        assert!(result.has_blocking_problems(true));
+
+        let release_report = format_test_accountability_report(&result, true);
+        assert!(release_report.contains("must be resolved before release"));
+
+        let success = super::TestAccountabilityResult {
+            accountability_files: Vec::new(),
+            files: vec![String::from("README.md")],
+            invalid_rules: Vec::new(),
+            missing_mirrors: Vec::new(),
+            requested_permission_rules: Vec::new(),
+            unmatched_rules: Vec::new(),
+            unaccounted_files: Vec::new(),
+        };
+        assert!(!success.has_blocking_problems(true));
+        assert!(format_test_accountability_report(&success, true).contains("passed"));
     }
 }

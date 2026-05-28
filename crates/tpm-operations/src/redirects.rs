@@ -321,16 +321,20 @@ fn with_trailing_slash(value: &str) -> String {
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "redirect operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("redirect operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("redirect operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "redirect diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("redirect diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("redirect diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {
@@ -344,6 +348,11 @@ fn display_path(path: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "redirect tests use fixture lookups and expected failures as asserted preconditions"
+    )]
+
     use std::error::Error;
     use std::fs;
     use std::path::{Path, PathBuf};
@@ -353,7 +362,7 @@ mod tests {
     use super::{
         RedirectRule, collect_legacy_rules, configured_redirects, display_path, format_redirects,
         insert_rule, legacy_permalink, markdown_path, normalize_path, redirect_diagnostics,
-        run_redirect_report,
+        run_redirect_report, with_trailing_slash,
     };
     use crate::{OperationInterface, OperationStatus};
     use tpm_workspace::WorkspaceContext;
@@ -375,6 +384,9 @@ mod tests {
         assert_eq!(normalize_path("2015/example"), "/2015/example/");
         assert_eq!(normalize_path("//2015//example"), "/2015/example/");
         assert_eq!(normalize_path("/already/"), "/already/");
+        assert_eq!(normalize_path(""), "/");
+        assert_eq!(with_trailing_slash("/already/"), "/already/");
+        assert_eq!(with_trailing_slash("/needs"), "/needs/");
     }
 
     #[test]
@@ -448,6 +460,35 @@ mod tests {
     }
 
     #[test]
+    fn redirect_report_collects_announcement_legacy_rules() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("announcement-collect");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        write_file(&root.join("site/config/redirects.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content/articles"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(
+            &root.join("site/content/announcements/update.md"),
+            "---\nlegacyPermalink: /legacy/update/\n---\n# Update",
+        )?;
+
+        let result = run_redirect_report(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "redirect rules: 1")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
+    #[test]
     fn configured_redirects_trim_and_normalize_sources() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("configured");
         let _ = fs::remove_dir_all(&root);
@@ -499,7 +540,7 @@ mod tests {
         assert_eq!(
             rules
                 .get("/legacy/update/")
-                .unwrap_or_else(|| panic!("legacy update redirect should exist"))
+                .expect("legacy update redirect should exist")
                 .destination,
             "/announcements/update/"
         );
@@ -543,15 +584,13 @@ mod tests {
         let context = WorkspaceContext::from_root(&root);
         let mut rules = BTreeMap::new();
 
-        let error = match collect_legacy_rules(
+        let error = collect_legacy_rules(
             &context,
             &root.join("site/content/articles"),
             "/articles/",
             &mut rules,
-        ) {
-            Ok(()) => panic!("conflicting legacy redirects should fail"),
-            Err(error) => error,
-        };
+        )
+        .expect_err("conflicting legacy redirects should fail");
 
         assert!(error.to_string().contains("site/content/articles/two.md"));
         assert!(error.to_string().contains("conflicting redirect"));

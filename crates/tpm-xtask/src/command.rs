@@ -4,41 +4,6 @@
 )]
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub(crate) enum InternalTask {
-    AssetsDuplicates,
-    AssetsLocations,
-    AssetsShared,
-    AssetsUnused,
-    BuildCloudflare,
-    BuildOptimize,
-    BuildRaw,
-    CatalogCheck,
-    ContentCheck,
-    CoverageVerify,
-    DiagnosticsDiff,
-    DocsReferences,
-    DocsReferencesCheck,
-    MigrationBaseline,
-    OutputVerify,
-    PayloadCheck,
-    PayloadReport,
-    PlatformCheck,
-    QaRegistry,
-    SiteSchema,
-    SiteSchemaCheck,
-    StartersCheck,
-    SyncAstroTestStore,
-    TagsCheck,
-    TagsNormalize,
-    TestAccountability,
-    TestAccountabilityRelease,
-    TestCatalog,
-    TestFlake,
-    ValidateHtml,
-    Verify,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum RemovedTask {
     PayloadCriticalCssExperiment,
     PayloadMinifyHtmlExperiment,
@@ -51,78 +16,22 @@ pub(crate) enum RemovedTask {
     ReferencesMigrateMechanical,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) enum TaskParseResult<'a> {
-    Active(InternalTask),
-    Removed(RemovedTask),
-    Unknown(&'a str),
-}
-
-impl InternalTask {
-    pub(crate) fn parse(name: &str) -> TaskParseResult<'_> {
+impl RemovedTask {
+    pub(crate) fn parse(name: &str) -> Option<Self> {
         match name {
-            "assets-duplicates" => TaskParseResult::Active(Self::AssetsDuplicates),
-            "assets-locations" => TaskParseResult::Active(Self::AssetsLocations),
-            "assets-shared" => TaskParseResult::Active(Self::AssetsShared),
-            "assets-unused" => TaskParseResult::Active(Self::AssetsUnused),
-            "build-cloudflare" => TaskParseResult::Active(Self::BuildCloudflare),
-            "build-optimize" => TaskParseResult::Active(Self::BuildOptimize),
-            "build-raw" => TaskParseResult::Active(Self::BuildRaw),
-            "catalog-check" => TaskParseResult::Active(Self::CatalogCheck),
-            "content-check" => TaskParseResult::Active(Self::ContentCheck),
-            "coverage-verify" => TaskParseResult::Active(Self::CoverageVerify),
-            "diagnostics-diff" => TaskParseResult::Active(Self::DiagnosticsDiff),
-            "docs-references" => TaskParseResult::Active(Self::DocsReferences),
-            "docs-references-check" => TaskParseResult::Active(Self::DocsReferencesCheck),
-            "migration-baseline" => TaskParseResult::Active(Self::MigrationBaseline),
-            "output-verify" => TaskParseResult::Active(Self::OutputVerify),
-            "payload-check" => TaskParseResult::Active(Self::PayloadCheck),
-            "payload-report" => TaskParseResult::Active(Self::PayloadReport),
-            "platform-check" => TaskParseResult::Active(Self::PlatformCheck),
-            "qa-registry" => TaskParseResult::Active(Self::QaRegistry),
-            "site-schema" => TaskParseResult::Active(Self::SiteSchema),
-            "site-schema-check" => TaskParseResult::Active(Self::SiteSchemaCheck),
-            "starters-check" => TaskParseResult::Active(Self::StartersCheck),
-            "sync-astro-test-store" => TaskParseResult::Active(Self::SyncAstroTestStore),
-            "tags-check" => TaskParseResult::Active(Self::TagsCheck),
-            "tags-normalize" => TaskParseResult::Active(Self::TagsNormalize),
-            "test-accountability" => TaskParseResult::Active(Self::TestAccountability),
-            "test-accountability-release" => {
-                TaskParseResult::Active(Self::TestAccountabilityRelease)
-            }
-            "test-catalog" => TaskParseResult::Active(Self::TestCatalog),
-            "test-flake" => TaskParseResult::Active(Self::TestFlake),
-            "validate-html" => TaskParseResult::Active(Self::ValidateHtml),
-            "verify" => TaskParseResult::Active(Self::Verify),
-            "payload-critical-css-experiment" => {
-                TaskParseResult::Removed(RemovedTask::PayloadCriticalCssExperiment)
-            }
-            "payload-minify-html-experiment" => {
-                TaskParseResult::Removed(RemovedTask::PayloadMinifyHtmlExperiment)
-            }
-            "payload-minify-html-experiments" => {
-                TaskParseResult::Removed(RemovedTask::PayloadMinifyHtmlExperiments)
-            }
-            "payload-postbuild-experiments" => {
-                TaskParseResult::Removed(RemovedTask::PayloadPostbuildExperiments)
-            }
-            "payload-vite-experiments" => {
-                TaskParseResult::Removed(RemovedTask::PayloadViteExperiments)
-            }
-            "references-audit" => TaskParseResult::Removed(RemovedTask::ReferencesAudit),
-            "references-bibtex-audit" => {
-                TaskParseResult::Removed(RemovedTask::ReferencesBibtexAudit)
-            }
-            "references-catalog" => TaskParseResult::Removed(RemovedTask::ReferencesCatalog),
-            "references-migrate-mechanical" => {
-                TaskParseResult::Removed(RemovedTask::ReferencesMigrateMechanical)
-            }
-            _ => TaskParseResult::Unknown(name),
+            "payload-critical-css-experiment" => Some(Self::PayloadCriticalCssExperiment),
+            "payload-minify-html-experiment" => Some(Self::PayloadMinifyHtmlExperiment),
+            "payload-minify-html-experiments" => Some(Self::PayloadMinifyHtmlExperiments),
+            "payload-postbuild-experiments" => Some(Self::PayloadPostbuildExperiments),
+            "payload-vite-experiments" => Some(Self::PayloadViteExperiments),
+            "references-audit" => Some(Self::ReferencesAudit),
+            "references-bibtex-audit" => Some(Self::ReferencesBibtexAudit),
+            "references-catalog" => Some(Self::ReferencesCatalog),
+            "references-migrate-mechanical" => Some(Self::ReferencesMigrateMechanical),
+            _ => None,
         }
     }
-}
 
-impl RemovedTask {
     pub(crate) const fn name(self) -> &'static str {
         match self {
             Self::PayloadCriticalCssExperiment => "payload-critical-css-experiment",
@@ -140,25 +49,53 @@ impl RemovedTask {
 
 #[cfg(test)]
 mod tests {
-    use super::{InternalTask, RemovedTask, TaskParseResult};
+    use super::RemovedTask;
 
     #[test]
-    fn parses_active_tasks_as_typed_values() {
+    fn parses_removed_tasks_separately_from_unknown_names() {
         assert_eq!(
-            InternalTask::parse("coverage-verify"),
-            TaskParseResult::Active(InternalTask::CoverageVerify)
+            RemovedTask::parse("payload-postbuild-experiments"),
+            Some(RemovedTask::PayloadPostbuildExperiments)
         );
+        assert_eq!(RemovedTask::parse("missing-task"), None);
     }
 
     #[test]
-    fn classifies_removed_tasks_separately_from_unknown_names() {
-        assert_eq!(
-            InternalTask::parse("payload-postbuild-experiments"),
-            TaskParseResult::Removed(RemovedTask::PayloadPostbuildExperiments)
-        );
-        assert_eq!(
-            InternalTask::parse("missing-task"),
-            TaskParseResult::Unknown("missing-task")
-        );
+    fn removed_task_names_roundtrip() {
+        for (name, task) in [
+            (
+                "payload-critical-css-experiment",
+                RemovedTask::PayloadCriticalCssExperiment,
+            ),
+            (
+                "payload-minify-html-experiment",
+                RemovedTask::PayloadMinifyHtmlExperiment,
+            ),
+            (
+                "payload-minify-html-experiments",
+                RemovedTask::PayloadMinifyHtmlExperiments,
+            ),
+            (
+                "payload-postbuild-experiments",
+                RemovedTask::PayloadPostbuildExperiments,
+            ),
+            (
+                "payload-vite-experiments",
+                RemovedTask::PayloadViteExperiments,
+            ),
+            ("references-audit", RemovedTask::ReferencesAudit),
+            (
+                "references-bibtex-audit",
+                RemovedTask::ReferencesBibtexAudit,
+            ),
+            ("references-catalog", RemovedTask::ReferencesCatalog),
+            (
+                "references-migrate-mechanical",
+                RemovedTask::ReferencesMigrateMechanical,
+            ),
+        ] {
+            assert_eq!(RemovedTask::parse(name), Some(task));
+            assert_eq!(task.name(), name);
+        }
     }
 }

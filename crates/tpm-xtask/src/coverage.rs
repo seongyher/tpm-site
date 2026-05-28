@@ -281,11 +281,18 @@ fn extension_is(file: &str, expected: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "coverage tests assert fixture error cases are rejected"
+    )]
+
     use std::fs;
     use std::path::PathBuf;
     use std::sync::atomic::{AtomicUsize, Ordering};
 
-    use super::{format_coverage_inventory_report, verify_coverage_inventory_with_roots};
+    use super::{
+        format_coverage_inventory_report, parse_covered_files, verify_coverage_inventory_with_roots,
+    };
 
     static NEXT_TEMP: AtomicUsize = AtomicUsize::new(0);
 
@@ -361,6 +368,112 @@ mod tests {
         assert_eq!(
             result.approved_exceptions,
             vec![String::from("src/styles/global.css")]
+        );
+
+        fs::remove_dir_all(root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn coverage_inventory_ignores_generated_dirs_and_reports_success()
+    -> Result<(), Box<dyn std::error::Error>> {
+        let root = temp_root("success");
+        fs::create_dir_all(root.join("coverage"))?;
+        fs::create_dir_all(root.join("scripts"))?;
+        fs::create_dir_all(root.join("src/lib"))?;
+        fs::create_dir_all(root.join("src/.astro"))?;
+        fs::create_dir_all(root.join("src/tmp"))?;
+        fs::write(root.join("README.md"), "# Fixture\n")?;
+        fs::write(
+            root.join("coverage/lcov.info"),
+            format!("SF:{}\nDA:1,1\n", root.join("src/lib/covered.ts").display()),
+        )?;
+        fs::write(root.join("scripts/coverage-exceptions.json"), "[]")?;
+        fs::write(
+            root.join("src/lib/covered.ts"),
+            "export const covered = true;\n",
+        )?;
+        fs::write(
+            root.join("src/.astro/generated.ts"),
+            "export const ignored = true;\n",
+        )?;
+        fs::write(
+            root.join("src/tmp/ignored.ts"),
+            "export const ignored = true;\n",
+        )?;
+        fs::write(root.join("src/lib/not-code.md"), "# Not code\n")?;
+
+        let result = verify_coverage_inventory_with_roots(
+            &root,
+            &[
+                "README.md",
+                "src/.astro/generated.ts",
+                "src/lib/covered.ts",
+                "src",
+            ],
+        )?;
+
+        assert!(result.missing.is_empty());
+        assert_eq!(result.covered, vec![String::from("src/lib/covered.ts")]);
+        assert_eq!(result.subjects, vec![String::from("src/lib/covered.ts")]);
+        assert!(format_coverage_inventory_report(&result).contains("Coverage inventory passed"));
+        assert_eq!(
+            parse_covered_files("SF:src/lib/covered.ts\nSF:src/lib/covered.ts\n", &root),
+            vec![String::from("src/lib/covered.ts")]
+        );
+
+        fs::remove_dir_all(root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn coverage_inventory_reports_plural_missing_gaps() -> Result<(), Box<dyn std::error::Error>> {
+        let root = temp_root("plural-missing");
+        fs::create_dir_all(root.join("coverage"))?;
+        fs::create_dir_all(root.join("scripts"))?;
+        fs::create_dir_all(root.join("src"))?;
+        fs::write(root.join("coverage/lcov.info"), "")?;
+        fs::write(root.join("scripts/coverage-exceptions.json"), "[]")?;
+        fs::write(root.join("src/one.ts"), "export const one = true;\n")?;
+        fs::write(root.join("src/two.ts"), "export const two = true;\n")?;
+
+        let result = verify_coverage_inventory_with_roots(&root, &["src"])?;
+        let report = format_coverage_inventory_report(&result);
+
+        assert_eq!(result.missing.len(), 2);
+        assert!(report.contains("2 unapproved coverage gaps."));
+
+        fs::remove_dir_all(root)?;
+        Ok(())
+    }
+
+    #[test]
+    fn invalid_coverage_exception_files_fail_loudly() -> Result<(), Box<dyn std::error::Error>> {
+        let root = temp_root("invalid-exceptions");
+        fs::create_dir_all(root.join("coverage"))?;
+        fs::create_dir_all(root.join("scripts"))?;
+        fs::create_dir_all(root.join("src"))?;
+        fs::write(root.join("coverage/lcov.info"), "")?;
+        fs::write(
+            root.join("src/example.ts"),
+            "export const example = true;\n",
+        )?;
+
+        fs::write(root.join("scripts/coverage-exceptions.json"), "{}")?;
+        let array_error = verify_coverage_inventory_with_roots(&root, &["src"])
+            .expect_err("object exception file should be rejected");
+        assert!(array_error.to_string().contains("must contain an array"));
+
+        fs::write(
+            root.join("scripts/coverage-exceptions.json"),
+            r#"[{"pattern":"","reason":""}]"#,
+        )?;
+        let item_error = verify_coverage_inventory_with_roots(&root, &["src"])
+            .expect_err("empty exception fields should be rejected");
+        assert!(
+            item_error
+                .to_string()
+                .contains("must include string pattern")
         );
 
         fs::remove_dir_all(root)?;

@@ -148,6 +148,11 @@ pub(crate) fn is_url_safe_slug(value: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "tag tests assert a known-valid frontmatter fixture is replaced"
+    )]
+
     use super::{
         is_url_safe_slug, normalize_author_alias, normalize_tag_list, replace_tags_block,
         tag_diagnostics,
@@ -158,6 +163,7 @@ mod tests {
         let result = normalize_tag_list(&[
             String::from("  Meme   Culture "),
             String::from("meme/culture"),
+            String::from("   "),
             String::from("Meme Culture"),
         ]);
 
@@ -165,7 +171,13 @@ mod tests {
             result.tags,
             vec![String::from("meme culture"), String::from("meme/culture")]
         );
-        assert_eq!(result.diagnostics.len(), 1);
+        let messages = result
+            .diagnostics
+            .iter()
+            .map(|diagnostic| diagnostic.message)
+            .collect::<Vec<_>>();
+        assert!(messages.contains(&"tag must not contain \"/\""));
+        assert!(messages.contains(&"tag must not be empty"));
     }
 
     #[test]
@@ -190,13 +202,16 @@ mod tests {
     #[test]
     fn replaces_only_the_frontmatter_tags_block() {
         let source = "---\ntitle: Example\ntags:\n  - Old\nsummary: Kept\n---\nBody";
-        let output = replace_tags_block(source, &[String::from("new tag")]);
-        let Some(output) = output else {
-            panic!("tags block should be replaced");
-        };
+        let output = replace_tags_block(source, &[String::from("new tag")])
+            .expect("tags block should be replaced");
 
         assert!(output.contains("tags:\n  - \"new tag\"\nsummary: Kept"));
         assert!(output.ends_with("---\nBody"));
+        assert_eq!(replace_tags_block("No frontmatter", &[]), None);
+        assert_eq!(
+            replace_tags_block("---\ntitle: Example\n---\nBody", &[]),
+            None
+        );
     }
 
     #[test]

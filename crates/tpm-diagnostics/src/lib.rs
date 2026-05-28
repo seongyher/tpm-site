@@ -457,6 +457,11 @@ fn render_diagnostic(diagnostic: &Diagnostic) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "test fixtures use static diagnostic codes whose validity is the test precondition"
+    )]
+
     use super::{
         Diagnostic, DiagnosticCode, DiagnosticCodeError, DiagnosticLocation,
         DiagnosticLocationKind, DiagnosticReport,
@@ -464,9 +469,7 @@ mod tests {
     use tpm_core::Severity;
 
     fn valid_code(value: &str) -> DiagnosticCode {
-        DiagnosticCode::parse(value).unwrap_or_else(|error| {
-            panic!("test diagnostic code should be valid: {error}");
-        })
+        DiagnosticCode::parse(value).expect("test diagnostic code should be valid")
     }
 
     #[test]

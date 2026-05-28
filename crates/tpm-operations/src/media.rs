@@ -45,6 +45,10 @@ pub fn run_image_asset_verification(
 
                 OperationResult::new(request, summary, OperationTiming::default(), diagnostics)
             }
+            // Coverage note: this branch represents host filesystem read errors
+            // during recursive media scanning. Focused tests cover valid scans,
+            // location violations, ignores, duplicates, and missing workspaces;
+            // permission failures remain defensive IO handling.
             Err(error) => OperationResult::new(
                 request,
                 OperationSummary::new("Image asset verification failed"),
@@ -324,16 +328,20 @@ fn wildcard_matches(pattern: &[u8], value: &[u8]) -> bool {
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "media operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("media operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("media operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "media diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("media diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("media diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {
@@ -358,6 +366,9 @@ mod tests {
     use std::fs;
     use std::path::{Path, PathBuf};
 
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt;
+
     use super::{
         display_path, fnv64, glob_matches, image_is_under, is_image_path, load_ignore_patterns,
         relative_path, run_image_asset_verification, wildcard_matches,
@@ -374,6 +385,13 @@ mod tests {
         }
         fs::write(path, contents)?;
         Ok(())
+    }
+
+    #[cfg(unix)]
+    fn make_unreadable(path: &Path) -> Result<fs::Permissions, Box<dyn Error>> {
+        let original = fs::metadata(path)?.permissions();
+        fs::set_permissions(path, fs::Permissions::from_mode(0o000))?;
+        Ok(original)
     }
 
     #[test]
@@ -480,25 +498,60 @@ mod tests {
         );
     }
 
+    #[cfg(unix)]
+    #[test]
+    fn image_operation_reports_scan_permission_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("scan-failure");
+        let _ = fs::remove_dir_all(&root);
+        write_file(&root.join("site/config/site.json"), b"{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets/unreadable"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        let original_permissions = make_unreadable(&root.join("site/assets/unreadable"))?;
+
+        let result = run_image_asset_verification(&root, OperationInterface::Test);
+
+        fs::set_permissions(root.join("site/assets/unreadable"), original_permissions)?;
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-MEDIA-IMAGE-SCAN")
+        );
+
+        let _ = fs::remove_dir_all(root);
+        Ok(())
+    }
+
     #[test]
     fn image_helpers_cover_globs_extensions_and_display_paths() -> Result<(), Box<dyn Error>> {
         assert!(is_image_path(Path::new("photo.JPG")));
         assert!(is_image_path(Path::new("icon.svg")));
         assert!(!is_image_path(Path::new("article.md")));
         assert!(image_is_under("site/assets/photo.jpg", "site/assets"));
+        assert!(image_is_under("site/assets", "site/assets"));
         assert!(!image_is_under("site/public/photo.jpg", "site/assets"));
         assert!(glob_matches("site/assets/hero.jpg", "site/assets/hero.jpg"));
         assert!(glob_matches(
             "examples/**/assets/*.svg",
             "examples/demo/assets/hero.svg"
         ));
+        assert!(glob_matches(
+            "examples/**/hero.*",
+            "examples/demo/nested/hero.avif"
+        ));
         assert!(glob_matches("site/assets/hero.???", "site/assets/hero.jpg"));
         assert!(!glob_matches(
             "site/assets/*.jpg",
             "site/assets/nested/hero.jpg"
         ));
+        assert!(!glob_matches("site/assets/hero.jpg", "site/assets"));
         assert!(wildcard_matches(b"hero.*", b"hero.jpg"));
+        assert!(wildcard_matches(b"hero-??.jpg", b"hero-01.jpg"));
         assert!(!wildcard_matches(b"hero.?", b"hero.jpeg"));
+        assert!(!wildcard_matches(b"hero-??.jpg", b"hero-1.jpg"));
         assert_eq!(display_path(Path::new("")), ".");
         assert_eq!(
             relative_path(
@@ -506,6 +559,10 @@ mod tests {
                 Path::new("/workspace/site/assets/a.png")
             ),
             "site/assets/a.png"
+        );
+        assert_eq!(
+            relative_path(Path::new("/workspace"), Path::new("/elsewhere/a.png")),
+            "/elsewhere/a.png"
         );
         assert_eq!(fnv64(b"same"), fnv64(b"same"));
 

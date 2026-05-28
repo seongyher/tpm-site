@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { chromium, type Page } from "@playwright/test";
+import { chromium } from "@playwright/test";
 import matter from "gray-matter";
 import { PDFDocument } from "pdf-lib";
 
@@ -77,6 +77,16 @@ export interface ArticlePdfRenderStats {
   unoptimizedArticleImageSources: readonly string[];
 }
 
+/** Serializable facts collected from an article image before PDF rendering. */
+export interface ArticlePdfImageSnapshot {
+  alt: null | string;
+  complete: boolean;
+  currentSrc: string;
+  naturalHeight: number;
+  naturalWidth: number;
+  src: null | string;
+}
+
 /** Parsed responsive image candidate used by the PDF renderer. */
 export interface ArticlePdfSrcsetCandidate {
   url: string;
@@ -93,16 +103,39 @@ interface StaticRouteFulfillOptions {
   status: number;
 }
 
+/** Minimal element handle contract needed for PDF image preparation. */
+export interface ArticlePdfImagePreparationElement {
+  evaluate: <Result>(
+    callback: (element: Element) => Promise<Result> | Result,
+  ) => Promise<Result>;
+  scrollIntoViewIfNeeded: () => Promise<void>;
+}
+
+/** Minimal locator contract needed for PDF image preparation. */
+export interface ArticlePdfImagePreparationLocator {
+  elementHandles: () => Promise<ArticlePdfImagePreparationElement[]>;
+}
+
+/** Minimal page contract needed for PDF image preparation. */
+export interface ArticlePdfImagePreparationPage {
+  evaluate: <Result>(
+    callback: () => Promise<Result> | Result,
+  ) => Promise<Result>;
+  locator: (selector: string) => ArticlePdfImagePreparationLocator;
+}
+
 /**
  * Runs the generated article PDF command-line workflow.
  *
  * @param args Command-line arguments without the executable prefix.
  * @param rootDir Repository root.
+ * @param dependencies Optional renderer dependencies for tests.
  * @returns Process exit code.
  */
 export async function runGenerateArticlePdfsCli(
   args = process.argv.slice(2),
   rootDir = process.cwd(),
+  dependencies: GenerateArticlePdfsDependencies = {},
 ): Promise<number> {
   if (args.includes("--help") || args.includes("-h")) {
     console.log(usage());
@@ -112,7 +145,10 @@ export async function runGenerateArticlePdfsCli(
   const quiet = args.includes("--quiet");
 
   try {
-    const result = await generateArticlePdfs(parseOptions(args, rootDir));
+    const result = await generateArticlePdfs(
+      parseOptions(args, rootDir),
+      dependencies,
+    );
 
     if (result.issues.length > 0) {
       console.error(formatGenerateArticlePdfsReport(result));
@@ -380,6 +416,65 @@ export function articlePdfPreferredSrcsetUrl(
   );
 }
 
+/**
+ * Converts browser-collected image snapshots into PDF render statistics.
+ *
+ * @param images Serializable article image facts from the browser page.
+ * @param origin Page origin used to classify Astro-optimized absolute URLs.
+ * @returns Article-image render stats used by PDF diagnostics.
+ */
+export function articlePdfRenderStatsFromImageSnapshots(
+  images: readonly ArticlePdfImageSnapshot[],
+  origin: string,
+): ArticlePdfRenderStats {
+  const unloadedArticleImages = images.flatMap((image, index) => {
+    if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+      return [];
+    }
+
+    const alt = image.alt;
+    const currentSrc = image.currentSrc.trim();
+    const src = image.src;
+
+    if (alt !== null && alt.trim() !== "") {
+      return [alt];
+    }
+
+    if (currentSrc !== "") {
+      return [currentSrc];
+    }
+
+    if (src !== null && src.trim() !== "") {
+      return [src];
+    }
+
+    return [`image ${index + 1}`];
+  });
+  const imageSources = images.map((image) =>
+    image.currentSrc.trim() !== "" ? image.currentSrc : (image.src ?? ""),
+  );
+  const astroAssetPrefix = `${origin}/_astro/`;
+  const isAstroOptimizedSource = (source: string) =>
+    source.startsWith("/_astro/") || source.startsWith(astroAssetPrefix);
+  const unoptimizedArticleImageSources = imageSources.filter((source) => {
+    if (source.trim() === "") {
+      return true;
+    }
+
+    return !isAstroOptimizedSource(source);
+  });
+  const optimizedArticleImageCount = imageSources.filter((source) =>
+    isAstroOptimizedSource(source),
+  ).length;
+
+  return {
+    articleImageCount: images.length,
+    optimizedArticleImageCount,
+    unoptimizedArticleImageSources,
+    unloadedArticleImages,
+  };
+}
+
 function articlePdfDocumentMetadata(
   articleDir: string,
   file: string,
@@ -401,15 +496,19 @@ function articlePdfDocumentMetadata(
 async function createPlaywrightRenderer(
   distDir: string,
 ): Promise<ArticlePdfRenderer> {
+  // Coverage note: this boundary launches Chromium and drives Playwright PDF
+  // rendering. Unit tests inject `ArticlePdfRenderer` implementations and cover
+  // static routing, target planning, metadata, image preparation, validation,
+  // CLI reporting, and renderer cleanup without depending on a browser process.
   const resolvedDist = path.resolve(distDir);
   const browser = await chromium.launch();
   const page = await browser.newPage({
     viewport: { height: 1056, width: 640 },
   });
   await page.route("**/*", async (route) => {
-    const response = await staticRouteResponse(
+    const response = await articlePdfStaticRouteResponse(
       resolvedDist,
-      pathnameFromAbsoluteUrl(route.request().url()),
+      articlePdfPathnameFromAbsoluteUrl(route.request().url()),
     );
 
     await route.fulfill(response);
@@ -443,11 +542,23 @@ async function createPlaywrightRenderer(
   };
 }
 
-function articlePdfLocalUrl(pathname: string): string {
+/**
+ * Converts a site pathname into the synthetic local origin used for PDF render.
+ *
+ * @param pathname Site pathname to request through the static route handler.
+ * @returns Absolute URL under the article PDF render origin.
+ */
+export function articlePdfLocalUrl(pathname: string): string {
   return `http://article-pdf.local${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
 }
 
-function pathnameFromAbsoluteUrl(url: string): string {
+/**
+ * Extracts a pathname from an absolute or path-like browser request URL.
+ *
+ * @param url Browser request URL.
+ * @returns Pathname without query string or fragment.
+ */
+export function articlePdfPathnameFromAbsoluteUrl(url: string): string {
   const protocolIndex = url.indexOf("://");
 
   if (protocolIndex === -1) {
@@ -463,8 +574,14 @@ function pathnameFromAbsoluteUrl(url: string): string {
   return url.slice(pathnameStart).split("?")[0]?.split("#")[0] ?? "/";
 }
 
-async function prepareArticlePdfImages(
-  page: Page,
+/**
+ * Prepares printable article images before Playwright renders a PDF.
+ *
+ * @param page Browser page contract used by the PDF renderer.
+ * @returns Article-image stats used by PDF diagnostics.
+ */
+export async function prepareArticlePdfImages(
+  page: ArticlePdfImagePreparationPage,
 ): Promise<ArticlePdfRenderStats> {
   const allImages = await page
     .locator("img[data-article-image]")
@@ -549,58 +666,23 @@ async function prepareArticlePdfImages(
     window.scrollTo(0, 0);
   });
 
-  return page.evaluate(() => {
-    const imageElements = Array.from(
+  const { images: imageSnapshots, origin } = await page.evaluate(() => ({
+    images: Array.from(
       document.querySelectorAll<HTMLImageElement>("img[data-article-image]"),
-    ).filter((image) => image.closest("[data-pdf-exclude]") === null);
-    const unloadedArticleImages = imageElements.flatMap((image, index) => {
-      if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
-        return [];
-      }
+    )
+      .filter((image) => image.closest("[data-pdf-exclude]") === null)
+      .map((image) => ({
+        alt: image.getAttribute("alt"),
+        complete: image.complete,
+        currentSrc: image.currentSrc,
+        naturalHeight: image.naturalHeight,
+        naturalWidth: image.naturalWidth,
+        src: image.getAttribute("src"),
+      })),
+    origin: window.location.origin,
+  }));
 
-      const alt = image.getAttribute("alt");
-      const currentSrc = image.currentSrc.trim();
-      const src = image.getAttribute("src");
-
-      if (alt !== null && alt.trim() !== "") {
-        return [alt];
-      }
-
-      if (currentSrc !== "") {
-        return [currentSrc];
-      }
-
-      if (src !== null && src.trim() !== "") {
-        return [src];
-      }
-
-      return [`image ${index + 1}`];
-    });
-    const imageSources = imageElements.map((image) => {
-      const currentSrc = image.currentSrc.trim();
-      return currentSrc !== "" ? currentSrc : (image.getAttribute("src") ?? "");
-    });
-    const astroAssetPrefix = `${window.location.origin}/_astro/`;
-    const isAstroOptimizedSource = (source: string) =>
-      source.startsWith("/_astro/") || source.startsWith(astroAssetPrefix);
-    const unoptimizedArticleImageSources = imageSources.filter((source) => {
-      if (source.trim() === "") {
-        return true;
-      }
-
-      return !isAstroOptimizedSource(source);
-    });
-    const optimizedArticleImageCount = imageSources.filter((source) =>
-      isAstroOptimizedSource(source),
-    ).length;
-
-    return {
-      articleImageCount: imageElements.length,
-      optimizedArticleImageCount,
-      unoptimizedArticleImageSources,
-      unloadedArticleImages,
-    };
-  });
+  return articlePdfRenderStatsFromImageSnapshots(imageSnapshots, origin);
 }
 
 function srcsetCandidate(
@@ -626,11 +708,18 @@ function isSrcsetWidthCandidate(
   return candidate !== undefined;
 }
 
-async function staticRouteResponse(
+/**
+ * Reads a generated static file for Playwright route fulfillment.
+ *
+ * @param resolvedDist Absolute generated output directory.
+ * @param pathname Browser request pathname.
+ * @returns Route fulfillment shape with content type and status.
+ */
+export async function articlePdfStaticRouteResponse(
   resolvedDist: string,
   pathname: string,
 ): Promise<StaticRouteFulfillOptions> {
-  const filePath = staticFilePath(resolvedDist, pathname);
+  const filePath = articlePdfStaticFilePath(resolvedDist, pathname);
 
   if (filePath === undefined) {
     return {
@@ -643,7 +732,7 @@ async function staticRouteResponse(
   try {
     return {
       body: await readFile(filePath),
-      contentType: contentType(filePath),
+      contentType: articlePdfContentType(filePath),
       status: 200,
     };
   } catch {
@@ -708,7 +797,17 @@ function readValueArg(args: string[], flag: string): string | undefined {
   return value;
 }
 
-function staticFilePath(distDir: string, pathname: string): string | undefined {
+/**
+ * Resolves a browser pathname to a generated static file under `dist`.
+ *
+ * @param distDir Absolute generated output directory.
+ * @param pathname Browser request pathname.
+ * @returns Absolute file path, or undefined when the request escapes `dist`.
+ */
+export function articlePdfStaticFilePath(
+  distDir: string,
+  pathname: string,
+): string | undefined {
   const relativePath = relativeStaticPath(decodeURIComponent(pathname));
   const resolvedFile = path.resolve(distDir, relativePath);
 
@@ -734,7 +833,13 @@ function relativeStaticPath(pathname: string): string {
   return pathname.slice(1);
 }
 
-function contentType(filePath: string): string {
+/**
+ * Returns the content type used by the PDF render static route handler.
+ *
+ * @param filePath Static file path.
+ * @returns HTTP content type for the file extension.
+ */
+export function articlePdfContentType(filePath: string): string {
   const extension = path.extname(filePath).toLowerCase();
 
   switch (extension) {
@@ -855,6 +960,8 @@ Default build directory: ${projectRelativePath(siteInstance.output.dist)}
 Default article source directory: ${projectRelativePath(siteInstance.content.articles)}`;
 }
 
+// Coverage note: this process entrypoint is intentionally thin. Unit tests call
+// `runGenerateArticlePdfsCli()` directly with injected dependencies.
 if (import.meta.main) {
   try {
     process.exitCode = await runGenerateArticlePdfsCli();
