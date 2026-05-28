@@ -15,6 +15,41 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Rust Engineering Guide
+
+This pass synthesizes the repo engineering philosophy, current Rust lint/tool
+policy, and external Rust guidance into a project-specific guide for durable
+Rust platform work.
+
+- [x] Re-read local repo philosophy, roadmap, Rust workspace docs, and Rust
+      strictness/tooling policy.
+- [x] Research requested Rust idiom, API, best-practice, pattern, crate, and
+      safety references.
+- [x] Write a project-specific Rust engineering guide covering domain modeling,
+      seams, errors, diagnostics, tests, docs, tooling, dependencies, and
+      anti-patterns.
+- [x] Review the guide against the repo philosophy and update discoverability
+      docs if needed.
+
+## Active Rust Engineering Guide Deepening
+
+This pass turns the first Rust guide draft into a research-backed judgment and
+style guide with concrete examples, anti-examples, and source notes. The goal
+is to steer developers toward correct Rust without encouraging mechanical
+over-application of abstractions.
+
+- [x] Re-check the guide's framing so it reads as judgment guidance rather than
+      a rigid rulebook.
+- [x] Read the requested Rust references in a source-by-source pass, including
+      every Rust API Guidelines topic page.
+- [x] Record research notes and non-obvious implications for TPM's Rust
+      operation-core work.
+- [x] Add realistic code examples and anti-examples for type-driven design,
+      pure/impure seams, diagnostics, adapter boundaries, tests, and
+      dependency/tooling policy.
+- [x] Review the revised guide for overzealous or misleading instructions and
+      verify documentation checks.
+
 ## Active TypeScript Automation To Rust Migration
 
 This migration removes repository-owned TypeScript automation scripts from the

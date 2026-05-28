@@ -147,6 +147,9 @@ the correct boundary.
 - `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`: Rust-first migration plan,
   crate boundaries, CLI/Tauri/MCP reuse model, `just` orchestration, and Rust
   QA strategy.
+- `agent-docs/RUST_ENGINEERING_GUIDE.md`: project-specific idiomatic Rust
+  guide for domain modeling, pure/impure seams, diagnostics, tests, docs,
+  dependency policy, and strict tooling.
 - `agent-docs/XTASK_ARCHITECTURE_REDESIGN.md`: internal Rust xtask
   architecture redesign for moving repository automation toward domain modules,
   parse-first options, pure planning seams, and auditable coverage exceptions.
