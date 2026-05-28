@@ -88,6 +88,9 @@ the correct boundary.
   `just` recipes. This is not a product CLI surface.
 - `crates/tpm-operations/`: shared operation request/result envelopes for
   future CLI, GUI, MCP, CI, and generated-output consumers.
+- `apps/studio/`: static Astro frontend shell and minimal Tauri desktop shell
+  for the future studio. Keep it read-only until operation-backed Tauri
+  bindings, plan/apply safety, and provider capabilities are implemented.
 - `site/`: default TPM site instance. Publication-specific content, assets,
   public files, theme overrides, redirects, and site config belong here.
 - `site/config/site.json`: publication configuration. Keep TPM-specific text,
@@ -207,6 +210,12 @@ the correct boundary.
   studio workflows, accessibility, recovery, security, and provider failures.
 - `docs/STUDIO_PARITY_FIXTURE_STRATEGY.md`: GUI/CLI/MCP/CI parity fixture
   strategy over shared studio operation results.
+- `docs/STUDIO_FRONTEND_SHELL.md`: first read-only Astro studio frontend shell
+  design, app boundary, fixture data model, responsive behavior, and handoff to
+  later Tauri/operation binding issues.
+- `docs/STUDIO_TAURI_SHELL.md`: minimal Tauri package design, capability
+  boundary, command-router surface, and security assumptions for the first
+  read-only desktop shell.
 - `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`: import/export and content
   preservation contracts.
 - `docs/LOCALIZATION_CONTRACTS.md`: locale and inclusive-defaults contracts.
@@ -1410,8 +1419,8 @@ Current baseline commands:
   accountability test, or an approved exception.
 - `just coverage-rust`: run Rust coverage with missing-line output when
   `cargo-llvm-cov` is installed.
-- `just typecheck`: run Astro checks while failing on warnings, then run
-  TypeScript tool checks.
+- `just typecheck`: run site and Studio Astro checks while failing on warnings,
+  then run TypeScript tool checks.
 - `just quality`: run the local quality path plus review-only signals.
 - `just build`: build Astro, generate Pagefind index, generate PDFs, and
   optimize output.

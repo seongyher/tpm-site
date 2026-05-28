@@ -1,0 +1,61 @@
+---
+import FutureSurfacesPanel from "../components/FutureSurfacesPanel.astro";
+import OperationDetailsPanel from "../components/OperationDetailsPanel.astro";
+import OperationRuntimePanel from "../components/OperationRuntimePanel.astro";
+import StudioAppBar from "../components/StudioAppBar.astro";
+import StudioNavigation from "../components/StudioNavigation.astro";
+import StudioSummaryPanel from "../components/StudioSummaryPanel.astro";
+import {
+  readOnlyOperation,
+  studioNavigation,
+} from "../data/read-only-operation";
+import StudioLayout from "../layouts/StudioLayout.astro";
+
+const futureSurfaces = [
+  {
+    copy: "Content editing will arrive after source-faithful document operations exist.",
+    id: "content",
+    title: "Content",
+  },
+  {
+    copy: "Media management waits for provider-backed materialization and usage reports.",
+    id: "media",
+    title: "Media",
+  },
+  {
+    copy: "Preview orchestration will bind to shared route and artifact operations.",
+    id: "preview",
+    title: "Preview",
+  },
+  {
+    copy: "Publish requires capability checks, dry-run plans, approvals, and audit records.",
+    id: "publish",
+    title: "Publish",
+  },
+  {
+    copy: "Settings will be generated from validated site and extension schemas.",
+    id: "settings",
+    title: "Settings",
+  },
+];
+---
+
+<StudioLayout
+  title="TPM Studio"
+  description="Read-only static shell for the future TPM publishing studio."
+>
+  <div class="bg-background text-foreground min-h-screen">
+    <StudioAppBar operation={readOnlyOperation} />
+    <StudioNavigation items={studioNavigation} />
+
+    <main
+      class="mx-auto grid w-full max-w-[86rem] gap-4 px-4 py-4 sm:px-8 sm:py-8"
+      id="overview"
+    >
+      <StudioSummaryPanel operation={readOnlyOperation} />
+      <OperationDetailsPanel operation={readOnlyOperation} />
+      <OperationRuntimePanel operation={readOnlyOperation} />
+      <FutureSurfacesPanel surfaces={futureSurfaces} />
+    </main>
+  </div>
+</StudioLayout>

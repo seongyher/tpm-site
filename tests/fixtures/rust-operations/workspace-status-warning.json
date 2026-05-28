@@ -8,7 +8,11 @@
   "status": "warning",
   "summary": {
     "title": "Workspace status checked",
-    "details": []
+    "details": [
+      "source roots: site/config/site.json, site/content, site/assets, site/public",
+      "required roots: 4",
+      "operation source: shared parity fixture"
+    ]
   },
   "timing": {
     "durationMs": 7
@@ -18,7 +22,12 @@
       {
         "code": "TPM-OP-WARNING",
         "severity": "warning",
-        "message": "Review this warning."
+        "message": "Review this warning.",
+        "remediation": "Review the shared operation fixture before changing interface-specific rendering.",
+        "location": {
+          "kind": "source",
+          "path": "tests/fixtures/rust-operations/workspace-status-warning.json"
+        }
       }
     ]
   }

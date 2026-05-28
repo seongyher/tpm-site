@@ -1,0 +1,29 @@
+---
+import type { StudioNavigationItem } from "../data/read-only-operation";
+
+interface Props {
+  items: readonly StudioNavigationItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav
+  class="border-border bg-panel flex gap-1 overflow-x-auto border-b px-4 py-2 sm:px-8"
+  aria-label="Studio surfaces"
+>
+  {
+    items.map((item) => (
+      <a
+        aria-disabled={item.disabled ? "true" : undefined}
+        class:list={[
+          "text-muted-foreground hover:bg-panel-muted hover:text-foreground flex-none rounded-sm px-3 py-2 text-sm font-semibold tracking-normal no-underline transition-colors",
+          item.disabled && "cursor-not-allowed opacity-50 hover:bg-transparent",
+        ]}
+        href={item.href}
+      >
+        {item.label}
+      </a>
+    ))
+  }
+</nav>

@@ -1,0 +1,22 @@
+---
+import {
+  badgeClassForTone,
+  type StudioBadgeTone,
+} from "../data/read-only-operation";
+
+interface Props {
+  label: string;
+  tone: StudioBadgeTone;
+}
+
+const { label, tone } = Astro.props;
+---
+
+<span
+  class:list={[
+    "inline-flex min-h-7 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap",
+    badgeClassForTone(tone),
+  ]}
+>
+  {label}
+</span>

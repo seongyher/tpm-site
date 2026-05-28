@@ -1,0 +1,21 @@
+---
+interface Props {
+  eyebrow: string;
+  id?: string;
+  title: string;
+}
+
+const { eyebrow, id, title } = Astro.props;
+const headingId = id ?? title.toLowerCase().replaceAll(/\s+/gu, "-");
+---
+
+<div class="mb-4">
+  <p
+    class="text-muted-foreground mb-1 text-xs font-bold tracking-normal uppercase"
+  >
+    {eyebrow}
+  </p>
+  <h2 id={headingId} class="text-xl leading-tight font-bold tracking-normal">
+    {title}
+  </h2>
+</div>

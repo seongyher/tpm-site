@@ -13,7 +13,7 @@ import { browserRuntimeGlobals, unsafeNumericGlobals } from "./restrictions";
 export function createAstroConfigs(): readonly ConfigWithExtends[] {
   return [
     {
-      files: ["src/**/*.astro"],
+      files: ["apps/studio/src/**/*.astro", "src/**/*.astro"],
       plugins: {
         jsdoc,
         "no-unsanitized": noUnsanitized,

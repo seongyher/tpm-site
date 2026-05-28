@@ -3,6 +3,8 @@ import type { KnipConfig } from "knip";
 const config = {
   entry: [
     "astro.config.ts",
+    "apps/studio/astro.config.mjs",
+    "apps/studio/src/**/*.{astro,ts}",
     "eslint/**/*.ts",
     "eslint.config.ts",
     "examples/platform-entrypoint-consumer/**/*.ts",
@@ -39,6 +41,8 @@ const config = {
   ignoreBinaries: ["gitleaks", "just"],
   ignoreDependencies: [
     "@astrojs/check",
+    // Invoked through `just studio-tauri-*`; Knip does not inspect justfile binaries.
+    "@tauri-apps/cli",
     "@typescript-eslint/parser",
     "@lhci/cli",
     "@tailwindcss/typography",
@@ -52,6 +56,8 @@ const config = {
   ],
   project: [
     "astro.config.ts",
+    "apps/studio/astro.config.mjs",
+    "apps/studio/src/**/*.{astro,ts}",
     "eslint/**/*.ts",
     "eslint.config.ts",
     "examples/platform-entrypoint-consumer/**/*.ts",

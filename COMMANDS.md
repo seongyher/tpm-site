@@ -58,6 +58,18 @@ used by browser-backed tests.
 | `just release-check` | Run the full release gate used before handoff, including Markdown review.  |
 | `just fix`           | Run automatic JS/TS/Astro/Tailwind, Markdown/MDX, package, and Rust fixes. |
 
+## Studio Shell
+
+| Command                     | Purpose                                                       |
+| --------------------------- | ------------------------------------------------------------- |
+| `just studio-dev`           | Start the static Studio frontend shell in Astro dev mode.     |
+| `just studio-build`         | Build the static Studio frontend shell into `dist/studio`.    |
+| `just studio-check`         | Type-check the Studio frontend shell with warnings as errors. |
+| `just studio-preview`       | Preview an existing built Studio frontend shell.              |
+| `just studio-preview-fresh` | Build, then preview the static Studio frontend shell.         |
+| `just studio-tauri-dev`     | Start the desktop Studio shell in Tauri dev mode.             |
+| `just studio-tauri-build`   | Build the desktop Studio shell with the static Astro shell.   |
+
 ## Author And Site Checks
 
 | Command                  | Purpose                                                               |

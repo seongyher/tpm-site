@@ -215,6 +215,37 @@ docs-site-preview-fresh *args:
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just build-release
     SITE_INSTANCE_ROOT=examples/docs-site SITE_OUTPUT_DIR=dist/examples/docs-site just preview {{args}}
 
+# Start the static Studio frontend shell in Astro dev mode.
+studio-dev *args:
+    ./node_modules/.bin/astro dev --root apps/studio {{args}}
+
+# Build the static Studio frontend shell.
+studio-build *args:
+    ./node_modules/.bin/astro build --root apps/studio {{args}}
+
+# Type-check the static Studio frontend shell with warnings as failures.
+studio-check:
+    ./node_modules/.bin/astro check --root apps/studio --minimumFailingSeverity warning --minimumSeverity warning
+
+# Preview the built Studio frontend shell.
+studio-preview *args:
+    ./node_modules/.bin/astro preview --root apps/studio {{args}}
+
+# Build, then preview the static Studio frontend shell.
+studio-preview-fresh *args:
+    just studio-build
+    just studio-preview {{args}}
+
+# Start the TPM Studio Tauri shell in development mode.
+[working-directory: 'apps/studio']
+studio-tauri-dev *args:
+    ../../node_modules/.bin/tauri dev {{args}}
+
+# Build the TPM Studio Tauri shell.
+[working-directory: 'apps/studio']
+studio-tauri-build *args:
+    ../../node_modules/.bin/tauri build {{args}}
+
 # Build the private component catalog.
 catalog-build:
     PLATFORM_COMPONENT_CATALOG=true SITE_OUTPUT_DIR=dist-catalog just build
@@ -240,8 +271,8 @@ catalog-preview-fresh *args:
 platform-check *args:
     just _xtask platform-check {{args}}
 
-# Type-check Astro and repository TypeScript tooling.
-typecheck: typecheck-astro typecheck-tools
+# Type-check Astro, Studio, and repository TypeScript tooling.
+typecheck: typecheck-astro studio-check typecheck-tools
 
 # Run Astro typechecking with warnings as failures.
 typecheck-astro:

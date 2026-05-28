@@ -440,7 +440,7 @@ mod tests {
 
     use std::path::{Path, PathBuf};
 
-    use super::run;
+    use super::{OperationResult, OutputFormat, run, write_operation};
     use tpm_core::CommandExit;
 
     fn fixture_root() -> PathBuf {
@@ -576,6 +576,22 @@ mod tests {
         assert!(output.contains("\"operationId\": \"workspace.status\""));
         assert!(output.contains("\"status\": \"success\""));
         assert!(output.contains("\"source artifacts: 3\""));
+    }
+
+    #[test]
+    fn cli_json_renderer_emits_shared_workspace_status_fixture() {
+        let fixture =
+            include_str!("../../../tests/fixtures/rust-operations/workspace-status-warning.json");
+        let result: OperationResult =
+            serde_json::from_str(fixture).expect("shared operation fixture should deserialize");
+        let mut output = Vec::new();
+
+        let exit = write_operation(&result, OutputFormat::Json, &mut output)
+            .expect("CLI JSON renderer should write fixture output");
+        let output = String::from_utf8(output).expect("CLI output should be UTF-8");
+
+        assert_eq!(exit, CommandExit::Success);
+        assert_eq!(output.trim_end(), fixture.trim_end());
     }
 
     #[test]

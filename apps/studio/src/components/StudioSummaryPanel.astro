@@ -1,0 +1,54 @@
+---
+import type { StudioOperationResult } from "../data/read-only-operation";
+
+interface Props {
+  operation: StudioOperationResult;
+}
+
+const { operation } = Astro.props;
+
+const workspace = operation.request.workspace ?? "not provided";
+const diagnosticCount = operation.diagnostics.diagnostics.length;
+---
+
+<section
+  class="border-border bg-panel shadow-panel grid gap-5 rounded-lg border p-4 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,26rem)] lg:p-6"
+  aria-labelledby="studio-summary"
+>
+  <div class="max-w-5xl">
+    <p
+      class="text-muted-foreground mb-1 text-xs font-bold tracking-normal uppercase"
+    >
+      {operation.request.operationId}
+    </p>
+    <h2
+      id="studio-summary"
+      class="text-3xl leading-none font-bold tracking-normal sm:text-5xl"
+    >
+      {operation.summary.title}
+    </h2>
+    <p
+      class="text-muted-foreground mt-4 max-w-4xl text-base leading-7 sm:text-lg"
+    >
+      {operation.summary.details.join(" · ")}
+    </p>
+  </div>
+  <dl class="grid gap-3" aria-label="Workspace summary">
+    <div class="border-border bg-panel-muted rounded-md border p-3">
+      <dt class="text-muted-foreground text-xs font-bold">Workspace</dt>
+      <dd class="mt-1 text-base font-bold [overflow-wrap:anywhere]">
+        {workspace}
+      </dd>
+    </div>
+    <div class="border-border bg-panel-muted rounded-md border p-3">
+      <dt class="text-muted-foreground text-xs font-bold">Interface</dt>
+      <dd class="mt-1 text-base font-bold">
+        {operation.request.interface.toUpperCase()}
+      </dd>
+    </div>
+    <div class="border-border bg-panel-muted rounded-md border p-3">
+      <dt class="text-muted-foreground text-xs font-bold">Diagnostics</dt>
+      <dd class="mt-1 text-base font-bold">{diagnosticCount}</dd>
+    </div>
+  </dl>
+</section>

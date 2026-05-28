@@ -1,0 +1,39 @@
+---
+import StatusBadge from "./StatusBadge.astro";
+import {
+  operationStatusLabel,
+  operationStatusTone,
+  type StudioOperationResult,
+} from "../data/read-only-operation";
+
+interface Props {
+  operation: StudioOperationResult;
+}
+
+const { operation } = Astro.props;
+---
+
+<header
+  class="border-border bg-panel flex flex-col gap-4 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8"
+>
+  <a
+    class="border-border bg-panel shadow-panel sr-only rounded-sm border px-3 py-2 focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-20"
+    href="#overview"
+  >
+    Skip to studio overview
+  </a>
+  <div class="min-w-0">
+    <p
+      class="text-muted-foreground mb-1 text-xs font-bold tracking-normal uppercase"
+    >
+      TPM Studio
+    </p>
+    <h1 class="text-xl leading-tight font-bold tracking-normal sm:text-2xl">
+      Publishing workspace
+    </h1>
+  </div>
+  <StatusBadge
+    label={operationStatusLabel(operation.status)}
+    tone={operationStatusTone(operation.status)}
+  />
+</header>

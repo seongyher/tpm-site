@@ -121,7 +121,12 @@ that detail.
 - Milestone 8: define operation fixture format and CLI/core parity for first
   read/check/preview operations.
 - Milestone 10: add provider capability and mock-provider parity fixtures.
-- Milestone 11: prove read-only GUI consumes core operation results.
+- Milestone 11: prove read-only GUI consumes core operation results. The first
+  concrete guard is documented in
+  [STUDIO_CLI_GUI_PARITY.md](./STUDIO_CLI_GUI_PARITY.md): the CLI JSON renderer
+  emits the shared `workspace.status` fixture exactly, and the Studio fallback
+  fixture is the same operation envelope with only `request.interface` changed
+  to `gui`.
 - Milestone 12: add authoring, preview, publish, rollback, migration, and GUI
   parity fixtures.
 - Milestone 13: add MCP resources/tools and safety parity fixtures.

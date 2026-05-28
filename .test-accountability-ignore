@@ -103,3 +103,10 @@ examples/docs-site/**
 # exercised by starters:check, starter matrix tests, site doctor checks, and
 # starter build smoke checks rather than mirrored unit tests for each file.
 examples/starters/**
+
+# Approved exception: The first static Studio shell is covered as an app
+# boundary by tests/config/studio-shell.test.ts, the Astro/Tauri build gates,
+# Rust workspace checks, and Tauri capability-policy checks. Individual
+# mirrored tests for each placeholder Astro component would overfit the current
+# read-only scaffold before operation-backed GUI behavior exists.
+apps/studio/**

@@ -46,6 +46,31 @@ the advisory allows. Do not add a direct dependency only to influence the
 resolver if the package is not imported by repo code; unused dependency checks
 should stay clean.
 
+## Rust Supply-Chain Policy
+
+`just rust-deny` runs `cargo-deny` as part of the blocking Rust gate. It checks
+advisories, yanked crates, duplicate dependency versions, licenses, and crate
+sources for the Rust operation workspace and the studio shell.
+
+The repo keeps duplicate dependency versions denied for repo-owned operation
+crates. The Tauri desktop shell has a narrowly documented duplicate-version
+skip-tree for Tauri's platform graph because Tauri currently pulls distinct
+transitive versions across desktop/mobile, build-time/codegen, and OS-specific
+paths. That exception belongs to the Tauri shell only and should be reviewed on
+every Tauri upgrade.
+
+The current Tauri graph also requires explicit advisory ignores for
+informational unmaintained advisories in the Linux GTK3 stack and `urlpattern`
+Unicode support crates. These are not direct repo-owned dependencies and no
+safe upgrade is currently available through Tauri. New vulnerability advisories
+must not be added to the ignore list without a separate risk review and
+remediation plan.
+
+The Rust license allow-list is intentionally explicit. Adding a new Rust
+dependency may require adding an OSI/free license to `deny.toml`; do that only
+after checking the dependency path and documenting any non-obvious policy
+tradeoff.
+
 ## Secret Policy
 
 Secret-like data must not enter source, committed local env files, generated
