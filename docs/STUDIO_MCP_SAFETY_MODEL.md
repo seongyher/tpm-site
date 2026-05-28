@@ -52,10 +52,11 @@ Read-only resources should expose structured snapshots:
 Resources should be stable enough for agents to reason over without scraping
 HTML or logs.
 
-The first implemented resource and read-only tool skeleton is documented in
+The implemented resource, tool, plan, and apply-gate contract is documented in
 [`STUDIO_MCP_RESOURCE_CONTRACTS.md`](./STUDIO_MCP_RESOURCE_CONTRACTS.md). It is
-transport-agnostic, read-only, and wraps existing Rust operation results instead
-of inventing an MCP-only diagnostics or workspace model.
+transport-agnostic and wraps existing Rust operation results instead of
+inventing an MCP-only diagnostics, workspace, preview, release, or publish
+model.
 
 ## Tool Classes
 
@@ -71,6 +72,18 @@ of inventing an MCP-only diagnostics or workspace model.
 
 Tools should call headless core operations. They should not edit files or call
 providers directly.
+
+Current implementation status:
+
+- inspection and report tools are available for workspace status, site
+  diagnostics, resource discovery, adapter-capability fallback, Studio
+  settings/content/media plans, preview reports, release plans, publish plans,
+  and workflow verification;
+- plan tools are `plan-only` and return shared operation envelopes with
+  `request.interface: "mcp"`;
+- apply tools exist only as gates. They require write/publish scopes, then
+  return `unsupported` until source/provider mutation operations exist in the
+  shared core.
 
 ## Permission Scopes
 
@@ -96,6 +109,10 @@ MCP scopes should map to platform scopes:
 
 Scope absence should omit tools where possible and return explicit diagnostics
 where a caller attempts a forbidden action.
+
+The first implemented permission set grants safe inspect/report/plan scopes by
+default and withholds write/publish scopes. The withheld scopes are still
+modeled so apply requests can fail before any mutation path is considered.
 
 ## Plan And Apply
 
@@ -123,6 +140,11 @@ Apply request:
 
 Apply should reject stale plans, changed source snapshots, missing scopes,
 blocking diagnostics, and missing credentials.
+
+In the current transport-agnostic crate, apply tools stop earlier than this:
+they reject missing write/publish scopes, and even when those scopes are
+present they return `TPM-MCP-APPLY-GATE-UNAVAILABLE`. This is intentional. MCP
+must not become the first implementation of source/provider mutation semantics.
 
 ## Tool Result Schema
 
@@ -197,6 +219,19 @@ Later implementation should add fixtures for:
 
 Tests should assert that MCP results match the same diagnostic and operation
 schemas used by CLI and GUI.
+
+Current Milestone 13 tests cover the implemented subset:
+
+- resource and tool catalog order;
+- exact wrapping of shared Studio preview, release, and publish operation
+  results;
+- default read/report/plan access;
+- missing-scope permission denial;
+- apply-gate unsupported responses after explicit write/publish scopes;
+- adapter-capability unsupported diagnostics;
+- secret-handle redaction and absence from serialized MCP responses;
+- deterministic audit events for read-only, plan-only, permission-denied,
+  unsupported, and rejected apply-gate paths.
 
 ## Handoff
 
