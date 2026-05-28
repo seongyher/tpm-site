@@ -1,0 +1,141 @@
+---
+import BrandLink from "../../components/navigation/BrandLink.astro";
+import CategoryGroup from "../../components/navigation/CategoryGroup.astro";
+import CategoryTree from "../../components/navigation/CategoryTree.astro";
+import MobileMenu from "../../components/navigation/MobileMenu.astro";
+import PrimaryNav from "../../components/navigation/PrimaryNav.astro";
+import SearchForm from "../../components/navigation/SearchForm.astro";
+import SearchReveal from "../../components/navigation/SearchReveal.astro";
+import SectionNav from "../../components/navigation/SectionNav.astro";
+import SectionNavItem from "../../components/navigation/SectionNavItem.astro";
+import SupportLink from "../../components/navigation/SupportLink.astro";
+import ThemeToggle from "../../components/navigation/ThemeToggle.astro";
+import {
+  primaryNavigationItems,
+  type SectionNavItem as SectionNavItemViewModel,
+} from "../../lib/navigation";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  navigationItems: readonly SectionNavItemViewModel[];
+}
+
+const { navigationItems } = Astro.props;
+const [primarySectionItem, secondarySectionItem] = navigationItems;
+
+if (primarySectionItem === undefined || secondarySectionItem === undefined) {
+  throw new Error("Navigation catalog section requires two section fixtures.");
+}
+---
+
+<CatalogSection
+  title="Navigation Components"
+  description="Static navigation and discovery components using semantic links, forms, and disclosure."
+>
+  <CatalogExample
+    title="BrandLink"
+    description="Publication identity link with truncation for narrow spaces."
+    componentPath="src/components/navigation/BrandLink.astro"
+  >
+    <div class="max-w-64">
+      <BrandLink />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="PrimaryNav"
+    description="Desktop navigation with current-page state."
+    componentPath="src/components/navigation/PrimaryNav.astro"
+  >
+    <PrimaryNav currentPath="/articles/" />
+  </CatalogExample>
+
+  <CatalogExample
+    title="SearchForm"
+    description="Semantic search form that can shrink inside header layouts."
+    componentPath="src/components/navigation/SearchForm.astro"
+  >
+    <div class="max-w-md">
+      <SearchForm inputId="catalog-navigation-search" />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="SearchReveal"
+    description="Compact header search action that reveals the semantic search form."
+    componentPath="src/components/navigation/SearchReveal.astro"
+  >
+    <SearchReveal popoverId="catalog-search-reveal" />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ThemeToggle"
+    description="Small header action with keyboard focus and theme-controller hook."
+    componentPath="src/components/navigation/ThemeToggle.astro"
+  >
+    <ThemeToggle />
+  </CatalogExample>
+
+  <CatalogExample
+    title="SupportLink"
+    description="Reusable support call to action for header, footer, and endcap surfaces."
+    componentPath="src/components/navigation/SupportLink.astro"
+  >
+    <SupportLink />
+  </CatalogExample>
+
+  <CatalogExample
+    title="SectionNavItem"
+    description="One category disclosure with current article and long-title wrapping."
+    componentPath="src/components/navigation/SectionNavItem.astro"
+  >
+    <ol class="max-w-sm">
+      <SectionNavItem item={primarySectionItem} />
+    </ol>
+  </CatalogExample>
+
+  <CatalogExample
+    title="CategoryGroup"
+    description="Category-named wrapper for the same disclosure behavior."
+    componentPath="src/components/navigation/CategoryGroup.astro"
+  >
+    <ol class="max-w-sm">
+      <CategoryGroup item={secondarySectionItem} />
+    </ol>
+  </CatalogExample>
+
+  <CatalogExample
+    title="CategoryTree"
+    description="All-category discovery tree for desktop and mobile surfaces."
+    componentPath="src/components/navigation/CategoryTree.astro"
+  >
+    <div class="max-w-sm">
+      <CategoryTree items={navigationItems} />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="SectionNav"
+    description="Category discovery block with heading and tree."
+    componentPath="src/components/navigation/SectionNav.astro"
+  >
+    <div class="max-w-sm">
+      <SectionNav items={navigationItems} />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="MobileMenu"
+    description="Narrow navigation disclosure containing search, top links, theme, support, and categories."
+    componentPath="src/components/navigation/MobileMenu.astro"
+  >
+    <div class="relative flex justify-end">
+      <MobileMenu
+        currentPath="/articles/"
+        categoryItems={navigationItems}
+        primaryItems={primaryNavigationItems()}
+      />
+    </div>
+  </CatalogExample>
+</CatalogSection>

@@ -1,0 +1,136 @@
+---
+import type { ImageMetadata } from "astro";
+
+import HomeAnnouncementBlock from "../../components/blocks/HomeAnnouncementBlock.astro";
+import HomeArchiveLinksBlock from "../../components/blocks/HomeArchiveLinksBlock.astro";
+import HomeCategoryOverviewBlock from "../../components/blocks/HomeCategoryOverviewBlock.astro";
+import HomeFeaturedArticlesBlock from "../../components/blocks/HomeFeaturedArticlesBlock.astro";
+import HomeHeroBlock from "../../components/blocks/HomeHeroBlock.astro";
+import HomeLatestArticleBlock from "../../components/blocks/HomeLatestArticleBlock.astro";
+import type { ArticleListItem } from "../../lib/article-list";
+import type { SectionNavItem } from "../../lib/navigation";
+import type { SupportActionsViewModel } from "../../lib/support";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  articleItems: readonly ArticleListItem[];
+  articleItemsWithMedia: readonly ArticleListItem[];
+  navigationItems: readonly SectionNavItem[];
+  sampleDarkImage: ImageMetadata;
+  sampleImage: ImageMetadata;
+  supportActions: SupportActionsViewModel;
+  supportUrl: string;
+}
+
+const {
+  articleItems,
+  articleItemsWithMedia,
+  navigationItems,
+  sampleDarkImage,
+  sampleImage,
+  supportActions,
+  supportUrl,
+} = Astro.props;
+const [primaryArticleItem] = articleItems;
+
+if (primaryArticleItem === undefined) {
+  throw new Error("Homepage catalog section requires one article fixture.");
+}
+---
+
+<CatalogSection
+  title="Homepage Blocks"
+  description="Composable homepage sections with normal, narrow, long-content, and empty-state examples."
+>
+  <CatalogExample
+    title="HomeHeroBlock"
+    description="Brand image, tagline, and calls to action."
+    componentPath="src/components/blocks/HomeHeroBlock.astro"
+  >
+    <div class="grid gap-8">
+      <HomeHeroBlock
+        lightImage={sampleImage}
+        darkImage={sampleDarkImage}
+        headingTitle="Catalog homepage hero"
+        imageAlt="Catalog homepage hero"
+        support={supportActions}
+        tagline="A reusable platform homepage hero with configurable calls to action."
+      />
+      <div class="max-w-xs">
+        <HomeHeroBlock
+          lightImage={sampleImage}
+          darkImage={sampleDarkImage}
+          headingTitle="Catalog narrow homepage hero"
+          imageAlt="Catalog homepage hero narrow preview"
+          support={supportActions}
+          tagline="A deliberately narrow example that checks wrapping for the homepage hero tagline."
+        />
+      </div>
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="HomeAnnouncementBlock"
+    description="Announcement artwork with editable Markdown prose."
+    componentPath="src/components/blocks/HomeAnnouncementBlock.astro"
+  >
+    <HomeAnnouncementBlock
+      image={sampleImage}
+      imageAlt="Catalog announcement artwork"
+    >
+      <p>
+        This fixture announcement includes an <a href={supportUrl}>
+          external support link
+        </a> without depending on a live site account.
+      </p>
+    </HomeAnnouncementBlock>
+  </CatalogExample>
+
+  <CatalogExample
+    title="HomeLatestArticleBlock"
+    description="Latest article teaser and empty state."
+    componentPath="src/components/blocks/HomeLatestArticleBlock.astro"
+  >
+    <div class="grid gap-8">
+      <HomeLatestArticleBlock
+        image={sampleImage}
+        imageAlt={primaryArticleItem.title}
+        item={primaryArticleItem}
+      />
+      <HomeLatestArticleBlock
+        image={sampleImage}
+        imageAlt="Missing latest article"
+        item={undefined}
+        title="Latest Empty State"
+      />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="HomeFeaturedArticlesBlock"
+    description="Start-here article list and missing-content state."
+    componentPath="src/components/blocks/HomeFeaturedArticlesBlock.astro"
+  >
+    <div class="grid gap-8">
+      <HomeFeaturedArticlesBlock items={articleItemsWithMedia} />
+      <HomeFeaturedArticlesBlock items={[]} title="Featured Empty State" />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="HomeCategoryOverviewBlock"
+    description="Category discovery grid using navigation data."
+    componentPath="src/components/blocks/HomeCategoryOverviewBlock.astro"
+  >
+    <HomeCategoryOverviewBlock items={navigationItems} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="HomeArchiveLinksBlock"
+    description="Archive, categories, and RSS link block."
+    componentPath="src/components/blocks/HomeArchiveLinksBlock.astro"
+  >
+    <HomeArchiveLinksBlock />
+  </CatalogExample>
+</CatalogSection>

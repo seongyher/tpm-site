@@ -23,6 +23,61 @@ code and frontend tests. PDF generation is the explicit legacy exception:
 `scripts/build/generate-article-pdfs.ts` and the `build-pdf` recipe stay as-is
 and are not ported to Rust in this migration.
 
+## Active Large-File Refactor Pass
+
+This pass reduces high-risk large files without changing product behavior. The
+goal is to improve navigability, testability, and future change safety by
+splitting mixed responsibilities behind stable public import paths and command
+surfaces.
+
+### Milestone LF01: Design And Scope
+
+- [x] Write a concise design for the large-file splits, including invariants,
+      module boundaries, migration order, and verification gates.
+- [x] Review the design against the engineering philosophy and refine it until
+      the implementation scope is clear and behavior-preserving.
+- [x] Break the selected refactors into implementation milestones before code
+      changes.
+
+### Milestone LF02: Xtask Structural Split
+
+- [x] Split the monolithic xtask task implementation into focused internal
+      modules while preserving `just` behavior and public crate entrypoints.
+- [x] Move reusable filesystem, workspace, external-command, content, asset,
+      redirect, and generated-output helpers behind testable seams.
+- [x] Move remaining command adapters out of the xtask root so `tasks.rs`
+      stays a router over focused task modules.
+- [x] Keep the user-facing `tpm` CLI separate from internal repository
+      automation.
+- [x] Run focused Rust tests after the split.
+
+### Milestone LF03: Component Catalog Structural Split
+
+- [x] Split the private component catalog into section modules over existing
+      fixture modules
+      while preserving rendered catalog behavior.
+- [x] Extract the remaining article catalog section so the catalog root stays
+      page-level orchestration instead of a mixed section implementation.
+- [x] Keep catalog sections narrow, domain-oriented, and easy to extend.
+- [x] Run catalog/accountability checks after the split.
+
+### Milestone LF04: Platform Domain Split Review
+
+- [x] Re-check `extensions`, `studio-models`, metadata/media policy, deployment
+      adapters, and AST plugin files after the first splits.
+- [x] Confirm no additional high-confidence behavior-preserving platform splits
+      should be taken in this pass without contract-level domain work.
+- [x] Record any intentionally deferred large-file candidates with reasons and
+      resume triggers.
+
+### Milestone LF05: Verification And Handoff
+
+- [x] Run formatting, type/Rust gates, coverage signals, docs checks, catalog
+      checks, and release checks as appropriate for the touched surfaces.
+- [x] Update docs if the new module organization changes developer-facing
+      guidance.
+- [x] Report completed splits and any remaining justified large files.
+
 ## Active Rust And Just Tooling Quality Pass
 
 This pass tightens the newly migrated Rust/`just` tooling after the command

@@ -1,0 +1,107 @@
+---
+import { Search } from "lucide-astro";
+
+import MainFrame from "../../components/layout/MainFrame.astro";
+import PageFrame from "../../components/layout/PageFrame.astro";
+import PriorityInlineRow from "../../components/layout/PriorityInlineRow.astro";
+import SiteFooter from "../../components/layout/SiteFooter.astro";
+import SiteHeader from "../../components/layout/SiteHeader.astro";
+import BrandLink from "../../components/navigation/BrandLink.astro";
+import ActionCluster from "../../components/ui/ActionCluster.astro";
+import IconButton from "../../components/ui/IconButton.astro";
+import LinkButton from "../../components/ui/LinkButton.astro";
+import TextLink from "../../components/ui/TextLink.astro";
+import {
+  primaryNavigationItems,
+  type SectionNavItem,
+} from "../../lib/navigation";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  longActionLabel: string;
+  navigationItems: readonly SectionNavItem[];
+  supportUrl: string;
+}
+
+const { longActionLabel, navigationItems, supportUrl } = Astro.props;
+---
+
+<CatalogSection
+  title="Layout Components"
+  description="Page-shell components that compose navigation, sidebars, content, and footer surfaces."
+>
+  <CatalogExample
+    title="PriorityInlineRow"
+    description="Start, centered, and end slots where the center remains geometrically centered."
+    componentPath="src/components/layout/PriorityInlineRow.astro"
+  >
+    <PriorityInlineRow
+      class="border-border bg-card rounded-sm border p-3"
+      aria-label="Catalog priority row"
+    >
+      <ActionCluster slot="start" gap="xs">
+        <IconButton label="Open catalog menu">
+          <Search size={18} aria-hidden="true" />
+        </IconButton>
+      </ActionCluster>
+      <BrandLink slot="center" class="max-w-full text-sm sm:text-base" />
+      <ActionCluster slot="end" align="end" gap="xs">
+        <TextLink href="/articles/">Articles</TextLink>
+        <LinkButton href={supportUrl} class="min-h-8 px-3 py-1.5 text-sm">
+          {longActionLabel}
+        </LinkButton>
+      </ActionCluster>
+    </PriorityInlineRow>
+  </CatalogExample>
+
+  <CatalogExample
+    title="SiteHeader"
+    description="Responsive header composed from navigation primitives."
+    componentPath="src/components/layout/SiteHeader.astro"
+  >
+    <SiteHeader
+      currentPath="/articles/"
+      categoryItems={navigationItems}
+      primaryItems={primaryNavigationItems()}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="MainFrame"
+    description="Desktop sidebar plus main content composition."
+    componentPath="src/components/layout/MainFrame.astro"
+  >
+    <div class="max-h-96 overflow-hidden border">
+      <MainFrame navigationItems={navigationItems}>
+        <PageFrame spacing="sm">
+          <h2 class="text-foreground text-xl font-semibold">
+            Main content slot
+          </h2>
+          <p class="text-muted-foreground">
+            Layout frames preserve the content region while sidebar discovery
+            remains reusable.
+          </p>
+        </PageFrame>
+      </MainFrame>
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="SiteFooter"
+    description="Publication footer with categories and support action."
+    componentPath="src/components/layout/SiteFooter.astro"
+  >
+    <SiteFooter navigationItems={navigationItems} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="PageFrame"
+    description="Generic page content width and vertical rhythm."
+    componentPath="src/components/layout/PageFrame.astro"
+  >
+    <PageFrame spacing="sm" size="prose">
+      <p>PageFrame gives non-article pages a predictable responsive measure.</p>
+    </PageFrame>
+  </CatalogExample>
+</CatalogSection>
