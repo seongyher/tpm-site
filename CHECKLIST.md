@@ -158,6 +158,152 @@ over-application of abstractions.
 - [x] Review the revised guide for overzealous or misleading instructions and
       verify documentation checks.
 
+## Active Milestone 13: MCP Automation And Agent Safety
+
+This pass implements as much of Milestone 13 as is currently unblocked. The
+read-only MCP resource skeleton is startable now. Read-only tools and write
+safety can only advance to the point where they consume the shared operation
+model without inventing capability or publish/apply contracts that belong to
+Milestones 10 and 12.
+
+### Milestone 13.1: Read Relevant Contracts And Design Skeleton
+
+- [x] Read the MCP safety model, headless core contract, Rust operation
+      contracts, Rust engineering guide, and Linear issue details for
+      `IRK-197`, `IRK-199`, `IRK-201`, `IRK-200`, `IRK-202`, and `IRK-203`.
+- [x] Confirm which Milestone 13 issues are truly unblocked and record
+      blockers for the rest.
+- [x] Design the first read-only MCP resource skeleton around existing
+      operation envelopes rather than a parallel MCP-only model.
+
+### Milestone 13.2: Implement `IRK-197` Read-Only MCP Resources
+
+- [x] Add an additive Rust MCP crate with read-only resource descriptors,
+      permission defaults, response envelopes, and redaction summary.
+- [x] Wrap existing operation artifacts as MCP resources for workspace status,
+      site diagnostics, release inspection, media image report, and route
+      redirect report.
+- [x] Add unsupported adapter-capability resource diagnostics that defer to the
+      future Milestone 10 capability registry.
+- [x] Add tests for resource catalog shape, permission denial, operation
+      wrapping, unsupported capability diagnostics, and redaction.
+- [x] Update docs and verify focused Rust checks.
+
+### Milestone 13.3: Advance Unblocked MCP Tool And Safety Work
+
+- [x] Re-check `IRK-199` after `IRK-197`; implement only tool pieces that do
+      not require the Milestone 10 capability registry.
+- [x] Re-check `IRK-201` after `IRK-197`; implement only permission, audit, and
+      redaction pieces that do not require identity/credential boundaries from
+      Milestone 10.
+- [x] Record remaining blockers for `IRK-199`, `IRK-201`, `IRK-200`,
+      `IRK-202`, and `IRK-203`.
+
+Remaining blocker notes:
+
+- `IRK-199`: provider-aware adapter capability inspection still waits for
+  `IRK-181`; the unblocked read-only status, diagnostics, resource catalog,
+  and unsupported capability fallback are implemented.
+- `IRK-201`: response-local read-only permission, redaction, and audit events
+  are implemented; identity, credential references, persisted audit storage,
+  and write/publish safety gates still wait for `IRK-180` and later
+  plan/apply work.
+- `IRK-200`: waits for `IRK-199` plus the release/publish plan model.
+- `IRK-202`: waits for publish/apply maturity and the completed MCP safety
+  model.
+- `IRK-203`: waits for read-only and write-capable MCP surfaces plus GUI/CLI
+  parity fixtures.
+
+### Milestone 13.4: Linear And Handoff
+
+- [x] Attach relevant docs to completed/partially advanced Milestone 13 issues.
+- [x] Move completed issues to In Review and leave blocked issues in their
+      correct state with blocker context.
+- [x] Run appropriate final checks and summarize completed work plus remaining
+      blockers.
+## Active Milestone 10: Adapter Contracts And Provider Capability Runtime
+
+This pass implements provider-neutral adapter contracts and capability
+inspection so future GUI, CLI, MCP, and CI surfaces can ask what a configured
+provider can do before showing or executing provider-backed actions.
+
+### M10.0 Design Synthesis And Scope
+
+- [x] Re-read Milestone 10 Linear issues, adapter/capability/security docs,
+      Rust operation contracts, and Rust engineering guidance.
+- [x] Confirm the implementation shape keeps adapter contracts in shared Rust
+      operation code and does not hard-code Cloudflare, GitHub, repo-local
+      assets, or TPM assumptions into core behavior.
+- [x] Break Milestone 10 into issue-level implementation milestones with
+      verification steps.
+
+### M10.1 Source And History Adapter Contracts (IRK-177)
+
+- [x] Model source/history provider capabilities, local-only behavior,
+      restore/review support, and unsupported-operation diagnostics.
+- [x] Add tests proving local source/history works without Git and Git/GitHub
+      behavior remains optional provider behavior.
+- [x] Verify focused Rust checks for source/history contracts.
+
+### M10.2 Media And Materialization Adapter Contracts (IRK-178)
+
+- [x] Model media provider capabilities for read/write/optimize/cache/
+      materialize/migrate/delete behavior.
+- [x] Model build-time materialization, source hashes, cache invalidation, and
+      unsupported media diagnostics.
+- [x] Verify focused Rust checks for media contracts.
+
+### M10.3 Workflow, Build, And Deploy Adapter Contracts (IRK-179)
+
+- [x] Model workflow/build/deploy capabilities, dry-run publish and rollback
+      plans, manual steps, and bundled reference adapter boundaries.
+- [x] Add tests proving Cloudflare-like and static export behavior are adapter
+      profiles rather than core truth.
+- [x] Verify focused Rust checks for workflow/build/deploy contracts.
+
+### M10.4 Identity, Credential, Diagnostics, And Observability Boundaries (IRK-180)
+
+- [x] Model non-secret identity and credential references, credential
+      requirements, redaction, diagnostics import, and observability import
+      contracts.
+- [x] Add tests proving credentials are never modeled as site content and
+      redacted output cannot expose secret values.
+- [x] Verify focused Rust checks for identity/credential/diagnostic contracts.
+
+### M10.5 Capability Registry And Unsupported Diagnostics (IRK-181)
+
+- [x] Implement a capability registry that combines configured adapters into a
+      stable capability report for local-only, TPM-like, and complex publisher
+      profiles.
+- [x] Implement unsupported-operation diagnostics with provider, capability,
+      cause, and remediation.
+- [x] Add fixture-style tests for supported, unsupported, partial, manual,
+      unknown-until-authenticated, and disabled-by-policy states.
+
+### M10.6 Adapter And Extension Inspection Commands (IRK-182)
+
+- [x] Add CLI/report operation output that lists configured adapters,
+      capabilities, credential requirements, dry-run support, unsupported
+      operations, and bundled/default/extension boundaries.
+- [x] Ensure JSON output is versioned and tested without creating a separate
+      CLI-only model.
+- [x] Verify CLI command and operation fixture tests.
+
+### M10.7 Mocked-Provider Runtime Verification (IRK-183)
+
+- [x] Add mocked adapter profiles for local-only, TPM-like, and complex
+      publisher configurations.
+- [x] Verify dry-run plan fixtures, secret/credential boundaries, unsupported
+      diagnostics, and capability-driven CLI/report output.
+- [x] Run Rust checks, documentation checks, and release-relevant checks before
+      handoff.
+
+### M10.8 Linear Handoff
+
+- [x] Attach relevant docs to Milestone 10 issues.
+- [x] Add completion comments and move IRK-177 through IRK-183 and parent
+      IRK-152 to In Review.
+
 ## Active TypeScript Automation To Rust Migration
 
 This migration removes repository-owned TypeScript automation scripts from the

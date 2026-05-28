@@ -10,6 +10,7 @@ filesystem proxy, provider API proxy, or secret exfiltration path.
 Related documents:
 
 - [HEADLESS_STUDIO_CORE_CONTRACT.md](./HEADLESS_STUDIO_CORE_CONTRACT.md)
+- [STUDIO_MCP_RESOURCE_CONTRACTS.md](./STUDIO_MCP_RESOURCE_CONTRACTS.md)
 - [STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md](./STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md)
 - [STUDIO_PROVIDER_CAPABILITY_MATRIX.md](./STUDIO_PROVIDER_CAPABILITY_MATRIX.md)
 - [SUPPLY_CHAIN_AND_SECRET_POLICY.md](./SUPPLY_CHAIN_AND_SECRET_POLICY.md)
@@ -50,6 +51,11 @@ Read-only resources should expose structured snapshots:
 
 Resources should be stable enough for agents to reason over without scraping
 HTML or logs.
+
+The first implemented resource and read-only tool skeleton is documented in
+[`STUDIO_MCP_RESOURCE_CONTRACTS.md`](./STUDIO_MCP_RESOURCE_CONTRACTS.md). It is
+transport-agnostic, read-only, and wraps existing Rust operation results instead
+of inventing an MCP-only diagnostics or workspace model.
 
 ## Tool Classes
 
