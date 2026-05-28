@@ -1,0 +1,22 @@
+name: Setup Tauri Linux dependencies
+description: Install native Linux packages needed to compile the Tauri studio shell.
+
+runs:
+  using: composite
+  steps:
+    - name: Install Tauri Linux packages
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends --yes \
+          build-essential \
+          curl \
+          file \
+          libayatana-appindicator3-dev \
+          librsvg2-dev \
+          libssl-dev \
+          libwebkit2gtk-4.1-dev \
+          libxdo-dev \
+          pkg-config \
+          wget

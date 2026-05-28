@@ -1,4 +1,5 @@
 export const typedFiles = [
+  "apps/studio/src/**/*.ts",
   "astro.config.ts",
   "eslint.config.ts",
   "eslint/**/*.ts",
@@ -12,6 +13,10 @@ export const typedFiles = [
 ];
 
 export const componentFiles = [
+  "apps/studio/src/**/*.astro",
+  "apps/studio/src/components/**/*.{ts,tsx}",
+  "apps/studio/src/layouts/**/*.{ts,tsx}",
+  "apps/studio/src/pages/**/*.{ts,tsx}",
   "src/**/*.astro",
   "src/components/**/*.{ts,tsx}",
   "src/layouts/**/*.{ts,tsx}",

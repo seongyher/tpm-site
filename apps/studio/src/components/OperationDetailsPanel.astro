@@ -1,0 +1,65 @@
+---
+import StatusBadge from "./StatusBadge.astro";
+import StudioSectionHeading from "./StudioSectionHeading.astro";
+import {
+  operationStatusLabel,
+  operationStatusTone,
+  type StudioOperationResult,
+} from "../data/read-only-operation";
+
+interface Props {
+  operation: StudioOperationResult;
+}
+
+const { operation } = Astro.props;
+
+const duration =
+  "durationMs" in operation.timing
+    ? `${operation.timing.durationMs}ms`
+    : "not reported";
+---
+
+<section
+  class="border-border bg-panel shadow-panel rounded-lg border p-4 lg:p-5"
+  aria-labelledby="operation-details-heading"
+>
+  <StudioSectionHeading
+    id="operation-details-heading"
+    eyebrow="Rust operation envelope"
+    title="Operation details"
+  />
+  <div class="grid gap-3">
+    <dl
+      class="border-border bg-panel-muted grid gap-3 rounded-md border p-3 sm:grid-cols-3"
+    >
+      <div>
+        <dt class="text-muted-foreground text-xs font-bold">Status</dt>
+        <dd class="mt-1">
+          <StatusBadge
+            label={operationStatusLabel(operation.status)}
+            tone={operationStatusTone(operation.status)}
+          />
+        </dd>
+      </div>
+      <div>
+        <dt class="text-muted-foreground text-xs font-bold">Schema</dt>
+        <dd class="mt-1 text-base font-bold">
+          v{operation.schemaVersion}
+        </dd>
+      </div>
+      <div>
+        <dt class="text-muted-foreground text-xs font-bold">Duration</dt>
+        <dd class="mt-1 text-base font-bold">{duration}</dd>
+      </div>
+    </dl>
+    <ul class="grid gap-2">
+      {
+        operation.summary.details.map((detail) => (
+          <li class="border-border bg-panel-muted rounded-md border p-3 leading-6 [overflow-wrap:anywhere]">
+            {detail}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

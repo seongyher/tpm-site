@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "app": {
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'"
+    },
+    "windows": [
+      {
+        "height": 860,
+        "minHeight": 640,
+        "minWidth": 960,
+        "resizable": true,
+        "title": "TPM Studio",
+        "width": 1280
+      }
+    ]
+  },
+  "build": {
+    "beforeBuildCommand": "just studio-build",
+    "beforeDevCommand": "just studio-dev --host 127.0.0.1 --port 4323",
+    "devUrl": "http://127.0.0.1:4323",
+    "frontendDist": "../../../dist/studio"
+  },
+  "bundle": {
+    "active": false,
+    "icon": ["icons/icon.png"],
+    "targets": "all"
+  },
+  "identifier": "com.thephilosophersmeme.studio",
+  "productName": "TPM Studio",
+  "version": "0.1.0"
+}

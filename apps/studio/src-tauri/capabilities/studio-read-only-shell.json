@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "description": "Read-only shell capability for the static TPM Studio frontend. This slice grants no frontend-invokable commands.",
+  "identifier": "studio-read-only-shell",
+  "permissions": [],
+  "windows": ["main"]
+}

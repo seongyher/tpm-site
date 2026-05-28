@@ -1,0 +1,48 @@
+---
+import StudioSectionHeading from "./StudioSectionHeading.astro";
+
+interface FutureSurface {
+  copy: string;
+  id: string;
+  title: string;
+}
+
+interface Props {
+  surfaces: FutureSurface[];
+}
+
+const { surfaces } = Astro.props;
+---
+
+<section
+  class="border-border bg-panel shadow-panel rounded-lg border p-4 lg:p-5"
+  aria-labelledby="future-surfaces"
+>
+  <StudioSectionHeading
+    id="future-surfaces"
+    eyebrow="Disabled in this slice"
+    title="Future surfaces"
+  />
+  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+    {
+      surfaces.map((surface) => (
+        <article
+          class="border-border bg-panel-muted grid min-h-48 content-start rounded-md border p-4"
+          id={surface.id}
+        >
+          <h3 class="text-base leading-snug font-bold tracking-normal">
+            {surface.title}
+          </h3>
+          <p class="text-muted-foreground mt-2 leading-6">{surface.copy}</p>
+          <button
+            class="border-border bg-panel text-muted-foreground mt-4 w-max self-end rounded-sm border px-3 py-2 text-sm font-semibold"
+            type="button"
+            disabled
+          >
+            Unavailable
+          </button>
+        </article>
+      ))
+    }
+  </div>
+</section>

@@ -30,6 +30,7 @@ const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
 export default tseslint.config(
   globalIgnores([
     ".astro/",
+    "apps/studio/.astro/",
     ".lighthouseci/",
     ".unlighthouse/",
     ".wrangler/",

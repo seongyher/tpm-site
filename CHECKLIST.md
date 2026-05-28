@@ -15,6 +15,114 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 11: Tauri/Astro Studio Shell And Read-Only Product Slice
+
+This pass implements as much of Linear Milestone 11 as can be completed before
+the next real blocker. Work proceeds issue-by-issue so later GUI slices consume
+the same Rust operation contracts as the CLI instead of creating a parallel
+CMS/source model.
+
+### IRK-184: Create Astro Studio Frontend Shell
+
+- [x] Design the static Astro studio shell, including layout, read-only
+      invariants, fixture/mock strategy, command surface, responsive behavior,
+      accessibility requirements, and verification gates.
+- [x] Review and refine the design until it is implementation-ready and does
+      not imply editing, provider, credential, or publish behavior.
+- [x] Add the studio frontend app structure and static shell.
+- [x] Add command-router recipes for building, developing, and previewing the
+      studio shell without reintroducing package scripts.
+- [x] Add focused tests or configuration checks proving the shell is static,
+      fixture-friendly, and separate from the current site source model.
+- [x] Verify the shell build and relevant docs/check gates, then update
+      Linear with status and documentation links.
+
+### IRK-185: Create Tauri Shell With Minimal Capabilities
+
+- [x] Reassess blockers after IRK-184, read current Tauri guidance, and decide
+      whether the minimal shell can be implemented cleanly in this pass.
+- [x] If unblocked, design the Tauri shell, capability files, security
+      assumptions, and verification gates.
+- [x] If unblocked, implement the minimal Tauri shell and static frontend
+      packaging.
+- [x] Verify the Tauri shell build, strict Rust gate, cargo-deny policy,
+      focused config tests, and documentation updates.
+- [x] Update Linear with status and documentation links.
+
+### IRK-186: Generate Or Validate Frontend Operation Types
+
+- [x] Design the frontend operation type strategy so the studio shell consumes
+      Rust-owned operation envelopes without a parallel GUI source or
+      diagnostic model.
+- [x] Replace the hand-maintained frontend operation interface with a
+      Rust-shaped JSON operation fixture and a thin TypeScript import adapter.
+- [x] Refactor the studio shell components to render the shared operation
+      envelope while preserving the component-first Astro/Tailwind structure.
+- [x] Add Rust validation proving the frontend fixture deserializes into
+      `tpm-operations`, round-trips without unknown fields, and derives the
+      expected status from diagnostics.
+- [x] Update focused configuration tests and docs for the validated operation
+      fixture strategy.
+- [x] Verify the studio frontend, Tauri shell, Rust gates, and docs/check
+      gates, then update Linear with status and documentation links.
+
+### IRK-187 Through IRK-189: Later Read-Only GUI Slice
+
+- [x] Reassess after IRK-186 and only proceed when the required operation-type
+      binding conditions are satisfied.
+
+### IRK-187: Bind Site Status And Check Site Through Tauri Commands
+
+- [x] Design the read-only Tauri command boundary, including command names,
+      operation mapping, workspace assumptions, permission posture,
+      success/failure tests, and handoff to live rendering.
+- [x] Register `site_status` and `check_site` Tauri commands as thin adapters
+      over Rust operation functions with `OperationInterface::Gui`.
+- [x] Add command tests covering successful fixture workspaces and diagnostic
+      failure states without browser-side source parsing.
+- [x] Update focused config tests and docs for command registration, command
+      scope, and verification expectations.
+- [x] Verify Studio build/typecheck, Tauri debug build, Rust gates, focused
+      config tests, and docs/check gates, then update Linear with status and
+      documentation links.
+
+### IRK-188 Through IRK-189: Later Read-Only GUI Slice
+
+- [x] Reassess after IRK-187 and only proceed when the required live command
+      result rendering conditions are satisfied.
+
+### IRK-188: Render Status And Diagnostics In The Studio GUI
+
+- [x] Design the read-only operation rendering boundary, including static
+      fallback, Tauri invoke behavior, loading/error/empty states,
+      accessibility expectations, and verification gates.
+- [x] Add the operation runtime panel and browser controller so the GUI renders
+      fixture fallback in browser preview and live read-only Tauri operation
+      results in the desktop shell.
+- [x] Add focused tests for rendering state helpers, command wiring,
+      accessibility markers, and the absence of a separate GUI diagnostic
+      model.
+- [x] Update docs and config tests for the live read-only rendering handoff.
+- [x] Verify Studio build/typecheck, Tauri debug build, Rust gates, focused
+      frontend tests, config tests, docs/check gates, then update Linear with
+      status and documentation links.
+
+### IRK-189: Verify CLI And GUI Consume The Same Operation Fixtures
+
+- [x] Reassess after IRK-188 and only proceed when the GUI live-rendering slice
+      is verified.
+- [x] Design the CLI/GUI parity guard so it compares shared operation envelope
+      data while allowing only intentional interface-specific request metadata.
+- [x] Make the Studio fallback fixture a GUI projection of the shared Rust
+      `workspace.status` operation fixture.
+- [x] Add Rust tests proving the CLI JSON renderer emits the shared fixture and
+      the GUI fixture remains the same operation data with `interface: gui`.
+- [x] Update Studio parity docs and focused config tests for the fixture
+      contract and non-goals.
+- [x] Verify focused CLI/GUI parity tests, Studio checks, Rust gates, docs
+      checks, and release checks, then update Linear with status and
+      documentation links.
+
 ## Active Rust Engineering Guide
 
 This pass synthesizes the repo engineering philosophy, current Rust lint/tool
@@ -113,6 +221,7 @@ Remaining blocker notes:
       correct state with blocker context.
 - [x] Run appropriate final checks and summarize completed work plus remaining
       blockers.
+
 ## Active Milestone 10: Adapter Contracts And Provider Capability Runtime
 
 This pass implements provider-neutral adapter contracts and capability

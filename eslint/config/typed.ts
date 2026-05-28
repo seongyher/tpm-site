@@ -231,7 +231,11 @@ function scopeToTypedFiles(
       ...config.languageOptions,
       parserOptions: {
         ...config.languageOptions?.parserOptions,
-        project: ["./tsconfig.json", "./tsconfig.tools.json"],
+        project: [
+          "./apps/studio/tsconfig.json",
+          "./tsconfig.json",
+          "./tsconfig.tools.json",
+        ],
         tsconfigRootDir,
       },
     },

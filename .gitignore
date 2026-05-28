@@ -3,6 +3,7 @@ target/
 dist/
 dist-catalog/
 .astro/
+apps/studio/.astro/
 .wrangler/
 .DS_Store
 .env.local
@@ -14,3 +15,4 @@ test-results/
 tmp/
 .vscode/settings.json
 .unlighthouse/
+apps/studio/src-tauri/gen/

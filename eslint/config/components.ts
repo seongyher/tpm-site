@@ -16,7 +16,7 @@ import {
 export function createComponentBoundaryConfigs(): readonly ConfigWithExtends[] {
   return [
     {
-      files: ["src/**/*.{ts,tsx}"],
+      files: ["apps/studio/src/**/*.{ts,tsx}", "src/**/*.{ts,tsx}"],
       rules: {
         "no-console": "error",
       },
@@ -75,7 +75,12 @@ export function createComponentBoundaryConfigs(): readonly ConfigWithExtends[] {
 export function createSourceModuleConfigs(): readonly ConfigWithExtends[] {
   return [
     {
-      files: ["src/lib/**/*.ts", "scripts/**/*.ts", "tests/**/*.ts"],
+      files: [
+        "apps/studio/src/**/*.ts",
+        "src/lib/**/*.ts",
+        "scripts/**/*.ts",
+        "tests/**/*.ts",
+      ],
       rules: {
         "no-restricted-syntax": ["error", ...sourceModuleSyntaxRestrictions],
       },

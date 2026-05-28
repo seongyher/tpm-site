@@ -167,7 +167,9 @@ Machine-readable contracts are protected by exact JSON fixtures under
 Current fixture:
 
 - `workspace-status-warning.json`: exercises schema version, request metadata,
-  warning status, timing, and warning diagnostics.
+  warning status, timing, details, remediation, source location, and warning
+  diagnostics. The Studio read-only fallback fixture is a GUI projection of
+  this same fixture for CLI/GUI parity.
 
 Fixture policy:
 

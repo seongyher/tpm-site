@@ -810,7 +810,7 @@ mod tests {
         run_workspace_doctor, run_workspace_status, test_operation_id, test_warning,
     };
     use tpm_core::Severity;
-    use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
+    use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticLocation, DiagnosticReport};
 
     fn diagnostic_code(value: &str) -> DiagnosticCode {
         DiagnosticCode::parse(value).expect("test diagnostic code should be valid")
@@ -945,12 +945,20 @@ mod tests {
             include_str!("../../../tests/fixtures/rust-operations/workspace-status-warning.json");
         let result = OperationResult::new(
             request(),
-            OperationSummary::new("Workspace status checked"),
+            OperationSummary::new("Workspace status checked")
+                .with_detail("source roots: site/config/site.json, site/content, site/assets, site/public")
+                .with_detail("required roots: 4")
+                .with_detail("operation source: shared parity fixture"),
             OperationTiming::completed(7),
-            DiagnosticReport::from_diagnostics(vec![test_warning(
-                "TPM-OP-WARNING",
-                "Review this warning.",
-            )]),
+            DiagnosticReport::from_diagnostics(vec![
+                test_warning("TPM-OP-WARNING", "Review this warning.")
+                    .with_remediation(
+                        "Review the shared operation fixture before changing interface-specific rendering.",
+                    )
+                    .with_location(DiagnosticLocation::source(
+                        "tests/fixtures/rust-operations/workspace-status-warning.json",
+                    )),
+            ]),
         );
 
         let rendered = result.render_json_pretty()?;
