@@ -411,12 +411,14 @@ impl DiagnosticReport {
             return String::from("No diagnostics.\n");
         }
 
-        self.diagnostics
+        let mut rendered = self
+            .diagnostics
             .iter()
             .map(render_diagnostic)
             .collect::<Vec<_>>()
-            .join("\n")
-            + "\n"
+            .join("\n");
+        rendered.push('\n');
+        rendered
     }
 
     /// Renders the report as stable pretty JSON.

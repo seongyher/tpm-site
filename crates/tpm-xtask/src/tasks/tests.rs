@@ -72,9 +72,17 @@ fn write_bytes(path: &Path, contents: &[u8]) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn remove_test_dir(path: impl AsRef<Path>) {
+    match fs::remove_dir_all(path.as_ref()) {
+        Ok(()) => {}
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        Err(error) => panic!("failed to remove test directory: {error}"),
+    }
+}
+
 #[cfg(unix)]
 fn write_executable(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::PermissionsExt as _;
 
     write_text(path, contents)?;
     let mut permissions = fs::metadata(path)?.permissions();
@@ -110,7 +118,10 @@ impl CurrentDirGuard {
 
 impl Drop for CurrentDirGuard {
     fn drop(&mut self) {
-        let _ = std::env::set_current_dir(&self.previous);
+        match std::env::set_current_dir(&self.previous) {
+            Ok(()) => {}
+            Err(error) => panic!("failed to restore current directory: {error}"),
+        }
     }
 }
 
@@ -251,7 +262,7 @@ fn catalog_test_target_matches_current_playwright_suite() {
 fn build_raw_plans_astro_and_pagefind_without_spawning_tools() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("build-raw-plan");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     write_text(
         &root.join("site/config/site.json"),
         r#"{"features":{"search":true,"tags":true}}"#,
@@ -289,7 +300,7 @@ fn build_raw_plans_astro_and_pagefind_without_spawning_tools() -> Result<(), Box
         "pagefind args: {pagefind_args:?}"
     );
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -297,7 +308,7 @@ fn build_raw_plans_astro_and_pagefind_without_spawning_tools() -> Result<(), Box
 fn build_raw_skips_pagefind_when_astro_build_fails() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("build-raw-build-fails");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     write_text(
         &root.join("site/config/site.json"),
         r#"{"features":{"search":true}}"#,
@@ -318,7 +329,7 @@ fn build_raw_skips_pagefind_when_astro_build_fails() -> Result<(), Box<dyn Error
     assert_eq!(exit, CommandExit::Failure);
     assert_eq!(runner.commands.len(), 1);
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -326,7 +337,7 @@ fn build_raw_skips_pagefind_when_astro_build_fails() -> Result<(), Box<dyn Error
 fn validate_html_plans_targets_and_reports_external_failures() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("validate-html-plan");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     write_text(
         &root.join("site/config/site.json"),
         r#"{"features":{"search":true},"routes":{"articles":"/writing/","search":"/find/"}}"#,
@@ -366,7 +377,7 @@ fn validate_html_plans_targets_and_reports_external_failures() -> Result<(), Box
         String::from("HTML validation failed.\n")
     );
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -374,7 +385,7 @@ fn validate_html_plans_targets_and_reports_external_failures() -> Result<(), Box
 fn test_catalog_plans_build_then_playwright_and_reports_failures() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("catalog-plan");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     fs::create_dir_all(&root)?;
     let _cwd = CurrentDirGuard::enter(&root)?;
     let mut output = Vec::new();
@@ -420,7 +431,7 @@ fn test_catalog_plans_build_then_playwright_and_reports_failures() -> Result<(),
     );
     assert_eq!(String::from_utf8(output)?, "Catalog tests failed.\n");
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -428,7 +439,7 @@ fn test_catalog_plans_build_then_playwright_and_reports_failures() -> Result<(),
 fn test_catalog_stops_when_catalog_build_fails() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("catalog-build-fails");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     fs::create_dir_all(&root)?;
     let _cwd = CurrentDirGuard::enter(&root)?;
     let mut output = Vec::new();
@@ -446,7 +457,7 @@ fn test_catalog_stops_when_catalog_build_fails() -> Result<(), Box<dyn Error>> {
     assert_eq!(runner.commands.len(), 1);
     assert!(output.is_empty());
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -454,7 +465,7 @@ fn test_catalog_stops_when_catalog_build_fails() -> Result<(), Box<dyn Error>> {
 fn test_flake_plans_randomized_bun_test_pass() -> Result<(), Box<dyn Error>> {
     let _lock = lock_process_state();
     let root = temp_workspace("flake-plan");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     fs::create_dir_all(&root)?;
     let _cwd = CurrentDirGuard::enter(&root)?;
     let mut output = Vec::new();
@@ -485,7 +496,7 @@ fn test_flake_plans_randomized_bun_test_pass() -> Result<(), Box<dyn Error>> {
         Some(&root.to_string_lossy().into_owned())
     );
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -508,7 +519,7 @@ fn misc_helpers_cover_slug_quotes_and_reference_scanning() {
 #[test]
 fn workspace_path_and_filesystem_helpers_cover_policy_edges() -> Result<(), Box<dyn Error>> {
     let root = temp_workspace("workspace-helpers");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     let ws = workspace(&root);
     write_text(&root.join("src/b.md"), "b")?;
     write_text(&root.join("src/a.TS"), "a")?;
@@ -582,14 +593,14 @@ fn workspace_path_and_filesystem_helpers_cover_policy_edges() -> Result<(), Box<
     assert_eq!(fnv64(b"same"), fnv64(b"same"));
     assert_ne!(fnv64(b"same"), fnv64(b"different"));
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
 #[test]
 fn redirect_collection_merges_configured_and_legacy_rules() -> Result<(), Box<dyn Error>> {
     let root = temp_workspace("redirects");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     let ws = workspace(&root);
     write_text(
         &root.join("site/config/redirects.json"),
@@ -623,14 +634,14 @@ fn redirect_collection_merges_configured_and_legacy_rules() -> Result<(), Box<dy
         Some(&String::from("/announcements/update/"))
     );
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
 #[test]
 fn content_verification_reports_author_tag_path_and_media_issues() -> Result<(), Box<dyn Error>> {
     let root = temp_workspace("content");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     let ws = workspace(&root);
     write_text(
         &root.join("site/content/authors/seong.md"),
@@ -674,14 +685,14 @@ fn content_verification_reports_author_tag_path_and_media_issues() -> Result<(),
     assert!(issues.contains("filename stem is not URL-safe"));
     assert!(issues.contains("category folder is not URL-safe"));
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
 #[test]
 fn tag_normalization_handles_dry_run_write_and_invalid_tags() -> Result<(), Box<dyn Error>> {
     let root = temp_workspace("tags");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     let ws = workspace(&root);
     let article = root.join("site/content/articles/culture/essay.md");
     write_text(
@@ -708,7 +719,7 @@ fn tag_normalization_handles_dry_run_write_and_invalid_tags() -> Result<(), Box<
     assert_eq!(invalid.issues.len(), 1);
     assert!(invalid.issues[0].contains("tag must not contain"));
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -716,7 +727,7 @@ fn tag_normalization_handles_dry_run_write_and_invalid_tags() -> Result<(), Box<
 fn asset_reference_helpers_resolve_shared_unused_and_ignored_images() -> Result<(), Box<dyn Error>>
 {
     let root = temp_workspace("assets");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     let ws = workspace(&root);
     write_bytes(&root.join("site/assets/hero.png"), b"hero")?;
     write_bytes(&root.join("site/assets/shared/logo.png"), b"logo")?;
@@ -800,14 +811,14 @@ const logo = "@site/assets/shared/logo.png";"#,
         ]
     );
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
 #[test]
 fn image_duplicate_and_optimizer_helpers_cover_review_paths() -> Result<(), Box<dyn Error>> {
     let root = temp_workspace("images");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
     write_bytes(&root.join("site/assets/a.png"), b"same")?;
     write_bytes(&root.join("site/assets/b.png"), b"same")?;
     write_bytes(&root.join("site/assets/c.png"), b"different")?;
@@ -844,7 +855,7 @@ fn image_duplicate_and_optimizer_helpers_cover_review_paths() -> Result<(), Box<
     assert!(!root.join("dist/_astro/unused.png").is_file());
     assert!(root.join("dist/_astro/vector.svg").is_file());
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 
@@ -858,7 +869,7 @@ fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(),
         .lock()
         .expect("process state lock should not be poisoned");
     let root = temp_workspace("commands");
-    let _ = fs::remove_dir_all(&root);
+    remove_test_dir(&root);
 
     write_text(
         &root.join("site/config/site.json"),
@@ -1144,7 +1155,7 @@ fn repository_task_commands_cover_local_success_and_review_paths() -> Result<(),
     assert_eq!(exit, CommandExit::Failure);
     assert!(output.contains("HTML validation failed"));
 
-    let _ = fs::remove_dir_all(root);
+    remove_test_dir(root);
     Ok(())
 }
 

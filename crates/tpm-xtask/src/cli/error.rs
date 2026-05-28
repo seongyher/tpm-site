@@ -7,7 +7,7 @@
 
 use std::io::{self, Write};
 
-use clap::CommandFactory;
+use clap::CommandFactory as _;
 use tpm_core::CommandExit;
 
 use crate::cli::commands::XtaskCli;
@@ -40,7 +40,20 @@ where
         }
         clap::error::ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand
         | clap::error::ErrorKind::MissingSubcommand => write_missing_command_help(output),
-        _ => {
+        clap::error::ErrorKind::InvalidValue
+        | clap::error::ErrorKind::UnknownArgument
+        | clap::error::ErrorKind::InvalidSubcommand
+        | clap::error::ErrorKind::NoEquals
+        | clap::error::ErrorKind::ValueValidation
+        | clap::error::ErrorKind::TooManyValues
+        | clap::error::ErrorKind::TooFewValues
+        | clap::error::ErrorKind::WrongNumberOfValues
+        | clap::error::ErrorKind::ArgumentConflict
+        | clap::error::ErrorKind::MissingRequiredArgument
+        | clap::error::ErrorKind::InvalidUtf8
+        | clap::error::ErrorKind::Io
+        | clap::error::ErrorKind::Format
+        | _ => {
             write!(output, "{error}")?;
             Ok(CommandExit::UsageError)
         }

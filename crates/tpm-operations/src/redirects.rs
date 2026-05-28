@@ -156,7 +156,7 @@ fn collect_markdown_files(dir: &Path, files: &mut Vec<PathBuf>) -> io::Result<()
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             collect_markdown_files(&path, files)?;
-        } else if file_type.is_file() && markdown_path(&path) {
+        } else if markdown_path(&path) {
             files.push(path);
         }
     }
@@ -266,16 +266,15 @@ fn legacy_permalink(markdown: &str) -> Option<String> {
 }
 
 fn strip_quotes(value: &str) -> String {
-    value
-        .strip_prefix('"')
-        .and_then(|unquoted| unquoted.strip_suffix('"'))
-        .or_else(|| {
-            value
-                .strip_prefix('\'')
-                .and_then(|unquoted| unquoted.strip_suffix('\''))
-        })
+    strip_wrapping_quote(value, '"')
+        .or_else(|| strip_wrapping_quote(value, '\''))
         .unwrap_or(value)
         .to_owned()
+}
+
+fn strip_wrapping_quote(value: &str, quote: char) -> Option<&str> {
+    let unquoted = value.strip_prefix(quote)?;
+    unquoted.strip_suffix(quote)
 }
 
 fn markdown_path(path: &Path) -> bool {
@@ -430,7 +429,7 @@ mod tests {
     #[test]
     fn redirect_report_collects_config_and_legacy_rules() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("collect");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(
             &root.join("site/config/redirects.json"),
@@ -455,14 +454,14 @@ mod tests {
                 .any(|detail| detail == "redirect rules: 2")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn redirect_report_collects_announcement_legacy_rules() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("announcement-collect");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(&root.join("site/config/redirects.json"), "{}")?;
         fs::create_dir_all(root.join("site/content/articles"))?;
@@ -484,14 +483,14 @@ mod tests {
                 .any(|detail| detail == "redirect rules: 1")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn configured_redirects_trim_and_normalize_sources() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("configured");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(
             &root.join("site/config/redirects.json"),
@@ -506,7 +505,7 @@ mod tests {
             vec![(String::from("/old/path/"), String::from("/new/path/"))]
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -514,7 +513,7 @@ mod tests {
     fn collect_legacy_rules_handles_nested_announcements_and_missing_dirs()
     -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("legacy");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(
             &root.join("site/content/announcements/nested/update.mdx"),
@@ -545,7 +544,7 @@ mod tests {
             "/announcements/update/"
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -571,7 +570,7 @@ mod tests {
     #[test]
     fn legacy_redirect_conflicts_include_source_file_context() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("legacy-conflict");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(
             &root.join("site/content/articles/one.md"),
@@ -595,14 +594,14 @@ mod tests {
         assert!(error.to_string().contains("site/content/articles/two.md"));
         assert!(error.to_string().contains("conflicting redirect"));
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn redirect_report_surfaces_collect_and_workspace_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("collect-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(&root.join("site/config/redirects.json"), "not-json")?;
 
@@ -630,14 +629,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-REDIRECTS-WORKSPACE")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn redirect_report_surfaces_legacy_conflicts() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("report-legacy-conflict");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(&root.join("site/config/redirects.json"), "{}")?;
         write_file(
@@ -659,7 +658,7 @@ mod tests {
                     .contains("conflicting redirect destinations")
         }));
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 

@@ -12,7 +12,7 @@ pub(crate) mod error;
 
 use std::ffi::OsString;
 
-use clap::Parser;
+use clap::Parser as _;
 
 pub(crate) use self::commands::XtaskCommand;
 

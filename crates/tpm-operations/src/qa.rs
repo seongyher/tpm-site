@@ -584,7 +584,7 @@ mod tests {
     #[test]
     fn diagnostic_diff_operation_succeeds_for_matching_snapshots() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("same");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -610,14 +610,14 @@ mod tests {
                 .any(|detail| detail == "missing: 0")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn diagnostic_diff_operation_fails_on_changed_snapshots() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("diff");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -647,14 +647,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-MISSING")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn diagnostic_diff_operation_reports_count_changes() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("count-change");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -687,7 +687,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-COUNT")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -695,7 +695,7 @@ mod tests {
     fn diagnostic_diff_operation_reports_read_and_validation_failures() -> Result<(), Box<dyn Error>>
     {
         let root = temp_workspace("read-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -721,14 +721,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn diagnostic_diff_operation_reports_actual_read_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("actual-read-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -754,7 +754,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-DIAGNOSTIC-DIFF-READ")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -762,7 +762,7 @@ mod tests {
     fn diagnostic_diff_operation_reports_actual_validation_failures() -> Result<(), Box<dyn Error>>
     {
         let root = temp_workspace("actual-validation-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -789,14 +789,14 @@ mod tests {
                 && diagnostic.message().contains("message must not be empty")
         }));
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn qa_registry_reports_package_and_workspace_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("invalid-package");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(&root.join("package.json"), "{\"scripts\":[]}")?;
 
@@ -824,7 +824,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-QA-WORKSPACE")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -832,7 +832,7 @@ mod tests {
     fn package_scripts_accepts_missing_scripts_and_rejects_non_string_scripts()
     -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("package-scripts");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("empty.json"), "{}")?;
         write_file(
             &root.join("invalid.json"),
@@ -844,7 +844,7 @@ mod tests {
         let invalid = package_scripts(&root.join("invalid.json"));
         assert!(invalid.is_err());
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 

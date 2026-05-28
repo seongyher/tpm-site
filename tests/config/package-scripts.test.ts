@@ -95,6 +95,15 @@ describe("command surface", () => {
     }
   });
 
+  test("keeps asset review recipes aligned with typed xtask arguments", async () => {
+    const justfile = await readJustfile();
+    const reviewAssets = justRecipeBlock(justfile, "review-assets");
+
+    expect(reviewAssets).toContain("just assets-duplicates --quiet");
+    expect(reviewAssets).toContain("just assets-unused --quiet");
+    expect(reviewAssets).not.toContain("--review");
+  });
+
   test("keeps retired review-only commands out of the visible just surface", async () => {
     const justfile = await readJustfile();
     const recipes = new Set(parseJustRecipes(justfile));

@@ -176,7 +176,7 @@ fn collect_images(
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             collect_images(root, &path, ignored_patterns, images)?;
-        } else if file_type.is_file() && is_image_path(&path) {
+        } else if is_image_path(&path) {
             images.push(relative);
         }
     }
@@ -367,7 +367,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     #[cfg(unix)]
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::PermissionsExt as _;
 
     use super::{
         display_path, fnv64, glob_matches, image_is_under, is_image_path, load_ignore_patterns,
@@ -397,7 +397,7 @@ mod tests {
     #[test]
     fn image_operation_reports_location_violations() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("violation");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), b"{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -415,14 +415,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-MEDIA-IMAGE-LOCATION")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn image_operation_reports_duplicate_notes() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("duplicates");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), b"{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/public"))?;
@@ -440,14 +440,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-MEDIA-DUPLICATE-IMAGE")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn image_operation_respects_source_ignores_and_generated_dirs() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("ignored");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), b"{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -477,7 +477,7 @@ mod tests {
                 .all(|diagnostic| diagnostic.code().as_str() != "TPM-MEDIA-IMAGE-LOCATION")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -502,7 +502,7 @@ mod tests {
     #[test]
     fn image_operation_reports_scan_permission_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("scan-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), b"{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets/unreadable"))?;
@@ -521,7 +521,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-MEDIA-IMAGE-SCAN")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -567,7 +567,7 @@ mod tests {
         assert_eq!(fnv64(b"same"), fnv64(b"same"));
 
         let root = temp_workspace("helpers");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("scripts/invalid-ignore.json"), b"not-json")?;
         write_file(
             &root.join("scripts/valid-ignore.json"),
@@ -581,7 +581,7 @@ mod tests {
             vec![String::from("site/public/**")]
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 }

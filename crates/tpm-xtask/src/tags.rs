@@ -98,28 +98,19 @@ fn normalize_tag(value: &str) -> String {
 }
 
 pub(crate) fn replace_tags_block(text: &str, tags: &[String]) -> Option<String> {
-    let bounds = frontmatter_bounds(text)?;
-    let frontmatter = &text[bounds.0..bounds.1];
+    let (frontmatter, suffix) = frontmatter_and_suffix(text)?;
     let mut lines = frontmatter.lines().map(str::to_owned).collect::<Vec<_>>();
     let tags_line = lines.iter().position(|line| line.trim() == "tags:")?;
     let end = tags_block_end(&lines, tags_line);
     let mut next_block = vec![String::from("tags:")];
     next_block.extend(tags.iter().map(|tag| format!("  - {tag:?}")));
     lines.splice(tags_line..end, next_block);
-    Some(format!(
-        "{}{}{}",
-        &text[..bounds.0],
-        lines.join("\n"),
-        &text[bounds.1..]
-    ))
+    Some(format!("---\n{}\n---{suffix}", lines.join("\n")))
 }
 
-fn frontmatter_bounds(text: &str) -> Option<(usize, usize)> {
-    if !text.starts_with("---\n") {
-        return None;
-    }
-    let end = text[4..].find("\n---")?;
-    Some((4, 4 + end))
+fn frontmatter_and_suffix(text: &str) -> Option<(&str, &str)> {
+    let text = text.strip_prefix("---\n")?;
+    text.split_once("\n---")
 }
 
 fn tags_block_end(lines: &[String], tags_line: usize) -> usize {

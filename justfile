@@ -168,8 +168,8 @@ assets-unused *args:
 
 # Run duplicate and unused image review signals.
 review-assets:
-    just assets-duplicates --review --quiet
-    just assets-unused --review --quiet
+    just assets-duplicates --quiet
+    just assets-unused --quiet
 
 # Run the Rust redirect report.
 routes-redirects *args:

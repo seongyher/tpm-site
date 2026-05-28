@@ -23,8 +23,7 @@ fn collect_files(dir: &Path, extensions: &[&str], files: &mut Vec<PathBuf>) -> i
             if !ignored_dir(&path) {
                 collect_files(&path, extensions, files)?;
             }
-        } else if file_type.is_file() && (extensions.is_empty() || extension_in(&path, extensions))
-        {
+        } else if extensions.is_empty() || extension_in(&path, extensions) {
             files.push(path);
         }
     }
@@ -148,7 +147,9 @@ pub(super) fn normalize_path_components(path: &Path) -> PathBuf {
                 normalized.pop();
             }
             std::path::Component::CurDir => {}
-            other => normalized.push(other.as_os_str()),
+            other @ (std::path::Component::Prefix(_)
+            | std::path::Component::RootDir
+            | std::path::Component::Normal(_)) => normalized.push(other.as_os_str()),
         }
     }
     normalized

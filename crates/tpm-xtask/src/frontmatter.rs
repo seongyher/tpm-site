@@ -12,12 +12,10 @@ pub(crate) struct Frontmatter {
 
 impl Frontmatter {
     pub(crate) fn parse(source: &str) -> Option<Self> {
-        if !source.starts_with("---\n") {
-            return None;
-        }
-        let end = source[4..].find("\n---")?;
+        let source = source.strip_prefix("---\n")?;
+        let (text, _) = source.split_once("\n---")?;
         Some(Self {
-            text: source[4..4 + end].to_owned(),
+            text: text.to_owned(),
         })
     }
 
@@ -32,11 +30,12 @@ impl Frontmatter {
     }
 
     pub(crate) fn bool_value(&self, key: &str) -> Option<bool> {
-        self.scalar(key).and_then(|value| match value.as_str() {
+        let value = self.scalar(key)?;
+        match value.as_str() {
             "true" => Some(true),
             "false" => Some(false),
             _ => None,
-        })
+        }
     }
 
     pub(crate) fn list(&self, key: &str) -> Option<Vec<String>> {
@@ -62,15 +61,14 @@ impl Frontmatter {
 }
 
 fn strip_quotes(value: &str) -> &str {
-    value
-        .strip_prefix('"')
-        .and_then(|unquoted| unquoted.strip_suffix('"'))
-        .or_else(|| {
-            value
-                .strip_prefix('\'')
-                .and_then(|unquoted| unquoted.strip_suffix('\''))
-        })
+    strip_wrapping_quote(value, '"')
+        .or_else(|| strip_wrapping_quote(value, '\''))
         .unwrap_or(value)
+}
+
+fn strip_wrapping_quote(value: &str, quote: char) -> Option<&str> {
+    let unquoted = value.strip_prefix(quote)?;
+    unquoted.strip_suffix(quote)
 }
 
 #[cfg(test)]

@@ -600,7 +600,7 @@ fn count_files(root: &Path) -> io::Result<usize> {
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             count += count_files(&path)?;
-        } else if file_type.is_file() {
+        } else {
             count += 1;
         }
     }
@@ -662,6 +662,28 @@ fn test_warning(code: &str, message: &str) -> Diagnostic {
 }
 
 #[cfg(test)]
+pub(crate) mod test_support {
+    //! Shared helpers for operation tests.
+
+    use std::fs;
+    use std::io;
+    use std::path::Path;
+
+    /// Removes a temporary test directory, accepting an already-clean path.
+    #[expect(
+        clippy::redundant_pub_crate,
+        reason = "shared cfg(test) helper is intentionally visible to sibling test modules only"
+    )]
+    pub(super) fn remove_test_dir(path: impl AsRef<Path>) {
+        match fs::remove_dir_all(path.as_ref()) {
+            Ok(()) => {}
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+            Err(error) => panic!("failed to remove test directory: {error}"),
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
     #![expect(
         clippy::expect_used,
@@ -673,7 +695,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     #[cfg(unix)]
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::PermissionsExt as _;
 
     use super::{
         OPERATION_SCHEMA_VERSION, OperationInterface, OperationRequest, OperationResult,
@@ -928,7 +950,7 @@ mod tests {
     #[test]
     fn release_inspect_counts_nested_output_artifacts() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("release-output");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -950,7 +972,7 @@ mod tests {
                 .any(|detail| detail == "output artifacts: 2")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -958,7 +980,7 @@ mod tests {
     #[test]
     fn release_inspect_reports_output_permission_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("release-output-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -978,7 +1000,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-RELEASE-OUTPUT-READ")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -986,7 +1008,7 @@ mod tests {
     #[test]
     fn workspace_status_reports_inventory_permission_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("source-inventory-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content/unreadable"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -1005,7 +1027,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-WORKSPACE-INVENTORY")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 

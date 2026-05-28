@@ -388,7 +388,7 @@ mod tests {
     #[test]
     fn migration_baseline_reports_retired_script_notes() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("retired-scripts");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(
             &root.join("package.json"),
@@ -403,7 +403,7 @@ mod tests {
                 && diagnostic.message().contains("image assets")
         }));
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 

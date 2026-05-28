@@ -327,7 +327,7 @@ impl WorkspaceContext {
             let file_type = entry.file_type()?;
             if file_type.is_dir() {
                 self.collect_directory_artifacts(&path, kind, policy, artifacts)?;
-            } else if file_type.is_file() {
+            } else {
                 artifacts.push(self.artifact_for(kind, &path));
             }
         }
@@ -579,7 +579,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     #[cfg(unix)]
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::PermissionsExt as _;
 
     use super::{
         IgnoredPathPolicy, SourceArtifact, SourceArtifactKind, WorkspaceContext,
@@ -602,6 +602,14 @@ mod tests {
         }
         fs::write(path, contents)?;
         Ok(())
+    }
+
+    fn remove_test_dir(path: impl AsRef<Path>) {
+        match fs::remove_dir_all(path.as_ref()) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => panic!("failed to remove test directory: {error}"),
+        }
     }
 
     #[cfg(unix)]
@@ -755,9 +763,17 @@ mod tests {
                 "site/public/robots.txt",
             ]
         );
-        assert_eq!(artifacts[0].kind(), SourceArtifactKind::SiteConfig);
-        assert_eq!(artifacts[1].kind(), SourceArtifactKind::Content);
-        assert_eq!(artifacts[2].kind(), SourceArtifactKind::PublicFile);
+        assert_eq!(
+            artifacts
+                .iter()
+                .map(SourceArtifact::kind)
+                .collect::<Vec<_>>(),
+            vec![
+                SourceArtifactKind::SiteConfig,
+                SourceArtifactKind::Content,
+                SourceArtifactKind::PublicFile,
+            ]
+        );
 
         Ok(())
     }
@@ -771,7 +787,7 @@ mod tests {
             ("public", "site/public/unreadable"),
         ] {
             let root = temp_workspace(&format!("unreadable-{name}"));
-            let _ = fs::remove_dir_all(&root);
+            remove_test_dir(&root);
             write_file(&root.join("site/config/site.json"), "{}")?;
             fs::create_dir_all(root.join("site/content"))?;
             fs::create_dir_all(root.join("site/assets"))?;
@@ -786,7 +802,7 @@ mod tests {
                 result.is_err(),
                 "expected unreadable {name} source root to fail inventory"
             );
-            let _ = fs::remove_dir_all(root);
+            remove_test_dir(root);
         }
 
         Ok(())
@@ -795,7 +811,7 @@ mod tests {
     #[test]
     fn missing_paths_emit_source_mapped_diagnostics() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("missing-paths");
-        let _ = fs::remove_dir_all(&root);
+        remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
 
         let context = WorkspaceContext::from_root(&root);
@@ -816,14 +832,14 @@ mod tests {
         );
         assert!(report.render_human().contains("at source site/content"));
 
-        let _ = fs::remove_dir_all(root);
+        remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn missing_workspace_shape_reports_site_and_config_paths() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("missing-workspace-shape");
-        let _ = fs::remove_dir_all(&root);
+        remove_test_dir(&root);
         fs::create_dir_all(&root)?;
 
         let context = WorkspaceContext::from_root(&root);
@@ -847,14 +863,14 @@ mod tests {
         assert_eq!(context.display_path(context.root()), ".");
         assert!(context.inventory_source_artifacts()?.artifacts().is_empty());
 
-        let _ = fs::remove_dir_all(root);
+        remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn starter_like_workspace_inventory_uses_the_same_contract() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("starter-like");
-        let _ = fs::remove_dir_all(&root);
+        remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         write_file(&root.join("site/content/pages/about.md"), "# About")?;
         write_file(&root.join("site/assets/photo.webp"), "")?;
@@ -880,7 +896,7 @@ mod tests {
             ]
         );
 
-        let _ = fs::remove_dir_all(root);
+        remove_test_dir(root);
         Ok(())
     }
 }

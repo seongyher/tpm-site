@@ -91,7 +91,8 @@ cargo deny check
 
 These gates are intentionally strict. The workspace forbids unsafe Rust,
 promotes compiler and rustdoc warnings to blocking failures, denies public API
-documentation gaps, runs Clippy with `all`, `cargo`, `pedantic`, `nursery`, and
+documentation gaps, requires crate-level Rust docs, blocks broken or invalid
+doc links/snippets, runs Clippy with `all`, `cargo`, `pedantic`, `nursery`, and
 selected high-signal restriction lints, and treats Clippy warnings as blocking
 during the gate. The supply-chain gate rejects denied advisories, yanked
 crates, wildcard dependencies, disallowed licenses, and unknown registries or

@@ -23,6 +23,57 @@ code and frontend tests. PDF generation is the explicit legacy exception:
 `scripts/build/generate-article-pdfs.ts` and the `build-pdf` recipe stay as-is
 and are not ported to Rust in this migration.
 
+## Active Rust Strictness Decision Audit
+
+This pass documents the decision process for Rust compiler lints, Clippy
+restriction lints, rustfmt policy, and external Rust static-analysis tooling.
+Implementation belongs in a follow-up pass after the decision record is
+reviewed.
+
+- [x] Inventory current Rust workspace lint, formatting, supply-chain, and
+      command gates.
+- [x] Check the pinned Rust 1.95 rustc and Clippy lint lists against primary
+      docs.
+- [x] Classify every allow-by-default rustc lint and every Clippy restriction
+      lint as already covered, enable now, enable with immediate cleanup, not
+      available on stable, or do not enable globally.
+- [x] Classify candidate Rust QA/static-analysis tools as blocking,
+      review-only, release-only, not currently useful, or future public-API
+      tooling.
+- [x] Write
+      `agent-docs/rust-migration-research/RUST_STRICTNESS_DECISION_RECORD.md`
+      with explicit justifications.
+
+## Active Rust Strictness Implementation
+
+This pass turns the accepted strictness decisions into blocking repo policy,
+cleans up every real issue surfaced by the new checks, and verifies local gates
+against the failing GitHub CI signal before handoff.
+
+- [x] Enable accepted workspace rustc and Clippy lints from the strictness
+      decision record.
+- [x] Tighten Rust supply-chain duplicate dependency policy after verifying the
+      current workspace has no duplicate crate versions.
+- [x] Run the strict Rust gate and fix all actionable failures without
+      weakening lint policy.
+- [x] Inspect the failing GitHub CI check and apply any missing local fix.
+- [x] Run release checks after strictness and CI fixes are complete.
+
+## Active Rustdoc Example Strictness
+
+This pass treats public Rust documentation as a product surface. Public APIs
+should include a useful code example by default, and any exception should be
+explicitly justified at the item.
+
+- [x] Enable stricter stable rustdoc lints for crate docs, backticks, and
+      explicit warn-by-default documentation checks.
+- [x] Verify the desired doc-example lint status and document why
+      `rustdoc::missing_doc_code_examples` cannot be a stable blocking lint
+      yet.
+- [x] Add useful examples or justified local exceptions for every new rustdoc
+      failure.
+- [ ] Run Rust and release-relevant checks after the rustdoc policy change.
+
 ## Active Large-File Refactor Pass
 
 This pass reduces high-risk large files without changing product behavior. The

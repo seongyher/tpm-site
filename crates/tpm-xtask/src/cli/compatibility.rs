@@ -58,7 +58,7 @@ mod tests {
     use super::handle_compatibility;
 
     #[cfg(unix)]
-    use std::os::unix::ffi::OsStringExt;
+    use std::os::unix::ffi::OsStringExt as _;
 
     fn run(values: &[&str]) -> Option<(CommandExit, String)> {
         let args = values.iter().map(OsString::from).collect::<Vec<_>>();

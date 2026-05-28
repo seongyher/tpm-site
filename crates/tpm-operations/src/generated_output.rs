@@ -118,7 +118,7 @@ fn collect_output(dir: &Path, inventory: &mut OutputInventory) -> io::Result<()>
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             collect_output(&path, inventory)?;
-        } else if file_type.is_file() {
+        } else {
             inventory.files += 1;
             if path.file_name().and_then(|name| name.to_str()) == Some("_redirects") {
                 inventory.has_redirects = true;
@@ -167,7 +167,7 @@ mod tests {
     use std::path::{Path, PathBuf};
 
     #[cfg(unix)]
-    use std::os::unix::fs::PermissionsExt;
+    use std::os::unix::fs::PermissionsExt as _;
 
     use super::{display_path, run_generated_output_bridge};
     use crate::{OperationInterface, OperationStatus};
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn output_bridge_warns_when_dist_is_missing() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("missing");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -211,14 +211,14 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-OUTPUT-MISSING")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
     #[test]
     fn output_bridge_reports_dist_inventory() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("inventory");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -257,7 +257,7 @@ mod tests {
                 .any(|detail| detail == "has _redirects: true")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 
@@ -265,7 +265,7 @@ mod tests {
     #[test]
     fn output_bridge_reports_dist_scan_failures() -> Result<(), Box<dyn Error>> {
         let root = temp_workspace("scan-failure");
-        let _ = fs::remove_dir_all(&root);
+        crate::test_support::remove_test_dir(&root);
         write_file(&root.join("site/config/site.json"), "{}")?;
         fs::create_dir_all(root.join("site/content"))?;
         fs::create_dir_all(root.join("site/assets"))?;
@@ -285,7 +285,7 @@ mod tests {
                 .any(|diagnostic| diagnostic.code().as_str() == "TPM-OUTPUT-SCAN")
         );
 
-        let _ = fs::remove_dir_all(root);
+        crate::test_support::remove_test_dir(root);
         Ok(())
     }
 

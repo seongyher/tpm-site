@@ -61,13 +61,7 @@ pub(crate) struct OperationArgs {
 impl OperationArgs {
     pub(crate) fn into_options(self) -> OperationTaskOptions {
         let Self {
-            site,
-            format,
-            json,
-            ci: _,
-            quiet: _,
-            verbose: _,
-            no_color: _,
+            site, format, json, ..
         } = self;
         let format = if json {
             OperationOutputFormat::Json
@@ -132,7 +126,7 @@ pub(crate) struct QuietArgs {
 }
 
 #[derive(Clone, Debug, Args, Eq, PartialEq)]
-pub(crate) struct NoArgs {}
+pub(crate) struct NoArgs;
 
 #[derive(Clone, Debug, Args, Eq, PartialEq)]
 pub(crate) struct OutputDirArgs {

@@ -194,7 +194,7 @@ fn collect_images(
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             collect_images(root, &path, ignores, files)?;
-        } else if file_type.is_file() && path_has_extension(&relative, IMAGE_EXTENSIONS) {
+        } else if path_has_extension(&relative, IMAGE_EXTENSIONS) {
             files.push(relative);
         }
     }
