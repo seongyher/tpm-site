@@ -36,8 +36,9 @@ just cli site status --format json
 
 The current CLI slice supports `tpm --help`, `tpm --version`,
 `tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
-`tpm media images`, `tpm routes redirects`, and `tpm release inspect`. These
-commands are product-interface proofs over Rust operation contracts.
+`tpm media images`, `tpm routes redirects`, `tpm release inspect`, and
+`tpm adapters inspect`. These commands are product-interface proofs over Rust
+operation contracts.
 
 Repository maintenance automation is intentionally not exposed as `tpm`
 commands. Focused `just` recipes call the internal `tpm-xtask` binary when a
@@ -71,6 +72,7 @@ The current ownership model is:
 | `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
 | `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
 | `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
+| `crates/tpm-mcp/`                 | Transport-agnostic read-only MCP resource and safety contracts over operation results. |
 | `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
 | `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
 | `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
@@ -170,6 +172,10 @@ The first operation-core crates now establish the shared contract documented in
   policy, and deterministic source artifact inventory;
 - operation results carry schema version, request metadata, status, summary,
   timing, diagnostics, and stable human/JSON renderers.
+- adapter capability reports expose provider-neutral capabilities, credential
+  requirements, dry-run support, unavailable-operation diagnostics, and
+  adapter boundaries through
+  [`RUST_ADAPTER_RUNTIME.md`](./RUST_ADAPTER_RUNTIME.md).
 
 The CLI, future Tauri studio, MCP server, CI reports, and generated-output
 diagnostics should consume these contracts instead of inventing interface-local

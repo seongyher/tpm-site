@@ -91,6 +91,10 @@ the correct boundary.
 - `apps/studio/`: static Astro frontend shell and minimal Tauri desktop shell
   for the future studio. Keep it read-only until operation-backed Tauri
   bindings, plan/apply safety, and provider capabilities are implemented.
+- `crates/tpm-mcp/`: transport-agnostic read-only MCP resource and safety
+  contracts over shared operation results. Do not add source writes or provider
+  mutations here before plan/apply, permission, audit, and capability gates
+  exist.
 - `site/`: default TPM site instance. Publication-specific content, assets,
   public files, theme overrides, redirects, and site config belong here.
 - `site/config/site.json`: publication configuration. Keep TPM-specific text,
@@ -206,6 +210,9 @@ the correct boundary.
   safety, workspace discovery, and product-contract design.
 - `docs/STUDIO_MCP_SAFETY_MODEL.md`: MCP resource/tool, permission,
   plan/apply, redaction, and agent safety model.
+- `docs/STUDIO_MCP_RESOURCE_CONTRACTS.md`: implemented read-only MCP resource
+  catalog, permission defaults, redaction summary, unsupported capability
+  behavior, and Milestone 13 handoff notes.
 - `docs/STUDIO_PRODUCT_TEST_PLAN.md`: mocked-provider product test matrix for
   studio workflows, accessibility, recovery, security, and provider failures.
 - `docs/STUDIO_PARITY_FIXTURE_STRATEGY.md`: GUI/CLI/MCP/CI parity fixture
@@ -232,6 +239,9 @@ the correct boundary.
   Rust checks, fixture, and migration policy.
 - `docs/RUST_OPERATION_CONTRACTS.md`: diagnostic, workspace, operation
   envelope, and operation fixture contracts.
+- `docs/RUST_ADAPTER_RUNTIME.md`: Rust adapter capability runtime,
+  mock-provider profiles, credential redaction, unavailable-operation
+  diagnostics, and inspection command contract.
 
 ## Project-Local Skills
 
