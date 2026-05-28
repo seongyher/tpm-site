@@ -88,6 +88,10 @@ the correct boundary.
   `just` recipes. This is not a product CLI surface.
 - `crates/tpm-operations/`: shared operation request/result envelopes for
   future CLI, GUI, MCP, CI, and generated-output consumers.
+- `crates/tpm-mcp/`: transport-agnostic read-only MCP resource and safety
+  contracts over shared operation results. Do not add source writes or provider
+  mutations here before plan/apply, permission, audit, and capability gates
+  exist.
 - `site/`: default TPM site instance. Publication-specific content, assets,
   public files, theme overrides, redirects, and site config belong here.
 - `site/config/site.json`: publication configuration. Keep TPM-specific text,
@@ -203,6 +207,9 @@ the correct boundary.
   safety, workspace discovery, and product-contract design.
 - `docs/STUDIO_MCP_SAFETY_MODEL.md`: MCP resource/tool, permission,
   plan/apply, redaction, and agent safety model.
+- `docs/STUDIO_MCP_RESOURCE_CONTRACTS.md`: implemented read-only MCP resource
+  catalog, permission defaults, redaction summary, unsupported capability
+  behavior, and Milestone 13 handoff notes.
 - `docs/STUDIO_PRODUCT_TEST_PLAN.md`: mocked-provider product test matrix for
   studio workflows, accessibility, recovery, security, and provider failures.
 - `docs/STUDIO_PARITY_FIXTURE_STRATEGY.md`: GUI/CLI/MCP/CI parity fixture

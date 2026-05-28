@@ -50,6 +50,70 @@ over-application of abstractions.
 - [x] Review the revised guide for overzealous or misleading instructions and
       verify documentation checks.
 
+## Active Milestone 13: MCP Automation And Agent Safety
+
+This pass implements as much of Milestone 13 as is currently unblocked. The
+read-only MCP resource skeleton is startable now. Read-only tools and write
+safety can only advance to the point where they consume the shared operation
+model without inventing capability or publish/apply contracts that belong to
+Milestones 10 and 12.
+
+### Milestone 13.1: Read Relevant Contracts And Design Skeleton
+
+- [x] Read the MCP safety model, headless core contract, Rust operation
+      contracts, Rust engineering guide, and Linear issue details for
+      `IRK-197`, `IRK-199`, `IRK-201`, `IRK-200`, `IRK-202`, and `IRK-203`.
+- [x] Confirm which Milestone 13 issues are truly unblocked and record
+      blockers for the rest.
+- [x] Design the first read-only MCP resource skeleton around existing
+      operation envelopes rather than a parallel MCP-only model.
+
+### Milestone 13.2: Implement `IRK-197` Read-Only MCP Resources
+
+- [x] Add an additive Rust MCP crate with read-only resource descriptors,
+      permission defaults, response envelopes, and redaction summary.
+- [x] Wrap existing operation artifacts as MCP resources for workspace status,
+      site diagnostics, release inspection, media image report, and route
+      redirect report.
+- [x] Add unsupported adapter-capability resource diagnostics that defer to the
+      future Milestone 10 capability registry.
+- [x] Add tests for resource catalog shape, permission denial, operation
+      wrapping, unsupported capability diagnostics, and redaction.
+- [x] Update docs and verify focused Rust checks.
+
+### Milestone 13.3: Advance Unblocked MCP Tool And Safety Work
+
+- [x] Re-check `IRK-199` after `IRK-197`; implement only tool pieces that do
+      not require the Milestone 10 capability registry.
+- [x] Re-check `IRK-201` after `IRK-197`; implement only permission, audit, and
+      redaction pieces that do not require identity/credential boundaries from
+      Milestone 10.
+- [x] Record remaining blockers for `IRK-199`, `IRK-201`, `IRK-200`,
+      `IRK-202`, and `IRK-203`.
+
+Remaining blocker notes:
+
+- `IRK-199`: provider-aware adapter capability inspection still waits for
+  `IRK-181`; the unblocked read-only status, diagnostics, resource catalog,
+  and unsupported capability fallback are implemented.
+- `IRK-201`: response-local read-only permission, redaction, and audit events
+  are implemented; identity, credential references, persisted audit storage,
+  and write/publish safety gates still wait for `IRK-180` and later
+  plan/apply work.
+- `IRK-200`: waits for `IRK-199` plus the release/publish plan model.
+- `IRK-202`: waits for publish/apply maturity and the completed MCP safety
+  model.
+- `IRK-203`: waits for read-only and write-capable MCP surfaces plus GUI/CLI
+  parity fixtures.
+
+### Milestone 13.4: Linear And Handoff
+
+- [x] Attach relevant docs to completed/partially advanced Milestone 13 issues.
+- [x] Move completed issues to In Review and leave blocked issues in their
+      correct state with blocker context.
+- [x] Run appropriate final checks and summarize completed work plus remaining
+      blockers.
+
 ## Active TypeScript Automation To Rust Migration
 
 This migration removes repository-owned TypeScript automation scripts from the
