@@ -230,6 +230,9 @@ the correct boundary.
   Rust checks, fixture, and migration policy.
 - `docs/RUST_OPERATION_CONTRACTS.md`: diagnostic, workspace, operation
   envelope, and operation fixture contracts.
+- `docs/RUST_ADAPTER_RUNTIME.md`: Rust adapter capability runtime,
+  mock-provider profiles, credential redaction, unavailable-operation
+  diagnostics, and inspection command contract.
 
 ## Project-Local Skills
 

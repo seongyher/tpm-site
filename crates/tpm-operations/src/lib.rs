@@ -1,5 +1,6 @@
 //! Shared operation request and result envelopes for the TPM publishing platform.
 
+mod adapters;
 mod generated_output;
 mod media;
 mod migration;
@@ -18,6 +19,15 @@ use tpm_core::Severity;
 use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticLocation, DiagnosticReport};
 use tpm_workspace::{WorkspaceContext, WorkspaceDiscoveryError};
 
+pub use adapters::{
+    AdapterBoundary, AdapterDescriptor, AdapterFamily, AdapterInspectionPayload,
+    AdapterRuntimeProfile, AuditRequirement, CapabilityActionBehavior, CapabilityOperation,
+    CapabilityRegistry, CapabilityStatus, CredentialReference, CredentialRequirement,
+    CredentialScope, CredentialSecretReference, CredentialState, CredentialStorageProfile,
+    CredentialSubject, DestructiveBehavior, DryRunSupport, ManualStep, ProviderCapability,
+    ProviderId, ProviderIdError, Reversibility, UnsupportedBehavior, mock_registry,
+    unsupported_operation_diagnostic,
+};
 pub use generated_output::run_generated_output_bridge;
 pub use media::run_image_asset_verification;
 pub use migration::{
@@ -250,6 +260,25 @@ impl OperationTiming {
     }
 }
 
+/// Typed payload attached to operation results that need more than summary
+/// lines and diagnostics.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case", tag = "kind", content = "data")]
+pub enum OperationPayload {
+    /// Adapter capability inspection payload.
+    AdapterInspection(AdapterInspectionPayload),
+}
+
+impl OperationPayload {
+    /// Renders payload details for human output.
+    #[must_use]
+    pub fn render_human(&self) -> String {
+        match self {
+            Self::AdapterInspection(payload) => payload.render_human(),
+        }
+    }
+}
+
 /// Short operation summary for humans and machines.
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -298,6 +327,8 @@ pub struct OperationResult {
     summary: OperationSummary,
     timing: OperationTiming,
     diagnostics: DiagnosticReport,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    payload: Option<OperationPayload>,
 }
 
 impl OperationResult {
@@ -318,7 +349,15 @@ impl OperationResult {
             summary,
             timing,
             diagnostics,
+            payload: None,
         }
+    }
+
+    /// Attaches a typed payload to the operation result.
+    #[must_use]
+    pub fn with_payload(mut self, payload: OperationPayload) -> Self {
+        self.payload = Some(payload);
+        self
     }
 
     /// Returns the serialized schema version.
@@ -357,6 +396,12 @@ impl OperationResult {
         &self.diagnostics
     }
 
+    /// Returns the typed payload when the operation has one.
+    #[must_use]
+    pub const fn payload(&self) -> Option<&OperationPayload> {
+        self.payload.as_ref()
+    }
+
     /// Returns warning diagnostics in emission order.
     #[must_use]
     pub fn warnings(&self) -> Vec<&Diagnostic> {
@@ -389,6 +434,10 @@ impl OperationResult {
             output.push_str("duration: ");
             output.push_str(&duration_ms.to_string());
             output.push_str("ms\n");
+        }
+
+        if let Some(payload) = &self.payload {
+            output.push_str(&payload.render_human());
         }
 
         let diagnostic_text = self.diagnostics.render_human();
@@ -511,6 +560,63 @@ pub fn run_release_inspect(
             DiagnosticReport::from_diagnostics(vec![workspace_not_found_diagnostic(&error)]),
         ),
     }
+}
+
+/// Runs adapter capability inspection for the default TPM-like profile.
+#[must_use]
+pub fn run_adapter_inspect(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+) -> OperationResult {
+    run_adapter_inspect_for_profile(start, interface, AdapterRuntimeProfile::TpmLike)
+}
+
+/// Runs adapter capability inspection for an explicit mock runtime profile.
+#[must_use]
+pub fn run_adapter_inspect_for_profile(
+    start: impl Into<PathBuf>,
+    interface: OperationInterface,
+    profile: AdapterRuntimeProfile,
+) -> OperationResult {
+    let start = start.into();
+    let request = OperationRequest::new(operation_id("adapters.inspect"), interface)
+        .with_workspace(display_path(&start));
+    let registry = mock_registry(profile);
+    let payload = AdapterInspectionPayload::from_registry(&registry);
+    let unavailable_capabilities = registry.unavailable_capabilities().len();
+    let mut diagnostics = registry.unavailable_capability_diagnostics();
+
+    if let Ok(context) = WorkspaceContext::discover(&start) {
+        for diagnostic in context.validate_required_paths().diagnostics() {
+            diagnostics.push(diagnostic.clone());
+        }
+    } else {
+        diagnostics.push(
+            Diagnostic::new(
+                diagnostic_code("TPM-ADAPTER-WORKSPACE-UNRESOLVED"),
+                Severity::Warning,
+                "Adapter inspection could not resolve a site workspace.",
+            )
+            .with_location(DiagnosticLocation::source(display_path(&start)))
+            .with_remediation(
+                "Run from a site workspace or pass --site to include workspace diagnostics.",
+            ),
+        );
+    }
+
+    OperationResult::new(
+        request,
+        OperationSummary::new("Adapter capabilities inspected")
+            .with_detail(format!("profile: {profile}"))
+            .with_detail(format!("adapters: {}", registry.adapters().len()))
+            .with_detail(format!("capabilities: {}", registry.capabilities().len()))
+            .with_detail(format!(
+                "unavailable capabilities: {unavailable_capabilities}"
+            )),
+        OperationTiming::default(),
+        diagnostics,
+    )
+    .with_payload(OperationPayload::AdapterInspection(payload))
 }
 
 fn run_workspace_inventory_operation(
@@ -698,10 +804,10 @@ mod tests {
     use std::os::unix::fs::PermissionsExt as _;
 
     use super::{
-        OPERATION_SCHEMA_VERSION, OperationInterface, OperationRequest, OperationResult,
-        OperationStatus, OperationSummary, OperationTiming, run_release_inspect,
-        run_workspace_check, run_workspace_doctor, run_workspace_status, test_operation_id,
-        test_warning,
+        AdapterRuntimeProfile, OPERATION_SCHEMA_VERSION, OperationInterface, OperationPayload,
+        OperationRequest, OperationResult, OperationStatus, OperationSummary, OperationTiming,
+        run_adapter_inspect_for_profile, run_release_inspect, run_workspace_check,
+        run_workspace_doctor, run_workspace_status, test_operation_id, test_warning,
     };
     use tpm_core::Severity;
     use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
@@ -945,6 +1051,121 @@ mod tests {
             result.warnings()[0].code().as_str(),
             "TPM-RELEASE-OUTPUT-MISSING"
         );
+    }
+
+    #[test]
+    fn adapter_inspect_operation_reports_each_mock_profile() {
+        for (profile, expected_provider) in [
+            (AdapterRuntimeProfile::LocalOnly, "manual-deploy"),
+            (AdapterRuntimeProfile::TpmLike, "cloudflare-deploy"),
+            (AdapterRuntimeProfile::ComplexPublisher, "enterprise-deploy"),
+        ] {
+            let result =
+                run_adapter_inspect_for_profile(fixture_root(), OperationInterface::Test, profile);
+            let OperationPayload::AdapterInspection(payload) = result
+                .payload()
+                .expect("adapter inspect should include payload");
+
+            assert_eq!(result.status(), OperationStatus::Warning);
+            assert_eq!(result.request().operation_id().as_str(), "adapters.inspect");
+            assert_eq!(payload.profile(), profile);
+            assert!(
+                payload
+                    .adapters()
+                    .iter()
+                    .any(|adapter| adapter.provider_id().as_str() == expected_provider)
+            );
+            assert!(!payload.capabilities().is_empty());
+            assert!(!result.diagnostics().has_blocking());
+            assert!(result.warnings().iter().all(
+                |diagnostic| diagnostic.code().as_str() == "TPM-ADAPTER-CAPABILITY-UNAVAILABLE"
+            ));
+        }
+    }
+
+    #[test]
+    fn adapter_inspect_json_exposes_dry_run_credentials_and_boundaries()
+    -> Result<(), Box<dyn Error>> {
+        let result = run_adapter_inspect_for_profile(
+            fixture_root(),
+            OperationInterface::Test,
+            AdapterRuntimeProfile::TpmLike,
+        );
+        let value = serde_json::from_str::<serde_json::Value>(&result.render_json_pretty()?)?;
+        let adapters = value["payload"]["data"]["adapters"]
+            .as_array()
+            .expect("adapter payload should contain adapters");
+        let cloudflare = adapters
+            .iter()
+            .find(|adapter| adapter["providerId"] == "cloudflare-deploy")
+            .expect("tpm-like profile should include cloudflare deploy");
+        let deploy_publish = cloudflare["capabilities"]
+            .as_array()
+            .expect("cloudflare adapter should include capabilities")
+            .iter()
+            .find(|capability| capability["operation"] == "deploy-publish")
+            .expect("cloudflare deploy should include publish capability");
+
+        assert_eq!(value["schemaVersion"], OPERATION_SCHEMA_VERSION);
+        assert_eq!(cloudflare["boundary"], "bundled");
+        assert_eq!(deploy_publish["credentialRequirement"], "required");
+        assert_eq!(
+            deploy_publish["credentialScopes"],
+            serde_json::json!(["deploy-write"])
+        );
+        assert_eq!(deploy_publish["dryRun"], "supported");
+        assert_eq!(deploy_publish["destructiveBehavior"], "publish");
+        assert_eq!(deploy_publish["auditRequirement"], "provider");
+
+        Ok(())
+    }
+
+    #[test]
+    fn adapter_inspect_missing_workspace_is_warning_only() {
+        let result = run_adapter_inspect_for_profile(
+            PathBuf::from("/tmp/tpm-missing-adapter-workspace"),
+            OperationInterface::Test,
+            AdapterRuntimeProfile::LocalOnly,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Warning);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-ADAPTER-WORKSPACE-UNRESOLVED")
+        );
+        assert!(!result.diagnostics().has_blocking());
+    }
+
+    #[test]
+    fn adapter_inspect_reports_resolved_workspace_path_warnings() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("adapter-required-paths");
+        crate::test_support::remove_test_dir(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+
+        let result = run_adapter_inspect_for_profile(
+            &root,
+            OperationInterface::Test,
+            AdapterRuntimeProfile::LocalOnly,
+        );
+
+        let diagnostic_codes = result
+            .diagnostics()
+            .diagnostics()
+            .iter()
+            .map(|diagnostic| diagnostic.code().as_str())
+            .collect::<Vec<_>>();
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(diagnostic_codes.contains(&"TPM-WORKSPACE-CONTENT"));
+        assert!(diagnostic_codes.contains(&"TPM-WORKSPACE-ASSETS"));
+        assert!(diagnostic_codes.contains(&"TPM-WORKSPACE-PUBLIC"));
+        assert!(!diagnostic_codes.contains(&"TPM-ADAPTER-WORKSPACE-UNRESOLVED"));
+
+        crate::test_support::remove_test_dir(&root);
+        Ok(())
     }
 
     #[test]

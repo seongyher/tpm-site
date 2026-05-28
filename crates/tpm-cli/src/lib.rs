@@ -5,9 +5,9 @@ use std::path::PathBuf;
 
 use tpm_core::{CommandExit, PLATFORM_NAME};
 use tpm_operations::{
-    OperationInterface, OperationResult, run_image_asset_verification, run_redirect_report,
-    run_release_inspect, run_site_doctor, run_workspace_check, run_workspace_doctor,
-    run_workspace_status,
+    OperationInterface, OperationResult, run_adapter_inspect, run_image_asset_verification,
+    run_redirect_report, run_release_inspect, run_site_doctor, run_workspace_check,
+    run_workspace_doctor, run_workspace_status,
 };
 
 /// Current top-level help text for the additive CLI shell.
@@ -18,6 +18,7 @@ Usage:
   tpm <command> [options]
 
 Commands:
+  adapters inspect   Inspect adapter capabilities and provider boundaries
   site status        Show workspace source roots, config, and source inventory
   site doctor        Run site workspace diagnostics
   check              Run the first Rust workspace diagnostic check
@@ -39,11 +40,28 @@ Global options:
   --no-color                 Disable ANSI color; output is currently plain text
 
 Examples:
+  tpm adapters inspect --format json
   tpm site status --format json
   tpm media images
   tpm check --format json
   tpm doctor
   tpm release inspect
+";
+
+const ADAPTERS_HELP: &str = "\
+tpm adapters - inspect provider adapter capabilities
+
+Usage:
+  tpm adapters inspect [options]
+  tpm adapter inspect [options]
+
+Commands:
+  inspect       List configured adapters, capability states, credentials,
+                dry-run support, unsupported operations, and boundaries
+
+Examples:
+  tpm adapters inspect
+  tpm adapters inspect --format json
 ";
 
 const SITE_HELP: &str = "\
@@ -177,6 +195,7 @@ enum OutputFormat {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum CliCommand {
+    AdaptersInspect,
     Check,
     Doctor,
     Help(HelpTopic),
@@ -190,6 +209,7 @@ enum CliCommand {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum HelpTopic {
+    Adapters,
     Check,
     Doctor,
     Media,
@@ -289,6 +309,7 @@ fn parse_output_format(value: &str) -> Result<OutputFormat, CliError> {
 fn help_topic(topic: Option<&str>) -> Result<HelpTopic, CliError> {
     match topic {
         None => Ok(HelpTopic::Top),
+        Some("adapter" | "adapters") => Ok(HelpTopic::Adapters),
         Some("check") => Ok(HelpTopic::Check),
         Some("doctor") => Ok(HelpTopic::Doctor),
         Some("media") => Ok(HelpTopic::Media),
@@ -306,6 +327,11 @@ fn parse_command(positionals: &[String]) -> Result<CliCommand, CliError> {
         [command] if command == "help" => Ok(CliCommand::Help(HelpTopic::Top)),
         [command, topic] if command == "help" => {
             Ok(CliCommand::Help(help_topic(Some(topic.as_str()))?))
+        }
+        [command, subcommand]
+            if matches!(command.as_str(), "adapter" | "adapters") && subcommand == "inspect" =>
+        {
+            Ok(CliCommand::AdaptersInspect)
         }
         [command, subcommand] if command == "site" && subcommand == "status" => {
             Ok(CliCommand::SiteStatus)
@@ -342,6 +368,10 @@ where
     W: Write,
 {
     match invocation.command {
+        CliCommand::AdaptersInspect => {
+            let result = run_adapter_inspect(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
         CliCommand::Check => {
             let result = run_workspace_check(invocation.options.site, OperationInterface::Cli);
             write_operation(&result, invocation.options.format, output)
@@ -421,6 +451,7 @@ fn operation_exit(result: &OperationResult) -> CommandExit {
 
 const fn help_text(topic: HelpTopic) -> &'static str {
     match topic {
+        HelpTopic::Adapters => ADAPTERS_HELP,
         HelpTopic::Check => CHECK_HELP,
         HelpTopic::Doctor => DOCTOR_HELP,
         HelpTopic::Media => MEDIA_HELP,
@@ -476,6 +507,7 @@ mod tests {
         let (exit, output) = run_text(vec![String::from("--help")]);
 
         assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("tpm adapters inspect --format json"));
         assert!(output.contains("tpm site status --format json"));
         assert!(!output.contains("migration baseline"));
         assert!(!output.contains("qa registry"));
@@ -494,7 +526,7 @@ mod tests {
 
     #[test]
     fn command_help_covers_all_topics_and_unknown_topics() {
-        for topic in ["doctor", "media", "release", "routes", "site"] {
+        for topic in ["adapters", "doctor", "media", "release", "routes", "site"] {
             let (exit, output) = run_text(vec![String::from("help"), String::from(topic)]);
 
             assert_eq!(exit, CommandExit::Success);
@@ -665,5 +697,69 @@ mod tests {
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("media.images"));
+    }
+
+    #[test]
+    fn adapters_inspect_command_renders_versioned_capability_json() {
+        let mut args = command_with_site(&["adapters", "inspect"], &fixture_root());
+        args.push(String::from("--format"));
+        args.push(String::from("json"));
+
+        let (exit, output) = run_text(args);
+        let value =
+            serde_json::from_str::<serde_json::Value>(&output).expect("adapter JSON should parse");
+        let capabilities = value["payload"]["data"]["adapters"]
+            .as_array()
+            .expect("adapter payload should include adapters")
+            .iter()
+            .flat_map(|adapter| {
+                adapter["capabilities"]
+                    .as_array()
+                    .expect("adapter should include capabilities")
+            })
+            .collect::<Vec<_>>();
+
+        assert_eq!(exit, CommandExit::Success);
+        assert_eq!(value["schemaVersion"], 1);
+        assert_eq!(value["request"]["operationId"], "adapters.inspect");
+        assert_eq!(value["payload"]["kind"], "adapter-inspection");
+        assert_eq!(value["payload"]["data"]["profile"], "tpm-like");
+        assert!(
+            value["payload"]["data"]["adapters"]
+                .as_array()
+                .expect("adapter payload should include adapters")
+                .iter()
+                .any(|adapter| adapter["providerId"] == "cloudflare-deploy"
+                    && adapter["boundary"] == "bundled")
+        );
+        assert!(
+            capabilities
+                .iter()
+                .any(|capability| capability["operation"] == "deploy-publish"
+                    && capability["credentialRequirement"] == "required"
+                    && capability["dryRun"] == "supported")
+        );
+        assert!(
+            capabilities
+                .iter()
+                .any(|capability| capability["status"] == "unsupported")
+        );
+        assert!(
+            value["diagnostics"]["diagnostics"]
+                .as_array()
+                .expect("adapter report should include capability diagnostics")
+                .iter()
+                .any(|diagnostic| diagnostic["code"] == "TPM-ADAPTER-CAPABILITY-UNAVAILABLE")
+        );
+    }
+
+    #[test]
+    fn adapter_singular_alias_routes_to_inspection_operation() {
+        let args = command_with_site(&["adapter", "inspect"], &fixture_root());
+        let (exit, output) = run_text(args);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("adapters.inspect"));
+        assert!(output.contains("adapter profile: tpm-like"));
     }
 }

@@ -236,7 +236,8 @@ spine and several review-only jobs.
 - `dependency-review`: PR-only GitHub Dependency Review action; CI-only because
   it depends on GitHub pull request metadata.
 - `secrets`: Gitleaks action against git history. Local approximation is
-  `just secrets`, while the CI action owns SARIF/security-event integration.
+  `just secrets`, scoped to the current branch history, while the CI action
+  owns SARIF/security-event integration.
 
 ### Config And Scope Inventory
 
