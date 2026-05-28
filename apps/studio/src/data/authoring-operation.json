@@ -1,0 +1,445 @@
+{
+  "schemaVersion": 1,
+  "request": {
+    "operationId": "studio.workflow.verify",
+    "interface": "gui",
+    "workspace": "tests/fixtures/rust-workspace"
+  },
+  "status": "partial",
+  "summary": {
+    "title": "Studio authoring workflow verified",
+    "details": [
+      "profile: tpm-like",
+      "surfaces: 6",
+      "settings fields: 2",
+      "content entries: 1",
+      "media entries: 0",
+      "publish actions: 1"
+    ]
+  },
+  "timing": {},
+  "diagnostics": {
+    "diagnostics": []
+  },
+  "payload": {
+    "kind": "studio-authoring",
+    "data": {
+      "profile": "tpm-like",
+      "surfaces": [
+        {
+          "id": "settings",
+          "label": "Settings",
+          "operationId": "studio.settings.inspect",
+          "status": "ready",
+          "summary": "2 schema-backed fields",
+          "requiredCapabilities": [
+            {
+              "providerId": "local-source",
+              "operation": "source-write-patch",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "content",
+          "label": "Content",
+          "operationId": "studio.content.editor",
+          "status": "requires-approval",
+          "summary": "1 editable source entry",
+          "requiredCapabilities": [
+            {
+              "providerId": "local-source",
+              "operation": "source-write-draft",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "media",
+          "label": "Media",
+          "operationId": "studio.media.library",
+          "status": "partial",
+          "summary": "0 provider-aware media entries",
+          "requiredCapabilities": [
+            {
+              "providerId": "repo-media",
+              "operation": "media-materialize-build-input",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "preview",
+          "label": "Preview",
+          "operationId": "studio.preview.plan",
+          "status": "partial",
+          "summary": "3 preview modes",
+          "requiredCapabilities": [
+            {
+              "providerId": "local-build",
+              "operation": "build-preview",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "publish",
+          "label": "Publish",
+          "operationId": "studio.release.plan",
+          "status": "requires-credentials",
+          "summary": "1 publish action",
+          "requiredCapabilities": [
+            {
+              "providerId": "cloudflare-deploy",
+              "operation": "deploy-check",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "audit",
+          "label": "Audit",
+          "operationId": "studio.publish.apply",
+          "status": "requires-approval",
+          "summary": "1 audit event planned",
+          "requiredCapabilities": [
+            {
+              "providerId": "cloudflare-deploy",
+              "operation": "deploy-rollback",
+              "status": "partial",
+              "behavior": "degraded",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "id": "identity.description",
+          "label": "Publication description",
+          "inputKind": "text",
+          "value": "A neutral fixture publication for Rust workspace tests.",
+          "required": true,
+          "visibility": "beginner",
+          "source": {
+            "domain": "site-config",
+            "displayPath": "site/config/site.json",
+            "owner": "workspace"
+          },
+          "generatedEffects": ["metadata", "search", "social previews"],
+          "capabilities": [
+            {
+              "providerId": "local-source",
+              "operation": "source-write-patch",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        },
+        {
+          "id": "identity.url",
+          "label": "Canonical site URL",
+          "inputKind": "url",
+          "value": "https://example.test",
+          "required": true,
+          "visibility": "advanced",
+          "source": {
+            "domain": "site-config",
+            "displayPath": "site/config/site.json",
+            "owner": "workspace"
+          },
+          "generatedEffects": ["canonical URLs", "sitemap", "feeds"],
+          "capabilities": [
+            {
+              "providerId": "local-source",
+              "operation": "source-write-patch",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        }
+      ],
+      "content": {
+        "entries": [
+          {
+            "id": "content-articles-hello-fixture",
+            "title": "Hello Fixture",
+            "domain": "article",
+            "format": "markdown",
+            "source": {
+              "domain": "content",
+              "displayPath": "site/content/articles/hello-fixture.md",
+              "owner": "workspace"
+            },
+            "byteCount": 263,
+            "lineCount": 9,
+            "status": "draft-plan-available"
+          }
+        ],
+        "editorDocument": {
+          "source": {
+            "domain": "content",
+            "displayPath": "site/content/articles/hello-fixture.md",
+            "owner": "workspace"
+          },
+          "format": "markdown",
+          "sourcePreview": "Hello Fixture source buffer, 263 bytes",
+          "sourceFidelity": "Markdown/MDX source is preserved; formatter actions must be explicit.",
+          "diagnostics": []
+        },
+        "draftPlan": {
+          "id": "content-draft-plan",
+          "label": "Save draft",
+          "safetyClass": "source-write",
+          "mode": "requires-approval",
+          "sourceDiffs": [
+            {
+              "source": {
+                "domain": "content",
+                "displayPath": "site/content/articles/hello-fixture.md",
+                "owner": "workspace"
+              },
+              "summary": "Write a source-faithful draft patch.",
+              "additions": 1,
+              "removals": 0
+            }
+          ],
+          "requiredCapabilities": [
+            {
+              "providerId": "local-source",
+              "operation": "source-write-draft",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ],
+          "requiresApproval": true,
+          "auditRequired": true,
+          "steps": [
+            "Validate Markdown or MDX source without rewriting it.",
+            "Create a source diff for review.",
+            "Apply only after explicit save confirmation."
+          ]
+        }
+      },
+      "media": {
+        "entries": [],
+        "picker": [],
+        "materializationPlan": {
+          "id": "media-materialization-plan",
+          "label": "Materialize media for preview",
+          "safetyClass": "read-only",
+          "mode": "dry-run",
+          "sourceDiffs": [],
+          "requiredCapabilities": [
+            {
+              "providerId": "repo-media",
+              "operation": "media-materialize-build-input",
+              "status": "supported",
+              "behavior": "enabled",
+              "required": true,
+              "remediation": null
+            }
+          ],
+          "requiresApproval": false,
+          "auditRequired": false,
+          "steps": [
+            "Resolve provider media references.",
+            "Materialize optimized build inputs where supported.",
+            "Report unsupported or missing media before preview."
+          ]
+        }
+      },
+      "preview": {
+        "modes": [
+          {
+            "id": "diagnostics-only",
+            "label": "Diagnostics only",
+            "status": "ready",
+            "cost": "fast"
+          },
+          {
+            "id": "route-preview",
+            "label": "Route preview",
+            "status": "partial",
+            "cost": "medium"
+          },
+          {
+            "id": "full-build",
+            "label": "Full static build",
+            "status": "requires-approval",
+            "cost": "slow"
+          }
+        ],
+        "routeTargets": ["/articles/content-articles-hello-fixture/"],
+        "artifactTargets": [
+          "dist",
+          "metadata summary",
+          "search/feed/social preview artifacts"
+        ],
+        "mediaRequirements": [],
+        "parityPolicy": "Fast preview may use caches, but release truth remains the static compiler output.",
+        "requiredCapabilities": [
+          {
+            "providerId": "local-build",
+            "operation": "build-preview",
+            "status": "supported",
+            "behavior": "enabled",
+            "required": true,
+            "remediation": null
+          }
+        ]
+      },
+      "release": {
+        "id": "release-draft-local",
+        "artifactRoot": "dist",
+        "affectedRoutes": ["/articles/content-articles-hello-fixture/"],
+        "affectedAssets": [],
+        "metadataProfiles": [
+          "canonical",
+          "open-graph",
+          "schema-org",
+          "rss-search"
+        ],
+        "health": {
+          "status": "partial",
+          "summary": "Release can be planned, but output must be built before apply.",
+          "warnings": [
+            "Generated output is not present; build before publish apply."
+          ]
+        },
+        "requiredCapabilities": [
+          {
+            "providerId": "local-build",
+            "operation": "build-full",
+            "status": "supported",
+            "behavior": "enabled",
+            "required": true,
+            "remediation": null
+          }
+        ]
+      },
+      "publish": {
+        "id": "publish-plan-draft",
+        "status": "requires-credentials",
+        "dryRun": true,
+        "affectedRoutes": ["/articles/content-articles-hello-fixture/"],
+        "providerActions": [
+          {
+            "providerId": "cloudflare-deploy",
+            "operation": "deploy-publish",
+            "behavior": "enabled",
+            "summary": "deploy-publish via cloudflare-deploy"
+          }
+        ],
+        "manualSteps": [
+          "Review generated-output health.",
+          "Connect required provider credentials.",
+          "Approve publish apply after reviewing route and asset effects."
+        ],
+        "requiredApproval": "Publish apply requires explicit approval.",
+        "credentialRefs": ["cloudflare-deploy-credential"],
+        "auditEvents": [
+          {
+            "id": "audit-publish-plan",
+            "operationId": "studio.publish.apply",
+            "actor": "studio-gui",
+            "safetyClass": "publish",
+            "dryRun": true,
+            "summary": "Publish apply was planned but not executed."
+          }
+        ],
+        "rollback": {
+          "status": "partial",
+          "summary": "Rollback depends on deploy provider support or redeploying a prior release.",
+          "restoreTarget": "previous-release-artifact",
+          "requiredCapabilities": [
+            {
+              "providerId": "cloudflare-deploy",
+              "operation": "deploy-rollback",
+              "status": "partial",
+              "behavior": "degraded",
+              "required": true,
+              "remediation": null
+            }
+          ]
+        }
+      },
+      "credentials": [
+        {
+          "reference": {
+            "id": "cloudflare-deploy-credential",
+            "providerId": "cloudflare-deploy",
+            "subject": "local-user",
+            "storage": "desktop-keychain",
+            "state": "missing",
+            "scopes": ["deploy-read"],
+            "secretReference": "[redacted]"
+          },
+          "displayLabel": "cloudflare-deploy credential"
+        }
+      ],
+      "verification": [
+        {
+          "id": "settings-schema",
+          "label": "Settings are schema-backed",
+          "status": "ready",
+          "evidence": ["2 settings fields modeled"]
+        },
+        {
+          "id": "source-fidelity",
+          "label": "Content source stays canonical",
+          "status": "requires-approval",
+          "evidence": [
+            "1 content entry inventoried",
+            "draft writes are represented as source diffs"
+          ]
+        },
+        {
+          "id": "media-materialization",
+          "label": "Media is provider-aware",
+          "status": "partial",
+          "evidence": ["0 media entries inventoried"]
+        },
+        {
+          "id": "preview-release-parity",
+          "label": "Preview declares release parity policy",
+          "status": "ready",
+          "evidence": [
+            "Fast preview may use caches, but release truth remains the static compiler output."
+          ]
+        },
+        {
+          "id": "publish-gate",
+          "label": "Publish apply is gated",
+          "status": "requires-credentials",
+          "evidence": [
+            "Publish apply requires explicit approval.",
+            "1 audit event planned"
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -223,6 +223,9 @@ the correct boundary.
 - `docs/STUDIO_TAURI_SHELL.md`: minimal Tauri package design, capability
   boundary, command-router surface, and security assumptions for the first
   read-only desktop shell.
+- `docs/STUDIO_AUTHORING_OPERATIONS.md`: implemented Milestone 12 Studio
+  authoring operation slice for settings, content, media, preview, release,
+  publish apply gates, rollback, credentials, audit, and product verification.
 - `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`: import/export and content
   preservation contracts.
 - `docs/LOCALIZATION_CONTRACTS.md`: locale and inclusive-defaults contracts.

@@ -6,7 +6,8 @@ use std::io;
 use std::path::PathBuf;
 
 use tpm_operations::{
-    OPERATION_SCHEMA_VERSION, OperationInterface, OperationResult, OperationStatus,
+    OPERATION_SCHEMA_VERSION, OperationInterface, OperationPayload, OperationResult,
+    OperationStatus,
 };
 
 fn frontend_fixture_path() -> PathBuf {
@@ -15,6 +16,14 @@ fn frontend_fixture_path() -> PathBuf {
         .join("src")
         .join("data")
         .join("read-only-operation.json")
+}
+
+fn authoring_fixture_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("src")
+        .join("data")
+        .join("authoring-operation.json")
 }
 
 fn core_workspace_status_fixture_path() -> PathBuf {
@@ -62,6 +71,31 @@ fn frontend_fixture_is_gui_projection_of_shared_operation_fixture() -> Result<()
     );
 
     assert_eq!(frontend_value, expected_value);
+
+    Ok(())
+}
+
+#[test]
+fn frontend_authoring_fixture_matches_rust_operation_contract() -> Result<(), Box<dyn Error>> {
+    let fixture = fs::read_to_string(authoring_fixture_path())?;
+    let fixture_value: serde_json::Value = serde_json::from_str(&fixture)?;
+    let result: OperationResult = serde_json::from_str(&fixture)?;
+    let round_tripped = serde_json::to_value(&result)?;
+
+    assert_eq!(round_tripped, fixture_value);
+    assert_eq!(result.schema_version(), OPERATION_SCHEMA_VERSION);
+    assert_eq!(
+        result.request().operation_id().as_str(),
+        "studio.workflow.verify"
+    );
+    assert_eq!(result.request().interface(), OperationInterface::Gui);
+    assert_eq!(result.status(), OperationStatus::Partial);
+    assert!(matches!(
+        result.payload(),
+        Some(OperationPayload::StudioAuthoring(_))
+    ));
+    assert!(!round_tripped.to_string().contains("secret-value"));
+    assert!(round_tripped.to_string().contains("[redacted]"));
 
     Ok(())
 }

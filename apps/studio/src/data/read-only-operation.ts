@@ -21,9 +21,9 @@ export type StudioBadgeTone =
   | StudioDiagnosticSeverityTone
   | StudioOperationStatusTone;
 
-/** Read-only studio surface navigation item. */
+/** Studio surface navigation item. */
 export interface StudioNavigationItem {
-  /** Whether the surface is disabled in the current read-only slice. */
+  /** Whether the surface is disabled in the current slice. */
   disabled: boolean;
   /** Fragment target for the surface. */
   href: string;
@@ -31,15 +31,17 @@ export interface StudioNavigationItem {
   label: string;
 }
 
-/** Navigation model for the static read-only studio shell. */
+/** Navigation model for the static Studio shell. */
 export const studioNavigation = [
   { disabled: false, href: "#overview", label: "Overview" },
-  { disabled: false, href: "#diagnostics", label: "Diagnostics" },
-  { disabled: true, href: "#content", label: "Content" },
-  { disabled: true, href: "#media", label: "Media" },
-  { disabled: true, href: "#preview", label: "Preview" },
-  { disabled: true, href: "#publish", label: "Publish" },
-  { disabled: true, href: "#settings", label: "Settings" },
+  { disabled: false, href: "#operation-result", label: "Diagnostics" },
+  { disabled: false, href: "#settings", label: "Settings" },
+  { disabled: false, href: "#content", label: "Content" },
+  { disabled: false, href: "#media", label: "Media" },
+  { disabled: false, href: "#preview", label: "Preview" },
+  { disabled: false, href: "#publish", label: "Publish" },
+  { disabled: false, href: "#audit", label: "Audit" },
+  { disabled: false, href: "#verification", label: "Verification" },
 ] as const satisfies readonly StudioNavigationItem[];
 
 /**
@@ -69,6 +71,17 @@ export function badgeClassForTone(tone: StudioBadgeTone): string {
  * @returns Stable short label for the shell status badge.
  */
 export function operationStatusLabel(status: string): string {
+  switch (status) {
+    case "partial":
+      return "Partial";
+    case "requires-approval":
+      return "Needs approval";
+    case "requires-credentials":
+      return "Needs credentials";
+    case "unsupported":
+      return "Unsupported";
+  }
+
   switch (operationStatusTone(status)) {
     case "failed":
       return "Blocked";
@@ -91,6 +104,12 @@ export function operationStatusTone(status: string): StudioOperationStatusTone {
     case "success":
     case "warning":
       return status;
+    case "partial":
+    case "requires-approval":
+    case "requires-credentials":
+      return "warning";
+    case "unsupported":
+      return "failed";
     default:
       return "failed";
   }

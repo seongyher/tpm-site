@@ -1,0 +1,64 @@
+---
+import StatusBadge from "../StatusBadge.astro";
+import {
+  operationStatusLabel,
+  operationStatusTone,
+  type StudioOperationResult,
+} from "../../data/read-only-operation";
+
+interface Props {
+  operation: StudioOperationResult;
+}
+
+const { operation } = Astro.props;
+---
+
+<article class="mt-4 grid gap-3">
+  <div
+    class="border-border bg-panel-muted grid gap-3 rounded-md border p-3 sm:grid-cols-4"
+  >
+    <div>
+      <p class="text-muted-foreground text-xs font-bold">Operation</p>
+      <p
+        class="mt-1 text-base font-bold [overflow-wrap:anywhere]"
+        data-studio-operation-id
+      >
+        {operation.request.operationId}
+      </p>
+    </div>
+    <div>
+      <p class="text-muted-foreground text-xs font-bold">Workspace</p>
+      <p
+        class="mt-1 text-base font-bold [overflow-wrap:anywhere]"
+        data-studio-operation-workspace
+      >
+        {operation.request.workspace ?? "not provided"}
+      </p>
+    </div>
+    <div>
+      <p class="text-muted-foreground text-xs font-bold">Summary</p>
+      <p class="mt-1 text-base font-bold" data-studio-operation-title>
+        {operation.summary.title}
+      </p>
+    </div>
+    <div>
+      <p class="text-muted-foreground text-xs font-bold">Status</p>
+      <StatusBadge
+        class="mt-1"
+        data-studio-operation-status-badge
+        label={operationStatusLabel(operation.status)}
+        tone={operationStatusTone(operation.status)}
+      />
+    </div>
+  </div>
+
+  <ul class="grid gap-2" data-studio-operation-details>
+    {
+      operation.summary.details.map((detail) => (
+        <li class="border-border bg-panel-muted rounded-md border p-3 leading-6 [overflow-wrap:anywhere]">
+          {detail}
+        </li>
+      ))
+    }
+  </ul>
+</article>

@@ -29,7 +29,14 @@ pub fn run() -> tauri::Result<()> {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             commands::site_status,
-            commands::check_site
+            commands::check_site,
+            commands::studio_settings,
+            commands::studio_content,
+            commands::studio_media,
+            commands::studio_preview,
+            commands::studio_release,
+            commands::studio_publish_apply,
+            commands::studio_workflow_verify
         ])
         .run(tauri::generate_context!())
 }

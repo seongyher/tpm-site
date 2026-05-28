@@ -1,17 +1,9 @@
 ---
+import OperationCommandBar from "./operation-runtime/OperationCommandBar.astro";
+import OperationDiagnosticsList from "./operation-runtime/OperationDiagnosticsList.astro";
+import OperationResultSummary from "./operation-runtime/OperationResultSummary.astro";
 import StudioSectionHeading from "./StudioSectionHeading.astro";
-import {
-  badgeClassForTone,
-  diagnosticSeverityTone,
-  operationStatusLabel,
-  operationStatusTone,
-  type StudioOperationResult,
-} from "../data/read-only-operation";
-import {
-  diagnosticBorderClass,
-  operationStateMessage,
-  studioOperationCommandOptions,
-} from "../data/operation-runtime";
+import type { StudioOperationResult } from "../data/read-only-operation";
 
 interface Props {
   operation: StudioOperationResult;
@@ -20,7 +12,6 @@ interface Props {
 const { operation } = Astro.props;
 const fallbackState = { kind: "fallback", result: operation } as const;
 const diagnostics = operation.diagnostics.diagnostics;
-const statusTone = operationStatusTone(operation.status);
 ---
 
 <section
@@ -40,40 +31,11 @@ const statusTone = operationStatusTone(operation.status);
     class="text-muted-foreground mt-2 max-w-4xl leading-6"
   >
     The static browser preview shows the validated fixture fallback. The Tauri
-    shell enables these read-only commands and returns the same Rust operation
-    envelope.
+    shell enables operation commands that return shared Rust operation envelopes
+    for status, authoring plans, preview, release, and publish gates.
   </p>
 
-  <div
-    class="border-border bg-panel-muted mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border p-3"
-  >
-    <p
-      class="text-muted-foreground min-w-0 text-sm leading-6"
-      data-studio-operation-state
-      role="status"
-      aria-live="polite"
-    >
-      {operationStateMessage(fallbackState)}
-    </p>
-    <div
-      class="flex flex-wrap gap-2"
-      role="group"
-      aria-label="Read-only workspace operations"
-    >
-      {
-        studioOperationCommandOptions.map((option) => (
-          <button
-            class="border-border bg-panel hover:bg-panel-muted focus-visible:outline-ring disabled:text-muted-foreground inline-flex min-h-9 items-center justify-center rounded-sm border px-3 py-1.5 text-sm font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
-            data-studio-operation-command={option.command}
-            disabled
-            type="button"
-          >
-            {option.label}
-          </button>
-        ))
-      }
-    </div>
-  </div>
+  <OperationCommandBar state={fallbackState} />
 
   <p
     class="bg-danger-muted text-danger mt-3 rounded-md p-3 text-sm font-bold"
@@ -82,118 +44,8 @@ const statusTone = operationStatusTone(operation.status);
   >
   </p>
 
-  <article class="mt-4 grid gap-3">
-    <div
-      class="border-border bg-panel-muted grid gap-3 rounded-md border p-3 sm:grid-cols-4"
-    >
-      <div>
-        <p class="text-muted-foreground text-xs font-bold">Operation</p>
-        <p
-          class="mt-1 text-base font-bold [overflow-wrap:anywhere]"
-          data-studio-operation-id
-        >
-          {operation.request.operationId}
-        </p>
-      </div>
-      <div>
-        <p class="text-muted-foreground text-xs font-bold">Workspace</p>
-        <p
-          class="mt-1 text-base font-bold [overflow-wrap:anywhere]"
-          data-studio-operation-workspace
-        >
-          {operation.request.workspace ?? "not provided"}
-        </p>
-      </div>
-      <div>
-        <p class="text-muted-foreground text-xs font-bold">Summary</p>
-        <p class="mt-1 text-base font-bold" data-studio-operation-title>
-          {operation.summary.title}
-        </p>
-      </div>
-      <div>
-        <p class="text-muted-foreground text-xs font-bold">Status</p>
-        <span
-          class:list={[
-            "mt-1 inline-flex min-h-7 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap",
-            badgeClassForTone(statusTone),
-          ]}
-          data-studio-operation-status-badge
-        >
-          {operationStatusLabel(operation.status)}
-        </span>
-      </div>
-    </div>
-
-    <ul class="grid gap-2" data-studio-operation-details>
-      {
-        operation.summary.details.map((detail) => (
-          <li class="border-border bg-panel-muted rounded-md border p-3 leading-6 [overflow-wrap:anywhere]">
-            {detail}
-          </li>
-        ))
-      }
-    </ul>
-  </article>
-
-  <div class="mt-4" aria-labelledby="operation-result-diagnostics">
-    <h3
-      id="operation-result-diagnostics"
-      class="text-muted-foreground mb-3 text-xs font-bold tracking-normal uppercase"
-    >
-      Diagnostics
-    </h3>
-    <p
-      class="border-border bg-panel-muted rounded-md border p-3 leading-6"
-      data-studio-diagnostics-empty
-      hidden={diagnostics.length > 0}
-    >
-      No diagnostics.
-    </p>
-    <div class="grid gap-3" data-studio-operation-diagnostics>
-      {
-        diagnostics.map((diagnostic) => (
-          <article
-            class:list={[
-              "border-border bg-panel-muted flex items-start justify-between gap-4 rounded-md border border-l-4 p-3 max-sm:grid",
-              diagnosticBorderClass(diagnostic.severity),
-            ]}
-          >
-            <div class="min-w-0">
-              <p class="text-muted-foreground text-xs font-bold uppercase">
-                {diagnostic.code}
-              </p>
-              <h4 class="mt-1 text-base leading-snug font-bold tracking-normal">
-                {diagnostic.message}
-              </h4>
-              {"location" in diagnostic && diagnostic.location && (
-                <p class="text-muted-foreground mt-2 flex flex-wrap gap-x-2 gap-y-1 text-sm">
-                  <span class="font-bold uppercase">
-                    {diagnostic.location.kind}
-                  </span>
-                  <code class="[overflow-wrap:anywhere]">
-                    {diagnostic.location.path}
-                  </code>
-                </p>
-              )}
-              {"remediation" in diagnostic && diagnostic.remediation && (
-                <p class="text-muted-foreground mt-2 leading-6">
-                  {diagnostic.remediation}
-                </p>
-              )}
-            </div>
-            <span
-              class:list={[
-                "inline-flex min-h-7 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap",
-                badgeClassForTone(diagnosticSeverityTone(diagnostic.severity)),
-              ]}
-            >
-              {diagnostic.severity}
-            </span>
-          </article>
-        ))
-      }
-    </div>
-  </div>
+  <OperationResultSummary operation={operation} />
+  <OperationDiagnosticsList diagnostics={diagnostics} />
 </section>
 
 <script src="../controllers/operation-runtime.ts"></script>
