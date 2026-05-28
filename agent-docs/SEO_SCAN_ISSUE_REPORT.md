@@ -387,9 +387,9 @@ Do not add routes or files for these. Keep them as 404s.
 After fixes, run:
 
 ```sh
-bun run build
-bun run verify
-bun run validate:html
+just build
+just verify
+just validate-html
 ```
 
 Then rerun the local bad-link scanner against `dist` and confirm these paths no

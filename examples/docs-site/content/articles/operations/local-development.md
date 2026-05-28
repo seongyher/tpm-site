@@ -13,13 +13,13 @@ Development commands run the platform against a selected site instance.
 ## Docs Site
 
 ```sh
-bun run docs-site:dev
+just docs-site-dev
 ```
 
 ## Default Site
 
 ```sh
-bun run dev
+just dev
 ```
 
 ## Explicit Site Instance
@@ -27,7 +27,7 @@ bun run dev
 Use `SITE_INSTANCE_ROOT` when adding a new instance script:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run dev
+SITE_INSTANCE_ROOT=examples/docs-site just dev
 ```
 
 ## What To Edit

@@ -411,12 +411,14 @@ impl DiagnosticReport {
             return String::from("No diagnostics.\n");
         }
 
-        self.diagnostics
+        let mut rendered = self
+            .diagnostics
             .iter()
             .map(render_diagnostic)
             .collect::<Vec<_>>()
-            .join("\n")
-            + "\n"
+            .join("\n");
+        rendered.push('\n');
+        rendered
     }
 
     /// Renders the report as stable pretty JSON.
@@ -457,6 +459,11 @@ fn render_diagnostic(diagnostic: &Diagnostic) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "test fixtures use static diagnostic codes whose validity is the test precondition"
+    )]
+
     use super::{
         Diagnostic, DiagnosticCode, DiagnosticCodeError, DiagnosticLocation,
         DiagnosticLocationKind, DiagnosticReport,
@@ -464,14 +471,16 @@ mod tests {
     use tpm_core::Severity;
 
     fn valid_code(value: &str) -> DiagnosticCode {
-        DiagnosticCode::parse(value).unwrap_or_else(|error| {
-            panic!("test diagnostic code should be valid: {error}");
-        })
+        DiagnosticCode::parse(value).expect("test diagnostic code should be valid")
     }
 
     #[test]
     fn diagnostic_codes_reject_empty_values() {
         assert_eq!(DiagnosticCode::parse(""), Err(DiagnosticCodeError::Empty));
+        assert_eq!(
+            DiagnosticCodeError::Empty.to_string(),
+            "diagnostic code must not be empty"
+        );
     }
 
     #[test]
@@ -501,13 +510,18 @@ mod tests {
             "example warning",
         ));
         report.push(Diagnostic::new(
+            valid_code("TPM-0000"),
+            Severity::Note,
+            "example note",
+        ));
+        report.push(Diagnostic::new(
             valid_code("TPM-0002"),
             Severity::Error,
             "example failure",
         ));
 
         let counts = report.counts();
-        assert_eq!(counts.notes(), 0);
+        assert_eq!(counts.notes(), 1);
         assert_eq!(counts.warnings(), 1);
         assert_eq!(counts.errors(), 1);
         assert_eq!(report.warnings().len(), 1);
@@ -533,7 +547,26 @@ mod tests {
             Some(DiagnosticLocationKind::Source)
         );
         assert_eq!(
+            diagnostic.location().map(DiagnosticLocation::path),
+            Some("site/content/articles/example.md")
+        );
+        assert_eq!(
+            diagnostic.location().and_then(DiagnosticLocation::line),
+            None
+        );
+        assert_eq!(
+            diagnostic.location().and_then(DiagnosticLocation::column),
+            None
+        );
+        assert_eq!(diagnostic.code().as_str(), "TPM-0003");
+        assert_eq!(diagnostic.severity(), Severity::Error);
+        assert_eq!(diagnostic.message(), "Missing article title.");
+        assert_eq!(
             diagnostic.remediation(),
+            Some("Add a title field to the article frontmatter.")
+        );
+        assert_eq!(
+            diagnostic.help(),
             Some("Add a title field to the article frontmatter.")
         );
         assert_eq!(
@@ -564,6 +597,31 @@ mod tests {
         assert!(rendered.contains("error TPM-0004: Missing site configuration."));
         assert!(rendered.contains("at source site/config/site.json:1:1"));
         assert!(rendered.contains("help: Create site/config/site.json."));
+    }
+
+    #[test]
+    fn diagnostic_locations_render_artifacts_and_line_only_positions() {
+        let location = DiagnosticLocation {
+            column: None,
+            kind: DiagnosticLocationKind::Artifact,
+            line: Some(12),
+            path: String::from("dist/index.html"),
+        };
+        let diagnostic = Diagnostic::new(
+            valid_code("TPM-0006"),
+            Severity::Note,
+            "Generated artifact note.",
+        )
+        .with_help("Review the generated file.")
+        .with_location(location)
+        .with_developer_message("artifact inventory branch");
+        let report = DiagnosticReport::from_diagnostics(vec![diagnostic]);
+        let rendered = report.render_human();
+
+        assert!(rendered.contains("note TPM-0006: Generated artifact note."));
+        assert!(rendered.contains("at artifact dist/index.html:12"));
+        assert!(rendered.contains("help: Review the generated file."));
+        assert!(rendered.contains("developer: artifact inventory branch"));
     }
 
     #[test]

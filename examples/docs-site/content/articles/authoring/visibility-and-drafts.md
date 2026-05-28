@@ -60,5 +60,5 @@ Site owners configure defaults here:
 ## Verify
 
 ```sh
-bun run author:check
+just author-check
 ```

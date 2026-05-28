@@ -22,8 +22,10 @@ we can rerun it after Astro, Vite, Tailwind, or site-content changes.
 
 ## Experiment Harness
 
-`bun run payload:vite:experiments` builds temporary Astro config files under
-`tmp/vite-build-experiments/`. Each scenario:
+Historical note: the old `just payload-vite-experiments` rerun command was
+retired from the active command surface during the Rust/`just` migration. If
+this experiment harness is reactivated, it should build temporary Astro config
+files under `tmp/vite-build-experiments/`. Each scenario should:
 
 - imports the real `astro.config.ts`;
 - merges a small JSON-serializable Vite config fragment;
@@ -56,5 +58,5 @@ scenario only improves raw bytes or only changes an internal temporary bundle,
 leave production config alone.
 
 Any production adoption must then pass the normal release gates, especially
-`bun run check:release`, browser invariants, accessibility checks, HTML
+`just release-check`, browser invariants, accessibility checks, HTML
 validation, and payload reporting.

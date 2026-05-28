@@ -33,9 +33,12 @@ as normal output.
 
 ## Experiment Harness
 
-`bun run payload:postbuild:experiments` copies `dist/` into temporary scenario
-directories and applies standalone transforms to those copies only. Each
-scenario then runs:
+Historical note: the old `just payload-postbuild-experiments` rerun command was
+retired from the active command surface during the Rust/`just` migration. The
+active production path is `just build-optimize`; if this experiment harness is
+reactivated, it should copy `dist/` into temporary scenario directories and
+apply standalone transforms to those copies only. Each scenario should then
+run:
 
 - strict HTML validation;
 - build-output verification;
@@ -56,12 +59,12 @@ generated-code quote style.
 
 The selected production stack is the `safe-stack` scenario: Lightning CSS,
 SVGO, conservative Oxc JS whitespace optimization, and unreferenced generated
-Astro raster asset cleanup. `bun run build` now runs the raw Astro/Pagefind
-build and then applies that stack to `dist/` through `bun run build:optimize`.
-The raw build remains available as `bun run build:raw` so payload experiments
+Astro raster asset cleanup. `just build` now runs the raw Astro/Pagefind
+build and then applies that stack to `dist/` through `just build-optimize`.
+The raw build remains available as `just build-raw` so payload experiments
 can keep comparing optimizer candidates against an unoptimized baseline.
 
-`bun run preview:release:fresh` builds optimized output, verifies generated
+`just preview-release-fresh` builds optimized output, verifies generated
 pages/links/scripts, validates representative HTML, and then starts Astro
 preview for release-like local inspection.
 

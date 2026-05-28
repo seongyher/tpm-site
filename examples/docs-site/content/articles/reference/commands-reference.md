@@ -1,6 +1,6 @@
 ---
 title: Commands Reference
-description: Choose the right Bun command for development, authoring, validation, and release checks.
+description: Choose the right repository command for development, authoring, validation, and release checks.
 date: 2026-05-08
 author: Platform Team
 tags:
@@ -8,54 +8,55 @@ tags:
   - commands
 ---
 
-The platform is Bun-first. Use `bun run` scripts for development, checks, and
+The platform uses Bun for JavaScript dependencies and tests, but `just` is the
+repository command surface. Use `just` recipes for development, checks, and
 site-instance operations.
 
 ## Development
 
 ```sh
-bun run dev
-bun run docs-site:dev
+just dev
+just docs-site-dev
 ```
 
 ## Authoring
 
 ```sh
-bun run author:check
-bun run author:fix
+just author-check
+just author-fix
 ```
 
 ## Docs Site
 
 ```sh
-bun run test:docs-site
-bun run docs-site:preview:fresh
+just test-docs-site
+just docs-site-preview-fresh
 ```
 
 ## External Fixture
 
 ```sh
-bun run test:site-instance
+just test-site-instance
 ```
 
 ## Platform Checks
 
 ```sh
-bun run platform:check
-bun run check
+just platform-check
+just check
 ```
 
 ## Release
 
 ```sh
-bun run check:release
+just release-check
 ```
 
 ## Generated Contracts
 
 ```sh
-bun run site:schema
-bun run site:schema:check
+just site-schema
+just site-schema-check
 ```
 
 Use [Validate Your Site](/articles/validate-site/) for the onboarding path and

@@ -38,7 +38,9 @@ const config = {
   ],
   ignoreBinaries: ["gitleaks", "just"],
   ignoreDependencies: [
+    "@astrojs/check",
     "@typescript-eslint/parser",
+    "@lhci/cli",
     "@tailwindcss/typography",
     "html-validate",
     "markdownlint-cli2",
@@ -46,6 +48,7 @@ const config = {
     "sort-package-json",
     "tailwindcss",
     "tw-animate-css",
+    "wrangler",
   ],
   project: [
     "astro.config.ts",

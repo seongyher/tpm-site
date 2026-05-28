@@ -1,3 +1,4 @@
+import siteSocialFallbackImage from "@site/assets/site/tpm_home_hero_dark.png";
 import type { ImageMetadata } from "astro";
 import { getCollection, getEntry } from "astro:content";
 
@@ -5,6 +6,7 @@ import {
   activeEditorialCollections,
   type EditorialCollectionEntry,
 } from "./collections";
+import { imageMetadataOrUndefined } from "./content-images";
 import {
   type AnnouncementEntry,
   type ArticleEntry,
@@ -66,12 +68,16 @@ export async function getSiteSocialFallbackImage(): Promise<ImageMetadata> {
   const home = await getHomePage();
   const fallbackImage =
     home?.data.hero?.darkImage ?? home?.data.hero?.lightImage;
+  const resolvedFallback = imageMetadataOrUndefined(fallbackImage);
 
   if (fallbackImage === undefined) {
     throw new Error("Missing homepage hero image for site social previews.");
   }
 
-  return fallbackImage;
+  // Astro's container renderer can expose content collection images as
+  // unresolved strings. Keep the production path config-driven, but preserve a
+  // renderable site fallback for component tests and other non-build adapters.
+  return resolvedFallback ?? siteSocialFallbackImage;
 }
 
 /**

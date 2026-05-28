@@ -5,12 +5,6 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, test } from "bun:test";
 import matter from "gray-matter";
 
-import {
-  collectCloudflareRedirectRules,
-  collectLegacyRedirectRules,
-  defaultLegacyRedirectSources,
-} from "../../scripts/build/generate-cloudflare-redirects";
-
 const publishableSources = [
   {
     dir: path.resolve("site/content/announcements"),
@@ -158,25 +152,5 @@ describe("legacy redirects", () => {
       await expectedRedirectsFromPublishableFrontmatter(),
     );
     expect(redirects).toMatchObject(rootCategoryRedirects);
-  });
-
-  test("content-derived Cloudflare redirects match publishable legacy permalink frontmatter", async () => {
-    expect(
-      Object.fromEntries(
-        (await collectLegacyRedirectRules(defaultLegacyRedirectSources())).map(
-          (rule) => [rule.source, rule.destination],
-        ),
-      ),
-    ).toEqual(await expectedRedirectsFromPublishableFrontmatter());
-  });
-
-  test("Cloudflare redirects include site-owned root category redirects", async () => {
-    expect(
-      Object.fromEntries(
-        (
-          await collectCloudflareRedirectRules(defaultLegacyRedirectSources())
-        ).map((rule) => [rule.source, rule.destination]),
-      ),
-    ).toMatchObject(rootCategoryRedirects);
   });
 });

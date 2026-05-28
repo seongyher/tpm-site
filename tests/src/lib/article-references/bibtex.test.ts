@@ -7,6 +7,7 @@ describe("BibTeX parser", () => {
     const result = parseBibtexEntries(`
 @book{baudrillard-1981,
   author = {Baudrillard, Jean},
+  pages = 1--2,
   title = {Simulacra and {Simulation}},
   year = "1981",
   unknown_field = {Preserved}
@@ -32,6 +33,7 @@ describe("BibTeX parser", () => {
     });
     expect(result.entries[0]?.fields).toMatchObject({
       author: "Baudrillard, Jean",
+      pages: "1--2",
       title: "Simulacra and {Simulation}",
       unknown_field: "Preserved",
       year: "1981",
@@ -46,6 +48,7 @@ describe("BibTeX parser", () => {
 % exported from a citation manager
 @comment{not a bibliography item}
 @preamble("ignored preamble")
+@comment{Nested {ignored} \\} value}
 @article{real-source, title = {Real Source}}
 `);
 
@@ -75,6 +78,7 @@ describe("BibTeX parser", () => {
 
   test("reports precise diagnostics for unsupported or incomplete BibTeX syntax", () => {
     const cases = [
+      ["not bibtex", "Expected a BibTeX entry starting with '@'."],
       ["@", "Expected a BibTeX entry type after '@'."],
       ["@book title = {Broken}", "Expected '{' or '(' after BibTeX type."],
       ["@book{, title = {Broken}}", "Expected a BibTeX key."],
@@ -89,6 +93,7 @@ describe("BibTeX parser", () => {
         "Expected ',' or the end of the BibTeX entry after a field value.",
       ],
       ["@book{source,", "Unterminated BibTeX entry."],
+      ["@book{source, title =", "Expected a BibTeX field value."],
       ['@book{source, title = "Broken}', "Unterminated quoted BibTeX value."],
       ["@book{source, title = {Broken", "Unterminated braced BibTeX value."],
       [
@@ -100,6 +105,10 @@ describe("BibTeX parser", () => {
         "Expected ',' or the end of the BibTeX entry after a field value.",
       ],
       ["@comment{not closed", "Unterminated ignored BibTeX entry."],
+      [
+        String.raw`@comment{literal \{ not closed`,
+        "Unterminated ignored BibTeX entry.",
+      ],
     ] as const;
 
     for (const [source, message] of cases) {

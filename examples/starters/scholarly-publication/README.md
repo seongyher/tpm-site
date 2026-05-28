@@ -6,5 +6,5 @@ research-style metadata.
 Run it with:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/starters/scholarly-publication bun run build
+SITE_INSTANCE_ROOT=examples/starters/scholarly-publication just build
 ```

@@ -5,6 +5,7 @@ import {
   authorSummariesForArticle,
   type AuthorSummary,
 } from "./authors";
+import { imageMetadataOrUndefined } from "./content-images";
 import {
   type ArticleEntry,
   articleUrl,
@@ -64,6 +65,7 @@ export function articleArchiveItems(
   return articles.map((article) => {
     const category = categoryMap.get(categorySlug(article));
     const title = entryTitle(article);
+    const image = imageMetadataOrUndefined(article.data.image);
 
     return {
       article,
@@ -83,11 +85,11 @@ export function articleArchiveItems(
       date: formatDate(entryDate(article)),
       description: excerpt(article),
       image:
-        article.data.image === undefined
+        image === undefined
           ? undefined
           : {
               alt: article.data.imageAlt ?? title,
-              src: article.data.image,
+              src: image,
             },
       title,
       url: articleUrl(article.id),

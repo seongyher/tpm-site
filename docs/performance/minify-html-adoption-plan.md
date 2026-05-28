@@ -29,7 +29,7 @@ every option and identifies hard blockers.
   savings come from.
 - Keep the report read-only and quiet enough for CI/review use.
 - Add tests for the payload reporter using temporary fixture files.
-- Document the package script in `PACKAGE_SCRIPTS.md`.
+- Document the `just` command in `COMMANDS.md`.
 
 Phase 2 is complete when we can run a build, collect baseline payload numbers,
 and compare later experiments against the same raw/gzip/Brotli metrics.
@@ -85,25 +85,24 @@ failed strict HTML validation.
   sidecars for Cloudflare Workers Static Assets.
 - Make the build fail if the minifier fails, skips an HTML file unexpectedly,
   or produces invalid output.
-- Update `bun run build`, `bun run verify`, relevant package script docs, and
-  tests.
+- Update `just build`, `just verify`, relevant command docs, and tests.
 - Keep minification deterministic and quiet unless it reports a failure or an
   explicit payload report is requested.
 
-Phase 5 is complete when normal `bun run build` emits minified production HTML
+Phase 5 is complete when normal `just build` emits minified production HTML
 and the full release gate passes.
 
 ## Required Gates
 
 Every production candidate must pass:
 
-- `bun run build`
-- `bun run verify`
-- `bun run validate:html`
-- `bun run test:e2e`
-- `bun run test:a11y`
-- `bun run check`
-- `bun run coverage`
+- `just build`
+- `just verify`
+- `just validate-html`
+- `just test-e2e`
+- `just test-a11y`
+- `just check`
+- `just coverage`
 - JSON-LD parse checks for representative article and author pages
 - Search result rendering checks, including `<mark>` highlights
 - Article anchor and TOC interaction checks

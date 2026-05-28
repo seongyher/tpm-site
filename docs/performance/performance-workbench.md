@@ -15,13 +15,15 @@ experience.
 
 1. Start with a clean baseline.
    Build the site with the command that matches the question. Use
-   `bun --silent run build:raw` when comparing optimizer candidates against
-   unoptimized Astro/Pagefind output. Use `bun --silent run build` when the
+   `just build-raw` when comparing optimizer candidates against
+   unoptimized Astro/Pagefind output. Use `just build` when the
    question is about production output.
 2. Run the smallest reproducible experiment.
-   Use the named `payload:*` script for the workbench track. Experiments must
-   write to `tmp/` or a copied output directory and must not mutate `dist/`
-   unless they are already part of the production build.
+   Use active `just` recipes such as `payload-report`, `payload-check`, and
+   `build-optimize` when they match the track. Historical experiment harnesses
+   are not active commands; restoring one should create an explicit workflow
+   that writes to `tmp/` or a copied output directory and does not mutate
+   `dist/` unless it becomes part of the production build.
 3. Measure comparable artifacts.
    Compare raw, gzip, and Brotli bytes for the same route classes and asset
    roles. Browser-only metrics such as LCP and CLS should be recorded as
@@ -33,7 +35,7 @@ experience.
    generated-output checks before promotion.
 5. Promote through contracts, not memory.
    Accepted behavior belongs in typed policies such as
-   `src/lib/performance-budgets.ts`, the package-script registry, release
+   `src/lib/performance-budgets.ts`, the command registry, release
    checks, and docs. A report alone is not a production contract.
 6. Keep rollback clear.
    Every adopted optimization must have an obvious rollback path that disables
@@ -41,22 +43,22 @@ experience.
 
 ## Tracks
 
-| Track                       | Current state      | Evidence command                                                                   | Promotion rule                                                                                          |
-| --------------------------- | ------------------ | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Route-class payload budgets | Release-gated      | `bun --silent run payload:check` and `bun --silent run payload:report -- --top 12` | Deterministic route/PDF/cache failures can block release; noisy Lighthouse timings stay warning-only.   |
-| Cache policy                | Release-gated      | `bun --silent run payload:check` and `bun --silent run payload:report -- --top 12` | Header patterns may be broadened only when all matched files are fingerprinted or intentionally stable. |
-| Post-build optimization     | Production-adopted | `bun --silent run payload:postbuild:experiments`                                   | New transforms need copied-output validation, browser checks, accessibility checks, and release checks. |
-| Critical CSS extraction     | Experiment-only    | `bun --silent run payload:critical-css:experiment`                                 | Adopt only if route-class wins outweigh duplicated CSS and lost shared-cache benefits.                  |
-| Preload/fetch priority      | Experiment-only    | Route-class Lighthouse or browser profile plus `payload:report`                    | Adopt only for stable first-viewport LCP resources with no competing-priority regression.               |
-| Vite build options          | Experiment-only    | `bun --silent run payload:vite:experiments`                                        | Adopt only when a temporary Astro/Vite config passes all gates and reduces compressed output.           |
-| HTML minification           | Experiment-only    | `bun --silent run payload:minify-html:experiments`                                 | Adopt only when strict HTML validation and machine-readable output stay correct.                        |
+| Track                       | Current state      | Evidence command or artifact                                         | Promotion rule                                                                                          |
+| --------------------------- | ------------------ | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Route-class payload budgets | Release-gated      | `just payload-check` and `just payload-report --top 12`              | Deterministic route/PDF/cache failures can block release; noisy Lighthouse timings stay warning-only.   |
+| Cache policy                | Release-gated      | `just payload-check` and `just payload-report --top 12`              | Header patterns may be broadened only when all matched files are fingerprinted or intentionally stable. |
+| Post-build optimization     | Production-adopted | `just build-optimize`, `just payload-report`, `just verify`          | New transforms need copied-output validation, browser checks, accessibility checks, and release checks. |
+| Critical CSS extraction     | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only if route-class wins outweigh duplicated CSS and lost shared-cache benefits.                  |
+| Preload/fetch priority      | Experiment-only    | Route-class Lighthouse or browser profile plus `just payload-report` | Adopt only for stable first-viewport LCP resources with no competing-priority regression.               |
+| Vite build options          | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only when a temporary Astro/Vite config passes all gates and reduces compressed output.           |
+| HTML minification           | Experiment-only    | Historical report in `docs/performance/`; no active `just` command   | Adopt only when strict HTML validation and machine-readable output stay correct.                        |
 
 ## Promotion Checklist
 
 A performance optimization can move from experiment to production only when all
 of these are true:
 
-- The experiment is reproducible from a package script or documented browser
+- The experiment is reproducible from a `just` recipe or documented browser
   profile.
 - The baseline and candidate use the same content, route classes, and output
   mode.
@@ -66,13 +68,13 @@ of these are true:
   changes emitted files.
 - Browser behavior tests cover any affected interaction scripts.
 - Accessibility tests cover any affected rendered page classes.
-- The promotion updates the relevant typed policy, package-script docs, and QA
+- The promotion updates the relevant typed policy, command docs, and QA
   registry.
 - The rollback path is limited to the candidate optimization or budget.
 
 ## Budget Policy
 
-`payload:report` owns deterministic review evidence, and `payload:check`
+`just payload-report` owns deterministic review evidence, and `just payload-check`
 promotes the release-blocking subset:
 
 - route-class HTML Brotli budgets;
@@ -118,7 +120,7 @@ When adding cache rules:
 - prove the files are fingerprinted or intentionally stable;
 - keep the rule in `site/public/_headers` or the owning generated-output
   adapter;
-- keep `payload:report` cache-header evidence passing.
+- keep `just payload-report` cache-header evidence passing.
 
 ## Rollback Policy
 

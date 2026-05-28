@@ -179,6 +179,75 @@ describe("anchored positioning browser script", () => {
     expect(panel.dataset["anchorPlacement"]).toBe("bottom-end");
   });
 
+  test("positions open roots from mouseover and viewport events", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <details data-anchor-root data-anchor-preset="article-citation-menu" open>
+        <summary data-anchor-trigger>Cite</summary>
+        <div data-anchor-panel>Panel</div>
+      </details>
+    `;
+
+    const trigger = requiredElement(window, "[data-anchor-trigger]");
+    const panel = requiredElement(window, "[data-anchor-panel]");
+    Reflect.set(window, "innerHeight", 700);
+    Reflect.set(window, "innerWidth", 768);
+    setRect(trigger, { height: 24, width: 64, x: 300, y: 220 });
+    setRect(panel, { height: 180, width: 288, x: 0, y: 0 });
+    installImmediateAnimationFrame(window);
+
+    installAnchoredPositioning(runtimeFor(window));
+    dispatchWindowEvent(trigger, window, "mouseover");
+    const firstY = panel.style.getPropertyValue("--anchor-y");
+
+    setRect(trigger, { height: 24, width: 64, x: 300, y: 280 });
+    window.dispatchEvent(new window.Event("resize"));
+
+    expect(firstY).toBe("248px");
+    expect(panel.style.getPropertyValue("--anchor-y")).toBe("308px");
+  });
+
+  test("does not add duplicate root listeners when initialized twice", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <details data-anchor-root data-anchor-preset="article-action-menu" open>
+        <summary data-anchor-trigger>Share</summary>
+        <div data-anchor-panel>Panel</div>
+      </details>
+    `;
+
+    const root = requiredElement(window, "[data-anchor-root]");
+    const panel = requiredElement(window, "[data-anchor-panel]");
+    setRect(requiredElement(window, "[data-anchor-trigger]"), {
+      height: 24,
+      width: 64,
+      x: 100,
+      y: 120,
+    });
+    setRect(panel, { height: 180, width: 288, x: 0, y: 0 });
+    let frameCount = 0;
+    Reflect.set(
+      window,
+      "requestAnimationFrame",
+      (callback: FrameRequestCallback) => {
+        frameCount += 1;
+        callback(0);
+
+        return 1;
+      },
+    );
+
+    installAnchoredPositioning(runtimeFor(window));
+    installAnchoredPositioning(runtimeFor(window));
+    dispatchWindowEvent(root, window, "mouseenter");
+
+    expect(frameCount).toBe(1);
+  });
+
   test("ignores unrelated events and invalid root contracts", () => {
     const window = browserWindow();
     const document = window.document;
@@ -222,6 +291,29 @@ describe("anchored positioning browser script", () => {
     expect(missingTriggerPanel.style.getPropertyValue("--anchor-x")).toBe("");
   });
 
+  test("uses an empty header rect when header anchored surfaces have no header", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <details data-anchor-root data-anchor-preset="header-dropdown" open>
+        <summary data-anchor-trigger>Menu</summary>
+        <div data-anchor-panel>Panel</div>
+      </details>
+    `;
+
+    const trigger = requiredElement(window, "[data-anchor-trigger]");
+    const panel = requiredElement(window, "[data-anchor-panel]");
+    setRect(trigger, { height: 40, width: 80, x: 24, y: 24 });
+    setRect(panel, { height: 240, width: 320, x: 0, y: 0 });
+    installImmediateAnimationFrame(window);
+
+    installAnchoredPositioning(runtimeFor(window));
+    dispatchWindowEvent(trigger, window, "click");
+
+    expect(panel.style.getPropertyValue("--anchor-y")).toBe("0px");
+  });
+
   test("observes header and panel size changes and disconnects removed roots", () => {
     const window = browserWindow();
     const document = window.document;
@@ -250,6 +342,31 @@ describe("anchored positioning browser script", () => {
     ]);
     expect(observer.disconnectCount).toBe(1);
     expect(panel.style.getPropertyValue("--anchor-x")).toBe("");
+  });
+
+  test("repositions open roots when resize observers fire", () => {
+    const window = browserWindow();
+    const document = window.document;
+    const observer = callbackResizeObserverConstructor();
+
+    document.body.innerHTML = `
+      <details data-anchor-root data-anchor-preset="article-action-menu" open>
+        <summary data-anchor-trigger>Share</summary>
+        <div data-anchor-panel>Panel</div>
+      </details>
+    `;
+
+    const trigger = requiredElement(window, "[data-anchor-trigger]");
+    const panel = requiredElement(window, "[data-anchor-panel]");
+    setRect(trigger, { height: 24, width: 64, x: 100, y: 120 });
+    setRect(panel, { height: 180, width: 288, x: 0, y: 0 });
+    installImmediateAnimationFrame(window);
+
+    installAnchoredPositioning(runtimeFor(window, observer.ResizeObserver));
+    setRect(trigger, { height: 24, width: 64, x: 100, y: 160 });
+    observer.fire();
+
+    expect(panel.style.getPropertyValue("--anchor-y")).toBe("188px");
   });
 
   test("positions disclosure-open roots without treating restored focus as open", () => {
@@ -433,6 +550,42 @@ function resizeObserverConstructor(): {
     },
     get observedSelectors() {
       return observedSelectors;
+    },
+    ResizeObserver: TestResizeObserver,
+  };
+}
+
+function callbackResizeObserverConstructor(): {
+  fire: () => void;
+  readonly ResizeObserver: typeof ResizeObserver;
+} {
+  let observerCallback: ResizeObserverCallback | undefined;
+
+  class TestResizeObserver implements ResizeObserver {
+    constructor(callback: ResizeObserverCallback) {
+      observerCallback = callback;
+    }
+
+    disconnect(): void {
+      observerCallback = undefined;
+    }
+
+    observe(element: Element, options?: ResizeObserverOptions): void {
+      void element;
+      void options;
+    }
+
+    unobserve(element: Element): void {
+      void element;
+    }
+  }
+
+  return {
+    fire: () => {
+      const callback = observerCallback;
+      if (callback !== undefined) {
+        callback([], new TestResizeObserver(callback));
+      }
     },
     ResizeObserver: TestResizeObserver,
   };

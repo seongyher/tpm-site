@@ -27,7 +27,7 @@ my-site/
 ## Build Command
 
 ```sh
-SITE_INSTANCE_ROOT=my-site SITE_OUTPUT_DIR=dist/my-site bun run build
+SITE_INSTANCE_ROOT=my-site SITE_OUTPUT_DIR=dist/my-site just build
 ```
 
 ## Fixture Proof
@@ -35,7 +35,7 @@ SITE_INSTANCE_ROOT=my-site SITE_OUTPUT_DIR=dist/my-site bun run build
 The repository includes a small external fixture:
 
 ```sh
-bun run test:site-instance
+just test-site-instance
 ```
 
 ## Docs-Site Proof
@@ -43,7 +43,7 @@ bun run test:site-instance
 The docs site uses the same mechanism:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 ## Next

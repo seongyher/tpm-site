@@ -1,10 +1,10 @@
 import { routeIndexOutputPath, routeOutputPath } from "./route-registry";
 
 /** Byte-budget status emitted by deterministic performance workbench checks. */
-export type PayloadBudgetStatus = "fail" | "missing" | "pass" | "warn";
+type PayloadBudgetStatus = "fail" | "missing" | "pass" | "warn";
 
 /** Route classes used by the performance workbench. */
-export type RoutePerformanceClassId =
+type RoutePerformanceClassId =
   | "articles-hub"
   | "generated-feeds-and-metadata"
   | "generated-pdfs"

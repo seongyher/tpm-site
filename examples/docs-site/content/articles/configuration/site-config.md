@@ -41,8 +41,8 @@ The real schema is stricter than this excerpt. Run the schema and doctor checks
 after edits:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:schema:check -- --quiet
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:doctor -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-schema-check --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-doctor --quiet
 ```
 
 ## What Belongs Here

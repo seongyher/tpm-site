@@ -1,0 +1,69 @@
+---
+import BibliographyEmptyState from "../../components/bibliography/BibliographyEmptyState.astro";
+import BibliographyEntry from "../../components/bibliography/BibliographyEntry.astro";
+import BibliographyList from "../../components/bibliography/BibliographyList.astro";
+import BibliographyPage from "../../components/bibliography/BibliographyPage.astro";
+import BibliographySourceArticles from "../../components/bibliography/BibliographySourceArticles.astro";
+import type { BibliographyEntry as BibliographyEntryViewModel } from "../../lib/bibliography";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  entries: readonly BibliographyEntryViewModel[];
+}
+
+const { entries } = Astro.props;
+const [primaryEntry] = entries;
+
+if (primaryEntry === undefined) {
+  throw new Error("Bibliography catalog section requires one entry fixture.");
+}
+---
+
+<CatalogSection
+  title="Bibliography Components"
+  description="Global cited-source browsing components built from normalized article-reference data."
+>
+  <CatalogExample
+    title="BibliographyPage"
+    description="Global bibliography page composition with filled and empty states."
+    componentPath="src/components/bibliography/BibliographyPage.astro"
+  >
+    <div class="grid gap-8">
+      <BibliographyPage entries={entries} />
+      <BibliographyPage entries={[]} />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="BibliographyList"
+    description="Divided list of bibliography entries."
+    componentPath="src/components/bibliography/BibliographyList.astro"
+  >
+    <BibliographyList entries={entries} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="BibliographyEntry"
+    description="One source entry with a long URL and source-article backlinks."
+    componentPath="src/components/bibliography/BibliographyEntry.astro"
+  >
+    <BibliographyEntry entry={primaryEntry} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="BibliographySourceArticles"
+    description="Backlinks to articles that cite one source."
+    componentPath="src/components/bibliography/BibliographySourceArticles.astro"
+  >
+    <BibliographySourceArticles articles={primaryEntry.sourceArticles} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="BibliographyEmptyState"
+    description="Empty state used while canonical citations are prepared."
+    componentPath="src/components/bibliography/BibliographyEmptyState.astro"
+  >
+    <BibliographyEmptyState />
+  </CatalogExample>
+</CatalogSection>

@@ -225,18 +225,25 @@ export async function articlePageViewModel({
 }
 
 async function getArticles(): Promise<ArticleEntry[]> {
+  // Coverage note: this default loader crosses Astro's virtual content module
+  // boundary. Unit tests inject the content bundle into `articlePageViewModel()`
+  // and Astro/container tests cover the real route integration.
   const content = await import("./content");
 
   return content.getArticles();
 }
 
 async function getCategories(): Promise<CategorySummary[]> {
+  // Coverage note: see `getArticles()`; this default is an Astro integration
+  // boundary and the view-model behavior is covered through injected content.
   const content = await import("./content");
 
   return content.getCategories();
 }
 
 async function getSiteSocialFallbackImage(): Promise<ImageMetadata> {
+  // Coverage note: see `getArticles()`; direct Bun unit tests cannot import
+  // Astro content modules without the Astro test container.
   const content = await import("./content");
 
   return content.getSiteSocialFallbackImage();

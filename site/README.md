@@ -37,7 +37,7 @@ Most content changes follow this pattern:
 1. Update your copy of the repository.
 2. Create a branch for your change.
 3. Edit files inside `site/`.
-4. Run `bun run author:check` if you can.
+4. Run `just author-check` if you can.
 5. Commit your change.
 6. Push the branch.
 7. Open a pull request for review.
@@ -156,7 +156,7 @@ tags:
   - memes
 ```
 
-If tag formatting is the only problem, `bun run author:fix` can usually fix it.
+If tag formatting is the only problem, `just author-fix` can usually fix it.
 
 ## Visibility, Drafts, And Exceptions
 
@@ -628,14 +628,14 @@ Leave this setting out to allow every supported profile kind.
 After changing `site/config/site.json`, run:
 
 ```sh
-bun run site:doctor
+just site-doctor
 ```
 
 If the schema check says `site/config/site.schema.json` is stale, a maintainer
 can regenerate it with:
 
 ```sh
-bun run site:schema
+just site-schema
 ```
 
 ## Edit Theme
@@ -654,25 +654,25 @@ articles. If a visual change affects layout or components, ask a maintainer.
 If you can use the terminal, install dependencies once:
 
 ```sh
-bun install
+just setup
 ```
 
 Run the author-facing check after content edits:
 
 ```sh
-bun run author:check
+just author-check
 ```
 
 If the only issue is tag normalization, run:
 
 ```sh
-bun run author:fix
+just author-fix
 ```
 
 Then run the check again:
 
 ```sh
-bun run author:check
+just author-check
 ```
 
 If you cannot run local checks, it is still okay to open a pull request. GitHub
@@ -706,7 +706,7 @@ git switch -c article/my-new-article
 Make your edits, then:
 
 ```sh
-bun run author:check
+just author-check
 git add site/
 git commit -m "Add my new article"
 git push -u origin article/my-new-article
@@ -736,7 +736,7 @@ Before asking for review:
 - `draft: true` is used for unpublished work.
 - `visibility` is used only when a published page should be hidden from a
   specific surface.
-- `bun run author:check` passes, if you can run it.
+- `just author-check` passes, if you can run it.
 
 If a check fails and you do not understand it, leave a comment on the pull
 request and ask for help. Do not open a second pull request for the same

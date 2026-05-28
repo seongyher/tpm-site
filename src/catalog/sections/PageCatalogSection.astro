@@ -1,0 +1,47 @@
+---
+import MarkdownPage from "../../components/pages/MarkdownPage.astro";
+import PageHeader from "../../components/pages/PageHeader.astro";
+import PageProse from "../../components/pages/PageProse.astro";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+---
+
+<CatalogSection
+  title="Page Components"
+  description="Generic Markdown page components that avoid article-only metadata and endcaps."
+>
+  <CatalogExample
+    title="PageHeader"
+    description="Generic page title and description."
+    componentPath="src/components/pages/PageHeader.astro"
+  >
+    <PageHeader title="About" description="About the catalog review site." />
+  </CatalogExample>
+
+  <CatalogExample
+    title="PageProse"
+    description="Non-article Markdown prose wrapper."
+    componentPath="src/components/pages/PageProse.astro"
+  >
+    <PageProse>
+      <h2>History</h2>
+      <p>
+        Generic Markdown pages share prose styling without article metadata or
+        article-end discovery.
+      </p>
+    </PageProse>
+  </CatalogExample>
+
+  <CatalogExample
+    title="MarkdownPage"
+    description="Composed non-article Markdown page shell."
+    componentPath="src/components/pages/MarkdownPage.astro"
+  >
+    <MarkdownPage title="About" description="About the catalog review site.">
+      <p>
+        MarkdownPage keeps page copy renderable while routing and metadata stay
+        in the Astro page.
+      </p>
+    </MarkdownPage>
+  </CatalogExample>
+</CatalogSection>

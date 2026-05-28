@@ -1,13 +1,21 @@
 # Repo Migration Audit For Rust
 
-This audit maps the current repository to Rust migration candidates. It is
-based on the current package scripts, `scripts/`, `src/platform/`, representative
-source modules, the platform roadmap, and the CLI strategy.
+This audit maps the repository to Rust migration candidates from the
+pre-migration baseline. It was based on the package-script command surface,
+`scripts/`, `src/platform/`, representative source modules, the platform
+roadmap, and the CLI strategy at the time it was written.
+
+Status note: the current repository now has a Rust workspace, a canonical
+`just` command router, and no package scripts. Use
+`agent-docs/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`,
+`agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`, and `COMMANDS.md` for
+the current command state. This document remains useful as migration rationale
+and historical baseline.
 
 ## Current State
 
-The repo is Bun-first today. `package.json` owns the public command surface and
-contains many mature quality gates:
+At the time of this audit, the repo was Bun-first. `package.json` owned the
+public command surface and contained many mature quality gates:
 
 - source/content checks;
 - Astro builds and static output optimization;
@@ -20,8 +28,8 @@ contains many mature quality gates:
 - dependency/security/audit gates;
 - QA command registry and CI parity checks.
 
-There is currently no Rust workspace, no `Cargo.toml`, no `rust-toolchain.toml`,
-no `deny.toml`, and no `justfile`.
+The later migration added the Rust workspace, `Cargo.toml`, `rust-toolchain.toml`,
+`deny.toml`, and `justfile`.
 
 The TypeScript code is already unusually migration-friendly because many
 scripts separate pure logic from process IO. Examples include:

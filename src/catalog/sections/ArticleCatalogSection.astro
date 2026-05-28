@@ -1,0 +1,506 @@
+---
+import type { ImageMetadata } from "astro";
+import { Maximize2 } from "lucide-astro";
+
+import ArticleBibliography from "../../components/articles/ArticleBibliography.astro";
+import ArticleCard from "../../components/articles/ArticleCard.astro";
+import ArticleCitationMenu from "../../components/articles/ArticleCitationMenu.astro";
+import ArticleEndcap from "../../components/articles/ArticleEndcap.astro";
+import ArticleFootnotes from "../../components/articles/ArticleFootnotes.astro";
+import ArticleHeader from "../../components/articles/ArticleHeader.astro";
+import ArticleImage from "../../components/articles/ArticleImage.astro";
+import ArticleList from "../../components/articles/ArticleList.astro";
+import ArticleMeta from "../../components/articles/ArticleMeta.astro";
+import ArticleProse from "../../components/articles/ArticleProse.astro";
+import ArticleReferenceBacklinks from "../../components/articles/ArticleReferenceBacklinks.astro";
+import ArticleReferences from "../../components/articles/ArticleReferences.astro";
+import ArticleShareMenu from "../../components/articles/ArticleShareMenu.astro";
+import ArticleTableOfContents from "../../components/articles/ArticleTableOfContents.astro";
+import ArticleTags from "../../components/articles/ArticleTags.astro";
+import HoverImageCard from "../../components/articles/HoverImageCard.astro";
+import MoreInCategoryBlock from "../../components/articles/MoreInCategoryBlock.astro";
+import NextArticleBlock from "../../components/articles/NextArticleBlock.astro";
+import RelatedArticlesBlock from "../../components/articles/RelatedArticlesBlock.astro";
+import SupportBlock from "../../components/blocks/SupportBlock.astro";
+import type { ArticleListItem } from "../../lib/article-list";
+import type { articleImagePresentation } from "../../lib/article-image-policy";
+import type { ArticleReferenceData } from "../../lib/article-references/model";
+import type { ArticleCitationMenuViewModel } from "../../lib/citations/article-citation";
+import type { ArticleShareMenuViewModel } from "../../lib/share-targets";
+import type { SupportBlockViewModel } from "../../lib/support";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  articleItemsWithMedia: readonly ArticleListItem[];
+  articleLandscapeImage: ImageMetadata;
+  articleTallImage: ImageMetadata;
+  authorName: string;
+  citation: ArticleCitationMenuViewModel;
+  generatedImagePresentation: ReturnType<typeof articleImagePresentation>;
+  references: ArticleReferenceData;
+  rtlArticleItems: readonly ArticleListItem[];
+  sampleImage: ImageMetadata;
+  share: ArticleShareMenuViewModel;
+  supportBlock: SupportBlockViewModel;
+  tags: readonly string[];
+  title: string;
+}
+
+const {
+  articleItemsWithMedia,
+  articleLandscapeImage,
+  articleTallImage,
+  authorName,
+  citation,
+  generatedImagePresentation,
+  references,
+  rtlArticleItems,
+  sampleImage,
+  share,
+  supportBlock,
+  tags,
+  title,
+} = Astro.props;
+const [primaryArticleItem] = articleItemsWithMedia;
+const [primaryCitation] = references.citations;
+
+if (primaryArticleItem === undefined) {
+  throw new Error("Article catalog section requires one article fixture.");
+}
+
+if (primaryCitation === undefined) {
+  throw new Error("Article catalog section requires one citation fixture.");
+}
+---
+
+<CatalogSection
+  title="Article Components"
+  description="Article surfaces, prose wrappers, discovery lists, and support prompts."
+>
+  <CatalogExample
+    title="ArticleHeader"
+    description="Title block with category, metadata, citation utility, and description."
+    componentPath="src/components/articles/ArticleHeader.astro"
+  >
+    <ArticleHeader
+      author={authorName}
+      category={{ href: "/categories/research/", title: "Research" }}
+      citation={citation}
+      date={new Date("2026-01-12T00:00:00.000Z")}
+      description="A generic article header fixture exercises long titles, citations, share actions, and prose rhythm."
+      formattedDate="January 12, 2026"
+      share={share}
+      title={title}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleCitationMenu"
+    description="Generated citation copy utility with visible no-JavaScript text."
+    componentPath="src/components/articles/ArticleCitationMenu.astro"
+  >
+    <ArticleCitationMenu citation={citation} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleShareMenu"
+    description="Article share utility with copy, email, and social targets."
+    componentPath="src/components/articles/ArticleShareMenu.astro"
+  >
+    <ArticleShareMenu share={share} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleMeta"
+    description="Author and machine-readable date metadata."
+    componentPath="src/components/articles/ArticleMeta.astro"
+  >
+    <ArticleMeta
+      author={authorName}
+      date={new Date("2026-01-12T00:00:00.000Z")}
+      formattedDate="January 12, 2026"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleTags"
+    description="Tag badges for article metadata."
+    componentPath="src/components/articles/ArticleTags.astro"
+  >
+    <ArticleTags tags={tags} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleImage - Default"
+    description="Astro-optimized bounded image preview with a full-screen inspection action."
+    componentPath="src/components/articles/ArticleImage.astro"
+  >
+    <ArticleImage
+      src={articleTallImage}
+      alt="A bounded article image preview"
+      caption="Default bounded article image example."
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleImage - Captioned"
+    description="Default article image anatomy with caption, alt text, and optimized responsive sources."
+    componentPath="src/components/articles/ArticleImage.astro"
+  >
+    <ArticleImage
+      src={articleLandscapeImage}
+      alt="Catalog sample preview image"
+      caption="Article image caption example."
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleImage - Long Alt"
+    description="Long accessible image descriptions do not change the visual article image anatomy."
+    componentPath="src/components/articles/ArticleImage.astro"
+  >
+    <ArticleImage
+      src={articleLandscapeImage}
+      alt="A deliberately long article image description used to verify that accessible image text remains available without becoming visible layout content in the article flow."
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleImage - Natural"
+    description="Natural height is the explicit escape hatch for intentional full-height component images."
+    componentPath="src/components/articles/ArticleImage.astro"
+  >
+    <ArticleImage
+      src={articleTallImage}
+      alt="A full-height loss diagram"
+      caption="Natural-height article image example."
+      heightPolicy="natural"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="Generated Markdown Image - Unknown"
+    description="Unknown-dimension generated Markdown images use the same bounded inspector contract without author components."
+    componentPath="src/components/articles/ArticleProse.astro"
+  >
+    <ArticleProse enableImageInspector>
+      <figure
+        class:list={[generatedImagePresentation.figureClass]}
+        data-article-image-figure="true"
+        data-article-image-inspectable="true"
+        data-article-image-policy="bounded"
+      >
+        <button
+          type="button"
+          class:list={[generatedImagePresentation.frameClass]}
+          data-article-image-inspect-trigger="true"
+          aria-haspopup="dialog"
+          aria-label="View full image: Generated Markdown image"
+        >
+          <img
+            src="/favicon.svg"
+            alt="Generated Markdown illustration"
+            class:list={[generatedImagePresentation.imageClass]}
+            data-article-image="true"
+            sizes={generatedImagePresentation.previewSizes}
+          />
+          <span
+            class:list={[generatedImagePresentation.inspectionClass]}
+            data-article-image-inspect-affordance="true"
+            aria-hidden="true"
+          >
+            <Maximize2 class="size-3" aria-hidden="true" />
+          </span>
+        </button>
+        <figcaption class:list={[generatedImagePresentation.captionClass]}>
+          Generated Markdown image fallback example.
+        </figcaption>
+      </figure>
+    </ArticleProse>
+  </CatalogExample>
+
+  <CatalogExample
+    title="Generated Markdown Linked Image"
+    description="Explicit image links keep their link behavior instead of becoming image inspector triggers."
+    componentPath="src/components/articles/ArticleProse.astro"
+  >
+    <ArticleProse>
+      <figure
+        class:list={[generatedImagePresentation.figureClass]}
+        data-article-image-figure="true"
+        data-article-image-inspectable="false"
+        data-article-image-policy="bounded"
+      >
+        <div class:list={[generatedImagePresentation.frameClass]}>
+          <a
+            href="/favicon.svg"
+            class="focus-visible:outline-ring inline-flex max-w-full items-center justify-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <img
+              src="/favicon.svg"
+              alt="Linked generated Markdown illustration"
+              class:list={[generatedImagePresentation.imageClass]}
+              data-article-image="true"
+              sizes={generatedImagePresentation.previewSizes}
+            />
+          </a>
+        </div>
+        <figcaption class:list={[generatedImagePresentation.captionClass]}>
+          Linked Markdown image example.
+        </figcaption>
+      </figure>
+    </ArticleProse>
+  </CatalogExample>
+
+  <CatalogExample
+    title="HoverImageCard"
+    description="Native anchored inline image-only preview for MDX article prose."
+    componentPath="src/components/articles/HoverImageCard.astro"
+  >
+    <ArticleProse>
+      <p>
+        Hover or focus this
+        <HoverImageCard
+          image={sampleImage}
+          label="inline preview"
+          alt="Catalog sample preview image"
+        />
+        without leaving the paragraph flow.
+      </p>
+    </ArticleProse>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleProse"
+    description="Markdown body wrapper using Tailwind Typography."
+    componentPath="src/components/articles/ArticleProse.astro"
+  >
+    <ArticleProse>
+      <p>
+        Article prose keeps generated Markdown readable without shipping a
+        client-side renderer.
+      </p>
+      <h2>Subheading</h2>
+      <p>
+        Links, images, blockquotes, and code inherit the prose styling contract.
+      </p>
+    </ArticleProse>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleTableOfContents"
+    description="Article-local heading navigation for the reading margin rail."
+    componentPath="src/components/articles/ArticleTableOfContents.astro"
+  >
+    <div class="max-w-64">
+      <ArticleTableOfContents
+        headings={[
+          {
+            depth: 2,
+            href: "#first-major-heading",
+            id: "first-major-heading",
+            level: 1,
+            order: 0,
+            text: "First major heading",
+          },
+          {
+            depth: 3,
+            href: "#nested-heading-with-a-long-title-that-wraps-inside-the-rail",
+            id: "nested-heading-with-a-long-title-that-wraps-inside-the-rail",
+            level: 2,
+            order: 1,
+            text: "Nested heading with a long title that wraps inside the rail",
+          },
+          {
+            depth: 2,
+            href: "#duplicate-heading",
+            id: "duplicate-heading",
+            level: 1,
+            order: 2,
+            text: "Duplicate heading",
+          },
+          {
+            depth: 2,
+            href: "#duplicate-heading-1",
+            id: "duplicate-heading-1",
+            level: 1,
+            order: 3,
+            text: "Duplicate heading",
+          },
+        ]}
+      />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleReferences"
+    description="Composed notes and bibliography with repeated citations."
+    componentPath="src/components/articles/ArticleReferences.astro"
+  >
+    <div class="grid gap-6">
+      <p class="max-w-prose text-base leading-7" data-catalog-reference-markers>
+        A catalog paragraph can point to an explanatory note
+        <a
+          id="note-ref-term-scope"
+          href="#note-term-scope"
+          class="text-primary focus-visible:outline-ring rounded-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+          aria-label="Note 1"
+          data-article-reference-marker="true"
+          data-reference-entry-id="note-term-scope"
+          data-reference-kind="note"
+          data-reference-label="note-term-scope"
+          data-reference-order="1">[1]</a
+        >
+        and a repeated citation
+        <a
+          id="cite-ref-baudrillard-1981"
+          href="#cite-baudrillard-1981"
+          class="text-primary focus-visible:outline-ring rounded-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+          aria-label="Citation 1"
+          data-article-reference-marker="true"
+          data-reference-entry-id="cite-baudrillard-1981"
+          data-reference-kind="citation"
+          data-reference-label="cite-baudrillard-1981"
+          data-reference-order="1">[1]</a
+        >
+        with another marker
+        <a
+          id="cite-ref-baudrillard-1981-2"
+          href="#cite-baudrillard-1981"
+          class="text-primary focus-visible:outline-ring rounded-sm underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2"
+          aria-label="Citation 1"
+          data-article-reference-marker="true"
+          data-reference-entry-id="cite-baudrillard-1981"
+          data-reference-kind="citation"
+          data-reference-label="cite-baudrillard-1981"
+          data-reference-order="2">[1]</a
+        >.
+      </p>
+      <ArticleReferences references={references} />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleFootnotes"
+    description="Notes-only article reference apparatus."
+    componentPath="src/components/articles/ArticleFootnotes.astro"
+  >
+    <ArticleFootnotes notes={references.notes} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleBibliography"
+    description="Bibliography-only article reference apparatus."
+    componentPath="src/components/articles/ArticleBibliography.astro"
+  >
+    <ArticleBibliography
+      citations={references.citations}
+      siteBibliographyHref="/bibliography/"
+      siteBibliographyLabel="View Site Bibliography"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleReferenceBacklinks"
+    description="Compact return links for note and citation entries."
+    componentPath="src/components/articles/ArticleReferenceBacklinks.astro"
+  >
+    <ArticleReferenceBacklinks
+      kind="citation"
+      references={primaryCitation.references}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleCard"
+    description="One flat editorial article row with bounded preview media."
+    componentPath="src/components/articles/ArticleCard.astro"
+  >
+    <ArticleCard {...primaryArticleItem} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleList"
+    description="Ordered flat editorial list with image and no-image rows."
+    componentPath="src/components/articles/ArticleList.astro"
+  >
+    <ArticleList items={articleItemsWithMedia} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleList RTL"
+    description="RTL localized article list fixture for direction and wrapping review."
+    componentPath="src/components/articles/ArticleList.astro"
+  >
+    <div dir="rtl" lang="ar">
+      <ArticleList items={rtlArticleItems} />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="MoreInCategoryBlock"
+    description="Article-end same-category discovery."
+    componentPath="src/components/articles/MoreInCategoryBlock.astro"
+  >
+    <MoreInCategoryBlock
+      categoryHref="/categories/metamemetics/"
+      categoryTitle="Metamemetics"
+      headingId="catalog-more-in-category-heading"
+      items={articleItemsWithMedia}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="RelatedArticlesBlock"
+    description="Future related-article discovery surface."
+    componentPath="src/components/articles/RelatedArticlesBlock.astro"
+  >
+    <RelatedArticlesBlock
+      headingId="catalog-related-articles-heading"
+      items={articleItemsWithMedia}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="NextArticleBlock"
+    description="Chronological article continuation before support."
+    componentPath="src/components/articles/NextArticleBlock.astro"
+  >
+    <NextArticleBlock
+      headingId="catalog-next-article-heading"
+      item={primaryArticleItem}
+      label="Next Article"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ArticleEndcap"
+    description="Composed article footer with discovery and support."
+    componentPath="src/components/articles/ArticleEndcap.astro"
+  >
+    <ArticleEndcap
+      categoryHref="/categories/metamemetics/"
+      categoryTitle="Metamemetics"
+      continuity={{
+        item: primaryArticleItem,
+        label: "Next Article",
+      }}
+      idPrefix="catalog-endcap"
+      moreInCategory={articleItemsWithMedia}
+      related={articleItemsWithMedia.slice(0, 1)}
+      support={supportBlock}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="SupportBlock"
+    description="Reusable support CTA for article endcaps and homepage sections."
+    componentPath="src/components/blocks/SupportBlock.astro"
+  >
+    <SupportBlock
+      headingId="catalog-support-block-heading"
+      support={supportBlock}
+    />
+  </CatalogExample>
+</CatalogSection>

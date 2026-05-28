@@ -2,6 +2,7 @@ import type { ImageMetadata } from "astro";
 
 import type { ArticleArchiveItem } from "./archive";
 import type { AuthorSummary } from "./authors";
+import { imageMetadataOrUndefined } from "./content-images";
 import {
   type AnnouncementEntry,
   announcementUrl,
@@ -254,12 +255,13 @@ export function publishableFromAnnouncement(
 ): PublishableEntry {
   const title = announcement.data.title;
   const href = announcementUrl(announcement.id);
+  const sourceImage = imageMetadataOrUndefined(announcement.data.image);
   const image =
-    announcement.data.image === undefined
+    sourceImage === undefined
       ? undefined
       : {
           alt: announcement.data.imageAlt ?? title,
-          src: announcement.data.image,
+          src: sourceImage,
         };
   const display = publishableDisplayFacts({
     author: announcement.data.author,

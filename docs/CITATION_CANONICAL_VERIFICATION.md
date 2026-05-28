@@ -2,6 +2,11 @@
 
 Date: 2026-05-17
 
+Historical tooling note: the `just references-*` audit commands referenced in
+this plan were retired from the active command surface during the Rust/`just`
+migration. The plan remains useful for manual citation cleanup; restoring the
+automation should be an explicit tooling task.
+
 This document defines the citation cleanup workflow after the structural
 BibTeX audit. The structural audit proves that every article citation marker
 and `tpm-bibtex` entry can be inventoried. It does not prove source accuracy.
@@ -171,9 +176,9 @@ The canonical verification ledger must include:
 
 After each correction batch:
 
-1. Run `bun run references:bibtex:audit -- --write --quiet`.
+1. Run `just references-bibtex-audit -- --write --quiet`.
 2. Review `docs/CITATION_BIBTEX_AUDIT.md` for coverage regressions.
 3. Inspect changed article bibliography output.
 4. Inspect `/bibliography/` for grouping and link behavior.
 5. Run focused tests if helper logic changed.
-6. Run `bun run check:release` before handoff after source edits.
+6. Run `just release-check` before handoff after source edits.

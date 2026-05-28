@@ -40,7 +40,7 @@ surface is part of this site.
 ## Verify
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 ## Common Mistake

@@ -1,0 +1,81 @@
+---
+import type { ImageMetadata } from "astro";
+
+import EmbedFrame from "../../components/media/EmbedFrame.astro";
+import ResponsiveIframe from "../../components/media/ResponsiveIframe.astro";
+import SoundCloudEmbed from "../../components/media/SoundCloudEmbed.astro";
+import ThemedImage from "../../components/media/ThemedImage.astro";
+import YouTubeEmbed from "../../components/media/YouTubeEmbed.astro";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  sampleDarkImage: ImageMetadata;
+  sampleImage: ImageMetadata;
+}
+
+const { sampleDarkImage, sampleImage } = Astro.props;
+---
+
+<CatalogSection
+  title="Media Primitives"
+  description="Embed components reserve stable space and require accessible metadata."
+>
+  <CatalogExample
+    title="ResponsiveIframe"
+    description="Low-level responsive iframe frame."
+    componentPath="src/components/media/ResponsiveIframe.astro"
+  >
+    <ResponsiveIframe src="about:blank" title="Blank catalog iframe" />
+  </CatalogExample>
+
+  <CatalogExample
+    title="SoundCloudEmbed"
+    description="Compact SoundCloud audio player wrapper."
+    componentPath="src/components/media/SoundCloudEmbed.astro"
+  >
+    <SoundCloudEmbed
+      sourceUrl="https://soundcloud.com/platform-blog/example-track"
+      title="Catalog SoundCloud preview"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="YouTubeEmbed"
+    description="Responsive YouTube video wrapper."
+    componentPath="src/components/media/YouTubeEmbed.astro"
+  >
+    <YouTubeEmbed
+      src="https://www.youtube.com/embed/example"
+      title="Catalog YouTube preview"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="EmbedFrame"
+    description="External embed wrapper with fallback source link."
+    componentPath="src/components/media/EmbedFrame.astro"
+  >
+    <EmbedFrame
+      title="External essay video"
+      description="Fallback link remains available if the embed fails."
+      fallbackHref="https://example.com/video"
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="ThemedImage"
+    description="Optimized image pair that switches artwork by light/dark theme."
+    componentPath="src/components/media/ThemedImage.astro"
+  >
+    <div class="max-w-3xl">
+      <ThemedImage
+        lightImage={sampleImage}
+        darkImage={sampleDarkImage}
+        alt="Catalog sample art"
+        layout="full-width"
+        class="block h-auto w-full"
+      />
+    </div>
+  </CatalogExample>
+</CatalogSection>

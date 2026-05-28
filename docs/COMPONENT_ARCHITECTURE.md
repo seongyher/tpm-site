@@ -1262,10 +1262,10 @@ Catalog build rules:
   they remain cross-platform.
 - Add a release verification guard that fails if `dist/catalog` appears in a
   normal production build.
-- Add `catalog:dev`, `catalog:build`, `catalog:preview`,
-  `catalog:preview:fresh`, and `catalog:check` scripts when the catalog is
+- Add `catalog-dev`, `catalog-build`, `catalog-preview`,
+  `catalog-preview-fresh`, and `catalog-check` scripts when the catalog is
   implemented.
-- `catalog:preview:fresh` should build with the catalog enabled, then preview
+- `catalog-preview-fresh` should build with the catalog enabled, then preview
   the built output for production-like manual review.
 - If the catalog later becomes public, replace the private build gate with an
   intentional public route, editorial copy, copyable examples, and the same QA
@@ -1274,7 +1274,7 @@ Catalog build rules:
 
 Catalog coverage:
 
-- Add `scripts/quality/verify-component-catalog.ts`.
+- Use `just catalog-check`.
 - Scan `src/components/**/*.{astro,tsx}` for public components.
 - Compare discovered components with explicit catalog entries.
 - Allow an ignore list for internal wrappers, generated components, or
@@ -1388,13 +1388,13 @@ reasonable way to separate them.
 
 Every component extraction should keep these checks green:
 
-- `bun run typecheck`
-- `bun --silent run lint`
-- `bun --silent run format:code`
+- `just typecheck`
+- `just lint`
+- `just format-code`
 - relevant pure logic tests;
 - relevant Astro component render tests once that harness exists;
-- `catalog:check` once the catalog exists;
-- `bun run build`
+- `catalog-check` once the catalog exists;
+- `just build`
 
 Before merging a navigation/sidebar redesign, also run browser checks and
 manually inspect:
@@ -1415,7 +1415,7 @@ When catalog examples exist for changed components, inspect the catalog in a
 fresh production preview. Prefer a command like:
 
 ```shell
-bun run catalog:preview:fresh
+just catalog-preview-fresh
 ```
 
 ## Open Questions

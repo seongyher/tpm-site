@@ -7,5 +7,5 @@ feeds, authors, categories, and tags.
 Run it with:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/starters/kitchen-sink bun run build
+SITE_INSTANCE_ROOT=examples/starters/kitchen-sink just build
 ```

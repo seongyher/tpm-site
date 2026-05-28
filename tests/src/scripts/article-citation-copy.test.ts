@@ -248,6 +248,71 @@ describe("article citation copy browser script", () => {
 
     expect(copiedText).toEqual([bibtex]);
   });
+
+  test("installs once and ignores unrelated or incomplete citation controls", async () => {
+    const window = new Window();
+    Reflect.set(window, "SyntaxError", SyntaxError);
+    const copiedText: string[] = [];
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <button id="outside" type="button">Outside</button>
+      <button id="orphan-style" data-article-citation-style-button>Style</button>
+      <div data-article-citation-menu>
+        <button id="incomplete-style" data-article-citation-style-button>Missing payload</button>
+        <button
+          id="missing-target"
+          data-article-citation-copy-button
+          data-article-citation-copy-target="missing"
+        >Copy missing</button>
+        <button
+          id="plain-copy"
+          data-article-citation-copy-button
+          data-article-citation-copy-target="plain-citation"
+        >Copy plain</button>
+        <code id="plain-citation" data-article-citation-text>Plain citation.</code>
+        <p data-article-citation-copy-status></p>
+      </div>
+    `;
+
+    const runtime = {
+      document: browserDocument(document),
+      navigator: browserNavigator({
+        clipboard: {
+          writeText: async (value: string) => {
+            await Promise.resolve();
+            copiedText.push(value);
+          },
+        },
+      }),
+    };
+
+    installArticleCitationCopy(runtime);
+    installArticleCitationCopy(runtime);
+    document.dispatchEvent(new window.Event("click"));
+    document
+      .querySelector("#outside")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    document
+      .querySelector("#orphan-style")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    document
+      .querySelector("#incomplete-style")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    document
+      .querySelector("#missing-target")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    document
+      .querySelector("#plain-copy")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+    await settledPromises();
+
+    expect(copiedText).toEqual(["Plain citation."]);
+    expect(
+      document.querySelector("[data-article-citation-copy-status]")
+        ?.textContent,
+    ).toBe("Copied.");
+  });
 });
 
 function browserDocument(document: unknown): Document {

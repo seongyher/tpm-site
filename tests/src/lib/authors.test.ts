@@ -93,6 +93,21 @@ describe("author helpers", () => {
     ]);
   });
 
+  test("sorts author profiles by display name", () => {
+    const zed = authorEntry({
+      displayName: "Zed Author",
+      id: "zed-author",
+    });
+    const ada = authorEntry({
+      displayName: "Ada Author",
+      id: "ada-author",
+    });
+
+    expect(authorProfiles([zed, ada], []).map((profile) => profile.id)).toEqual(
+      ["ada-author", "zed-author"],
+    );
+  });
+
   test("detects author profiles that should render biography content", () => {
     const emptyProfile = authorProfiles(
       [
@@ -127,7 +142,7 @@ describe("author helpers", () => {
 
   test("fails duplicate aliases across author profiles", () => {
     const first = authorEntry({
-      aliases: ["Same"],
+      aliases: ["Another", "Same"],
       displayName: "First",
       id: "first",
     });
@@ -136,9 +151,14 @@ describe("author helpers", () => {
       displayName: "Second",
       id: "second",
     });
+    const third = authorEntry({
+      aliases: ["another"],
+      displayName: "Third",
+      id: "third",
+    });
 
-    expect(() => authorProfiles([first, second], [])).toThrow(
-      "Duplicate author aliases",
+    expect(() => authorProfiles([first, second, third], [])).toThrow(
+      "Duplicate author aliases: another, same.",
     );
   });
 });

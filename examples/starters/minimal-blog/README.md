@@ -8,5 +8,5 @@ simple homepage.
 Run it with:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/starters/minimal-blog bun run build
+SITE_INSTANCE_ROOT=examples/starters/minimal-blog just build
 ```

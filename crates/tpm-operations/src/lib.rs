@@ -1,5 +1,12 @@
 //! Shared operation request and result envelopes for the TPM publishing platform.
 
+mod generated_output;
+mod media;
+mod migration;
+mod qa;
+mod redirects;
+mod site_doctor;
+
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::fs;
 use std::io;
@@ -10,6 +17,15 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use tpm_core::Severity;
 use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticLocation, DiagnosticReport};
 use tpm_workspace::{WorkspaceContext, WorkspaceDiscoveryError};
+
+pub use generated_output::run_generated_output_bridge;
+pub use media::run_image_asset_verification;
+pub use migration::{
+    ScriptMigration, ScriptMigrationDisposition, migration_plan, run_migration_baseline,
+};
+pub use qa::{DiagnosticRecord, run_qa_diagnostic_diff, run_qa_registry};
+pub use redirects::run_redirect_report;
+pub use site_doctor::run_site_doctor;
 
 /// Current schema version for serialized operation reports.
 pub const OPERATION_SCHEMA_VERSION: u16 = 1;
@@ -584,7 +600,7 @@ fn count_files(root: &Path) -> io::Result<usize> {
         let file_type = entry.file_type()?;
         if file_type.is_dir() {
             count += count_files(&path)?;
-        } else if file_type.is_file() {
+        } else {
             count += 1;
         }
     }
@@ -592,16 +608,20 @@ fn count_files(root: &Path) -> io::Result<usize> {
     Ok(count)
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "operation IDs are static repository invariants"
+)]
 fn operation_id(value: &'static str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("operation ID should be valid")
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "operation diagnostic codes are static repository invariants"
+)]
 fn diagnostic_code(value: &'static str) -> DiagnosticCode {
-    DiagnosticCode::parse(value).unwrap_or_else(|error| {
-        panic!("diagnostic code should be valid: {error}");
-    })
+    DiagnosticCode::parse(value).expect("diagnostic code should be valid")
 }
 
 fn display_path(path: &Path) -> String {
@@ -621,38 +641,73 @@ fn workspace_discovery_start(error: &WorkspaceDiscoveryError) -> &Path {
 
 /// Creates an operation ID for test fixtures.
 #[cfg(test)]
+#[expect(
+    clippy::expect_used,
+    reason = "operation test helper IDs are static fixture invariants"
+)]
 fn test_operation_id(value: &str) -> OperationId {
-    OperationId::parse(value).unwrap_or_else(|error| {
-        panic!("test operation ID should be valid: {error}");
-    })
+    OperationId::parse(value).expect("test operation ID should be valid")
 }
 
 /// Creates a warning diagnostic for operation tests.
 #[cfg(test)]
+#[expect(
+    clippy::expect_used,
+    reason = "operation test helper diagnostic codes are static fixture invariants"
+)]
 fn test_warning(code: &str, message: &str) -> Diagnostic {
-    let code = DiagnosticCode::parse(code).unwrap_or_else(|error| {
-        panic!("test diagnostic code should be valid: {error}");
-    });
+    let code = DiagnosticCode::parse(code).expect("test diagnostic code should be valid");
 
     Diagnostic::new(code, Severity::Warning, message)
 }
 
 #[cfg(test)]
+pub(crate) mod test_support {
+    //! Shared helpers for operation tests.
+
+    use std::fs;
+    use std::io;
+    use std::path::Path;
+
+    /// Removes a temporary test directory, accepting an already-clean path.
+    #[expect(
+        clippy::redundant_pub_crate,
+        reason = "shared cfg(test) helper is intentionally visible to sibling test modules only"
+    )]
+    pub(super) fn remove_test_dir(path: impl AsRef<Path>) {
+        match fs::remove_dir_all(path.as_ref()) {
+            Ok(()) => {}
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+            Err(error) => panic!("failed to remove test directory: {error}"),
+        }
+    }
+}
+
+#[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    #![expect(
+        clippy::expect_used,
+        reason = "operation tests use static fixture identifiers and diagnostics"
+    )]
+
+    use std::error::Error;
+    use std::fs;
+    use std::path::{Path, PathBuf};
+
+    #[cfg(unix)]
+    use std::os::unix::fs::PermissionsExt as _;
 
     use super::{
         OPERATION_SCHEMA_VERSION, OperationInterface, OperationRequest, OperationResult,
         OperationStatus, OperationSummary, OperationTiming, run_release_inspect,
-        run_workspace_check, run_workspace_status, test_operation_id, test_warning,
+        run_workspace_check, run_workspace_doctor, run_workspace_status, test_operation_id,
+        test_warning,
     };
     use tpm_core::Severity;
     use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
 
     fn diagnostic_code(value: &str) -> DiagnosticCode {
-        DiagnosticCode::parse(value).unwrap_or_else(|error| {
-            panic!("test diagnostic code should be valid: {error}");
-        })
+        DiagnosticCode::parse(value).expect("test diagnostic code should be valid")
     }
 
     fn request() -> OperationRequest {
@@ -669,14 +724,55 @@ mod tests {
             .join("tests/fixtures/rust-workspace")
     }
 
+    fn temp_workspace(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!("tpm-operations-{name}-{}", std::process::id()))
+    }
+
+    fn write_file(path: &Path, contents: &str) -> Result<(), Box<dyn Error>> {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        fs::write(path, contents)?;
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    fn make_unreadable(path: &Path) -> Result<fs::Permissions, Box<dyn Error>> {
+        let original = fs::metadata(path)?.permissions();
+        fs::set_permissions(path, fs::Permissions::from_mode(0o000))?;
+        Ok(original)
+    }
+
     #[test]
     fn operation_ids_reject_invalid_values() {
         assert_eq!(
             test_operation_id("workspace.status").as_str(),
             "workspace.status"
         );
-        assert!(super::OperationId::parse("Workspace Status").is_err());
-        assert!(super::OperationId::parse("workspace..status").is_err());
+        assert_eq!(
+            super::OperationId::parse("").err(),
+            Some(super::OperationIdError::Empty)
+        );
+        assert_eq!(
+            super::OperationIdError::Empty.to_string(),
+            "operation ID must not be empty"
+        );
+        assert_eq!(
+            super::OperationId::parse("workspace..status").err(),
+            Some(super::OperationIdError::EmptySegment)
+        );
+        assert_eq!(
+            super::OperationIdError::EmptySegment.to_string(),
+            "operation ID must not contain empty segments"
+        );
+        assert_eq!(
+            super::OperationId::parse("Workspace Status").err(),
+            Some(super::OperationIdError::InvalidCharacter)
+        );
+        assert_eq!(
+            super::OperationIdError::InvalidCharacter.to_string(),
+            "operation ID may only contain ASCII lowercase letters, numbers, dots, and hyphens"
+        );
     }
 
     #[test]
@@ -754,6 +850,12 @@ mod tests {
         let rendered = result.render_json_pretty()?;
 
         assert_eq!(result.schema_version(), OPERATION_SCHEMA_VERSION);
+        assert_eq!(result.request().interface(), OperationInterface::Test);
+        assert_eq!(
+            result.request().workspace(),
+            Some("tests/fixtures/rust-workspace")
+        );
+        assert_eq!(result.timing().duration_ms(), Some(7));
         assert_eq!(result.warnings().len(), 1);
         assert_eq!(rendered, expected.trim_end());
 
@@ -783,6 +885,27 @@ mod tests {
     }
 
     #[test]
+    fn workspace_check_and_doctor_report_fixture_inventory() {
+        let check = run_workspace_check(fixture_root(), OperationInterface::Test);
+        let doctor = run_workspace_doctor(fixture_root(), OperationInterface::Test);
+
+        assert_eq!(check.status(), OperationStatus::Success);
+        assert_eq!(check.request().operation_id().as_str(), "workspace.check");
+        assert!(check.summary().details().iter().any(|detail| {
+            detail == "source roots: 4" || detail.starts_with("source artifacts: ")
+        }));
+        assert_eq!(doctor.status(), OperationStatus::Success);
+        assert_eq!(doctor.request().operation_id().as_str(), "workspace.doctor");
+        assert!(
+            doctor
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "required roots: 4")
+        );
+    }
+
+    #[test]
     fn workspace_check_operation_reports_missing_workspace() {
         let result = run_workspace_check(
             PathBuf::from("/tmp/tpm-missing-operation-workspace"),
@@ -791,6 +914,21 @@ mod tests {
 
         assert_eq!(result.status(), OperationStatus::Failed);
         assert_eq!(result.request().operation_id().as_str(), "workspace.check");
+        assert_eq!(
+            result.diagnostics().errors()[0].code().as_str(),
+            "TPM-WORKSPACE-NOT-FOUND"
+        );
+    }
+
+    #[test]
+    fn release_inspect_reports_missing_workspace() {
+        let result = run_release_inspect(
+            PathBuf::from("/tmp/tpm-missing-release-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert_eq!(result.request().operation_id().as_str(), "release.inspect");
         assert_eq!(
             result.diagnostics().errors()[0].code().as_str(),
             "TPM-WORKSPACE-NOT-FOUND"
@@ -807,5 +945,105 @@ mod tests {
             result.warnings()[0].code().as_str(),
             "TPM-RELEASE-OUTPUT-MISSING"
         );
+    }
+
+    #[test]
+    fn release_inspect_counts_nested_output_artifacts() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("release-output");
+        crate::test_support::remove_test_dir(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        write_file(&root.join("dist/index.html"), "<!doctype html>")?;
+        write_file(
+            &root.join("dist/articles/example/index.html"),
+            "<!doctype html>",
+        )?;
+
+        let result = run_release_inspect(&root, OperationInterface::Test);
+
+        assert_eq!(result.status(), OperationStatus::Success);
+        assert!(
+            result
+                .summary()
+                .details()
+                .iter()
+                .any(|detail| detail == "output artifacts: 2")
+        );
+
+        crate::test_support::remove_test_dir(root);
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn release_inspect_reports_output_permission_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("release-output-failure");
+        crate::test_support::remove_test_dir(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        fs::create_dir_all(root.join("dist/unreadable"))?;
+        let original_permissions = make_unreadable(&root.join("dist/unreadable"))?;
+
+        let result = run_release_inspect(&root, OperationInterface::Test);
+
+        fs::set_permissions(root.join("dist/unreadable"), original_permissions)?;
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-RELEASE-OUTPUT-READ")
+        );
+
+        crate::test_support::remove_test_dir(root);
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn workspace_status_reports_inventory_permission_failures() -> Result<(), Box<dyn Error>> {
+        let root = temp_workspace("source-inventory-failure");
+        crate::test_support::remove_test_dir(&root);
+        write_file(&root.join("site/config/site.json"), "{}")?;
+        fs::create_dir_all(root.join("site/content/unreadable"))?;
+        fs::create_dir_all(root.join("site/assets"))?;
+        fs::create_dir_all(root.join("site/public"))?;
+        let original_permissions = make_unreadable(&root.join("site/content/unreadable"))?;
+
+        let result = run_workspace_status(&root, OperationInterface::Test);
+
+        fs::set_permissions(root.join("site/content/unreadable"), original_permissions)?;
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert!(
+            result
+                .diagnostics()
+                .diagnostics()
+                .iter()
+                .any(|diagnostic| diagnostic.code().as_str() == "TPM-WORKSPACE-INVENTORY")
+        );
+
+        crate::test_support::remove_test_dir(root);
+        Ok(())
+    }
+
+    #[test]
+    fn operation_display_path_handles_empty_paths() {
+        assert_eq!(super::display_path(Path::new("")), ".");
+    }
+
+    #[test]
+    fn workspace_doctor_reports_missing_workspace() {
+        let result = run_workspace_doctor(
+            PathBuf::from("/tmp/tpm-missing-doctor-workspace"),
+            OperationInterface::Test,
+        );
+
+        assert_eq!(result.status(), OperationStatus::Failed);
+        assert_eq!(result.request().operation_id().as_str(), "workspace.doctor");
     }
 }

@@ -89,8 +89,8 @@ publications, GUI editing, and eventual external site packages.
 
 ### Verification
 
-- `bun run platform:check` should remain green.
-- `bun run test:docs-site` should keep proving second-site compatibility.
+- `just platform-check` should remain green.
+- `just test-docs-site` should keep proving second-site compatibility.
 - Unit tests should cover alternate route and feature configurations.
 - Generated `site.schema.json` must stay current through `site:schema:check`.
 
@@ -138,7 +138,7 @@ strict compiler-like pipeline for content correctness.
 
 ### Verification
 
-- `bun run author:check` stays fast and focused.
+- `just author-check` stays fast and focused.
 - Content fixtures cover happy paths and invalid paths.
 - Docs-site authoring pages exercise the same commands.
 - Non-technical documentation should never require editing `src/` for ordinary
@@ -182,7 +182,7 @@ stable issue codes, clear ownership, and reusable reports.
 
 ### Verification
 
-- `bun run verify` output remains concise.
+- `just verify` output remains concise.
 - Existing build verification tests remain green or become more targeted.
 - New issue-code tests prevent accidental message drift.
 - Release checks continue to fail on invalid public output.
@@ -322,7 +322,7 @@ better primitives and stronger component contracts.
 
 ### Verification
 
-- `bun run catalog:check` remains green.
+- `just catalog-check` remains green.
 - Component one-pagers match component inventory.
 - E2E layout tests cover the primitives most likely to affect multiple pages.
 - Visual changes are accepted only when they improve consistency or resilience.
@@ -404,7 +404,7 @@ Make performance measurable, budgeted, and resistant to regression.
 
 ### Verification
 
-- `bun run test:perf:built`, payload reports, and build verification agree on
+- `just test-perf-built`, payload reports, and build verification agree on
   budget concepts.
 - Budget failures produce actionable paths and suggested repairs.
 - Performance docs explain when to run fast checks versus expensive scans.
@@ -446,7 +446,7 @@ external users without mixing their concerns.
 
 ### Verification
 
-- `bun run review:markdown` remains green.
+- `just review-markdown` remains green.
 - Docs-site builds with the same platform as TPM.
 - Documentation drift checks fail when public contracts change without docs.
 

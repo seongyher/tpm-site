@@ -51,5 +51,5 @@ Use ordinary Markdown for body images:
 ## Verify
 
 ```sh
-bun run author:check
+just author-check
 ```

@@ -5,8 +5,9 @@ use std::path::PathBuf;
 
 use tpm_core::{CommandExit, PLATFORM_NAME};
 use tpm_operations::{
-    OperationInterface, OperationResult, run_release_inspect, run_workspace_check,
-    run_workspace_doctor, run_workspace_status,
+    OperationInterface, OperationResult, run_image_asset_verification, run_redirect_report,
+    run_release_inspect, run_site_doctor, run_workspace_check, run_workspace_doctor,
+    run_workspace_status,
 };
 
 /// Current top-level help text for the additive CLI shell.
@@ -18,8 +19,11 @@ Usage:
 
 Commands:
   site status        Show workspace source roots, config, and source inventory
+  site doctor        Run site workspace diagnostics
   check              Run the first Rust workspace diagnostic check
   doctor             Explain current workspace diagnostics and remediation
+  media images       Inspect image asset policy
+  routes redirects   Inspect route and redirect policy
   release inspect    Inspect generated output/release readiness
   help <command>     Show command help
   version            Show version information
@@ -36,12 +40,10 @@ Global options:
 
 Examples:
   tpm site status --format json
+  tpm media images
   tpm check --format json
   tpm doctor
   tpm release inspect
-
-This Rust CLI is additive and does not replace existing Bun/Astro release
-checks yet.
 ";
 
 const SITE_HELP: &str = "\
@@ -49,12 +51,15 @@ tpm site - create and manage site workspaces
 
 Usage:
   tpm site status [options]
+  tpm site doctor [options]
 
 Commands:
   status        Show site config, source roots, source artifacts, and health
+  doctor        Run site workspace diagnostics
 
 Examples:
   tpm site status
+  tpm site doctor
   tpm site status --site tests/fixtures/rust-workspace --format json
 ";
 
@@ -92,6 +97,28 @@ Usage:
 Examples:
   tpm release inspect
   tpm release inspect latest --format json
+";
+
+const MEDIA_HELP: &str = "\
+tpm media - inspect and validate media assets
+
+Usage:
+  tpm media images [options]
+
+Examples:
+  tpm media images
+  tpm media images --format json
+";
+
+const ROUTES_HELP: &str = "\
+tpm routes - inspect route and redirect policy
+
+Usage:
+  tpm routes redirects [options]
+
+Examples:
+  tpm routes redirects
+  tpm routes redirects --format json
 ";
 
 /// Runs the CLI shell against an argument sequence and output sink.
@@ -153,7 +180,10 @@ enum CliCommand {
     Check,
     Doctor,
     Help(HelpTopic),
+    MediaImages,
     ReleaseInspect,
+    RoutesRedirects,
+    SiteDoctor,
     SiteStatus,
     Version,
 }
@@ -162,7 +192,9 @@ enum CliCommand {
 enum HelpTopic {
     Check,
     Doctor,
+    Media,
     Release,
+    Routes,
     Site,
     Top,
 }
@@ -259,7 +291,9 @@ fn help_topic(topic: Option<&str>) -> Result<HelpTopic, CliError> {
         None => Ok(HelpTopic::Top),
         Some("check") => Ok(HelpTopic::Check),
         Some("doctor") => Ok(HelpTopic::Doctor),
+        Some("media") => Ok(HelpTopic::Media),
         Some("release") => Ok(HelpTopic::Release),
+        Some("routes") => Ok(HelpTopic::Routes),
         Some("site") => Ok(HelpTopic::Site),
         Some(other) => Err(CliError::new(format!("Unknown help topic `{other}`."))),
     }
@@ -275,6 +309,15 @@ fn parse_command(positionals: &[String]) -> Result<CliCommand, CliError> {
         }
         [command, subcommand] if command == "site" && subcommand == "status" => {
             Ok(CliCommand::SiteStatus)
+        }
+        [command, subcommand] if command == "site" && subcommand == "doctor" => {
+            Ok(CliCommand::SiteDoctor)
+        }
+        [command, subcommand] if command == "media" && subcommand == "images" => {
+            Ok(CliCommand::MediaImages)
+        }
+        [command, subcommand] if command == "routes" && subcommand == "redirects" => {
+            Ok(CliCommand::RoutesRedirects)
         }
         [command] if command == "check" => Ok(CliCommand::Check),
         [command, scope] if command == "check" && matches!(scope.as_str(), "all" | "workspace") => {
@@ -311,8 +354,21 @@ where
             write!(output, "{}", help_text(topic))?;
             Ok(CommandExit::Success)
         }
+        CliCommand::MediaImages => {
+            let result =
+                run_image_asset_verification(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
         CliCommand::ReleaseInspect => {
             let result = run_release_inspect(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::RoutesRedirects => {
+            let result = run_redirect_report(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::SiteDoctor => {
+            let result = run_site_doctor(invocation.options.site, OperationInterface::Cli);
             write_operation(&result, invocation.options.format, output)
         }
         CliCommand::SiteStatus => {
@@ -367,7 +423,9 @@ const fn help_text(topic: HelpTopic) -> &'static str {
     match topic {
         HelpTopic::Check => CHECK_HELP,
         HelpTopic::Doctor => DOCTOR_HELP,
+        HelpTopic::Media => MEDIA_HELP,
         HelpTopic::Release => RELEASE_HELP,
+        HelpTopic::Routes => ROUTES_HELP,
         HelpTopic::Site => SITE_HELP,
         HelpTopic::Top => HELP,
     }
@@ -375,6 +433,11 @@ const fn help_text(topic: HelpTopic) -> &'static str {
 
 #[cfg(test)]
 mod tests {
+    #![expect(
+        clippy::expect_used,
+        reason = "CLI tests assert fixture commands emit valid output without IO errors"
+    )]
+
     use std::path::{Path, PathBuf};
 
     use super::run;
@@ -392,15 +455,8 @@ mod tests {
 
     fn run_text(args: Vec<String>) -> (CommandExit, String) {
         let mut output = Vec::new();
-        let result = run(args, &mut output);
-        let exit = match result {
-            Ok(exit) => exit,
-            Err(error) => panic!("CLI test should not emit io errors: {error}"),
-        };
-        let text = match String::from_utf8(output) {
-            Ok(text) => text,
-            Err(error) => panic!("CLI output should be valid UTF-8: {error}"),
-        };
+        let exit = run(args, &mut output).expect("CLI test should not emit io errors");
+        let text = String::from_utf8(output).expect("CLI output should be valid UTF-8");
 
         (exit, text)
     }
@@ -421,6 +477,9 @@ mod tests {
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("tpm site status --format json"));
+        assert!(!output.contains("migration baseline"));
+        assert!(!output.contains("qa registry"));
+        assert!(!output.contains("output verify"));
         assert!(output.contains("release inspect"));
     }
 
@@ -434,8 +493,31 @@ mod tests {
     }
 
     #[test]
+    fn command_help_covers_all_topics_and_unknown_topics() {
+        for topic in ["doctor", "media", "release", "routes", "site"] {
+            let (exit, output) = run_text(vec![String::from("help"), String::from(topic)]);
+
+            assert_eq!(exit, CommandExit::Success);
+            assert!(output.contains(&format!("tpm {topic}")));
+        }
+
+        let (exit, output) = run_text(vec![String::from("--help"), String::from("unknown")]);
+
+        assert_eq!(exit, CommandExit::UsageError);
+        assert!(output.contains("Unknown help topic `unknown`."));
+    }
+
+    #[test]
     fn version_command_prints_platform_name() {
         let (exit, output) = run_text(vec![String::from("--version")]);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("TPM Platform"));
+    }
+
+    #[test]
+    fn short_version_command_prints_platform_name() {
+        let (exit, output) = run_text(vec![String::from("-V")]);
 
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("TPM Platform"));
@@ -450,6 +532,39 @@ mod tests {
     }
 
     #[test]
+    fn internal_repo_tasks_are_not_exposed_by_product_cli() {
+        for command in [
+            vec![String::from("task"), String::from("verify")],
+            vec![String::from("qa"), String::from("registry")],
+            vec![String::from("output"), String::from("verify")],
+            vec![String::from("migration"), String::from("baseline")],
+        ] {
+            let (exit, output) = run_text(command);
+
+            assert_eq!(exit, CommandExit::UsageError);
+            assert!(output.contains("Unknown command"));
+        }
+    }
+
+    #[test]
+    fn invalid_options_return_usage_errors() {
+        for (args, expected) in [
+            (vec!["--bogus"], "Unknown option `--bogus`."),
+            (vec!["--site"], "Missing value for --site."),
+            (vec!["--format"], "Missing value for --format."),
+            (
+                vec!["--format", "xml"],
+                "Unsupported output format `xml`. Use text, json, or ndjson.",
+            ),
+        ] {
+            let (exit, output) = run_text(args.into_iter().map(String::from).collect());
+
+            assert_eq!(exit, CommandExit::UsageError);
+            assert!(output.contains(expected));
+        }
+    }
+
+    #[test]
     fn site_status_renders_json_operation_output() {
         let mut args = command_with_site(&["site", "status"], &fixture_root());
         args.push(String::from("--format"));
@@ -461,6 +576,24 @@ mod tests {
         assert!(output.contains("\"operationId\": \"workspace.status\""));
         assert!(output.contains("\"status\": \"success\""));
         assert!(output.contains("\"source artifacts: 3\""));
+    }
+
+    #[test]
+    fn site_status_accepts_equals_site_format_and_automation_flags() {
+        let (exit, output) = run_text(vec![
+            String::from("site"),
+            String::from("status"),
+            format!("--site={}", fixture_root().to_string_lossy()),
+            String::from("--format=ndjson"),
+            String::from("--ci"),
+            String::from("--quiet"),
+            String::from("--verbose"),
+            String::from("--no-color"),
+        ]);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.starts_with("{\"schemaVersion\":"));
+        assert!(output.contains("\"operationId\":\"workspace.status\""));
     }
 
     #[test]
@@ -495,5 +628,42 @@ mod tests {
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("release.inspect"));
         assert!(output.contains("TPM-RELEASE-OUTPUT-MISSING"));
+    }
+
+    #[test]
+    fn command_aliases_route_to_expected_operations() {
+        for (command, operation) in [
+            (&["check", "all"][..], "workspace.check"),
+            (&["check", "workspace"], "workspace.check"),
+            (&["doctor", "workspace"], "workspace.doctor"),
+            (&["release", "inspect", "latest"], "release.inspect"),
+            (&["routes", "redirects"], "routes.redirects"),
+        ] {
+            let args = command_with_site(command, &fixture_root());
+            let (exit, output) = run_text(args);
+
+            assert_ne!(exit, CommandExit::UsageError);
+            assert!(output.contains(operation));
+        }
+    }
+
+    #[test]
+    fn site_doctor_command_uses_product_operation() {
+        let args = command_with_site(&["site", "doctor"], &fixture_root());
+
+        let (exit, output) = run_text(args);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("site.doctor"));
+    }
+
+    #[test]
+    fn media_images_command_uses_product_operation() {
+        let args = command_with_site(&["media", "images"], &fixture_root());
+
+        let (exit, output) = run_text(args);
+
+        assert_eq!(exit, CommandExit::Success);
+        assert!(output.contains("media.images"));
     }
 }

@@ -14,7 +14,7 @@ parallel validation model.
 Use the author command layer for day-to-day content edits:
 
 ```sh
-bun run author:check
+just author-check
 ```
 
 This runs the checks most relevant to author and webmaster edits:
@@ -28,10 +28,10 @@ This runs the checks most relevant to author and webmaster edits:
 Use the safe repair command when the failure is tag normalization:
 
 ```sh
-bun run author:fix
+just author-fix
 ```
 
-`author:fix` currently runs `tags:normalize`, which can trim/lowercase/collapse
+`author-fix` currently runs `tags-normalize`, which can trim/lowercase/collapse
 safe tag differences and remove duplicate tags. It intentionally does not fix
 slash-containing tags or unrelated Markdown prose because those require
 editorial judgment.
@@ -41,26 +41,26 @@ editorial judgment.
 The command layer is intentionally thin. Maintainers can still run the focused
 tools directly:
 
-- `bun run verify:content`
-- `bun run tags:check`
-- `bun run tags:normalize`
-- `bun run assets:locations`
-- `bun run assets:shared`
-- `bun run site:doctor`
-- `bun run site:schema:check`
+- `just content-check`
+- `just tags-check`
+- `just tags-normalize`
+- `just assets-locations`
+- `just assets-shared`
+- `just site-doctor`
+- `just site-schema-check`
 
-Use `site:doctor` directly when changing site configuration, navigation,
+Use `site-doctor` directly when changing site configuration, navigation,
 collections, redirects, author profiles, category metadata, or site-level
 assets:
 
 ```sh
-bun run site:doctor
+just site-doctor
 ```
 
 For editor, GUI, MCP, or CI consumers that need structured output:
 
 ```sh
-bun run site:doctor -- --json
+just site-doctor -- --json
 ```
 
 The JSON output uses the shared author diagnostic report shape: stable
@@ -68,7 +68,7 @@ diagnostic codes, severity, category, repair owner, source location, related
 docs, remediation, and summary counts. Human output stays short so authors can
 repair common mistakes without reading platform internals.
 
-Keep new author-facing checks wired into `author:check` when they catch
+Keep new author-facing checks wired into `just author-check` when they catch
 mistakes authors can reasonably make while editing `site/`.
 
 ## Authoring Surfaces
@@ -110,6 +110,6 @@ The planned article submission tool in `scripts/article-submission/DESIGN.md`
 is still deferred implementation work. Until then, the workflow is:
 
 1. add or edit site content/assets;
-2. run `bun run author:check`;
-3. run `bun run author:fix` only for safe tag normalization;
+2. run `just author-check`;
+3. run `just author-fix` only for safe tag normalization;
 4. run broader maintainer checks when code or platform files changed.

@@ -29,7 +29,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `bun run preview --host 127.0.0.1 --port ${port}`,
+    command: `just preview --host 127.0.0.1 --port ${port}`,
     reuseExistingServer: process.env["CI"] !== "true",
     timeout: 15_000,
     url: `http://127.0.0.1:${port}`,

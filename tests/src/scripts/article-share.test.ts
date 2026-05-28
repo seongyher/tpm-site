@@ -140,6 +140,43 @@ describe("article share browser script", () => {
     ).toBe("Article URL was not found.");
   });
 
+  test("ignores non-element clicks and malformed open payloads", () => {
+    const window = new Window();
+    Reflect.set(window, "SyntaxError", SyntaxError);
+    const openedUrls: string[] = [];
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <div data-article-share-menu>
+        <button data-article-share-open-button data-article-share-open-url="">Open</button>
+      </div>
+    `;
+
+    installArticleShare({
+      document: browserDocument(document),
+      navigator: browserNavigator({
+        clipboard: {
+          writeText: async () => {
+            await Promise.resolve();
+          },
+        },
+      }),
+      window: browserWindow({
+        open: (url) => {
+          openedUrls.push(url);
+          return null;
+        },
+      }),
+    });
+
+    document.dispatchEvent(new window.Event("click"));
+    document
+      .querySelector("[data-article-share-open-button]")
+      ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+
+    expect(openedUrls).toEqual([]);
+  });
+
   test("installs only once", async () => {
     const window = new Window();
     Reflect.set(window, "SyntaxError", SyntaxError);
@@ -224,6 +261,49 @@ describe("article share browser script", () => {
       "https://twitter.com/intent/tweet?url=https%3A%2F%2Fexample.com",
     ]);
     expect(document.querySelector("a[href*='twitter.com']")).toBeNull();
+  });
+
+  test("installs from ambient browser globals when runtime is omitted", async () => {
+    const window = new Window();
+    Reflect.set(window, "SyntaxError", SyntaxError);
+    const copiedText: string[] = [];
+    const document = window.document;
+    const navigator = browserNavigator({
+      clipboard: {
+        writeText: async (value: string) => {
+          await Promise.resolve();
+          copiedText.push(value);
+        },
+      },
+    });
+
+    document.body.innerHTML = `
+      <div data-article-share-menu>
+        <button
+          data-article-share-copy-button
+          data-article-share-copy-text="&quot;https://example.com/articles/post/&quot;"
+        >Copy link</button>
+        <p data-article-share-copy-status></p>
+      </div>
+    `;
+
+    Reflect.set(globalThis, "document", document);
+    Reflect.set(globalThis, "navigator", navigator);
+    Reflect.set(globalThis, "window", browserWindow());
+
+    try {
+      installArticleShare();
+      document
+        .querySelector("button")
+        ?.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+      await settledPromises();
+    } finally {
+      Reflect.deleteProperty(globalThis, "document");
+      Reflect.deleteProperty(globalThis, "navigator");
+      Reflect.deleteProperty(globalThis, "window");
+    }
+
+    expect(copiedText).toEqual(["https://example.com/articles/post/"]);
   });
 });
 

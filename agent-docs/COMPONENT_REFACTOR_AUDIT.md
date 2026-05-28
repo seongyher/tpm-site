@@ -393,10 +393,10 @@ Stop conditions:
 
 Minimum checks:
 
-- `bun --silent run format`
-- `bun --silent run lint`
-- `bun --silent run typecheck`
-- `bun --silent run check`
+- `just format`
+- `just lint`
+- `just typecheck`
+- `just check`
 
 Add targeted tests when behavior is touched:
 
@@ -1191,7 +1191,7 @@ These are intentionally sequenced so each milestone lowers risk for the next.
 Verification:
 
 - Component catalog examples.
-- `bun --silent run check`.
+- `just check`.
 - Targeted e2e for article header/actions if touched.
 
 ### Milestone B: Compact Entry Lists
@@ -1275,9 +1275,9 @@ Verification:
 Verification:
 
 - Article unit tests.
-- `bun --silent run check`.
-- `bun --silent run build`.
-- `bun --silent run validate:html`.
+- `just check`.
+- `just build`.
+- `just validate-html`.
 
 ### Active E-F Implementation Decisions
 
@@ -1733,7 +1733,7 @@ Verification:
 
 - Catalog route tests.
 - Catalog component tests.
-- `bun --silent run test:catalog`.
+- `just test-catalog`.
 
 Status: implemented for the first productionization pass. Lifecycle metadata
 exists, catalog-only components are classified, and the UI primitives domain
@@ -1834,7 +1834,7 @@ The active refactor pass is complete:
 - Developer-facing and site-owner/author-facing documentation has been audited
   and updated for the new primitives, config-default boundary, and catalog
   lifecycle metadata.
-- `bun run check:release` passes after the refactor fixes discovered during
+- `just release-check` passes after the refactor fixes discovered during
   the release gate.
 
 Remaining items are not blockers for this refactor pass. They are future

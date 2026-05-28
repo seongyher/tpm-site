@@ -175,6 +175,20 @@ describe("article table of contents browser script", () => {
     expect(previous.hasAttribute("aria-current")).toBe(false);
     expect(current.getAttribute("data-current")).toBe("true");
   });
+
+  test("does nothing when the table-of-contents document has no default view", () => {
+    const window = new Window();
+    const toc = window.document.createElement("nav");
+    toc.setAttribute("data-article-toc", "");
+    const document = {
+      defaultView: null,
+      querySelectorAll: () => [toc],
+    };
+
+    installArticleTableOfContents(browserDocument(document));
+
+    expect(toc.children.length).toBe(0);
+  });
 });
 
 function domRect({ top }: { top: number }): DOMRect {

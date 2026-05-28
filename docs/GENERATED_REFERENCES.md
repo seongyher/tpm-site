@@ -44,7 +44,8 @@ It should include:
 - semantic profile kinds generated from `semanticProfileKinds`;
 - media/PDF policy roles and surfaces generated from the current documented
   media policy vocabulary until those values move into a typed policy module;
-- QA command/domain reference generated from the QA command registry.
+- QA command/domain reference generated from the `just` command surface and
+  Rust QA operation metadata.
 
 The file is generated in `docs/generated/` rather than the docs-site content
 tree so it can become a source for later public docs without forcing the
@@ -62,7 +63,7 @@ Generated sections should name their owning source.
 | Visibility surfaces  | `src/lib/site-config-defaults.ts` and content schema visibility defaults                           |
 | Metadata profiles    | `src/lib/semantic-profile-kinds.ts`                                                                |
 | Media/PDF vocabulary | `docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md` until promoted to typed policy constants              |
-| QA commands          | `package.json` and `scripts/quality/qa-command-registry.ts`                                        |
+| QA commands          | `justfile`, `COMMANDS.md`, `crates/tpm-xtask/src/tasks.rs`, and Rust QA operations                 |
 
 When a source changes, the generated reference should change or the check
 command should prove no output change is needed.
@@ -71,8 +72,8 @@ command should prove no output change is needed.
 
 The docs reference generator should provide:
 
-- `docs:references` to write generated references;
-- `docs:references:check` to fail when generated references are stale.
+- `just docs-references` to write generated references;
+- `just docs-references-check` to fail when generated references are stale.
 
 The check command should be fast enough for focused local use and should be
 registered in the QA command registry. It should not run a full site build.
@@ -94,7 +95,7 @@ Implementation should verify:
 
 - the generator output is deterministic;
 - `--check` fails when the generated file differs from source-of-truth output;
-- package scripts, QA registry, and `PACKAGE_SCRIPTS.md` stay aligned;
+- `just` command evidence, Rust QA reports, and `COMMANDS.md` stay aligned;
 - generated references mention all current route keys, feature flags, semantic
   profile kinds, and QA command domains;
 - the implementation does not read built `dist/` output or depend on a running

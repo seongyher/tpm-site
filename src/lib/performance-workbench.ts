@@ -16,13 +16,13 @@ type PerformanceWorkbenchTrackId =
 
 /** One reproducible performance experiment or promoted budget track. */
 export interface PerformanceWorkbenchTrack {
+  readonly commands: readonly string[];
   readonly decisionRule: string;
   readonly docs: readonly string[];
   readonly id: PerformanceWorkbenchTrackId;
   readonly label: string;
   readonly promotionGate: string;
   readonly rollbackRule: string;
-  readonly scripts: readonly string[];
   readonly state: PerformanceWorkbenchState;
 }
 
@@ -40,7 +40,7 @@ export const performanceWorkbenchTracks = [
       "HTML validation, build verification, browser tests, accessibility tests, payload report, and release checks.",
     rollbackRule:
       "Remove the critical-CSS post-process and return to shared hashed CSS when route payload or validation regresses.",
-    scripts: ["payload:critical-css:experiment"],
+    commands: [],
     state: "experiment-only",
   },
   {
@@ -56,7 +56,7 @@ export const performanceWorkbenchTracks = [
       "Route-class Lighthouse evidence, generated HTML review, browser tests, and payload report.",
     rollbackRule:
       "Remove the hint when the LCP element changes, a route class stops using it, or it competes with more critical resources.",
-    scripts: [],
+    commands: [],
     state: "experiment-only",
   },
   {
@@ -72,7 +72,7 @@ export const performanceWorkbenchTracks = [
       "Payload report cache-header evidence, build verification, and release checks.",
     rollbackRule:
       "Remove or narrow headers when a path pattern includes mutable, author-managed, or unfingerprinted output.",
-    scripts: ["payload:check", "payload:report"],
+    commands: ["payload-check", "payload-report"],
     state: "release-gated",
   },
   {
@@ -88,7 +88,7 @@ export const performanceWorkbenchTracks = [
       "Payload report must run on optimized release output and fail only on deterministic budget failures.",
     rollbackRule:
       "Loosen or demote a budget only after documenting why the route class changed and adding a more precise future metric if needed.",
-    scripts: ["payload:check", "payload:report"],
+    commands: ["payload-check", "payload-report"],
     state: "release-gated",
   },
   {
@@ -105,7 +105,7 @@ export const performanceWorkbenchTracks = [
       "Strict HTML validation, build verification, browser tests, accessibility tests, and release checks.",
     rollbackRule:
       "Disable the specific optimizer scenario that causes validation, behavior, or payload regression.",
-    scripts: ["payload:postbuild:experiments"],
+    commands: ["build-optimize", "payload-report", "verify", "validate-html"],
     state: "production-adopted",
   },
   {
@@ -122,7 +122,7 @@ export const performanceWorkbenchTracks = [
       "Pagefind, strict HTML validation, build verification, payload report, and release checks.",
     rollbackRule:
       "Revert the Astro/Vite config fragment and rerun the route-class payload report.",
-    scripts: ["payload:vite:experiments"],
+    commands: [],
     state: "experiment-only",
   },
   {
@@ -139,23 +139,20 @@ export const performanceWorkbenchTracks = [
       "Strict HTML validation, build verification, representative browser tests, payload report, and release checks.",
     rollbackRule:
       "Remove the minify-html scenario and keep raw Astro HTML when validation or machine-readable output regresses.",
-    scripts: [
-      "payload:minify-html:experiment",
-      "payload:minify-html:experiments",
-    ],
+    commands: [],
     state: "experiment-only",
   },
 ] as const satisfies readonly PerformanceWorkbenchTrack[];
 
 /**
- * Returns every package script owned by the performance workbench.
+ * Returns every `just` recipe owned by the performance workbench.
  *
- * @returns Sorted unique package script names.
+ * @returns Sorted unique command names.
  */
 export function performanceWorkbenchScriptNames(): string[] {
   return Array.from(
     new Set(
-      performanceWorkbenchTracks.flatMap((track) => Array.from(track.scripts)),
+      performanceWorkbenchTracks.flatMap((track) => Array.from(track.commands)),
     ),
   ).sort((left, right) => left.localeCompare(right));
 }

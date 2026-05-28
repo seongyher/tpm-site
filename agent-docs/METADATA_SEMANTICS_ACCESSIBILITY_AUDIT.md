@@ -519,7 +519,7 @@ Recommended behavior:
 ### Generated Accessibility Sweep
 
 The repo already has Playwright + `@axe-core/playwright` coverage through
-`bun run test:a11y` and `bun run test:a11y:built`. The current CI-style scan is
+`just test-a11y` and `just test-a11y-built`. The current CI-style scan is
 representative rather than exhaustive: it covers home, articles, one article,
 bibliography, categories, one category, about, and search, and fails only on
 serious or critical axe violations.
@@ -1080,7 +1080,7 @@ Likely touch points:
 - Existing verifier scripts under `scripts/`.
 - SEO/route tests under `tests/src/lib/` and `tests/config/`.
 - Playwright accessibility tests under `tests/a11y/`.
-- `PACKAGE_SCRIPTS.md` if new scripts are added.
+- `COMMANDS.md` if new scripts are added.
 - CI workflow if a new release gate is promoted.
 
 Deliverables:

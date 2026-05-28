@@ -42,7 +42,7 @@ pdf: false
 ## Generate PDFs
 
 ```sh
-bun run build:pdf
+just build-pdf
 ```
 
 ## Common Reasons To Disable

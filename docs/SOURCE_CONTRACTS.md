@@ -157,5 +157,5 @@ Required focused coverage:
 - article artifact: article view-model characterization, reference/PDF/table of
   contents fixtures, visibility/default policy, and downstream output facts.
 
-Final verification should use focused tests first, then `bun --silent run
-check:release` before Linear status handoff.
+Final verification should use focused tests first, then `just release-check`
+before Linear status handoff.

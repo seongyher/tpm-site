@@ -113,4 +113,7 @@ function browserRuntime(): AnchoredPositioningLoaderRuntime | null {
   };
 }
 
+// Coverage note: browser auto-init and the dynamic positioning import are
+// exercised by built pages. Unit tests inject runtime dependencies into
+// `installAnchoredPositioningLoader()` to cover behavior deterministically.
 installAnchoredPositioningLoader();

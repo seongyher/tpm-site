@@ -30,6 +30,7 @@ export const publishableImage = {
 export interface PublishableArticleArchiveFixtureOptions {
   category?: ArticleArchiveItem["category"];
   data?: Partial<ArticleEntry["data"]>;
+  filePath?: string;
   id?: string;
   image?: ArticleArchiveItem["image"];
   title?: string;
@@ -80,6 +81,7 @@ export function collectionOnlyVisibilityFixture(): PublishableVisibility {
  * @param options Article archive fixture overrides.
  * @param options.category Optional category fixture override.
  * @param options.data Article frontmatter overrides.
+ * @param options.filePath Article source file path override.
  * @param options.id Entry ID override.
  * @param options.image Representative image override.
  * @param options.title Display title override.
@@ -91,12 +93,16 @@ export function articleArchiveItemFixture({
     url: "/categories/metamemetics/",
   },
   data = {},
+  filePath,
   id = "what-is-a-meme",
   image,
   title = "What Is A Meme?",
 }: PublishableArticleArchiveFixtureOptions = {}): ArticleArchiveItem {
+  const articleOptions =
+    filePath === undefined ? { data, id } : { data, filePath, id };
+
   return {
-    article: articleEntry({ data, id }),
+    article: articleEntry(articleOptions),
     author: "Author",
     authors: [],
     category,

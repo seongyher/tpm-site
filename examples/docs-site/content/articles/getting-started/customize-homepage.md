@@ -69,7 +69,7 @@ Homepage labels live in site config:
 Run:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 ## Next

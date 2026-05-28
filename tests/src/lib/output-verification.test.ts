@@ -55,20 +55,29 @@ describe("output verification diagnostics", () => {
         moduleId: "assets",
         severity: "warning",
       }),
+      createOutputDiagnostic({
+        category: "route",
+        code: "route.static-route-ok",
+        message: "Route output inspected.",
+        moduleId: "routes",
+        severity: "info",
+      }),
     ];
 
     expect(createOutputVerificationReport(diagnostics).summary).toEqual({
       byCategory: {
         asset: 1,
         metadata: 1,
+        route: 1,
       },
       byModule: {
         assets: 1,
         metadata: 1,
+        routes: 1,
       },
       errors: 1,
-      info: 0,
-      total: 2,
+      info: 1,
+      total: 3,
       warnings: 1,
     });
     expect(hasBlockingOutputDiagnostics(diagnostics)).toBe(true);

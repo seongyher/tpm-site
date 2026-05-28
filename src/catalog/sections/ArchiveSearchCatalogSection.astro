@@ -1,0 +1,92 @@
+---
+import ArchiveListBlock from "../../components/blocks/ArchiveListBlock.astro";
+import CategoryOverviewBlock from "../../components/blocks/CategoryOverviewBlock.astro";
+import CategoryRailBlock from "../../components/blocks/CategoryRailBlock.astro";
+import SearchResultsBlock from "../../components/blocks/SearchResultsBlock.astro";
+import type { ArticleListItem } from "../../lib/article-list";
+import type { SectionNavItem } from "../../lib/navigation";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  articleItems: readonly ArticleListItem[];
+  navigationItems: readonly SectionNavItem[];
+}
+
+const { articleItems, navigationItems } = Astro.props;
+---
+
+<CatalogSection
+  title="Archive, Category, And Search Blocks"
+  description="Reusable article archive, category overview, and search surfaces."
+>
+  <CatalogExample
+    title="ArchiveListBlock"
+    description="Shared archive and category article-list framing."
+    componentPath="src/components/blocks/ArchiveListBlock.astro"
+  >
+    <div class="grid gap-8">
+      <ArchiveListBlock
+        title="Articles"
+        description="Essays and notes on memes, cyberculture, and the Internet."
+        items={articleItems}
+        pagefindIgnore
+      />
+      <ArchiveListBlock
+        eyebrow="Category"
+        title="A Category With A Deliberately Long Title For Wrapping"
+        items={articleItems.slice(0, 1)}
+      />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="CategoryRailBlock"
+    description="One-row category discovery rail with scroll controls."
+    componentPath="src/components/blocks/CategoryRailBlock.astro"
+  >
+    <div class="grid gap-8">
+      <CategoryRailBlock
+        aria-label="Catalog category rail"
+        items={navigationItems}
+        railId="catalog-category-rail"
+      />
+      <CategoryRailBlock
+        emptyText="No category rail items yet."
+        items={[]}
+        railId="catalog-empty-category-rail"
+      />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="CategoryOverviewBlock"
+    description="Category overview backed by shared navigation data."
+    componentPath="src/components/blocks/CategoryOverviewBlock.astro"
+  >
+    <div class="grid gap-8">
+      <CategoryOverviewBlock
+        title="Categories"
+        description="Browse the archive by subject."
+        items={navigationItems}
+      />
+      <CategoryOverviewBlock
+        headingId="catalog-empty-categories-heading"
+        title="Empty Category Overview"
+        items={[]}
+      />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="SearchResultsBlock"
+    description="Search form and empty result-enhancement region."
+    componentPath="src/components/blocks/SearchResultsBlock.astro"
+  >
+    <SearchResultsBlock
+      headingId="catalog-search-heading"
+      title="Search"
+      description="Search starts empty until Pagefind enhances the result region."
+    />
+  </CatalogExample>
+</CatalogSection>

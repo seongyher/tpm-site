@@ -90,7 +90,7 @@ This pass should add only the low-risk config surfaces:
 2. Resolve homepage discovery links through a typed helper so route-key links
    share the configured route model.
 3. Add `share.targets` as an ordered list of supported third-party target IDs.
-4. Update `site:doctor` to diagnose configured homepage route links that point
+4. Update `site-doctor` to diagnose configured homepage route links that point
    at disabled features.
 5. Update TPM, fixture, and docs-site configs plus generated schemas.
 6. Add focused tests for parsing defaults, homepage link resolution, share target

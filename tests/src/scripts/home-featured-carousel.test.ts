@@ -79,6 +79,57 @@ describe("home featured carousel browser script", () => {
     expect(second.getAttribute("aria-hidden")).toBe("false");
     expect(secondIndicator.getAttribute("aria-current")).toBe("true");
   });
+
+  test("wraps backward with the previous control", () => {
+    const window = carouselWindow();
+    const document = window.document;
+
+    appendCarouselFixture(browserDocument(document));
+    installHomeFeaturedCarousels(browserDocument(document));
+
+    const previous = requiredElement(
+      document.querySelector("[data-home-featured-previous]"),
+    );
+    const second = requiredHtmlElement(
+      document.querySelectorAll("[data-home-featured-slide]").item(1),
+    );
+
+    previous.dispatchEvent(new window.Event("click"));
+
+    expect(second.getAttribute("aria-hidden")).toBe("false");
+    expect(second.getAttribute("data-home-featured-active")).toBe("true");
+  });
+
+  test("keeps incomplete carousel fixtures inert", () => {
+    const window = carouselWindow();
+    const document = window.document;
+    const section = document.createElement("section");
+    const slide = document.createElement("article");
+    section.setAttribute("data-home-featured-carousel", "");
+    slide.setAttribute("data-home-featured-slide", "");
+    slide.textContent = "Only slide";
+    section.append(slide);
+    document.body.replaceChildren(section);
+
+    installHomeFeaturedCarousels(browserDocument(document));
+
+    expect(slide.hidden).toBe(false);
+    expect(slide.hasAttribute("inert")).toBe(false);
+  });
+
+  test("does nothing when the carousel document has no default view", () => {
+    const window = carouselWindow();
+    const section = window.document.createElement("section");
+    section.setAttribute("data-home-featured-carousel", "");
+    const document = {
+      defaultView: null,
+      querySelectorAll: () => [section],
+    };
+
+    installHomeFeaturedCarousels(browserDocument(document));
+
+    expect(section.hasAttribute("data-home-featured-active")).toBe(false);
+  });
 });
 
 function appendCarouselFixture(document: Document): void {

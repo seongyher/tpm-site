@@ -56,7 +56,7 @@ Each documentation surface should fit one of these kinds.
 - **Component reference:** component public contract, composition, responsive
   behavior, accessibility, theme behavior, and testable invariants.
 - **Generated reference:** deterministic output from a schema, registry,
-  manifest, package script registry, or other typed source.
+  manifest, command registry, or other typed source.
 - **Operational runbook:** commands, release checks, deployment, previews,
   diagnostics, and production triage.
 - **Architecture/design contract:** durable design decisions that future
@@ -82,8 +82,8 @@ must be changed first when the contract changes.
 - Article render facts, visibility, PDF eligibility, scholarly metadata
   eligibility, reference facts, table of contents, and output facts are owned by
   the article compiler artifact.
-- Package-script purpose, QA class, CI parity, mutation behavior, and runtime
-  expectations are owned by `package.json` plus the QA command registry.
+- `just` command purpose, QA class, CI parity, mutation behavior, and runtime
+  expectations are owned by `justfile` plus the QA command registry.
 - Starter-template personas, supported feature matrices, source/build/release
   checks, and adoption guidance are owned by `src/lib/starter-templates.ts`
   plus the maintained roots under `examples/starters/` and
@@ -99,7 +99,7 @@ must be changed first when the contract changes.
 
 - Put TPM-specific author and site-owner instructions in `site/README.md`.
 - Put repo-local developer setup, command orientation, and release guidance in
-  `README.md` or `PACKAGE_SCRIPTS.md`.
+  `README.md` or `COMMANDS.md`.
 - Put durable platform contracts and implementation-facing references in
   `docs/`.
 - Put public platform documentation and example-site workflows in
@@ -130,8 +130,8 @@ must be changed first when the contract changes.
 
 - `README.md` is the repo-level developer entry point. It should stay focused
   on commands, local setup, architecture orientation, and release checks.
-- `PACKAGE_SCRIPTS.md` is the human-readable package-script reference. Its
-  truth comes from `package.json` and the QA command registry.
+- `COMMANDS.md` is the human-readable `just` command reference. Its
+  truth comes from `justfile` and the QA command registry.
 - `agent-docs/ENGINEERING_PHILOSOPHY.md` is the durable engineering decision
   aid for substantial platform work.
 - `agent-docs/PLATFORM_ROADMAP.md` is the long-term platform and productization
@@ -153,7 +153,7 @@ must be changed first when the contract changes.
   `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md` define Milestone 5 platform
   contracts for future productization.
 - `docs/generated/platform-reference.md` is generated from platform schemas
-  and registries by `bun run docs:references`.
+  and registries by `just docs-references`.
 
 ### Component Docs
 
@@ -222,7 +222,7 @@ change.
   config examples.
 - Update trigger: site config, feature flag, route, navigation, homepage,
   support/social/share, redirect, theme, or site-instance path changes.
-- Verification owner: `site:schema:check`, docs-site checks, config tests, and
+- Verification owner: `just site-schema-check`, docs-site checks, config tests, and
   route/source-artifact tests when their contracts change.
 
 ### Platform Contract Docs
@@ -256,13 +256,13 @@ change.
 
 - Primary audience: developers, deploy operators, and maintainers.
 - Document kind: operational runbook and generated reference.
-- Current surfaces: `README.md`, `PACKAGE_SCRIPTS.md`, QA preflight docs, and
+- Current surfaces: `README.md`, `COMMANDS.md`, QA preflight docs, and
   docs-site command reference.
-- Owning sources: `package.json`, QA command registry, CI workflows, failure
+- Owning sources: `justfile`, QA command registry, CI workflows, failure
   probes, and release orchestration scripts.
-- Update trigger: package script, CI workflow, command classification,
+- Update trigger: `just` recipe, CI workflow, command classification,
   mutation behavior, runtime expectation, or release gate changes.
-- Verification owner: package-script tests, CI workflow tests, QA registry
+- Verification owner: command-surface tests, CI workflow tests, QA registry
   tests, and Markdown review.
 
 ### Public Docs Site
@@ -277,7 +277,7 @@ change.
   config/content, and the docs-site information architecture.
 - Update trigger: any public workflow, configuration surface, authoring surface,
   operations command, or reference contract changes.
-- Verification owner: `test:docs-site`, Markdown review, link checks when
+- Verification owner: `just test-docs-site`, Markdown review, link checks when
   available, and generated-reference drift checks.
 
 ### Starter Template Docs
@@ -291,7 +291,7 @@ change.
   and starter verification logic.
 - Update trigger: starter ID, persona, feature matrix, checks, required files,
   or starter source content changes.
-- Verification owner: `bun --silent run starters:check`, Markdown review, and
+- Verification owner: `just starters-check`, Markdown review, and
   focused starter-template tests.
 
 ### Planning, Deferred, And Historical Docs
@@ -316,7 +316,7 @@ drift check.
 
 The lifecycle is:
 
-1. Identify the owning source: schema, registry, manifest, package script
+1. Identify the owning source: schema, registry, manifest, command
    registry, component inventory, compiler artifact, or verifier registry.
 2. Generate a deterministic reference from that source.
 3. Mark the generated file clearly so authors do not edit it by hand.
@@ -329,12 +329,12 @@ The lifecycle is:
 Current generated references:
 
 - `docs/generated/platform-reference.md` is generated by
-  `bun run docs:references` and checked by `bun run docs:references:check`.
+  `just docs-references` and checked by `just docs-references-check`.
   It currently covers site config fields, content frontmatter fields, routes,
   feature flags, visibility surfaces, semantic profiles, media/PDF vocabulary,
   author diagnostics, source/artifact manifests, and QA command domains.
 - `site/config/site.schema.json` and `examples/docs-site/config/site.schema.json`
-  are generated from `siteConfigSchema` and checked by `site:schema:check`.
+  are generated from `siteConfigSchema` and checked by `just site-schema-check`.
 
 Planned generated references:
 
@@ -384,25 +384,26 @@ Use these triggers during implementation review.
 
 Documentation verification should match the kind of doc that changed.
 
-- Narrative Markdown changes: `bun --silent run review:markdown`.
+- Narrative Markdown changes: `just review-markdown`.
 - Generated platform-reference changes:
-  `bun --silent run docs:references:check`.
-- Starter template changes: `bun --silent run starters:check`.
-- Docs-site source changes: `bun --silent run test:docs-site`.
-- Site config reference changes: `bun --silent run site:schema:check`.
-- Package script or CI reference changes: `bun --silent run test:config`.
-- Component contract changes: `bun --silent run catalog:check` plus focused
+  `just docs-references-check`.
+- Starter template changes: `just starters-check`.
+- Docs-site source changes: `just test-docs-site`.
+- Site config reference changes: `just site-schema-check`.
+- Command-surface or CI reference changes: `just test-config`.
+- Component contract changes: `just catalog-check` plus focused
   component tests.
 - Source contract or generated-output contract changes: focused unit tests for
   the owning domain, then the relevant release gate.
-- Broad platform contract changes: `bun --silent run check:release` before
+- Broad platform contract changes: `just release-check` before
   handoff.
 
 Future documentation tooling should add a broader docs accountability check
 that maps changed source domains to expected documentation surfaces. That check
 should use the ownership and trigger model in this document rather than
-hard-coded filename guesses. `docs:references:check`, `site:schema:check`, and
-`starters:check` are current focused precedents.
+hard-coded filename guesses. `just docs-references-check`,
+`just site-schema-check`, and `just starters-check` are current focused
+precedents.
 
 ## Downstream Boundaries
 

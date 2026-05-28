@@ -203,8 +203,8 @@ Current article-content MDX inventory:
 
 Future author-facing MDX article components must have a PDF compatibility
 decision before publication. Add a registry-like test fixture in
-`src/lib/article-pdf-compatibility.ts`, consumed by
-`scripts/content/verify-content.ts`, with a discriminated policy:
+`src/lib/article-pdf-compatibility.ts`, consumed by the Rust-backed
+`just content-check` source verifier, with a discriminated policy:
 
 ```ts
 type ArticlePdfCompatibility =
@@ -238,10 +238,10 @@ raw iframes gain `data-article-embed-fallback` automatically.
 
 ## PDF Generation
 
-Add a build script under `scripts/build/`:
+The retained PDF generator is invoked through the repository command router:
 
 ```text
-bun scripts/build/generate-article-pdfs.ts --quiet
+just build-pdf --quiet
 ```
 
 The script should:
@@ -258,13 +258,13 @@ The script should:
 9. fail if a generated PDF is missing, empty, not a PDF, or above the selected
    size budget.
 
-The production build path should become:
+The production build path is:
 
 ```text
-build:raw -> build:pdf -> build:optimize
+build-raw -> build-pdf -> build-optimize
 ```
 
-`build:pdf` should operate only on generated `dist/` output. It should not
+`build-pdf` should operate only on generated `dist/` output. It should not
 modify source content.
 
 The generator must not rely on lazy-loading side effects. Before printing, it
@@ -334,7 +334,7 @@ files.
 
 ## Build Verification
 
-`bun run verify` should enforce:
+`just verify` should enforce:
 
 - every PDF-eligible published article has `articles/<slug>/<slug>.pdf`;
 - every generated PDF has useful title/author document metadata;
@@ -395,12 +395,12 @@ Browser tests:
 
 Release checks:
 
-- `bun run check`;
-- `bun run build`;
-- `bun run verify`;
-- `bun run validate:html`;
+- `just check`;
+- `just build`;
+- `just verify`;
+- `just validate-html`;
 - focused Playwright PDF/export invariants;
-- `bun run check:release` before release handoff.
+- `just release-check` before release handoff.
 
 ## Critical Review
 

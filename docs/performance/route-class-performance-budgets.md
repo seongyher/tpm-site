@@ -82,8 +82,8 @@ replace local release gates.
 The current local build was generated with:
 
 ```sh
-bun --silent run build
-bun --silent run payload:report -- --top 12
+just build
+just payload-report -- --top 12
 ```
 
 Build output summary:
@@ -294,7 +294,7 @@ Secondary profiles:
 
 ## Enforcement Plan
 
-1. Keep current `test:perf` behavior while the route-class workbench is built.
+1. Keep current `test-perf` behavior while the route-class workbench is built.
 2. Add a typed route-class manifest that maps route classes to representative
    routes and budget profiles.
 3. Add a budget reporter that reads built output and reports route HTML size,
@@ -313,16 +313,16 @@ Current implementation status:
 - `src/lib/performance-budgets.ts` owns the typed route-class manifest,
   representative routes, HTML Brotli warning/failure budgets, generated PDF
   budget policy, and immutable Astro asset cache policy.
-- `payload:report` emits machine-readable and human-readable evidence for
+- `just payload-report` emits machine-readable and human-readable evidence for
   extension totals, asset-role totals, route-class HTML budget states, generated
   PDF warning/failure states, and `_headers` cache policy presence.
-- `payload:check` runs the same report in release-gate mode. It fails only on
+- `just payload-check` runs the same report in release-gate mode. It fails only on
   deterministic route-class, generated PDF, or cache-header `fail`/`missing`
   states; `warn` remains review evidence.
 - `lighthouserc.json` samples at least one route from each route class marked
   for Lighthouse measurement.
 - Deterministic payload/cache failures are now release-gated through
-  `check:release`. Lighthouse performance scores and browser timing metrics
+  `just release-check`. Lighthouse performance scores and browser timing metrics
   remain review/workbench evidence until route-class baselines are stable enough
   to fail release reliably.
 
@@ -345,6 +345,5 @@ Route-class budget implementation is complete when:
 This design was checked against `lighthouserc.json`, `package.json`,
 `docs/performance/unlighthouse-audit-2026-05-17.md`,
 `docs/ARTICLE_PDF_EXPORT.md`, `docs/SOCIAL_PREVIEW_IMAGES.md`,
-`site/public/_headers`, `scripts/payload/report-payload.ts`,
-`scripts/build/verify-build.ts`, and a fresh local `dist/` generated with
-`bun --silent run build`.
+`site/public/_headers`, `just payload-report`, `just verify`, and a fresh
+local `dist/` generated with `just build`.

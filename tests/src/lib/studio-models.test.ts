@@ -176,6 +176,10 @@ describe("studio models", () => {
 
   test("rejects invalid editorial state transitions with actionable diagnostics", () => {
     const draft: StudioEditorialState = { kind: "draft" };
+    const published: StudioEditorialState = {
+      kind: "published",
+      release: { id: "release-1", label: "Release 1" },
+    };
     const blockingDiagnostic = createAuthorDiagnostic({
       category: "frontmatter",
       code: "frontmatter.invalid-date",
@@ -207,6 +211,31 @@ describe("studio models", () => {
     ).toMatchObject({
       diagnostics: ["Review submission requires a review reference."],
       ok: false,
+    });
+
+    for (const [state, action, diagnostic] of [
+      [draft, "approve", "Only review states can be approved."],
+      [published, "mark-ready", "Published entries are already public."],
+      [draft, "request-changes", "Only review states can request changes."],
+      [draft, "restore", "Only rollback proposals can be restored."],
+      [draft, "schedule", "Only ready or approved entries can be scheduled."],
+      [
+        draft,
+        "unpublish",
+        "Only published or scheduled entries can be unpublished.",
+      ],
+    ] as const) {
+      expect(transitionStudioEditorialState(state, action)).toMatchObject({
+        diagnostics: [diagnostic],
+        ok: false,
+        state,
+      });
+    }
+
+    expect(transitionStudioEditorialState(draft, "roll-back")).toMatchObject({
+      diagnostics: ["Rollback requires a restore point."],
+      ok: false,
+      state: draft,
     });
   });
 });

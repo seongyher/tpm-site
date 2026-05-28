@@ -44,7 +44,7 @@ describe("starter templates", () => {
       expect(template.acceptanceChecks.source.length).toBeGreaterThan(0);
       expect(template.acceptanceChecks.build.length).toBeGreaterThan(0);
       expect(template.acceptanceChecks.release).toContain(
-        "bun run starters:check",
+        "just starters-check",
       );
       expect(template.root).not.toContain("site/");
     }

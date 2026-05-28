@@ -295,9 +295,9 @@ Use these checks when changing metadata code:
 - component render tests for `SiteHead`, `ArticleJsonLd`,
   `AnnouncementJsonLd`, `ArticleScholarMeta`, and social metadata;
 - build-output verifier tests in `tests/scripts/build/build-verifier.test.ts`;
-- `bun run verify` to parse generated output and enforce public artifact
+- `just verify` to parse generated output and enforce public artifact
   contracts;
-- `bun run check:release` before release handoff.
+- `just release-check` before release handoff.
 
 Any new author-facing metadata field should include:
 

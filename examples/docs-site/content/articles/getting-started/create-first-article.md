@@ -50,13 +50,13 @@ The URL is based on the file name:
 Run:
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run verify:content -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just content-check --quiet
 ```
 
 Then run the full docs-site check when the article is ready:
 
 ```sh
-bun run test:docs-site
+just test-docs-site
 ```
 
 ## Common Mistakes

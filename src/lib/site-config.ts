@@ -220,7 +220,7 @@ const contentDefaultsConfigSchema = z
   })
   .strict()
   .default(defaultContentDefaultsConfig);
-export const siteConfigSchema = z
+const siteConfigSchema = z
   .object({
     contentDefaults: contentDefaultsConfigSchema,
     features: featureConfigSchema,

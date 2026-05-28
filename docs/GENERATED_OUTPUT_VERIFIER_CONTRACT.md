@@ -10,47 +10,31 @@ or publishable-entry contracts to land first.
 
 ## Current Inventory
 
-`scripts/build/verify-build.ts` still exposes the release-check CLI and legacy
-bucketed string arrays so existing CI output stays stable. The checks now run
-through focused verifier modules under `scripts/build/verify-build/`:
+`just verify` is the active generated-output verification command. It calls the
+internal Rust task adapter in `crates/tpm-xtask/src/tasks.rs` through the
+private `just _xtask verify` plumbing. The older TypeScript verifier modules
+were removed during the Rust/`just` migration; future verifier work should
+deepen the Rust module set instead of reintroducing repository-owned
+TypeScript automation. This maintenance adapter is intentionally separate from
+the user-facing `tpm` product CLI.
 
-- `route-verifier.ts` owns required route output and unexpected dated pages;
-- `link-verifier.ts` owns rendered local `href`/`src` targets;
-- `redirect-verifier.ts` owns legacy redirect fallback output;
-- `feed-verifier.ts` owns generated RSS feed policy;
-- `sitemap-verifier.ts` owns sitemap policy;
-- `html-inspection.ts` provides shared generated-HTML parsing helpers;
-- `html-verifier.ts` owns image alt semantics, scoped media output, embed
-  fallback output, and hydration boundaries;
-- `metadata-verifier.ts` owns document metadata, JSON-LD, and social previews;
-- `pdf-verifier.ts` owns article PDF links, Scholar metadata, generated PDF
-  files, PDF document metadata, and media-policy PDF diagnostics;
-- `asset-verifier.ts` owns source maps, immutable generated-asset cache policy,
-  and unexpected client scripts;
-- `content-output-verifier.ts` owns draft leaks, article page counts, and
-  private catalog output.
-
-The current release gate verifies:
+The current generated-output gate verifies:
 
 - required output paths;
-- legacy redirect fallbacks;
-- invalid redirect pages;
-- metadata and JSON-LD;
-- image alt attributes;
-- scoped article, hover, thumbnail, and embed media output;
-- broken links;
-- component catalog leakage;
-- article page counts;
-- draft leakage into feeds, sitemaps, and search output;
-- missing article JSON-LD;
-- source maps;
-- immutable cache headers for hashed generated Astro assets;
-- social preview images;
-- unexpected static client scripts;
-- unexpected generated dated pages;
-- unexpected hydration boundaries;
-- PDF links, PDF files, Scholar metadata, PDF document metadata, and
-  media-policy PDF diagnostics.
+- generated `_redirects`, RSS feed, and sitemap index files;
+- generated HTML doctype presence;
+- insecure same-site HTTP URL leakage in rendered HTML.
+
+Additional output intelligence is available through adjacent Rust or ecosystem
+commands:
+
+- `just validate-html` calls `html-validate` through a Rust task adapter over
+  representative generated HTML targets;
+- `just output-verify` runs the Rust operation report bridge for future
+  machine-readable output diagnostics;
+- `just build-cloudflare` writes Cloudflare redirect artifacts from Rust;
+- `just build-optimize` removes unreferenced hashed Astro raster assets from
+  generated `_astro/` output.
 
 The broader `search` and `security` categories are part of the verifier
 vocabulary, but they should gain dedicated modules only when the release gate
@@ -58,11 +42,9 @@ has concrete generated-output contracts for them. Today, search coverage is
 represented by draft-leak checks against Pagefind output, and cache coverage is
 limited to the `_headers` policy for immutable hashed Astro assets.
 
-`scripts/site/site-doctor.ts` already has a smaller author-facing diagnostic
-shape with `severity`, `message`, `path`, and `repair`. The generated-output
-verifier needs a richer machine-readable shape because it must describe source
-files, generated artifacts, public URLs, future route registry entries, and
-release-report identities.
+The generated-output verifier needs a richer machine-readable shape because it
+must describe source files, generated artifacts, public URLs, future route
+registry entries, and release-report identities.
 
 ## Diagnostic Model
 
@@ -113,9 +95,10 @@ Planned module categories are:
 - `build`;
 - `content`.
 
-The current implementation adapts module diagnostics back into the legacy
-bucketed report shape. This keeps human CLI output and existing JSON report
-codes stable while allowing each verifier family to be tested directly.
+The current Rust implementation is intentionally small. As verifier families
+are deepened, keep them as pure modules that return structured diagnostics and
+let the CLI, release gate, GUI, and MCP surfaces adapt those diagnostics for
+their consumers.
 
 ## Output Expectations
 

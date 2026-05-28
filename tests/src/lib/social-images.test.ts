@@ -64,6 +64,21 @@ describe("social preview image helpers", () => {
     expect(received?.src).toBe(fallbackImage);
   });
 
+  test("uses the fallback image when Astro exposes an unresolved content image string", async () => {
+    let received: SocialPreviewImageTransform | undefined;
+    await socialPreviewImageViewModel({
+      fallback: fallbackImage,
+      optimize: async (transform) => {
+        received = transform;
+        await Promise.resolve();
+        return { src: "/_astro/fallback.hash.jpg" };
+      },
+      source: "../../../assets/article/source.png",
+    });
+
+    expect(received?.src).toBe(fallbackImage);
+  });
+
   test("omits empty alt text and exposes a conservative size budget", async () => {
     const result = await socialPreviewImageViewModel({
       alt: "   ",

@@ -1,10 +1,10 @@
 # Rust Workspace
 
-This repository now has an additive Rust workspace for the future platform
-core, CLI, MCP, and Tauri studio backend. Rust does not replace the existing
-Bun/Astro site pipeline yet. A Rust command may replace an existing Bun or
-TypeScript command only after a later parity milestone proves equivalent
-behavior and updates the documented command owner.
+This repository has an additive Rust workspace for the future platform core,
+CLI, MCP, and Tauri studio backend. `just` is the canonical human command
+router for repository workflows. Bun remains the package manager, JavaScript
+test runner, and adapter for Astro/browser ecosystem tools where Rust is not
+the right boundary.
 
 ## Daily Commands
 
@@ -14,14 +14,15 @@ Use `just --list` as the command index.
 just --list
 just fix
 just rust-check
-bun run rust:check
 just check-fast
 just check
+just release-check
 ```
 
-`just fix` is the single automatic-fix command. It runs the existing Bun
-ESLint and Prettier fixes, package sorting, Markdownlint fixes, Markdown/MDX
-formatting, Rust formatting, and Clippy's machine-applicable fixes.
+`just fix` is the single automatic-fix command. It runs ESLint fixes,
+Prettier code/config formatting, package sorting, Markdownlint fixes,
+Markdown/MDX formatting, Rust formatting, and Clippy's machine-applicable
+fixes.
 
 The additive `tpm` CLI can be exercised through Cargo or the `just` command
 router:
@@ -34,17 +35,26 @@ just cli site status --format json
 ```
 
 The current CLI slice supports `tpm --help`, `tpm --version`,
-`tpm site status`, `tpm check`, `tpm doctor`, and `tpm release inspect`. These
-commands are product-interface proofs over Rust operation contracts. They do
-not replace the existing Bun/Astro authoring, build, verification, release, or
-deployment commands yet.
+`tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
+`tpm media images`, `tpm routes redirects`, and `tpm release inspect`. These
+commands are product-interface proofs over Rust operation contracts.
+
+Repository maintenance automation is intentionally not exposed as `tpm`
+commands. Focused `just` recipes call the internal `tpm-xtask` binary when a
+Rust adapter is needed for build, QA, generated-output, or migration plumbing.
 
 The current ownership model is:
 
-- `bun run <script>` remains the source of truth for existing Astro, content,
-  build, browser, accessibility, performance, and release checks.
+- `just <recipe>` is the source of truth for repository workflow commands.
+- `tpm-xtask` owns internal repository maintenance adapters behind focused
+  `just` recipes; it is not a public product CLI.
 - `cargo` owns direct Rust crate formatting, type checks, lints, and tests.
-- `just` is only orchestration. Do not put domain logic in the `justfile`.
+- Bun owns dependency installation, JS tests, `bun audit`, and the retained
+  TypeScript PDF-generation exception behind `just build-pdf`.
+- Astro, Playwright, Vitest, Prettier, ESLint, Markdownlint, Lighthouse CI,
+  Wrangler, and Gitleaks remain ecosystem adapters behind focused `just`
+  recipes.
+- Do not put domain logic in the `justfile`.
 
 ## Workspace Layout
 
@@ -55,12 +65,13 @@ The current ownership model is:
 | `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                         |
 | `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                |
 | `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                             |
-| `justfile`                        | Local command router over Bun and Cargo commands.                                      |
+| `justfile`                        | Local command router over Rust operations and JS/Astro ecosystem adapters.             |
 | `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                 |
 | `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                 |
 | `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
 | `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
 | `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
+| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
 | `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
 | `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
 
@@ -80,7 +91,8 @@ cargo deny check
 
 These gates are intentionally strict. The workspace forbids unsafe Rust,
 promotes compiler and rustdoc warnings to blocking failures, denies public API
-documentation gaps, runs Clippy with `all`, `cargo`, `pedantic`, `nursery`, and
+documentation gaps, requires crate-level Rust docs, blocks broken or invalid
+doc links/snippets, runs Clippy with `all`, `cargo`, `pedantic`, `nursery`, and
 selected high-signal restriction lints, and treats Clippy warnings as blocking
 during the gate. The supply-chain gate rejects denied advisories, yanked
 crates, wildcard dependencies, disallowed licenses, and unknown registries or
@@ -92,8 +104,7 @@ failure patterns, or CLI adapter needs. Add any lint escape locally, narrowly,
 and with a concrete reason.
 
 GitHub Actions runs the same gate in the blocking `Rust` job through
-`just rust-check`. The package script `bun run rust:check` is a convenience
-wrapper for environments that use package scripts as the QA command index.
+`just rust-check`. Use `just rust-*` or direct `cargo` commands for Rust work.
 Install the local supply-chain tool with:
 
 ```sh
@@ -106,17 +117,17 @@ These commands are useful signals, but they are not part of `just rust-check`
 or the current release gate:
 
 ```sh
-just rust-coverage
+just coverage-rust
 just rust-nextest
 ```
 
-`rust-coverage` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
+`coverage-rust` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
 available. `rust-nextest` prints install guidance if its Cargo subcommand is
 not installed. Promote a review-only Rust tool to a blocking gate only after it
 is installed in the shared environment, documented, low-noise, and represented
 in the CI/local parity model.
 
-GitHub Actions also runs `just rust-coverage` in a non-blocking
+GitHub Actions also runs `just coverage-rust` in a non-blocking
 `Rust coverage review` job. The job installs `cargo-llvm-cov` and
 `llvm-tools-preview` for CI evidence, but coverage remains informational.
 
@@ -172,8 +183,9 @@ policy, generated-output inspection, QA reports, and release artifacts.
 
 Rules for future migrations:
 
-1. Keep Astro rendering, browser behavior, and existing Bun scripts as the
-   source of truth until parity is proven.
+1. Keep Astro rendering, browser behavior, and explicitly retained ecosystem
+   adapters as the source of truth for unpromoted domains until parity is
+   proven.
 2. Add Rust operations behind tests and fixtures before wiring them into
    command routers.
 3. Dual-run old and new implementations for behavior-sensitive migrations.

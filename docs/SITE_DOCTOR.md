@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`site:doctor` is the author and site-owner diagnostic entry point for source
+`just site-doctor` is the author and site-owner diagnostic entry point for source
 relationships that schemas cannot validate alone.
 
 It should answer:
@@ -22,7 +22,7 @@ that expectation deterministic.
 
 ## Ownership Boundary
 
-`site:doctor` owns source-side relationships:
+`just site-doctor` owns source-side relationships:
 
 - required site-instance files and directories;
 - site config relationships not expressible in the config schema;
@@ -49,7 +49,7 @@ Generated-output verifier modules own generated artifacts:
 - whether generated social images have the expected encoded file type, size,
   and link relationships.
 
-When a failure can only be proven after rendering, `site:doctor` should not
+When a failure can only be proven after rendering, `just site-doctor` should not
 duplicate the release verifier. It may link to the relevant release check in
 the diagnostic detail.
 
@@ -209,7 +209,7 @@ Rendered metadata and generated files remain release-verifier concerns.
 
 Validate source expectations that docs and tooling depend on:
 
-- generated platform references are fresh when `docs:references:check` reports
+- generated platform references are fresh when `just docs-references-check` reports
   drift;
 - documentation checks should remain separate commands, but site doctor may
   emit an info or warning when generated references are stale in author-facing
@@ -262,6 +262,6 @@ The site-doctor expansion is complete when:
   repair owners, related docs, and concrete remediation;
 - human output remains readable;
 - JSON output uses `AuthorDiagnosticReport`;
-- `author:check` includes the expanded site doctor;
+- `just author-check` includes the expanded site doctor;
 - release verification still owns generated-output facts;
 - docs explain the author command layer and common repairs.

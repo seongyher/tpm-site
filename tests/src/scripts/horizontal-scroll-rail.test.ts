@@ -73,6 +73,10 @@ describe("horizontal scroll rail browser script", () => {
     expect(nextWrap.hidden).toBe(true);
     expect(previous.disabled).toBe(false);
     expect(next.disabled).toBe(true);
+
+    previous.dispatchEvent(domEvent(new window.Event("click")));
+
+    expect(viewport.scrollLeft).toBe(580 - horizontalScrollStep(viewport));
   });
 
   test("keeps controls hidden when every item already fits", () => {
@@ -95,6 +99,118 @@ describe("horizontal scroll rail browser script", () => {
     expect(controls.every((control) => control.hidden === true)).toBe(true);
     expect(previous.disabled).toBe(true);
     expect(next.disabled).toBe(true);
+  });
+
+  test("does not bind incomplete or already-bound rail fixtures", () => {
+    const window = railWindow();
+    const document = browserDocument(window.document);
+    const incomplete = document.createElement("section");
+    incomplete.setAttribute("data-scroll-rail", "");
+    document.body.append(incomplete);
+
+    expect(() => installHorizontalScrollRails(document)).not.toThrow();
+
+    appendRailFixture(document, { clientWidth: 320, scrollWidth: 900 });
+    const root = requiredHtmlElement(
+      document.querySelector("[data-scroll-rail]"),
+    );
+    const next = requiredButton(
+      document.querySelector("[data-scroll-rail-next]"),
+    );
+
+    installHorizontalScrollRails(document);
+    installHorizontalScrollRails(document);
+    next.dispatchEvent(domEvent(new window.Event("click")));
+
+    const viewport = requiredHtmlElement(
+      document.querySelector("[data-scroll-rail-viewport]"),
+    );
+    expect(root.getAttribute("data-scroll-rail-bound")).toBe("true");
+    expect(viewport.scrollLeft).toBe(horizontalScrollStep(viewport));
+  });
+
+  test("updates controls from resize observers and reduced-motion scrolling", () => {
+    const window = railWindow();
+    const document = browserDocument(window.document);
+    let observerCallback: ResizeObserverCallback | undefined;
+    const observer: ResizeObserver = {
+      disconnect: () => {
+        observerCallback = undefined;
+      },
+      observe: (element: Element, options?: ResizeObserverOptions) => {
+        void element;
+        void options;
+      },
+      unobserve: (element: Element) => {
+        void element;
+      },
+    };
+
+    Reflect.set(window, "matchMedia", () => ({ matches: true }));
+    Reflect.set(
+      window,
+      "ResizeObserver",
+      class TestResizeObserver implements ResizeObserver {
+        constructor(callback: ResizeObserverCallback) {
+          observerCallback = callback;
+        }
+
+        disconnect(): void {
+          observer.disconnect();
+        }
+
+        observe(element: Element, options?: ResizeObserverOptions): void {
+          observer.observe(element, options);
+        }
+
+        unobserve(element: Element): void {
+          observer.unobserve(element);
+        }
+      },
+    );
+
+    appendRailFixture(document, { clientWidth: 320, scrollWidth: 900 });
+    installHorizontalScrollRails(document);
+    const viewport = requiredHtmlElement(
+      document.querySelector("[data-scroll-rail-viewport]"),
+    );
+    const next = requiredButton(
+      document.querySelector("[data-scroll-rail-next]"),
+    );
+    let behavior: ScrollBehavior | undefined;
+    Object.defineProperty(viewport, "scrollBy", {
+      configurable: true,
+      value: (options?: number | ScrollToOptions) => {
+        if (typeof options !== "number") {
+          behavior = options?.behavior;
+          viewport.scrollLeft += options?.left ?? 0;
+        }
+      },
+    });
+
+    next.dispatchEvent(domEvent(new window.Event("click")));
+    defineDimension(viewport, "scrollWidth", 320);
+    const callback = observerCallback;
+    if (callback !== undefined) {
+      callback([], observer);
+    }
+
+    expect(behavior).toBe("auto");
+    expect(next.disabled).toBe(true);
+  });
+
+  test("keeps rails usable when ResizeObserver is unavailable", () => {
+    const window = railWindow();
+    const document = browserDocument(window.document);
+
+    Reflect.set(window, "ResizeObserver", undefined);
+    appendRailFixture(document, { clientWidth: 320, scrollWidth: 900 });
+
+    expect(() => installHorizontalScrollRails(document)).not.toThrow();
+    expect(
+      requiredButton(document.querySelector("[data-scroll-rail-next]"))
+        .disabled,
+    ).toBe(false);
   });
 });
 

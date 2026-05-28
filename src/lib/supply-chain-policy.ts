@@ -35,16 +35,16 @@ export interface SupplyChainPolicyCheck {
 export interface SupplyChainPolicy {
   readonly checks: readonly SupplyChainPolicyCheck[];
   readonly ignoredSecretEnvGlobs: readonly string[];
-  readonly requiredReleaseScripts: readonly string[];
+  readonly requiredReleaseCommands: readonly string[];
   readonly secretLikePatterns: readonly RegExp[];
 }
 
 /** Inputs used to assess supply-chain policy coverage. */
 export interface SupplyChainPolicyAssessmentInput {
+  readonly availableCommands: ReadonlySet<string>;
   readonly generatedOutputSamples?: readonly SupplyChainOutputSample[];
   readonly gitignoreText: string;
   readonly lockfilePresent: boolean;
-  readonly packageScripts: Readonly<Record<string, string>>;
   readonly policy?: SupplyChainPolicy | undefined;
   readonly publicEnvNames?: readonly string[] | undefined;
 }
@@ -66,7 +66,7 @@ export const defaultSupplyChainPolicy = {
   checks: [
     {
       blocking: true,
-      command: "bun --silent run audit",
+      command: "just audit",
       id: "dependency-audit-high",
       owner: "release-operator",
       summary: "High-severity dependency audit blocks release checks.",
@@ -74,7 +74,7 @@ export const defaultSupplyChainPolicy = {
     },
     {
       blocking: false,
-      command: "bun --silent run audit:all",
+      command: "just audit-all",
       id: "dependency-audit-all",
       owner: "developer",
       summary: "All-severity dependency audits are maintenance review signal.",
@@ -82,7 +82,7 @@ export const defaultSupplyChainPolicy = {
     },
     {
       blocking: true,
-      command: "bun --silent run secrets",
+      command: "just secrets",
       id: "secret-scan",
       owner: "release-operator",
       summary: "Gitleaks history scan blocks release checks when available.",
@@ -121,7 +121,7 @@ export const defaultSupplyChainPolicy = {
     },
   ],
   ignoredSecretEnvGlobs: [".env.local", ".env.*.local"],
-  requiredReleaseScripts: ["audit", "secrets"],
+  requiredReleaseCommands: ["audit", "secrets", "release-check"],
   secretLikePatterns: [
     /AKIA[0-9A-Z]{16}/u,
     /ghp_\w{20,}/u,
@@ -133,26 +133,26 @@ export const defaultSupplyChainPolicy = {
  * Assesses dependency, lockfile, secret, and supply-chain policy coverage.
  *
  * @param input Repository policy inputs.
+ * @param input.availableCommands Available repository `just` recipe names.
  * @param input.generatedOutputSamples Generated output snippets to scan.
  * @param input.gitignoreText Repository gitignore text.
  * @param input.lockfilePresent Whether the Bun lockfile is present.
- * @param input.packageScripts Package scripts keyed by script name.
  * @param input.policy Optional supply-chain policy override.
  * @param input.publicEnvNames Public environment variable names to inspect.
  * @returns Supply-chain checks and diagnostics.
  */
 export function assessSupplyChainPolicy({
+  availableCommands,
   generatedOutputSamples = [],
   gitignoreText,
   lockfilePresent,
-  packageScripts,
   policy = defaultSupplyChainPolicy,
   publicEnvNames = [],
 }: SupplyChainPolicyAssessmentInput): SupplyChainPolicyAssessment {
   return {
     checks: policy.checks,
     diagnostics: [
-      ...releaseCommandDiagnostics(packageScripts, policy),
+      ...releaseCommandDiagnostics(availableCommands, policy),
       ...gitignoreDiagnostics(gitignoreText, policy),
       ...lockfileDiagnostics(lockfilePresent),
       ...publicEnvDiagnostics(publicEnvNames),
@@ -179,21 +179,18 @@ export function redactSecretLikeValues(
 }
 
 function releaseCommandDiagnostics(
-  packageScripts: Readonly<Record<string, string>>,
+  availableCommands: ReadonlySet<string>,
   policy: SupplyChainPolicy,
 ): OutputDiagnostic[] {
-  const releaseCommand = packageScripts["check:release"] ?? "";
-
-  return policy.requiredReleaseScripts.flatMap((script) =>
-    releaseCommand.includes(`run ${script}`) ||
-    releaseCommand.includes(`&& ${script}`)
+  return policy.requiredReleaseCommands.flatMap((command) =>
+    availableCommands.has(command)
       ? []
       : [
           supplyChainDiagnostic({
             code: "security.release-security-command-missing",
-            message: `check:release does not run ${script}.`,
+            message: `Required security/release command \`${command}\` is missing from the just command surface.`,
             remediation:
-              "Add the security command to check:release or document a replacement gate in the supply-chain policy.",
+              "Add the command to the just command surface or document a replacement gate in the supply-chain policy.",
             severity: "error",
           }),
         ],

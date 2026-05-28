@@ -72,7 +72,7 @@ repo-specific experiments.
 
 | Option                                         | What It Does                                                                                                       | Production Position                                 | Blocker If Enabled                                                                                                               |
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `allow_noncompliant_unquoted_attribute_values` | Allows shorter unquoted attribute values that the WHATWG spec does not permit, though browsers usually parse them. | Keep off. Measure only in an aggressive experiment. | Any `validate:html` failure is a hard blocker. Standards noncompliance is not acceptable for normal production output.           |
+| `allow_noncompliant_unquoted_attribute_values` | Allows shorter unquoted attribute values that the WHATWG spec does not permit, though browsers usually parse them. | Keep off. Measure only in an aggressive experiment. | Any `validate-html` failure is a hard blocker. Standards noncompliance is not acceptable for normal production output.           |
 | `allow_optimal_entities`                       | Allows entity minifications that may not pass validation but browser engines usually parse.                        | Keep off. Measure only in an aggressive experiment. | Validation failure, changed visible text, changed copied text, changed JSON-LD, or search excerpt mismatch.                      |
 | `allow_removing_spaces_between_attributes`     | Removes spaces between attributes when possible, which may be noncompliant.                                        | Keep off.                                           | Validation failure. This is too risky for minimal likely gzip gain.                                                              |
 | `keep_closing_tags`                            | Prevents omission of optional closing tags.                                                                        | Enable by default.                                  | If disabling produces meaningful savings and all checks pass, it may still be rejected for debuggability and parser consistency. |
@@ -94,8 +94,8 @@ repo-specific experiments.
 A minification configuration is not production-eligible if any of the following
 occur:
 
-- `bun run validate:html` fails.
-- `bun run verify` fails.
+- `just validate-html` fails.
+- `just verify` fails.
 - Search page behavior or Pagefind result rendering changes.
 - JSON-LD script content fails to parse or loses required SEO fields.
 - `pre`, `code`, Markdown prose, article references, or bibliography/footnote
@@ -110,9 +110,9 @@ occur:
 
 ## Experiment Finding
 
-The reproducible suite in `scripts/payload/run-minify-html-experiments.ts` found that
-the tested standard-library configurations are not production-eligible for this
-repo today.
+The retired minify-HTML experiment suite found that the tested
+standard-library configurations are not production-eligible for this repo
+today.
 
 Observed hard blockers:
 

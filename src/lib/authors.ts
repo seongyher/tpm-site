@@ -166,6 +166,9 @@ export async function getAuthorEntries(): Promise<AuthorEntry[]> {
  * @returns Author profiles with published articles.
  */
 export async function getAuthorProfiles(): Promise<AuthorProfile[]> {
+  // Coverage note: this default loader crosses Astro's virtual content module
+  // boundary. Unit tests cover profile derivation through injected author and
+  // article entries; route/container tests cover the real content integration.
   const { getArticles } = await import("./content");
 
   return authorProfiles(await getAuthorEntries(), await getArticles());

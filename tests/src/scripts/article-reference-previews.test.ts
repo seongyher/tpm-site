@@ -257,6 +257,32 @@ describe("article reference preview browser script", () => {
     expect(marker.getAttribute("aria-describedby")).toBe(null);
   });
 
+  test("closes active previews and restores focus on Escape", () => {
+    const window = browserWindow();
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    let focused = false;
+
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+    Reflect.set(marker, "focus", () => {
+      focused = true;
+    });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+    expect(panel.hidden).toBe(false);
+
+    dispatchWindowEvent(document, window, "keydown", { key: "Escape" });
+
+    expect(panel.hidden).toBe(true);
+    expect(focused).toBe(true);
+  });
+
   test("repositions an active preview when the viewport changes", () => {
     const window = browserWindow();
     const document = window.document;
@@ -304,6 +330,166 @@ describe("article reference preview browser script", () => {
     dispatchWindowEvent(marker, window, "focusout", {
       relatedTarget: outside,
     });
+    expect(panel.hidden).toBe(true);
+  });
+
+  test("handles focus cancellation and scroll repositioning", () => {
+    const window = browserWindow();
+    const document = window.document;
+    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    document.body.innerHTML = referencePreviewFixture();
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const missing = requiredElement(window, "#missing-reference");
+    const outside = requiredElement(window, "#outside-target");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    const panelContent = requiredElement(
+      window,
+      "[data-article-reference-preview-content]",
+    );
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(missing, { height: 16, width: 24, x: 280, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(missing, window, "focusin");
+    expect(panel.hidden).toBe(true);
+
+    dispatchWindowEvent(marker, window, "pointerover");
+    expect(panel.hidden).toBe(false);
+    const firstY = panel.style.getPropertyValue("--anchor-y");
+
+    setRect(marker, { height: 16, width: 24, x: 240, y: 220 });
+    dispatchWindowEvent(marker, window, "pointerout", {
+      relatedTarget: outside,
+    });
+    dispatchWindowEvent(panelContent, window, "focusin");
+    dispatchWindowEvent(window, window, "scroll");
+
+    expect(panel.hidden).toBe(false);
+    expect(panel.style.getPropertyValue("--anchor-y")).not.toBe(firstY);
+    expect(marker.getAttribute("aria-describedby")).toBe(panel.id);
+
+    dispatchWindowEvent(outside, window, "click");
+    expect(panel.hidden).toBe(true);
+    expect(marker.getAttribute("aria-describedby")).toBe(null);
+  });
+
+  test("handles panel hover timing and malformed backlink targets", () => {
+    const window = browserWindow({ immediateTimers: true });
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <main>
+        <button id="outside-target" type="button">Outside</button>
+        <article data-article-prose>
+          <p>
+            Source
+            <a
+              id="cite-ref-source"
+              href="#cite-source"
+              data-article-reference-marker="true"
+              data-reference-entry-id="cite-source"
+            >[1]</a>
+          </p>
+        </article>
+        <a id="broken-backlink" data-article-reference-backlink="true">Back</a>
+        <a
+          id="orphan-backlink"
+          href="#orphan-marker"
+          data-article-reference-backlink="true"
+        >Back</a>
+        <a id="orphan-marker" href="#cite-source">[orphan]</a>
+        <section data-article-references>
+          <ol>
+            <li id="cite-source">
+              <div data-article-reference-definition-content>
+                <p>Source title.</p>
+              </div>
+            </li>
+          </ol>
+          <div class="hidden" data-article-reference-preview hidden>
+            <div data-article-reference-preview-content></div>
+          </div>
+        </section>
+      </main>
+    `;
+
+    const marker = requiredElement(window, "#cite-ref-source");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(marker, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(marker, window, "pointerover");
+    expect(panel.hidden).toBe(false);
+
+    dispatchWindowEvent(panel, window, "pointerover");
+    dispatchWindowEvent(panel, window, "pointerout", {
+      relatedTarget: requiredElement(window, "#outside-target"),
+    });
+    expect(panel.hidden).toBe(true);
+
+    dispatchWindowEvent(
+      requiredElement(window, "#broken-backlink"),
+      window,
+      "pointerover",
+    );
+    expect(panel.hidden).toBe(true);
+
+    dispatchWindowEvent(
+      requiredElement(window, "#orphan-backlink"),
+      window,
+      "pointerover",
+    );
+    expect(panel.hidden).toBe(true);
+
+    dispatchWindowEvent(document, window, "pointerover");
+    expect(panel.hidden).toBe(true);
+  });
+
+  test("keeps empty backlink context previews disabled", () => {
+    const window = browserWindow();
+    const document = window.document;
+
+    document.body.innerHTML = `
+      <main>
+        <article data-article-prose>
+          <p>
+            <a
+              id="empty-marker"
+              href="#cite-source"
+              data-article-reference-marker="true"
+            ></a>
+          </p>
+        </article>
+        <section data-article-references>
+          <ol>
+            <li id="cite-source">
+              <nav>
+                <a
+                  id="empty-backlink"
+                  href="#empty-marker"
+                  data-article-reference-backlink="true"
+                >Back</a>
+              </nav>
+            </li>
+          </ol>
+          <div class="hidden" data-article-reference-preview hidden>
+            <div data-article-reference-preview-content></div>
+          </div>
+        </section>
+      </main>
+    `;
+
+    const backlink = requiredElement(window, "#empty-backlink");
+    const panel = requiredElement(window, "[data-article-reference-preview]");
+    setRect(backlink, { height: 16, width: 24, x: 240, y: 160 });
+    setRect(panel, { height: 180, width: 320, x: 0, y: 0 });
+
+    installArticleReferencePreviews(runtimeFor(window));
+    dispatchWindowEvent(backlink, window, "pointerover");
+
     expect(panel.hidden).toBe(true);
   });
 });
@@ -449,10 +635,13 @@ function dispatchWindowEvent(
     throw new Error("Expected fixture target to dispatch browser events.");
   }
 
-  const { relatedTarget, ...eventOptions } = options;
+  const { key, relatedTarget, ...eventOptions } = options;
   const event = new window.Event(eventName, { bubbles: true, ...eventOptions });
   if (relatedTarget !== undefined) {
     Object.defineProperty(event, "relatedTarget", { value: relatedTarget });
+  }
+  if (key !== undefined) {
+    Object.defineProperty(event, "key", { value: key });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
@@ -462,6 +651,7 @@ function dispatchWindowEvent(
 }
 
 interface TestEventOptions extends EventInit {
+  readonly key?: string;
   readonly relatedTarget?: EventTarget | null;
 }
 
@@ -477,6 +667,7 @@ function dispatchPointerEvent(
 
   const event = new window.Event(eventName, { bubbles: true });
   Reflect.set(event, "pointerType", pointerType);
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
   element.dispatchEvent(event as unknown as Event);
 }

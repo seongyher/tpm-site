@@ -165,6 +165,7 @@ const {
   getAnnouncements,
   getCategories,
   getCategory,
+  getEditorialCollections,
   getSiteSocialFallbackImage,
   getTag,
   getTags,
@@ -228,5 +229,9 @@ describe("content helpers", () => {
       href: "/tags/meme%20history/",
       label: "meme history",
     });
+  });
+
+  test("loads active editorial collections from the content boundary", async () => {
+    expect(await getEditorialCollections()).toEqual([]);
   });
 });

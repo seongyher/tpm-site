@@ -8,13 +8,13 @@ Astro static site for The Philosopher's Meme.
 
 - Bun
 - Node.js `>=22.12.0`
-- Rust `1.93.0` through `rustup` for additive Rust workspace checks
+- Rust `1.95.0` through `rustup` for additive Rust workspace checks
 - `just` for the repository command router
 
 Install dependencies:
 
 ```sh
-bun install
+just setup
 ```
 
 ## Common Commands
@@ -22,36 +22,36 @@ bun install
 Start the development server:
 
 ```sh
-bun run dev
+just dev
 ```
 
 Build the static site:
 
 ```sh
-bun run build
+just build
 ```
 
 Preview the built site locally:
 
 ```sh
-bun run preview
+just preview
 ```
 
 Build and then preview in one command:
 
 ```sh
-bun run preview:fresh
+just preview-fresh
 ```
 
 Run the normal local validation used before opening a PR:
 
 ```sh
-bun run check
-bun run build
-bun run verify
+just check
+just build
+just verify
 ```
 
-For a short explanation of every package script, see `PACKAGE_SCRIPTS.md`.
+For a short explanation of every repository command, see `COMMANDS.md`.
 For documentation ownership, generated-reference, and drift-check planning,
 see `docs/DOCUMENTATION_LIFECYCLE.md`.
 For the additive Rust workspace and `just` command router, see
@@ -72,7 +72,7 @@ just rust-check
 Run the same local quality path with successful command output hidden:
 
 ```sh
-bun run quality
+just quality
 ```
 
 Run automatic fixes before checking code, Markdown, and Rust:
@@ -88,8 +88,8 @@ machine-applicable fixes.
 Markdown and MDX style checks are review-only, not release blockers:
 
 ```sh
-bun run review:markdown
-bun run fix:markdown
+just review-markdown
+just markdown-fix
 ```
 
 Asset cleanup checks are review-only. They warn about duplicate images and
@@ -100,21 +100,24 @@ If a warning is intentionally wrong, add a narrow path or glob to
 `scripts/duplicate-image-ignore.json` or `scripts/unused-image-ignore.json`:
 
 ```sh
-bun run review:assets
+just review-assets
 ```
 
 Run dependency audit review across all severities:
 
 ```sh
-bun run audit:all
+just audit-all
 ```
 
 Run broad coverage review after changing scripts, helpers, browser scripts, or
 other testable code:
 
 ```sh
-bun run coverage
+just coverage
 ```
+
+Use `just coverage-ts` for the TypeScript/Astro side only, or
+`just coverage-rust` for the Rust workspace only.
 
 Prefer meaningful behavior tests. If a remaining uncovered path is an
 unavoidable process, generated-output, or browser auto-init boundary, document
@@ -123,18 +126,18 @@ the reason near that boundary with a `Coverage note:` comment.
 Run the heavier pre-release gate:
 
 ```sh
-bun run check:release
+just release-check
 ```
 
 Run the heavier pre-release gate with successful command output hidden:
 
 ```sh
-bun run quality:release
+just quality-release
 ```
 
-`check:release` includes the blocking release gates: normal checks, production
+`release-check` includes the blocking release gates: normal checks, production
 build verification, browser smoke/responsive/search tests, high-severity
-dependency audit, and secrets checks. `quality:release` also runs the
+dependency audit, and secrets checks. `quality-release` also runs the
 non-blocking review signals: Markdown style, asset cleanup, accessibility,
 Lighthouse, coverage, and all-severity dependency audit. The secrets check
 expects the `gitleaks` binary to be available locally.
@@ -312,7 +315,7 @@ outside the site, currently through Cloudflare.
 
 ## Search, RSS, And Sitemap
 
-`bun run build` generates:
+`just build` generates:
 
 - static Astro pages in `dist/`
 - hashed Astro-managed assets under `dist/_astro/`
@@ -320,12 +323,12 @@ outside the site, currently through Cloudflare.
 - RSS feed at `/feed.xml`
 - sitemap output through `@astrojs/sitemap`
 
-For a production-like search check, run `bun run build` and then
-`bun run preview`.
+For a production-like search check, run `just build` and then
+`just preview`.
 
 ## Production Output
 
-The deployable site is the `dist/` directory produced by `bun run build`.
+The deployable site is the `dist/` directory produced by `just build`.
 
 Astro and Vite process project CSS and normal client scripts for production:
 CSS is minified and chunked, processed scripts are bundled and minified, and
@@ -339,7 +342,7 @@ Pagefind search assets are generated after the Astro build and live under
 
 ## Verification
 
-`bun run verify` checks the built `dist/` output for expected pages, assets,
+`just verify` checks the built `dist/` output for expected pages, assets,
 published article count, and broken internal links. The
 expected article count is derived from current source content, excluding
 articles marked `draft: true`.
@@ -347,15 +350,15 @@ articles marked `draft: true`.
 Run this before opening a PR:
 
 ```sh
-bun run check
-bun run build
-bun run verify
+just check
+just build
+just verify
 ```
 
 ## Deployment
 
 Production deploys use Cloudflare Workers Static Assets. The Worker is
-configured in `wrangler.toml`; `bun run build:release` creates the deployable
+configured in `wrangler.toml`; `just build-release` creates the deployable
 `dist/` output plus Cloudflare-specific generated files.
 
 `.github/workflows/ci.yml` deploys on pushes to `main` after the blocking
@@ -367,9 +370,9 @@ signals rather than publish blockers.
 
 Manual deployment hosts should:
 
-1. Install dependencies with `bun install`.
-2. Run `bun run check:release`.
-3. Deploy with `bun run deploy:cloudflare`.
+1. Install dependencies with `just setup`.
+2. Run `just release-check`.
+3. Deploy with `just deploy-cloudflare`.
 
 The production site origin is configured in `astro.config.ts`:
 

@@ -1,225 +1,247 @@
-import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 
 import { describe, expect, test } from "bun:test";
 
+import { justRecipeBlock, parseJustRecipes } from "../helpers/justfile";
+
 interface PackageJson {
-  scripts: Record<string, string>;
+  scripts?: Record<string, string>;
 }
 
-const expectedScriptEntrypoints = [
-  ["assets:duplicates", "scripts/assets/find-duplicate-images.ts"],
-  ["assets:locations", "scripts/assets/verify-image-asset-locations.ts"],
-  ["assets:shared", "scripts/assets/find-shared-assets.ts"],
-  ["assets:unused", "scripts/assets/find-unused-images.ts"],
-  ["build:cloudflare", "scripts/build/generate-cloudflare-redirects.ts"],
-  ["build:optimize", "scripts/build/optimize-build-output.ts"],
-  ["build:pdf", "scripts/build/generate-article-pdfs.ts"],
-  ["build:raw", "scripts/build/build-raw.ts"],
-  ["catalog:check", "scripts/quality/verify-component-catalog.ts"],
-  ["coverage:verify", "scripts/testing/verify-test-coverage.ts"],
-  ["docs:references", "scripts/docs/generate-platform-references.ts"],
-  ["docs:references:check", "scripts/docs/generate-platform-references.ts"],
-  ["payload:check", "scripts/payload/report-payload.ts"],
-  [
-    "payload:minify-html:experiment",
-    "scripts/payload/minify-html-experiment.ts",
-  ],
-  [
-    "payload:minify-html:experiments",
-    "scripts/payload/run-minify-html-experiments.ts",
-  ],
-  [
-    "payload:postbuild:experiments",
-    "scripts/payload/run-post-build-optimization-experiments.ts",
-  ],
-  ["payload:report", "scripts/payload/report-payload.ts"],
-  ["payload:vite:experiments", "scripts/payload/run-vite-build-experiments.ts"],
-  ["platform:check", "scripts/quality/verify-platform-boundaries.ts"],
-  ["quality", "scripts/quality/run-quality.ts"],
-  ["quality:release", "scripts/quality/run-quality.ts"],
-  ["site:doctor", "scripts/site/site-doctor.ts"],
-  ["site:schema", "scripts/site/generate-site-config-schema.ts"],
-  ["site:schema:check", "scripts/site/generate-site-config-schema.ts"],
-  ["tags:check", "scripts/content/normalize-tags.ts"],
-  ["tags:normalize", "scripts/content/normalize-tags.ts"],
-  ["test", "scripts/testing/run-tests.ts"],
-  ["test:accountability", "scripts/testing/verify-test-accountability.ts"],
-  [
-    "test:accountability:release",
-    "scripts/testing/verify-test-accountability.ts",
-  ],
-  ["test:astro", "scripts/testing/sync-astro-test-store.ts"],
-  ["test:catalog", "scripts/testing/run-catalog-tests.ts"],
-  ["test:flake", "scripts/testing/run-randomized-tests.ts"],
-  ["validate:html", "scripts/build/validate-html.ts"],
-  ["verify", "scripts/build/verify-build.ts"],
-  ["verify:content", "scripts/content/verify-content.ts"],
-] as const;
-
 function isPackageJson(value: unknown): value is PackageJson {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "scripts" in value &&
-    typeof value.scripts === "object" &&
-    value.scripts !== null
-  );
+  return typeof value === "object" && value !== null;
+}
+
+async function readJustfile(): Promise<string> {
+  return readFile("justfile", "utf8");
 }
 
 async function readPackageJson(): Promise<PackageJson> {
   const parsed: unknown = JSON.parse(await readFile("package.json", "utf8"));
 
   if (!isPackageJson(parsed)) {
-    throw new TypeError("package.json does not contain a scripts object.");
+    throw new TypeError("package.json has an unexpected shape.");
   }
 
   return parsed;
 }
 
-describe("package scripts", () => {
-  test("point script entrypoints at organized script directories", async () => {
+describe("command surface", () => {
+  test("keeps package scripts retired", async () => {
     const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
 
-    for (const [scriptName, entrypoint] of expectedScriptEntrypoints) {
-      expect(scripts.get(scriptName)).toContain(entrypoint);
-      expect(existsSync(entrypoint)).toBe(true);
+    expect(packageJson.scripts ?? {}).toEqual({});
+  });
+
+  test("uses just as the command router for major workflow surfaces", async () => {
+    const justfile = await readJustfile();
+
+    for (const recipe of [
+      "setup",
+      "dev",
+      "build",
+      "build-release",
+      "check-fast",
+      "check",
+      "release-check",
+      "fix",
+      "test",
+      "test-e2e-built",
+      "docs-check",
+      "author-check",
+      "review-assets",
+      "review-markdown",
+      "coverage",
+      "coverage-ts",
+      "coverage-rust",
+      "audit",
+      "secrets",
+      "deploy-cloudflare",
+      "rust-check",
+      "cli",
+    ]) {
+      expect(justfile).toContain(`\n${recipe}`);
+    }
+  });
+
+  test("keeps coverage commands explicit by ecosystem and aggregate", async () => {
+    const justfile = await readJustfile();
+
+    expect(justRecipeBlock(justfile, "coverage")).toContain(
+      "coverage-ts coverage-rust",
+    );
+    expect(justRecipeBlock(justfile, "coverage-ts")).toContain(
+      "just _coverage-ts-report",
+    );
+    expect(justRecipeBlock(justfile, "coverage-ts")).toContain(
+      "just coverage-verify {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "coverage-rust")).toContain(
+      "cargo llvm-cov",
+    );
+    expect(justRecipeBlock(justfile, "coverage-rust")).toContain(
+      "--show-missing-lines",
+    );
+
+    for (const retiredRecipe of [
+      "coverage-check",
+      "coverage-unit",
+      "rust-coverage",
+    ]) {
+      expect(
+        justfile.includes(`\n${retiredRecipe}:`),
+        `${retiredRecipe} should not be a public just recipe`,
+      ).toBe(false);
+    }
+  });
+
+  test("keeps asset review recipes aligned with typed xtask arguments", async () => {
+    const justfile = await readJustfile();
+    const reviewAssets = justRecipeBlock(justfile, "review-assets");
+
+    expect(reviewAssets).toContain("just assets-duplicates --quiet");
+    expect(reviewAssets).toContain("just assets-unused --quiet");
+    expect(reviewAssets).not.toContain("--review");
+  });
+
+  test("keeps retired review-only commands out of the visible just surface", async () => {
+    const justfile = await readJustfile();
+    const recipes = new Set(parseJustRecipes(justfile));
+
+    for (const retiredRecipe of [
+      "payload-critical-css-experiment",
+      "payload-minify-html-experiment",
+      "payload-minify-html-experiments",
+      "payload-postbuild-experiments",
+      "payload-vite-experiments",
+      "references-audit",
+      "references-bibtex-audit",
+      "references-catalog",
+      "references-migrate-mechanical",
+    ]) {
+      expect(
+        recipes.has(retiredRecipe),
+        `${retiredRecipe} should be retired`,
+      ).toBe(false);
     }
   });
 
   test("keeps built-output browser checks separate from local build conveniences", async () => {
-    const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
+    const justfile = await readJustfile();
 
-    expect(scripts.get("test:e2e:built")).toBe("playwright test tests/e2e");
-    expect(scripts.get("test:a11y:built")).toBe("playwright test tests/a11y");
-    expect(scripts.get("test:perf:built")).toBe("lhci autorun");
+    expect(justfile).toContain("test-e2e-built *args:");
+    expect(justfile).toContain("./node_modules/.bin/playwright test tests/e2e");
+    expect(justfile).toContain("test-a11y-built *args:");
+    expect(justfile).toContain(
+      "./node_modules/.bin/playwright test tests/a11y",
+    );
+    expect(justfile).toContain("test-perf-built *args:");
+    expect(justfile).toContain("./node_modules/.bin/lhci autorun");
 
-    expect(scripts.get("test:e2e")).toBe(
-      "bun --silent run build && bun --silent run test:e2e:built",
-    );
-    expect(scripts.get("test:a11y")).toBe(
-      "bun --silent run build && bun --silent run test:a11y:built",
-    );
-    expect(scripts.get("test:perf")).toBe(
-      "bun --silent run build && bun --silent run test:perf:built",
-    );
+    expect(justfile).toContain("test-e2e *args:");
+    expect(justfile).toContain("just build\n    just test-e2e-built");
+    expect(justfile).toContain("test-a11y *args:");
+    expect(justfile).toContain("just build\n    just test-a11y-built");
+    expect(justfile).toContain("test-perf *args:");
+    expect(justfile).toContain("just build\n    just test-perf-built");
   });
 
   test("keeps fast checks cheap and release checks from rebuilding before e2e", async () => {
-    const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
-    const fastCheck = scripts.get("check:fast") ?? "";
-    const normalCheck = scripts.get("check") ?? "";
-    const docsCheck = scripts.get("docs:check") ?? "";
-    const releaseCheck = scripts.get("check:release") ?? "";
+    const justfile = await readJustfile();
+    const fastCheck = justRecipeBlock(justfile, "check-fast");
+    const normalCheck = justRecipeBlock(justfile, "check");
+    const docsCheck = justRecipeBlock(justfile, "docs-check");
+    const releaseCheck = justRecipeBlock(justfile, "release-check");
 
-    for (const scriptName of [
-      "verify:content",
-      "tags:check",
-      "site:doctor",
-      "site:schema:check",
-      "docs:references:check",
-      "platform:check",
-      "assets:locations",
-      "assets:shared",
-      "catalog:check",
-      "lint:packages",
-      "test:config",
+    for (const recipe of [
+      "content-check",
+      "tags-check",
+      "site-doctor",
+      "site-schema-check",
+      "docs-references-check",
+      "platform-check",
+      "assets-locations",
+      "assets-shared",
+      "catalog-check",
+      "package-check",
+      "test-config",
     ]) {
-      expect(fastCheck).toContain(`run ${scriptName}`);
+      expect(fastCheck).toContain(recipe);
     }
 
-    for (const expensiveScriptName of [
+    for (const expensiveRecipe of [
       "typecheck",
-      "lint &&",
+      "lint",
       "format",
       "deadcode",
-      "test &&",
+      "test ",
       "build",
-      "test:e2e",
+      "test-e2e",
     ]) {
-      expect(fastCheck).not.toContain(`run ${expensiveScriptName}`);
+      expect(fastCheck).not.toContain(expensiveRecipe);
     }
 
-    expect(normalCheck.startsWith("bun --silent run check:fast &&")).toBe(true);
-    expect(docsCheck).toContain("run docs:references:check -- --quiet");
-    expect(docsCheck).toContain("run test:docs-site");
-    expect(releaseCheck).toContain("bun --silent run build:release");
-    expect(releaseCheck).toContain("bun --silent run docs:check");
-    expect(releaseCheck).toContain("bun --silent run payload:check");
-    expect(releaseCheck).toContain("bun --silent run test:e2e:built");
-    expect(releaseCheck).not.toContain("bun --silent run test:e2e &&");
-    expect(releaseCheck.indexOf("bun --silent run docs:check")).toBeGreaterThan(
-      releaseCheck.indexOf("bun --silent run check"),
-    );
-    expect(releaseCheck.indexOf("bun --silent run docs:check")).toBeLessThan(
-      releaseCheck.indexOf("bun --silent run test:catalog"),
-    );
-    expect(releaseCheck.indexOf("bun --silent run test:catalog")).toBeLessThan(
-      releaseCheck.indexOf("bun --silent run build:release"),
-    );
-    expect(
-      releaseCheck.indexOf("bun --silent run payload:check"),
-    ).toBeGreaterThan(releaseCheck.indexOf("bun --silent run build:release"));
-    expect(releaseCheck.indexOf("bun --silent run payload:check")).toBeLessThan(
-      releaseCheck.indexOf("bun --silent run verify"),
-    );
-    expect(
-      releaseCheck.indexOf("bun --silent run test:e2e:built"),
-    ).toBeGreaterThan(releaseCheck.indexOf("bun --silent run validate:html"));
+    expect(normalCheck).toContain("check-fast");
+    expect(docsCheck).toContain("docs-references-check");
+    expect(docsCheck).toContain("test-docs-site");
+    expect(releaseCheck).toContain("build-release");
+    expect(releaseCheck).toContain("docs-check");
+    expect(releaseCheck).toContain("review-markdown");
+    expect(releaseCheck).toContain("payload-check");
+    expect(releaseCheck).toContain("test-e2e-built");
+    expect(releaseCheck).not.toContain("test-e2e ");
   });
 
   test("keeps source-side site diagnostics in author and release check paths", async () => {
-    const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
-    const authorCheck = scripts.get("author:check") ?? "";
-    const fastCheck = scripts.get("check:fast") ?? "";
-    const releaseCheck = scripts.get("check:release") ?? "";
+    const justfile = await readJustfile();
+    const authorCheck = justRecipeBlock(justfile, "author-check");
+    const fastCheck = justRecipeBlock(justfile, "check-fast");
+    const releaseCheck = justRecipeBlock(justfile, "release-check");
 
-    expect(authorCheck).toContain("run verify:content");
-    expect(authorCheck).toContain("run site:doctor -- --quiet");
-    expect(authorCheck).toContain("run site:schema:check -- --quiet");
-    expect(fastCheck).toContain("run site:doctor -- --quiet");
-    expect(releaseCheck).toContain("bun --silent run check");
+    expect(authorCheck).toContain("content-check --quiet");
+    expect(authorCheck).toContain("site-doctor --quiet");
+    expect(authorCheck).toContain("site-schema-check --quiet");
+    expect(fastCheck).toContain("site-doctor");
+    expect(releaseCheck).toContain("check");
   });
 
   test("keeps catalog builds isolated from production output", async () => {
-    const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
+    const justfile = await readJustfile();
 
-    expect(scripts.get("catalog:build")).toContain(
+    expect(justRecipeBlock(justfile, "catalog-build")).toContain(
       "SITE_OUTPUT_DIR=dist-catalog",
     );
-    expect(scripts.get("catalog:preview")).toContain(
+    expect(justRecipeBlock(justfile, "catalog-preview")).toContain(
       "SITE_OUTPUT_DIR=dist-catalog",
     );
-    expect(scripts.get("catalog:preview:fresh")).toBe(
-      "bun --silent run catalog:build && bun --silent run catalog:preview",
+    expect(justRecipeBlock(justfile, "catalog-preview-fresh")).toContain(
+      "just catalog-build",
     );
-    expect(scripts.get("test:catalog")).toBe(
-      "bun scripts/testing/run-catalog-tests.ts",
+    expect(justRecipeBlock(justfile, "test-catalog")).toContain(
+      "just _xtask test-catalog",
     );
   });
 
   test("exposes Cloudflare static-asset deploy commands", async () => {
-    const packageJson = await readPackageJson();
-    const scripts = new Map(Object.entries(packageJson.scripts));
+    const justfile = await readJustfile();
 
-    expect(scripts.get("build:cloudflare")).toBe(
-      "bun scripts/build/generate-cloudflare-redirects.ts --quiet",
+    expect(justRecipeBlock(justfile, "build-cloudflare")).toContain(
+      "just _xtask build-cloudflare",
     );
-    expect(scripts.get("build:release")).toBe(
-      "bun --silent run build && bun --silent run build:cloudflare",
+    expect(justRecipeBlock(justfile, "build-release")).toContain(
+      "build-cloudflare",
     );
-    expect(scripts.get("deploy:cloudflare")).toBe("wrangler deploy");
-    expect(scripts.get("preview:cloudflare")).toBe("wrangler dev");
-    expect(scripts.get("preview:cloudflare:fresh")).toContain(
-      "bun --silent run build:release",
+    expect(justRecipeBlock(justfile, "deploy-cloudflare")).toContain(
+      "wrangler deploy",
     );
-    expect(scripts.get("preview:release:fresh")).toContain(
-      "bun --silent run build:release",
+    expect(justRecipeBlock(justfile, "preview-cloudflare")).toContain(
+      "wrangler dev",
+    );
+    expect(justRecipeBlock(justfile, "preview-cloudflare-fresh")).toContain(
+      "build-release",
+    );
+    expect(justRecipeBlock(justfile, "preview-release-fresh")).toContain(
+      "build-release",
     );
   });
 });

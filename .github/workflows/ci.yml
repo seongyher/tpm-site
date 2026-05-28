@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -31,7 +32,7 @@ jobs:
         with:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
-      - run: bun run check
+      - run: just check
 
   rust:
     name: Rust
@@ -45,7 +46,7 @@ jobs:
       - run: rustup show
       - run: just rust-check
 
-  rust-coverage-review:
+  coverage-rust-review:
     name: Rust coverage review
     continue-on-error: true
     runs-on: ubuntu-latest
@@ -56,7 +57,7 @@ jobs:
       - uses: taiki-e/install-action@just
       - uses: taiki-e/install-action@cargo-llvm-cov
       - run: rustup component add llvm-tools-preview
-      - run: just rust-coverage
+      - run: just coverage-rust
 
   markdown-review:
     name: Markdown style review
@@ -66,6 +67,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -73,7 +75,7 @@ jobs:
         with:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
-      - run: bun run review:markdown
+      - run: just review-markdown
 
   asset-review:
     name: Asset review
@@ -83,6 +85,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -90,7 +93,7 @@ jobs:
         with:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
-      - run: bun run review:assets
+      - run: just review-assets
 
   build:
     name: Build and verify
@@ -99,6 +102,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -107,10 +111,10 @@ jobs:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
-      - run: bun run build
-      - run: bun run build:cloudflare
-      - run: bun run verify
-      - run: bun run validate:html
+      - run: just build
+      - run: just build-cloudflare
+      - run: just verify
+      - run: just validate-html
       - uses: actions/upload-artifact@v4
         with:
           name: verified-dist
@@ -126,6 +130,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -138,7 +143,7 @@ jobs:
         with:
           name: verified-dist
           path: dist
-      - run: bun run test:e2e:built
+      - run: just test-e2e-built
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -154,6 +159,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -162,8 +168,8 @@ jobs:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
-      - run: bun run test:catalog
-      - run: bun run test:catalog:site-instance
+      - run: just test-catalog
+      - run: just test-catalog-site-instance
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -179,6 +185,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -187,7 +194,7 @@ jobs:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
       - run: bunx playwright install --with-deps chromium
-      - run: bun run docs:check
+      - run: just docs-check
 
   accessibility:
     name: Accessibility review
@@ -199,6 +206,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -211,7 +219,7 @@ jobs:
         with:
           name: verified-dist
           path: dist
-      - run: bun run test:a11y:built
+      - run: just test-a11y-built
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -230,6 +238,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -241,7 +250,7 @@ jobs:
         with:
           name: verified-dist
           path: dist
-      - run: bun run test:perf:built
+      - run: just test-perf-built
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -255,6 +264,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -262,7 +272,7 @@ jobs:
         with:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
-      - run: bun run audit
+      - run: just audit
 
   audit-review:
     name: Dependency audit review
@@ -272,6 +282,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
@@ -279,7 +290,7 @@ jobs:
         with:
           bun-version: 1.3.12
       - run: bun install --frozen-lockfile
-      - run: bun run audit:all
+      - run: just audit-all
 
   coverage-review:
     name: Coverage review
@@ -289,14 +300,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
           node-version: 22.12.0
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.12
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - run: rustup component add llvm-tools-preview
       - run: bun install --frozen-lockfile
-      - run: bun run coverage
+      - run: just coverage
       - uses: actions/upload-artifact@v4
         if: always()
         with:

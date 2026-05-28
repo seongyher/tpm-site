@@ -47,12 +47,9 @@ describe("platform security entrypoint", () => {
 
   test("exposes supply-chain policy through the platform seam", () => {
     const assessment = assessSupplyChainPolicy({
+      availableCommands: new Set(["audit", "release-check", "secrets"]),
       gitignoreText: ".env.local\n.env.*.local\n",
       lockfilePresent: true,
-      packageScripts: {
-        "check:release":
-          "bun --silent run check && bun --silent run audit && bun --silent run secrets",
-      },
     });
 
     expect(

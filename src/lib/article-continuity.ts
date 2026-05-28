@@ -83,6 +83,9 @@ export function articleContinuityItem(
     authors,
   );
 
+  // Coverage note: `articleArchiveItems([article])` emits exactly one item for
+  // valid article entries. This guard keeps the view-model failure explicit if
+  // that upstream invariant changes.
   if (archiveItem === undefined) {
     throw new Error(
       `Unable to build article continuity item for "${selection.article.id}".`,

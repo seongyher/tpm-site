@@ -100,6 +100,7 @@ crates/
   tpm-adapters/
   tpm-qa/
   tpm-cli/
+  tpm-xtask/
   tpm-mcp/
 apps/
   studio/
@@ -160,6 +161,10 @@ diagnostic diffing, and test accountability.
 `tpm-cli`
 : Thin `clap` binary that parses user intent, loads workspace context, calls
 shared operations, and renders human/JSON output.
+
+`tpm-xtask`
+: Internal repository automation binary used behind focused `just` recipes. It
+must not become the product command language.
 
 `tpm-mcp`
 : MCP server over the same operation layer. It should expose tools/resources
@@ -265,7 +270,7 @@ just build
 just preview
 just rust-check
 just rust-test
-just rust-coverage
+just coverage-rust
 just rust-audit
 just js-check
 just site-check
@@ -351,6 +356,13 @@ warnings = "deny"
 [workspace.lints.rustdoc]
 bare_urls = "deny"
 broken_intra_doc_links = "deny"
+invalid_codeblock_attributes = "deny"
+invalid_html_tags = "deny"
+invalid_rust_codeblocks = "deny"
+missing_crate_level_docs = "deny"
+private_intra_doc_links = "deny"
+redundant_explicit_links = "deny"
+unescaped_backticks = "deny"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }
@@ -423,8 +435,8 @@ Deliverables:
 - strict baseline lints;
 - `justfile`;
 - initial CI/local commands;
-- empty or minimal `tpm-core`, `tpm-diagnostics`, `tpm-workspace`, and
-  `tpm-cli` crates;
+- empty or minimal `tpm-core`, `tpm-diagnostics`, `tpm-workspace`, `tpm-cli`,
+  and internal `tpm-xtask` crates;
 - docs explaining command ownership and migration policy.
 
 Verification:
@@ -476,7 +488,10 @@ Verification:
 
 Deliverables:
 
-- `just` and package scripts call Rust commands for promoted domains;
+- `just` calls Rust commands for promoted domains and calls JS/Astro ecosystem
+  tools directly where those tools remain the implementation owner; package
+  scripts remain retired unless a temporary compatibility shim is explicitly
+  approved;
 - old TypeScript scripts are removed, parked, or kept as explicit fallback for
   one release cycle;
 - generated docs and command references point to the Rust CLI.
@@ -645,12 +660,13 @@ Issue candidates:
 3. Promote redirect generation.
 4. Promote QA registry reporting.
 5. Add release manifest shell and generated-output report bridge.
-6. Update package scripts, `just`, docs, and CI parity registry.
+6. Update `just`, docs, and CI parity registry.
 
 Acceptance for every promotion:
 
 - old and new outputs have passed dual-run parity;
-- package scripts and `just` call the promoted command;
+- `just` calls the promoted command, with no package-script wrapper unless a
+  temporary compatibility shim has an owner and retirement trigger;
 - release checks pass;
 - docs name the new command;
 - rollback path is documented;
@@ -699,8 +715,10 @@ These should be resolved or deliberately deferred before creating implementation
 issues from this plan.
 
 1. **Initial crate count.**
-   Recommendation: start with four crates: `tpm-core`, `tpm-diagnostics`,
-   `tpm-workspace`, and `tpm-cli`. Add domain crates as real code demands.
+   Recommendation: start with product crates for `tpm-core`,
+   `tpm-diagnostics`, `tpm-workspace`, and `tpm-cli`, plus internal
+   `tpm-xtask` only for repository automation behind `just`. Add domain crates
+   as real code demands.
 2. **Rust MSRV.**
    Recommendation: pin stable in `rust-toolchain.toml` first, then set
    `rust-version` once the initial toolchain and dependency floor are known.

@@ -169,6 +169,38 @@ describe("publishable model", () => {
     ]);
   });
 
+  test("keeps every publishable visibility surface explicit", () => {
+    const surfaces = [
+      "collections",
+      "directory",
+      "external",
+      "feed",
+      "homepage",
+      "pdf",
+      "related",
+      "search",
+      "sitemap",
+    ] as const;
+
+    for (const surface of surfaces) {
+      const hidden = articlePublishableFixture({
+        data: {
+          visibility: publishableVisibilityFixture({
+            [surface]: false,
+          }),
+        },
+        id: `hidden-${surface}`,
+      });
+      const visible = announcementPublishableFixture({
+        id: `visible-${surface}`,
+      });
+
+      expect(visiblePublishables([hidden, visible], surface)).toEqual([
+        visible,
+      ]);
+    }
+  });
+
   test("maps multiple publishables to source-agnostic list items", () => {
     const items = publishableListItems([
       articlePublishableFixture({ id: "article" }),
@@ -219,5 +251,29 @@ describe("publishable model", () => {
     expect(
       publishableSourceHref(announcementEntry({ id: "announcement" })),
     ).toBe("/announcements/announcement/");
+  });
+
+  test("derives source formats from Markdown, MDX, and unknown source paths", () => {
+    expect(
+      articlePublishableFixture({
+        filePath: "/repo/site/content/articles/interactive.mdx",
+        id: "interactive",
+      }).source,
+    ).toMatchObject({
+      format: "mdx",
+      id: "interactive",
+    });
+
+    expect(
+      publishableFromAnnouncement(
+        announcementEntry({
+          filePath: "/repo/site/content/announcements/imported",
+          id: "imported",
+        }),
+      ).source,
+    ).toMatchObject({
+      format: "unknown",
+      id: "imported",
+    });
   });
 });

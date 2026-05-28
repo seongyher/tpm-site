@@ -69,6 +69,136 @@ describe("article image inspector browser script", () => {
     expect(dialog.open).toBe(false);
   });
 
+  test("dismisses when native dialog backdrop clicks target the dialog", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    appendInspectableFigure(document);
+
+    installArticleImageInspector({ document });
+    requiredInspectTrigger(document).click();
+    const dialog = requiredDialog(document);
+
+    dialog.dispatchEvent(
+      browserEvent(
+        new window.MouseEvent("click", { bubbles: true, cancelable: true }),
+      ),
+    );
+
+    expect(dialog.open).toBe(false);
+  });
+
+  test("uses native dialog show and close methods when available", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    const dialogPrototype = Reflect.getPrototypeOf(
+      document.createElement("dialog"),
+    );
+    if (dialogPrototype === null) {
+      throw new Error("Expected dialog prototype.");
+    }
+    let showCount = 0;
+    let closeCount = 0;
+    Reflect.set(
+      dialogPrototype,
+      "showModal",
+      function showModal(this: HTMLDialogElement) {
+        showCount += 1;
+        this.setAttribute("open", "");
+      },
+    );
+    Reflect.set(
+      dialogPrototype,
+      "close",
+      function close(this: HTMLDialogElement) {
+        closeCount += 1;
+        this.removeAttribute("open");
+        this.dispatchEvent(browserEvent(new window.Event("close")));
+      },
+    );
+    appendInspectableFigure(document);
+
+    installArticleImageInspector({ document });
+    requiredInspectTrigger(document).click();
+    requiredDialogClose(document).click();
+
+    expect(showCount).toBe(1);
+    expect(closeCount).toBe(1);
+    expect(requiredDialog(document).open).toBe(false);
+  });
+
+  test("installs once and reuses the existing dialog on later opens", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    const first = appendInspectableFigure(document, "First caption.");
+    const second = appendInspectableFigure(document, "Second caption.");
+    first.image.src = "/images/first.png";
+    second.image.src = "/images/second.png";
+
+    installArticleImageInspector({ document });
+    installArticleImageInspector({ document });
+    first.button.click();
+    const dialog = requiredDialog(document);
+    const dialogImage = requiredDialogImage(document);
+
+    expect(dialogImage.src).toBe("https://example.com/images/first.png");
+    requiredDialogClose(document).click();
+    second.button.click();
+
+    expect(requiredDialog(document)).toBe(dialog);
+    expect(dialogImage.src).toBe("https://example.com/images/second.png");
+    expect(requiredDialogCaption(document).textContent).toBe("Second caption.");
+  });
+
+  test("supports browsers without native dialog methods", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    const dialogPrototype = Reflect.getPrototypeOf(
+      document.createElement("dialog"),
+    );
+    if (dialogPrototype === null) {
+      throw new Error("Expected dialog prototype.");
+    }
+    Reflect.set(dialogPrototype, "showModal", undefined);
+    Reflect.set(dialogPrototype, "close", undefined);
+    const { button } = appendInspectableFigure(document);
+
+    installArticleImageInspector({ document });
+    button.focus();
+    button.click();
+    const dialog = requiredDialog(document);
+
+    expect(dialog.hasAttribute("open")).toBe(true);
+    dialog.dispatchEvent(
+      browserEvent(
+        new window.KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          key: "Escape",
+        }),
+      ),
+    );
+
+    expect(dialog.hasAttribute("open")).toBe(false);
+    expect(document.activeElement).toBe(button);
+  });
+
+  test("ignores non-element clicks and figures without images", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    const figure = document.createElement("figure");
+    const button = document.createElement("button");
+    figure.dataset["articleImageFigure"] = "true";
+    button.dataset["articleImageInspectTrigger"] = "true";
+    figure.append(button);
+    document.body.append(figure);
+
+    installArticleImageInspector({ document });
+    document.dispatchEvent(browserEvent(new window.Event("click")));
+    button.click();
+
+    expect(document.querySelector("[data-article-image-dialog]")).toBeNull();
+  });
+
   test("ignores incomplete inspectable markup safely", () => {
     const window = testWindow();
     const document = browserDocument(window);
@@ -80,6 +210,23 @@ describe("article image inspector browser script", () => {
     button.click();
 
     expect(document.querySelector("[data-article-image-dialog]")).toBeNull();
+  });
+
+  test("installs from ambient browser globals when runtime is omitted", () => {
+    const window = testWindow();
+    const document = browserDocument(window);
+    appendInspectableFigure(document);
+
+    Reflect.set(globalThis, "document", document);
+
+    try {
+      installArticleImageInspector();
+      requiredInspectTrigger(document).click();
+    } finally {
+      Reflect.deleteProperty(globalThis, "document");
+    }
+
+    expect(requiredDialog(document).open).toBe(true);
   });
 });
 

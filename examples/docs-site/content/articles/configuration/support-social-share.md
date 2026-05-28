@@ -52,5 +52,5 @@ share endpoints.
 ## Verify
 
 ```sh
-SITE_INSTANCE_ROOT=examples/docs-site bun run site:schema:check -- --quiet
+SITE_INSTANCE_ROOT=examples/docs-site just site-schema-check --quiet
 ```

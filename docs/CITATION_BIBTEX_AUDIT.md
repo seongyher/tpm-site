@@ -2,6 +2,12 @@
 
 Generated from repository content on May 21, 2026.
 
+Historical tooling note: the `just references-*` audit commands used to
+generate this report were retired from the active command surface during the
+Rust/`just` migration. This document remains source material for manual
+citation cleanup; restoring automated citation audit commands should be an
+explicit new tooling task.
+
 This report inventories every article `[^cite-*]` marker and every hidden
 `tpm-bibtex` entry under `site/content/articles/`. It is a structural
 audit, not the final source-correction pass: every inventory row still
@@ -77,7 +83,7 @@ the missing-entry table, and parser diagnostics are zero.
 - `possible-entry-type-upgrade`: 2
 
 Detailed diagnostics are available from
-`bun run references:bibtex:audit -- --json`; the inventory table below
+`just references-bibtex-audit -- --json`; the inventory table below
 keeps per-entry review flags beside the source records authors need to
 repair.
 
@@ -92,7 +98,7 @@ repair.
 4. Merge duplicate clusters only after confirming they refer to the same
    source. Similar titles and reused URLs are review signals, not automatic
    proof.
-5. Re-run `bun run references:bibtex:audit -- --write` after each cleanup
+5. Re-run `just references-bibtex-audit -- --write` after each cleanup
    pass to prove that no citation markers or entries were skipped.
 
 ## Article Coverage

@@ -15,7 +15,7 @@ of the development server.
 ## Docs-Site Preview
 
 ```sh
-bun run docs-site:preview:fresh
+just docs-site-preview-fresh
 ```
 
 This builds the docs site into:
@@ -27,7 +27,7 @@ dist/examples/docs-site
 ## Default Release Preview
 
 ```sh
-bun run preview:release:fresh
+just preview-release-fresh
 ```
 
 This builds, verifies, validates HTML, and then serves the default site
@@ -36,7 +36,7 @@ instance.
 ## Full Release Gate
 
 ```sh
-bun run check:release
+just release-check
 ```
 
 Use this before high-confidence release handoff. It is intentionally slower

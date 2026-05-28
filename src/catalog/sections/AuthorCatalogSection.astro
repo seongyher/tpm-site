@@ -1,0 +1,114 @@
+---
+import AuthorArticleList from "../../components/authors/AuthorArticleList.astro";
+import AuthorBioBlock from "../../components/authors/AuthorBioBlock.astro";
+import AuthorByline from "../../components/authors/AuthorByline.astro";
+import AuthorLink from "../../components/authors/AuthorLink.astro";
+import AuthorPage from "../../components/authors/AuthorPage.astro";
+import AuthorProfileHeader from "../../components/authors/AuthorProfileHeader.astro";
+import AuthorSocialLinks from "../../components/authors/AuthorSocialLinks.astro";
+import AuthorsIndexPage from "../../components/authors/AuthorsIndexPage.astro";
+import type { ArticleListItem } from "../../lib/article-list";
+import type { AuthorProfile, AuthorSummary } from "../../lib/authors";
+import CatalogExample from "../CatalogExample.astro";
+import CatalogSection from "../CatalogSection.astro";
+
+interface Props {
+  articles: readonly ArticleListItem[];
+  profile: AuthorProfile;
+  profiles: readonly AuthorProfile[];
+  summaries: readonly AuthorSummary[];
+  primarySummary: AuthorSummary;
+}
+
+const { articles, profile, profiles, summaries, primarySummary } = Astro.props;
+---
+
+<CatalogSection
+  title="Author Components"
+  description="Structured byline, profile, and author-discovery components."
+>
+  <CatalogExample
+    title="AuthorLink"
+    description="Single author profile link."
+    componentPath="src/components/authors/AuthorLink.astro"
+  >
+    <AuthorLink author={primarySummary} profileLinksEnabled />
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorByline"
+    description="One or more linked authors with a legacy fallback."
+    componentPath="src/components/authors/AuthorByline.astro"
+  >
+    <div class="grid gap-3">
+      <AuthorByline authors={summaries} />
+      <AuthorByline legacyAuthor="Legacy Author String" />
+    </div>
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorSocialLinks"
+    description="Approved public profile links."
+    componentPath="src/components/authors/AuthorSocialLinks.astro"
+  >
+    <AuthorSocialLinks
+      links={[
+        { href: "https://example.com", label: "Website" },
+        {
+          href: "https://example.com/profile",
+          label: "Long profile label for wrapping behavior",
+        },
+      ]}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorProfileHeader"
+    description="Author identity, type, article count, and optional links."
+    componentPath="src/components/authors/AuthorProfileHeader.astro"
+  >
+    <AuthorProfileHeader profile={profile} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorBioBlock"
+    description="Optional author bio surface; renders only with useful profile content."
+    componentPath="src/components/authors/AuthorBioBlock.astro"
+  >
+    <AuthorBioBlock profile={profile} hasProfileBody>
+      <p>
+        Longer profile body content is rendered from author Markdown when the
+        author profile provides it.
+      </p>
+    </AuthorBioBlock>
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorArticleList"
+    description="Author-profile article listing backed by shared cards."
+    componentPath="src/components/authors/AuthorArticleList.astro"
+  >
+    <AuthorArticleList
+      title={`Articles by ${profile.displayName}`}
+      items={articles}
+    />
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorsIndexPage"
+    description="Browsing page for all public author profiles."
+    componentPath="src/components/authors/AuthorsIndexPage.astro"
+  >
+    <AuthorsIndexPage profiles={profiles} />
+  </CatalogExample>
+
+  <CatalogExample
+    title="AuthorPage"
+    description="Composed author detail page."
+    componentPath="src/components/authors/AuthorPage.astro"
+  >
+    <AuthorPage profile={profile} items={articles} hasProfileBody>
+      <p>Longer author profile Markdown appears here when provided.</p>
+    </AuthorPage>
+  </CatalogExample>
+</CatalogSection>
