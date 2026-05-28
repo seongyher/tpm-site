@@ -70,7 +70,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-tauri-linux
       - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
@@ -297,7 +296,7 @@ jobs:
       - run: just audit-all
 
   coverage-review:
-    name: Coverage review
+    name: TypeScript coverage review
     continue-on-error: true
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -311,10 +310,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.3.12
-      - uses: taiki-e/install-action@cargo-llvm-cov
-      - run: rustup component add llvm-tools-preview
       - run: bun install --frozen-lockfile
-      - run: just coverage
+      - run: just coverage-ts
       - uses: actions/upload-artifact@v4
         if: always()
         with:

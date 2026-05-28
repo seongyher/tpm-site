@@ -221,6 +221,7 @@ Remaining blocker notes:
       correct state with blocker context.
 - [x] Run appropriate final checks and summarize completed work plus remaining
       blockers.
+
 ## Active Milestone 10: Adapter Contracts And Provider Capability Runtime
 
 This pass implements provider-neutral adapter contracts and capability

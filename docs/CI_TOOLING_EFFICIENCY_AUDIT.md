@@ -84,7 +84,9 @@ Before Milestone 100, the CI workflow ran these PR jobs:
 - `audit`: installs dependencies and runs the high-severity dependency audit.
 - `audit-review`: review-only, installs dependencies and runs all-severity
   audit.
-- `coverage-review`: review-only, installs dependencies and runs coverage.
+- `coverage-review`: review-only, installs dependencies and runs
+  TypeScript/Astro coverage plus broad coverage accountability. Rust coverage
+  has its own review job.
 
 On `main`, deploy repeated install, Playwright Chromium install, production
 build, build verification, and HTML validation before uploading `dist/`.
@@ -137,9 +139,9 @@ running browser checks against an already-built output.
 ### Review Jobs Consume Real CI Time
 
 `accessibility`, `lighthouse`, `markdown-review`, `asset-review`,
-`audit-review`, and `coverage-review` are `continue-on-error`, which is good
-for non-blocking review signals. They still consume runner minutes and setup
-time on every PR.
+`audit-review`, `coverage-review`, and `coverage-rust-review` are
+`continue-on-error`, which is good for non-blocking review signals. They still
+consume runner minutes and setup time on every PR.
 
 Lighthouse is the largest review-only cost by far. It took about 80 seconds
 against an existing `dist/`, before counting repeated production build and
