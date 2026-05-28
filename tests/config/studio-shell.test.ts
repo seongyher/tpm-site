@@ -109,7 +109,7 @@ describe("studio shell configuration", () => {
     expect(accountabilityIgnore).toContain("apps/studio/**");
   });
 
-  test("grants no Tauri frontend permissions in the static shell slice", async () => {
+  test("keeps Tauri frontend permissions narrow", async () => {
     const capability = await readWorkspaceFile(
       "apps/studio/src-tauri/capabilities/studio-read-only-shell.json",
     );
@@ -123,7 +123,6 @@ describe("studio shell configuration", () => {
     expect(config).not.toContain("fs:");
     expect(config).not.toContain("shell:");
     expect(design).toContain("IRK-185");
-    expect(design).toContain("grants the frontend no invokable Tauri commands");
     expect(design).toContain("no broad filesystem, shell, network");
   });
 
@@ -180,6 +179,28 @@ describe("studio shell configuration", () => {
     expect(rustFixtureTest).toContain('"interface"');
   });
 
+  test("uses Rust-shaped Studio authoring operation fixture data", async () => {
+    const fixtureModule = await readWorkspaceFile(
+      "apps/studio/src/data/authoring-operation.ts",
+    );
+    const fixture = await readWorkspaceFile(
+      "apps/studio/src/data/authoring-operation.json",
+    );
+    const rustFixtureTest = await readWorkspaceFile(
+      "apps/studio/src-tauri/tests/frontend_operation_fixture.rs",
+    );
+
+    expect(fixture).toContain('"operationId": "studio.workflow.verify"');
+    expect(fixture).toContain('"kind": "studio-authoring"');
+    expect(fixture).toContain('"secretReference": "[redacted]"');
+    expect(fixture).toContain('"sourceFidelity"');
+    expect(fixtureModule).toContain("authoring-operation.json");
+    expect(fixtureModule).toContain("surfaceStatusLabel");
+    expect(rustFixtureTest).toContain("authoring-operation.json");
+    expect(rustFixtureTest).toContain("OperationPayload::StudioAuthoring");
+    expect(rustFixtureTest).toContain("OperationStatus::Partial");
+  });
+
   test("keeps the shell component-first and Tailwind-backed", async () => {
     const page = await readWorkspaceFile("apps/studio/src/pages/index.astro");
     const styles = await readWorkspaceFile("apps/studio/src/styles/studio.css");
@@ -190,7 +211,7 @@ describe("studio shell configuration", () => {
     expect(page).toContain("StudioSummaryPanel");
     expect(page).toContain("OperationDetailsPanel");
     expect(page).toContain("OperationRuntimePanel");
-    expect(page).toContain("FutureSurfacesPanel");
+    expect(page).toContain("StudioAuthoringPanel");
     expect(page).not.toContain("SourceRootsPanel");
     expect(page).not.toContain("ArtifactsPanel");
   });
@@ -198,6 +219,12 @@ describe("studio shell configuration", () => {
   test("keeps live operation rendering accessible and fixture-backed", async () => {
     const panel = await readWorkspaceFile(
       "apps/studio/src/components/OperationRuntimePanel.astro",
+    );
+    const commandBar = await readWorkspaceFile(
+      "apps/studio/src/components/operation-runtime/OperationCommandBar.astro",
+    );
+    const diagnosticsList = await readWorkspaceFile(
+      "apps/studio/src/components/operation-runtime/OperationDiagnosticsList.astro",
     );
     const controller = await readWorkspaceFile(
       "apps/studio/src/controllers/operation-runtime.ts",
@@ -207,16 +234,18 @@ describe("studio shell configuration", () => {
     );
     const packageJson = await readWorkspaceFile("package.json");
 
-    expect(panel).toContain('role="status"');
-    expect(panel).toContain('aria-live="polite"');
-    expect(panel).toContain('role="group"');
-    expect(panel).toContain("data-studio-diagnostics-empty");
+    expect(panel).toContain("OperationCommandBar");
+    expect(panel).toContain("OperationDiagnosticsList");
     expect(panel).toContain("data-studio-operation-error");
-    expect(panel).toContain("No diagnostics.");
-    expect(panel).toContain("disabled");
+    expect(commandBar).toContain('role="status"');
+    expect(commandBar).toContain('aria-live="polite"');
+    expect(commandBar).toContain('role="group"');
+    expect(commandBar).toContain("disabled");
+    expect(diagnosticsList).toContain("data-studio-diagnostics-empty");
+    expect(diagnosticsList).toContain("No diagnostics.");
     expect(controller).toContain("@tauri-apps/api/core");
     expect(controller).toContain("isTauri");
-    expect(controller).toContain("invoke<StudioOperationResult>");
+    expect(controller).toContain("invoke<StudioRuntimeOperationResult>");
     expect(runtime).toContain('kind: "loading"');
     expect(runtime).toContain('kind: "error"');
     expect(runtime).toContain('kind: "fallback"');

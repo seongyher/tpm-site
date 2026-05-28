@@ -1,43 +1,16 @@
 ---
-import FutureSurfacesPanel from "../components/FutureSurfacesPanel.astro";
 import OperationDetailsPanel from "../components/OperationDetailsPanel.astro";
 import OperationRuntimePanel from "../components/OperationRuntimePanel.astro";
+import StudioAuthoringPanel from "../components/StudioAuthoringPanel.astro";
 import StudioAppBar from "../components/StudioAppBar.astro";
 import StudioNavigation from "../components/StudioNavigation.astro";
 import StudioSummaryPanel from "../components/StudioSummaryPanel.astro";
+import { authoringOperation } from "../data/authoring-operation";
 import {
   readOnlyOperation,
   studioNavigation,
 } from "../data/read-only-operation";
 import StudioLayout from "../layouts/StudioLayout.astro";
-
-const futureSurfaces = [
-  {
-    copy: "Content editing will arrive after source-faithful document operations exist.",
-    id: "content",
-    title: "Content",
-  },
-  {
-    copy: "Media management waits for provider-backed materialization and usage reports.",
-    id: "media",
-    title: "Media",
-  },
-  {
-    copy: "Preview orchestration will bind to shared route and artifact operations.",
-    id: "preview",
-    title: "Preview",
-  },
-  {
-    copy: "Publish requires capability checks, dry-run plans, approvals, and audit records.",
-    id: "publish",
-    title: "Publish",
-  },
-  {
-    copy: "Settings will be generated from validated site and extension schemas.",
-    id: "settings",
-    title: "Settings",
-  },
-];
 ---
 
 <StudioLayout
@@ -55,7 +28,7 @@ const futureSurfaces = [
       <StudioSummaryPanel operation={readOnlyOperation} />
       <OperationDetailsPanel operation={readOnlyOperation} />
       <OperationRuntimePanel operation={readOnlyOperation} />
-      <FutureSurfacesPanel surfaces={futureSurfaces} />
+      <StudioAuthoringPanel operation={authoringOperation} />
     </main>
   </div>
 </StudioLayout>

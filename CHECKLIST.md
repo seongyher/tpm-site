@@ -15,6 +15,92 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 12: Studio Authoring, Preview, Release, And Publish
+
+This pass implements Linear Milestone 12 issue-by-issue. The goal is to move
+the Studio from a read-only shell to operation-backed authoring, media,
+preview, release, publish, rollback, credential, and audit workflows without
+creating a GUI-only CMS/source model.
+
+### M12.0 Design Synthesis And Scope
+
+- [x] Re-read Milestone 12 Linear issues, studio editing/publish/provider
+      docs, headless core contract, parity fixture strategy, Rust operation
+      contracts, and Rust engineering guidance.
+- [x] Design the Milestone 12 operation slice, payloads, GUI surfaces, CLI/Tauri
+      bindings, plan/apply safety, diagnostics, fixtures, and verification
+      gates.
+- [x] Review and refine the design until the implementation can proceed
+      without hidden blockers or a second studio model.
+
+### IRK-190: Schema-Driven Site Settings Surfaces
+
+- [x] Model settings descriptors from site/config intent with schema/default/
+      diagnostic metadata and provider capability effects.
+- [x] Render settings in the Studio from operation payload data and keep
+      unsupported or write-requiring controls capability-aware.
+- [x] Add focused tests proving settings descriptors are deterministic,
+      source-referenced, and not GUI-only state.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-191: Content List And Source-Faithful Markdown/MDX Editor
+
+- [x] Model content inventory, editor documents, source references, draft/write
+      plan state, source-diff metadata, and conflict/data-loss diagnostics.
+- [x] Render content list and editor/source-view surfaces in the Studio without
+      rewriting Markdown or MDX source.
+- [x] Add focused tests for deterministic content listing, source fidelity,
+      plan/apply gating, and GUI operation consumption.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-192: Media Library And Media Reference Picker
+
+- [x] Model media library entries, usage, alt/caption policy, reference picker
+      choices, materialization status, and provider capability diagnostics.
+- [x] Render media library and picker surfaces in the Studio from operation
+      payload data.
+- [x] Add focused tests for repo-local, missing, unsupported, and
+      materialization-required media states.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-193: Preview Orchestration With Output Parity
+
+- [x] Model diagnostics-only, route-preview, artifact-preview, and full-build
+      preview plans over the shared operation/build contracts.
+- [x] Render preview status, route/artifact targets, media requirements,
+      generated-output effects, and parity warnings in the Studio.
+- [x] Add focused tests proving preview output is deterministic and tied to
+      release/build contracts rather than GUI-only simulation.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-194: Release Manifest, Health Report, And Publish Plan View
+
+- [x] Model release manifests, health reports, affected routes/assets/metadata,
+      provider capabilities, manual steps, and publish plans.
+- [x] Render release and publish-plan review surfaces in product language with
+      no credential requirement for dry-run review.
+- [x] Add focused tests proving CLI/GUI consume the same publish-plan payloads
+      and provider limitations are visible.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-195: Publish Apply, Rollback, Credentials, And Audit Logs
+
+- [x] Model explicit apply gates, credential references, rollback plans,
+      restore notes, audit events, failed publish states, and recovery paths.
+- [x] Render apply/rollback/audit surfaces in the Studio while keeping secret
+      values redacted and provider-specific behavior behind adapters.
+- [x] Add focused tests for approval requirements, credential redaction, audit
+      records, rollback limitations, and failed-publish recovery.
+- [x] Verify focused Rust, Studio, and docs checks before updating Linear.
+
+### IRK-196: Verify Studio Authoring And Publish Product Workflows
+
+- [x] Add product-level workflow verification over settings, content, media,
+      preview, release, publish, rollback, diagnostics, and capability states.
+- [x] Add/update docs for the implemented Milestone 12 operation and GUI slice.
+- [x] Run focused checks plus release checks, fix issues, attach docs to
+      relevant Linear issues, and move completed issues to In Review.
+
 ## Active Milestone 11: Tauri/Astro Studio Shell And Read-Only Product Slice
 
 This pass implements as much of Linear Milestone 11 as can be completed before

@@ -1,0 +1,56 @@
+---
+import AuthoringAuditPanel from "./authoring/AuthoringAuditPanel.astro";
+import AuthoringContentPanel from "./authoring/AuthoringContentPanel.astro";
+import AuthoringMediaPanel from "./authoring/AuthoringMediaPanel.astro";
+import AuthoringPreviewPanel from "./authoring/AuthoringPreviewPanel.astro";
+import AuthoringPublishPanel from "./authoring/AuthoringPublishPanel.astro";
+import AuthoringSettingsPanel from "./authoring/AuthoringSettingsPanel.astro";
+import AuthoringSurfaceGrid from "./authoring/AuthoringSurfaceGrid.astro";
+import AuthoringVerificationPanel from "./authoring/AuthoringVerificationPanel.astro";
+import StudioSectionHeading from "./StudioSectionHeading.astro";
+import {
+  authoringOperation,
+  type StudioAuthoringOperationResult,
+} from "../data/authoring-operation";
+
+interface Props {
+  operation?: StudioAuthoringOperationResult;
+}
+
+const { operation = authoringOperation } = Astro.props;
+const payload = operation.payload.data;
+---
+
+<section
+  class="border-border bg-panel shadow-panel rounded-lg border p-4 lg:p-5"
+  id="authoring"
+  aria-labelledby="authoring-heading"
+>
+  <StudioSectionHeading
+    id="authoring-heading"
+    eyebrow="Authoring operations"
+    title="Studio workflow"
+  />
+
+  <AuthoringSurfaceGrid surfaces={payload.surfaces} />
+
+  <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <AuthoringSettingsPanel settings={payload.settings} />
+    <AuthoringContentPanel content={payload.content} />
+  </div>
+
+  <div class="mt-4 grid gap-4 xl:grid-cols-2 2xl:grid-cols-4">
+    <AuthoringMediaPanel media={payload.media} />
+    <AuthoringPreviewPanel preview={payload.preview} />
+    <AuthoringPublishPanel
+      publish={payload.publish}
+      release={payload.release}
+    />
+    <AuthoringAuditPanel
+      credentials={payload.credentials}
+      publish={payload.publish}
+    />
+  </div>
+
+  <AuthoringVerificationPanel verification={payload.verification} />
+</section>

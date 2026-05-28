@@ -2,10 +2,13 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 
 import {
   diagnosticBorderClass,
+  isStudioOperationCommand,
   operationErrorMessage,
   operationStateMessage,
   type StudioOperationCommand,
   type StudioOperationLoadState,
+  type StudioRuntimeDiagnostic,
+  type StudioRuntimeOperationResult,
 } from "../data/operation-runtime";
 import {
   badgeClassForTone,
@@ -13,8 +16,6 @@ import {
   operationStatusLabel,
   operationStatusTone,
   readOnlyOperation,
-  type StudioDiagnostic,
-  type StudioOperationResult,
 } from "../data/read-only-operation";
 
 const rootSelector = "[data-studio-operation-runtime]";
@@ -54,7 +55,7 @@ function initializeRoot(root: HTMLElement): void {
 
   buttons.forEach((button) => {
     const command = button.dataset["studioOperationCommand"];
-    if (!isOperationCommand(command)) {
+    if (!isStudioOperationCommand(command)) {
       return;
     }
 
@@ -82,7 +83,7 @@ async function runCommand(
     result: readOnlyOperation,
   });
 
-  const result = await invoke<StudioOperationResult>(command);
+  const result = await invoke<StudioRuntimeOperationResult>(command);
 
   renderState(root, {
     command,
@@ -105,7 +106,7 @@ function renderState(root: HTMLElement, state: StudioOperationLoadState): void {
 
 function renderStatusBadge(
   root: HTMLElement,
-  result: StudioOperationResult,
+  result: StudioRuntimeOperationResult,
 ): void {
   const badge = queryElement(root, statusBadgeSelector);
   if (badge === null) {
@@ -139,7 +140,7 @@ function renderDetails(root: HTMLElement, details: readonly string[]): void {
 
 function renderDiagnostics(
   root: HTMLElement,
-  diagnostics: readonly StudioDiagnostic[],
+  diagnostics: readonly StudioRuntimeDiagnostic[],
 ): void {
   const list = queryElement(root, diagnosticsSelector);
   const empty = queryElement(root, emptySelector);
@@ -151,7 +152,9 @@ function renderDiagnostics(
   list.replaceChildren(...diagnostics.map(createDiagnosticCard));
 }
 
-function createDiagnosticCard(diagnostic: StudioDiagnostic): HTMLElement {
+function createDiagnosticCard(
+  diagnostic: StudioRuntimeDiagnostic,
+): HTMLElement {
   const article = document.createElement("article");
   article.className = [
     "border-border bg-panel-muted flex items-start justify-between gap-4 rounded-md border border-l-4 p-3 max-sm:grid",
@@ -179,21 +182,21 @@ function createDiagnosticCard(diagnostic: StudioDiagnostic): HTMLElement {
   return article;
 }
 
-function diagnosticCode(diagnostic: StudioDiagnostic): HTMLElement {
+function diagnosticCode(diagnostic: StudioRuntimeDiagnostic): HTMLElement {
   const code = document.createElement("p");
   code.className = "text-muted-foreground text-xs font-bold uppercase";
   code.textContent = diagnostic.code;
   return code;
 }
 
-function diagnosticMessage(diagnostic: StudioDiagnostic): HTMLElement {
+function diagnosticMessage(diagnostic: StudioRuntimeDiagnostic): HTMLElement {
   const message = document.createElement("h3");
   message.className = "mt-1 text-base leading-snug font-bold tracking-normal";
   message.textContent = diagnostic.message;
   return message;
 }
 
-function diagnosticLocation(diagnostic: StudioDiagnostic): HTMLElement {
+function diagnosticLocation(diagnostic: StudioRuntimeDiagnostic): HTMLElement {
   const location = document.createElement("p");
   location.className =
     "text-muted-foreground mt-2 flex flex-wrap gap-x-2 gap-y-1 text-sm";
@@ -216,7 +219,9 @@ function diagnosticLocation(diagnostic: StudioDiagnostic): HTMLElement {
   return location;
 }
 
-function diagnosticRemediation(diagnostic: StudioDiagnostic): HTMLElement {
+function diagnosticRemediation(
+  diagnostic: StudioRuntimeDiagnostic,
+): HTMLElement {
   const remediation = document.createElement("p");
   remediation.className = "text-muted-foreground mt-2 leading-6";
 
@@ -257,12 +262,6 @@ function setText(root: HTMLElement, selector: string, value: string): void {
 function queryElement(root: HTMLElement, selector: string): HTMLElement | null {
   const element = root.querySelector(selector);
   return element instanceof HTMLElement ? element : null;
-}
-
-function isOperationCommand(
-  command: string | undefined,
-): command is StudioOperationCommand {
-  return command === "check_site" || command === "site_status";
 }
 
 function isDiagnosticLocation(

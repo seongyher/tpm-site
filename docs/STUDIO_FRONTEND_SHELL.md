@@ -9,10 +9,11 @@ results.
 
 Create a static Astro app under `apps/studio/` that demonstrates the future
 studio product shape without introducing a second CMS/source model. The shell
-should render read-only workspace status, diagnostics, and placeholder panels
-from fixture-like operation data. It should be easy to package in Tauri later,
-but it should not require Tauri, credentials, providers, editing, or publishing
-to run.
+started by rendering read-only workspace status and diagnostics, then
+Milestone 12 extended it with operation-backed authoring, preview, release,
+publish-gate, rollback, credential, audit, and verification surfaces from
+shared Rust operation results. It should be easy to package in Tauri, but it
+must not require live credentials or providers to run.
 
 ## Non-Goals
 
@@ -20,7 +21,8 @@ This slice does not:
 
 1. edit content, config, media, routes, or generated output;
 2. connect credentials or provider accounts;
-3. publish, rollback, deploy, or run workflow actions;
+3. publish, rollback, deploy, or run workflow actions without a shared
+   plan/apply operation;
 4. parse source files in the browser;
 5. define a separate GUI diagnostic or source model;
 6. add package.json scripts.
@@ -55,10 +57,10 @@ The shell should be built from focused Astro components:
 - `StudioSummaryPanel`: operation summary and workspace overview.
 - `OperationDetailsPanel`: Rust operation schema, timing, status, and summary
   detail lines.
-- `OperationRuntimePanel`: read-only Tauri command controls, loading/error
-  states, and operation diagnostics.
-- `FutureSurfacesPanel`: disabled placeholders for later editor, media,
-  preview, publish, and settings surfaces.
+- `OperationRuntimePanel`: Tauri command controls, loading/error states, and
+  operation diagnostics over shared Rust operation envelopes.
+- `StudioAuthoringPanel`: operation-backed settings, content, media, preview,
+  release, publish, credential, audit, rollback, and verification surfaces.
 
 Pages should compose these components; they should not own layout or operation
 rendering logic directly.
@@ -75,7 +77,7 @@ The shell uses a local JSON fixture shaped as the Rust
 - timing;
 - diagnostic report with severity, location, message, and remediation.
 
-The fixture is intentionally read-only and local to the app. It is a UI
+The status fixture is intentionally read-only and local to the app. It is a UI
 contract sample, not a source model. `IRK-186` adds Rust validation that
 deserializes and round-trips the fixture through `tpm-operations`, preventing a
 separate GUI diagnostic, source-root, artifact, or status model from drifting
@@ -84,17 +86,22 @@ the fallback fixture to be a GUI projection of the shared Rust operation
 fixture, as documented in
 [STUDIO_CLI_GUI_PARITY.md](./STUDIO_CLI_GUI_PARITY.md).
 
+Milestone 12 adds `authoring-operation.json`, another Rust-validated fixture
+that uses the same envelope and the `studio-authoring` payload. It represents
+the first authoring/product workflow slice without giving the browser a second
+CMS source model.
+
 ## Layout
 
 The first screen should communicate the product direction:
 
 1. top application bar with product name and read-only status;
-2. left navigation for future surfaces: Overview, Diagnostics, Content, Media,
-   Preview, Publish, Settings;
+2. left navigation for surfaces: Overview, Diagnostics, Settings, Content,
+   Media, Preview, Publish, Audit, Verification;
 3. main status area with workspace health and operation details;
 4. diagnostics panel with severity, source/artifact reference, and remediation;
-5. placeholder panels for future editor, media, preview, publish, and settings
-   surfaces, all explicitly disabled/read-only.
+5. operation-backed panels for editor, media, preview, publish, settings,
+   credentials, audit, rollback, and verification state.
 
 The design should be quiet and operational, not a marketing page. It should
 favor dense but readable information, clear hierarchy, and predictable
@@ -114,7 +121,7 @@ navigation.
 
 - Use semantic landmarks: header, nav, main, section, aside where appropriate.
 - Use visible headings for each surface.
-- Mark disabled future surfaces with text and disabled state, not hidden
+- Mark unavailable or gated actions with text and disabled state, not hidden
   controls.
 - Preserve keyboard navigation through links/buttons.
 - Use status text plus color; do not rely on color alone.
@@ -139,3 +146,7 @@ navigation.
 - `IRK-187` binds read-only Tauri commands.
 - `IRK-188` renders live status and diagnostics from those command results.
 - `IRK-189` proves CLI and GUI fixture parity.
+- `IRK-190` through `IRK-196` add the first operation-backed authoring,
+  preview, release, publish, credential, audit, rollback, and verification
+  surfaces. That slice is documented in
+  [STUDIO_AUTHORING_OPERATIONS.md](./STUDIO_AUTHORING_OPERATIONS.md).

@@ -6,8 +6,10 @@ use std::path::PathBuf;
 use tpm_core::{CommandExit, PLATFORM_NAME};
 use tpm_operations::{
     OperationInterface, OperationResult, run_adapter_inspect, run_image_asset_verification,
-    run_redirect_report, run_release_inspect, run_site_doctor, run_workspace_check,
-    run_workspace_doctor, run_workspace_status,
+    run_redirect_report, run_release_inspect, run_site_doctor, run_studio_content_editor,
+    run_studio_media_library, run_studio_preview_plan, run_studio_publish_apply,
+    run_studio_release_plan, run_studio_settings_inspect, run_studio_workflow_verify,
+    run_workspace_check, run_workspace_doctor, run_workspace_status,
 };
 
 /// Current top-level help text for the additive CLI shell.
@@ -26,6 +28,14 @@ Commands:
   media images       Inspect image asset policy
   routes redirects   Inspect route and redirect policy
   release inspect    Inspect generated output/release readiness
+  studio settings    Inspect schema-driven Studio settings surfaces
+  studio content     Inspect content list and source editor plans
+  studio media       Inspect media library and materialization plans
+  studio preview     Inspect preview orchestration plans
+  studio release     Inspect release manifest and publish plan
+  studio publish apply
+                     Inspect the gated publish-apply plan
+  studio verify      Verify Studio authoring/publish workflow readiness
   help <command>     Show command help
   version            Show version information
 
@@ -46,6 +56,7 @@ Examples:
   tpm check --format json
   tpm doctor
   tpm release inspect
+  tpm studio release --format json
 ";
 
 const ADAPTERS_HELP: &str = "\
@@ -115,6 +126,24 @@ Usage:
 Examples:
   tpm release inspect
   tpm release inspect latest --format json
+";
+
+const STUDIO_HELP: &str = "\
+tpm studio - inspect Studio authoring, preview, release, and publish operations
+
+Usage:
+  tpm studio settings [options]
+  tpm studio content [options]
+  tpm studio media [options]
+  tpm studio preview [options]
+  tpm studio release [options]
+  tpm studio publish apply [options]
+  tpm studio verify [options]
+
+Examples:
+  tpm studio settings --format json
+  tpm studio content
+  tpm studio publish apply --format json
 ";
 
 const MEDIA_HELP: &str = "\
@@ -204,6 +233,13 @@ enum CliCommand {
     RoutesRedirects,
     SiteDoctor,
     SiteStatus,
+    StudioContent,
+    StudioMedia,
+    StudioPreview,
+    StudioPublishApply,
+    StudioRelease,
+    StudioSettings,
+    StudioVerify,
     Version,
 }
 
@@ -216,6 +252,7 @@ enum HelpTopic {
     Release,
     Routes,
     Site,
+    Studio,
     Top,
 }
 
@@ -316,6 +353,7 @@ fn help_topic(topic: Option<&str>) -> Result<HelpTopic, CliError> {
         Some("release") => Ok(HelpTopic::Release),
         Some("routes") => Ok(HelpTopic::Routes),
         Some("site") => Ok(HelpTopic::Site),
+        Some("studio") => Ok(HelpTopic::Studio),
         Some(other) => Err(CliError::new(format!("Unknown help topic `{other}`."))),
     }
 }
@@ -358,6 +396,29 @@ fn parse_command(positionals: &[String]) -> Result<CliCommand, CliError> {
             if command == "release" && subcommand == "inspect" && target == "latest" =>
         {
             Ok(CliCommand::ReleaseInspect)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "settings" => {
+            Ok(CliCommand::StudioSettings)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "content" => {
+            Ok(CliCommand::StudioContent)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "media" => {
+            Ok(CliCommand::StudioMedia)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "preview" => {
+            Ok(CliCommand::StudioPreview)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "release" => {
+            Ok(CliCommand::StudioRelease)
+        }
+        [command, subcommand, action]
+            if command == "studio" && subcommand == "publish" && action == "apply" =>
+        {
+            Ok(CliCommand::StudioPublishApply)
+        }
+        [command, subcommand] if command == "studio" && subcommand == "verify" => {
+            Ok(CliCommand::StudioVerify)
         }
         [command, ..] => Err(CliError::new(format!("Unknown command `{command}`."))),
     }
@@ -403,6 +464,37 @@ where
         }
         CliCommand::SiteStatus => {
             let result = run_workspace_status(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioContent => {
+            let result =
+                run_studio_content_editor(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioMedia => {
+            let result = run_studio_media_library(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioPreview => {
+            let result = run_studio_preview_plan(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioPublishApply => {
+            let result = run_studio_publish_apply(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioRelease => {
+            let result = run_studio_release_plan(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioSettings => {
+            let result =
+                run_studio_settings_inspect(invocation.options.site, OperationInterface::Cli);
+            write_operation(&result, invocation.options.format, output)
+        }
+        CliCommand::StudioVerify => {
+            let result =
+                run_studio_workflow_verify(invocation.options.site, OperationInterface::Cli);
             write_operation(&result, invocation.options.format, output)
         }
         CliCommand::Version => {
@@ -458,6 +550,7 @@ const fn help_text(topic: HelpTopic) -> &'static str {
         HelpTopic::Release => RELEASE_HELP,
         HelpTopic::Routes => ROUTES_HELP,
         HelpTopic::Site => SITE_HELP,
+        HelpTopic::Studio => STUDIO_HELP,
         HelpTopic::Top => HELP,
     }
 }
@@ -526,7 +619,9 @@ mod tests {
 
     #[test]
     fn command_help_covers_all_topics_and_unknown_topics() {
-        for topic in ["adapters", "doctor", "media", "release", "routes", "site"] {
+        for topic in [
+            "adapters", "doctor", "media", "release", "routes", "site", "studio",
+        ] {
             let (exit, output) = run_text(vec![String::from("help"), String::from(topic)]);
 
             assert_eq!(exit, CommandExit::Success);
@@ -777,5 +872,57 @@ mod tests {
         assert_eq!(exit, CommandExit::Success);
         assert!(output.contains("adapters.inspect"));
         assert!(output.contains("adapter profile: tpm-like"));
+    }
+
+    #[test]
+    fn studio_commands_route_to_authoring_operations() {
+        for (command, operation, expected_status) in [
+            (
+                &["studio", "settings"][..],
+                "studio.settings.inspect",
+                "\"status\": \"warning\"",
+            ),
+            (
+                &["studio", "content"],
+                "studio.content.editor",
+                "\"status\": \"requires-approval\"",
+            ),
+            (
+                &["studio", "media"],
+                "studio.media.library",
+                "\"status\": \"partial\"",
+            ),
+            (
+                &["studio", "preview"],
+                "studio.preview.plan",
+                "\"status\": \"partial\"",
+            ),
+            (
+                &["studio", "release"],
+                "studio.release.plan",
+                "\"status\": \"requires-credentials\"",
+            ),
+            (
+                &["studio", "publish", "apply"],
+                "studio.publish.apply",
+                "\"status\": \"requires-approval\"",
+            ),
+            (
+                &["studio", "verify"],
+                "studio.workflow.verify",
+                "\"status\": \"partial\"",
+            ),
+        ] {
+            let mut args = command_with_site(command, &fixture_root());
+            args.push(String::from("--format"));
+            args.push(String::from("json"));
+
+            let (exit, output) = run_text(args);
+
+            assert_eq!(exit, CommandExit::Success);
+            assert!(output.contains(operation));
+            assert!(output.contains("\"kind\": \"studio-authoring\""));
+            assert!(output.contains(expected_status));
+        }
     }
 }

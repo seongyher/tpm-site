@@ -1,21 +1,24 @@
 ---
+import type { HTMLAttributes } from "astro/types";
 import {
   badgeClassForTone,
   type StudioBadgeTone,
 } from "../data/read-only-operation";
 
-interface Props {
+interface Props extends HTMLAttributes<"span"> {
   label: string;
   tone: StudioBadgeTone;
 }
 
-const { label, tone } = Astro.props;
+const { label, tone, class: className, ...attrs } = Astro.props;
 ---
 
 <span
+  {...attrs}
   class:list={[
     "inline-flex min-h-7 items-center justify-center rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap",
     badgeClassForTone(tone),
+    className,
   ]}
 >
   {label}
