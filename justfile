@@ -439,7 +439,7 @@ audit-all:
 
 # Run local secrets scan.
 secrets:
-    gitleaks git --redact --no-banner
+    gitleaks git --redact --no-banner --log-opts=HEAD
 
 # Run all blocking Rust gates.
 rust-check: rust-fmt rust-cargo-check rust-clippy rust-doc rust-doc-test rust-test rust-deny

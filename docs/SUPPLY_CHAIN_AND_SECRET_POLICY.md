@@ -54,7 +54,7 @@ output, Linear/GitHub comments, docs, fixtures, or release artifacts.
 Current required safeguards:
 
 - `.env.local` and `.env.*.local` are ignored;
-- `secrets` runs Gitleaks against git history in release checks;
+- `secrets` runs Gitleaks against the current branch history in release checks;
 - secret-like `PUBLIC_*` env names are rejected because they imply client-side
   exposure;
 - generated-output samples can be checked for common token shapes and diagnostic

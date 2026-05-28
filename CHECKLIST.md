@@ -50,6 +50,89 @@ over-application of abstractions.
 - [x] Review the revised guide for overzealous or misleading instructions and
       verify documentation checks.
 
+## Active Milestone 10: Adapter Contracts And Provider Capability Runtime
+
+This pass implements provider-neutral adapter contracts and capability
+inspection so future GUI, CLI, MCP, and CI surfaces can ask what a configured
+provider can do before showing or executing provider-backed actions.
+
+### M10.0 Design Synthesis And Scope
+
+- [x] Re-read Milestone 10 Linear issues, adapter/capability/security docs,
+      Rust operation contracts, and Rust engineering guidance.
+- [x] Confirm the implementation shape keeps adapter contracts in shared Rust
+      operation code and does not hard-code Cloudflare, GitHub, repo-local
+      assets, or TPM assumptions into core behavior.
+- [x] Break Milestone 10 into issue-level implementation milestones with
+      verification steps.
+
+### M10.1 Source And History Adapter Contracts (IRK-177)
+
+- [x] Model source/history provider capabilities, local-only behavior,
+      restore/review support, and unsupported-operation diagnostics.
+- [x] Add tests proving local source/history works without Git and Git/GitHub
+      behavior remains optional provider behavior.
+- [x] Verify focused Rust checks for source/history contracts.
+
+### M10.2 Media And Materialization Adapter Contracts (IRK-178)
+
+- [x] Model media provider capabilities for read/write/optimize/cache/
+      materialize/migrate/delete behavior.
+- [x] Model build-time materialization, source hashes, cache invalidation, and
+      unsupported media diagnostics.
+- [x] Verify focused Rust checks for media contracts.
+
+### M10.3 Workflow, Build, And Deploy Adapter Contracts (IRK-179)
+
+- [x] Model workflow/build/deploy capabilities, dry-run publish and rollback
+      plans, manual steps, and bundled reference adapter boundaries.
+- [x] Add tests proving Cloudflare-like and static export behavior are adapter
+      profiles rather than core truth.
+- [x] Verify focused Rust checks for workflow/build/deploy contracts.
+
+### M10.4 Identity, Credential, Diagnostics, And Observability Boundaries (IRK-180)
+
+- [x] Model non-secret identity and credential references, credential
+      requirements, redaction, diagnostics import, and observability import
+      contracts.
+- [x] Add tests proving credentials are never modeled as site content and
+      redacted output cannot expose secret values.
+- [x] Verify focused Rust checks for identity/credential/diagnostic contracts.
+
+### M10.5 Capability Registry And Unsupported Diagnostics (IRK-181)
+
+- [x] Implement a capability registry that combines configured adapters into a
+      stable capability report for local-only, TPM-like, and complex publisher
+      profiles.
+- [x] Implement unsupported-operation diagnostics with provider, capability,
+      cause, and remediation.
+- [x] Add fixture-style tests for supported, unsupported, partial, manual,
+      unknown-until-authenticated, and disabled-by-policy states.
+
+### M10.6 Adapter And Extension Inspection Commands (IRK-182)
+
+- [x] Add CLI/report operation output that lists configured adapters,
+      capabilities, credential requirements, dry-run support, unsupported
+      operations, and bundled/default/extension boundaries.
+- [x] Ensure JSON output is versioned and tested without creating a separate
+      CLI-only model.
+- [x] Verify CLI command and operation fixture tests.
+
+### M10.7 Mocked-Provider Runtime Verification (IRK-183)
+
+- [x] Add mocked adapter profiles for local-only, TPM-like, and complex
+      publisher configurations.
+- [x] Verify dry-run plan fixtures, secret/credential boundaries, unsupported
+      diagnostics, and capability-driven CLI/report output.
+- [x] Run Rust checks, documentation checks, and release-relevant checks before
+      handoff.
+
+### M10.8 Linear Handoff
+
+- [x] Attach relevant docs to Milestone 10 issues.
+- [x] Add completion comments and move IRK-177 through IRK-183 and parent
+      IRK-152 to In Review.
+
 ## Active TypeScript Automation To Rust Migration
 
 This migration removes repository-owned TypeScript automation scripts from the
