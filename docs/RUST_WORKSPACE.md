@@ -72,6 +72,7 @@ The current ownership model is:
 | `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
 | `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
 | `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
+| `crates/tpm-mcp/`                 | Transport-agnostic read-only MCP resource and safety contracts over operation results. |
 | `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
 | `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
 | `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |

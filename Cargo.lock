@@ -232,6 +232,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tpm-mcp"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tpm-core",
+ "tpm-diagnostics",
+ "tpm-operations",
+]
+
+[[package]]
 name = "tpm-operations"
 version = "0.1.0"
 dependencies = [
