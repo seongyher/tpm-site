@@ -80,6 +80,10 @@ standard.
 This keeps Astro as the frontend compiler and Tauri as the native package shell
 instead of creating another build surface.
 
+Linux CI compiles the full Rust workspace with Tauri included, so Rust jobs use
+`.github/actions/setup-tauri-linux` to install the native GTK/WebKit packages
+required by Tauri's Linux dependency graph before running Cargo checks.
+
 The shell icon is copied from `site/public/apple-touch-icon.png` for the first
 slice because Tauri requires an application icon at compile time. A later
 branding pass can replace it with a studio-specific icon without changing the

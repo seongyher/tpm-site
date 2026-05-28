@@ -66,6 +66,11 @@ safe upgrade is currently available through Tauri. New vulnerability advisories
 must not be added to the ignore list without a separate risk review and
 remediation plan.
 
+GitHub Dependency Review is configured separately for PRs in
+`.github/dependency-review-config.yml`. Its allow-list should mirror only the
+narrow Tauri-only risk decisions that `cargo-deny` cannot express through
+RustSec advisory IDs.
+
 The Rust license allow-list is intentionally explicit. Adding a new Rust
 dependency may require adding an OSI/free license to `deny.toml`; do that only
 after checking the dependency path and documenting any non-obvious policy

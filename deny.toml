@@ -12,6 +12,8 @@ ignore = [
   # Tauri 2.11.2 pulls the current Linux WebKit/GTK stack through wry/tao.
   # These are informational unmaintained advisories with no safe upgrade path
   # while Tauri still depends on GTK3 bindings for Linux.
+  # GitHub Dependency Review also allows GHSA-wrw7-89jp-8q8g for glib 0.18 in
+  # this same Tauri-only graph.
   "RUSTSEC-2024-0411",
   "RUSTSEC-2024-0412",
   "RUSTSEC-2024-0413",

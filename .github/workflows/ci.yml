@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-tauri-linux
       - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:
@@ -41,6 +42,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-tauri-linux
       - uses: taiki-e/install-action@just
       - uses: taiki-e/install-action@cargo-deny
       - run: rustup show
@@ -54,6 +56,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-tauri-linux
       - uses: taiki-e/install-action@just
       - uses: taiki-e/install-action@cargo-llvm-cov
       - run: rustup component add llvm-tools-preview
@@ -67,6 +70,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-tauri-linux
       - uses: taiki-e/install-action@just
       - uses: actions/setup-node@v4
         with:

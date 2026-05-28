@@ -1,0 +1,9 @@
+# GitHub Dependency Review policy for PR supply-chain checks.
+#
+# Tauri 2.11.2 currently pulls glib 0.18 through its Linux GTK/WebKit
+# dependency graph. Repo-owned Rust crates do not call this API directly, and
+# cargo-deny carries the matching Tauri-only advisory rationale. Keep this
+# exception narrow and remove it when Tauri's Linux stack upgrades past glib
+# 0.18.
+allow-ghsas:
+  - GHSA-wrw7-89jp-8q8g
