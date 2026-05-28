@@ -116,7 +116,9 @@ An operation result is a serializable envelope with:
 - `status`: derived from diagnostics as `success`, `warning`, or `failed`;
 - `summary`: short title plus optional detail lines;
 - `timing`: optional duration in milliseconds;
-- `diagnostics`: diagnostic report.
+- `diagnostics`: diagnostic report;
+- optional typed `payload` for operations that need structured data beyond
+  summary lines and diagnostics.
 
 Operation IDs are lowercase stable identifiers such as `workspace.status`.
 They should name platform operations, not UI buttons or provider calls.
@@ -136,6 +138,7 @@ Current operations:
 | `qa.diagnostics-diff` | Compare normalized diagnostic snapshots using the shared operation envelope.             |
 | `output.verify`       | Report generated-output inventory through shared diagnostics.                            |
 | `release.inspect`     | Inspect the conventional generated-output root and report release-readiness diagnostics. |
+| `adapters.inspect`    | Inspect adapter capabilities, credentials, dry-run support, statuses, and boundaries.    |
 
 Some operations are product-facing CLI commands. Others are internal
 repo-maintenance operations consumed by `just`/`tpm-xtask`. Do not expose an
@@ -178,6 +181,22 @@ Fixture policy:
 The neutral source workspace fixture lives in
 `tests/fixtures/rust-workspace/`. Keep it generic and non-TPM. Add invalid
 fixture variants next to it when a test needs broken source state.
+
+## Adapter Capability Runtime
+
+Milestone 10 adds the first provider-neutral adapter capability runtime. The
+implementation is documented in
+[`RUST_ADAPTER_RUNTIME.md`](./RUST_ADAPTER_RUNTIME.md).
+
+The adapter runtime currently provides:
+
+- local-only, TPM-like, and complex-publisher mock registries;
+- source, history, media, workflow, build, deploy, identity, credential,
+  diagnostics, and observability capability records;
+- non-blocking unavailable-capability report diagnostics;
+- blocking unsupported-operation diagnostics for attempted invalid actions;
+- non-secret credential references and redacted secret handles;
+- the `adapters.inspect` operation and `tpm adapters inspect` CLI command.
 
 ## Promotion Rules
 
