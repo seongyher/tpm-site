@@ -4,6 +4,7 @@ mod assets;
 mod build;
 mod cloudflare;
 mod content;
+mod distribution;
 mod external;
 mod filesystem;
 mod operations;
@@ -34,6 +35,9 @@ use self::cloudflare::build_cloudflare;
 use self::cloudflare::collect_redirects;
 #[cfg(test)]
 use self::content::{normalize_tags, verify_content};
+use self::distribution::{cli_reference, distribution_check, public_api_check};
+#[cfg(test)]
+use self::distribution::{cli_reference_issues, distribution_readiness_issues, public_api_issues};
 use self::external::SystemCommandRunner;
 #[cfg(test)]
 use self::external::{
@@ -92,9 +96,12 @@ where
         XtaskCommand::BuildOptimize(args) => build_optimize(&args, output),
         XtaskCommand::BuildRaw(args) => build_raw(&args, output, &mut external_runner),
         XtaskCommand::CatalogCheck(args) => catalog_check(&args, output),
+        XtaskCommand::CliReference(args) => cli_reference(&args, false, output),
+        XtaskCommand::CliReferenceCheck(args) => cli_reference(&args, true, output),
         XtaskCommand::ContentCheck(args) => content_check(&args, output),
         XtaskCommand::CoverageVerify(args) => coverage_verify(&args, output),
         XtaskCommand::DiagnosticsDiff(args) => diagnostics_diff(args, output),
+        XtaskCommand::DistributionCheck(args) => distribution_check(&args, output),
         XtaskCommand::DocsReferences(args) => docs_references(&args, false, output),
         XtaskCommand::DocsReferencesCheck(args) => docs_references(&args, true, output),
         XtaskCommand::MigrationBaseline(args) => migration_baseline(args, output),
@@ -102,6 +109,7 @@ where
         XtaskCommand::PayloadCheck(args) => payload_report(&args, true, output),
         XtaskCommand::PayloadReport(args) => payload_report(&args, false, output),
         XtaskCommand::PlatformCheck(args) => platform_check(&args, output),
+        XtaskCommand::PublicApiCheck(args) => public_api_check(&args, output),
         XtaskCommand::QaRegistry(args) => qa_registry(args, output),
         XtaskCommand::SiteSchema(args) => site_schema(args, false, output),
         XtaskCommand::SiteSchemaCheck(args) => site_schema(args, true, output),

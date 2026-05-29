@@ -12,6 +12,7 @@ description = "Internal repository automation for TPM development."
 [dependencies]
 clap.workspace = true
 serde_json.workspace = true
+tpm-cli.workspace = true
 tpm-core.workspace = true
 tpm-operations.workspace = true
 

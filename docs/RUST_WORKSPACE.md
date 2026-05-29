@@ -37,8 +37,10 @@ just cli site status --format json
 The current CLI slice supports `tpm --help`, `tpm --version`,
 `tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
 `tpm media images`, `tpm routes redirects`, `tpm release inspect`, and
-`tpm adapters inspect`. These commands are product-interface proofs over Rust
-operation contracts.
+`tpm adapters inspect`, plus read-only Studio inspection commands. The
+generated command reference is refreshed with `just cli-reference` and checked
+with `just cli-reference-check`. These commands are product-interface proofs
+over Rust operation contracts.
 
 Repository maintenance automation is intentionally not exposed as `tpm`
 commands. Focused `just` recipes call the internal `tpm-xtask` binary when a
@@ -121,6 +123,9 @@ or the current release gate:
 ```sh
 just coverage-rust
 just rust-nextest
+just rust-dependency-review
+just rust-binary-size-review
+just rust-distribution-review
 ```
 
 `coverage-rust` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
@@ -144,6 +149,10 @@ Current policy decisions:
   accepted.
 - Rust coverage remains review-only and should be used to inspect meaningful
   operation-core gaps before any percentage threshold is considered.
+- `cargo-machete` and `cargo-bloat` remain review-only distribution signals
+  until they are installed, low-noise, and useful enough to promote.
+- Public Rust API compatibility checks stay policy-based until a crate is
+  intentionally published with a semver baseline.
 
 ## Fixture Policy
 

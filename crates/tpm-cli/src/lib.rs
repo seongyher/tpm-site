@@ -168,6 +168,38 @@ Examples:
   tpm routes redirects --format json
 ";
 
+const COMMAND_REFERENCE_TOPICS: &[(HelpTopic, &str)] = &[
+    (HelpTopic::Top, "Top-Level Help"),
+    (HelpTopic::Adapters, "Adapters"),
+    (HelpTopic::Site, "Site"),
+    (HelpTopic::Check, "Check"),
+    (HelpTopic::Doctor, "Doctor"),
+    (HelpTopic::Media, "Media"),
+    (HelpTopic::Routes, "Routes"),
+    (HelpTopic::Release, "Release"),
+    (HelpTopic::Studio, "Studio"),
+];
+
+/// Renders the generated Markdown command reference for the current CLI model.
+#[must_use]
+pub fn render_command_reference_markdown() -> String {
+    let mut markdown = String::from(
+        "# TPM CLI Reference\n\n\
+This file is generated from the `tpm-cli` command model. Do not edit it by hand.\n\
+Run `just cli-reference` to refresh it.\n",
+    );
+
+    for (topic, heading) in COMMAND_REFERENCE_TOPICS {
+        markdown.push_str("\n## ");
+        markdown.push_str(heading);
+        markdown.push_str("\n\n```text\n");
+        markdown.push_str(help_text(*topic).trim_end());
+        markdown.push_str("\n```\n");
+    }
+
+    markdown
+}
+
 /// Runs the CLI shell against an argument sequence and output sink.
 ///
 /// # Errors
@@ -632,6 +664,20 @@ mod tests {
 
         assert_eq!(exit, CommandExit::UsageError);
         assert!(output.contains("Unknown help topic `unknown`."));
+    }
+
+    #[test]
+    fn generated_command_reference_comes_from_cli_help_model() {
+        let reference = super::render_command_reference_markdown();
+
+        assert!(reference.starts_with("# TPM CLI Reference"));
+        assert!(reference.contains("## Top-Level Help"));
+        assert!(reference.contains("## Adapters"));
+        assert!(reference.contains("## Studio"));
+        assert!(reference.contains("tpm adapters inspect --format json"));
+        assert!(reference.contains("tpm studio publish apply"));
+        assert!(!reference.contains("tpm-xtask"));
+        assert!(!reference.contains("qa-registry"));
     }
 
     #[test]

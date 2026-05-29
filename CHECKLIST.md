@@ -15,6 +15,93 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 14: Packaging, Extraction, And Public Distribution
+
+This pass implements Linear Milestone 14 issue-by-issue. The goal is to turn
+proven Rust, CLI, MCP, Tauri, and platform seams into documented, verified,
+distribution-ready boundaries without publishing premature packages or leaking
+TPM-specific assumptions.
+
+### M14.0 Context And Design Synthesis
+
+- [x] Re-read Milestone 14 Linear issues, package-boundary docs, release
+      governance, Rust workspace/tooling docs, CLI product contract, Tauri
+      studio docs, MCP safety/resource docs, and the platform roadmap.
+- [x] Design the implementation order, public/private boundary criteria,
+      compatibility policy, examples, release pipeline checks, Tauri packaging
+      plan, advanced Rust QA policy, and final readiness gate.
+- [x] Review and refine the design until implementation can proceed without
+      premature extraction or hidden public API commitments.
+
+### IRK-204: Identify Proven Package And Crate Extraction Candidates
+
+- [x] Audit current Rust crates, platform entrypoints, examples, docs, CLI,
+      MCP, Tauri, and operation contracts for actual consumer evidence.
+- [x] Classify candidates as public, private-package-like, internal-only,
+      deferred, or rejected with reasons and revisit triggers.
+- [x] Update package-boundary documentation with current Milestone 14
+      decisions and verification expectations.
+- [x] Verify docs and focused boundary checks before updating Linear.
+
+### IRK-205 And IRK-216: Public API Docs And Compatibility Checks
+
+- [x] Define the public API/stability contract for any accepted public or
+      externally consumed Rust/package boundaries.
+- [x] Add or document compatibility checks such as semver/API checks only where
+      a real public compatibility promise exists.
+- [x] Keep internal crates and repo-only tools out of fake public API policy.
+- [x] Verify focused Rust/docs checks before updating Linear.
+
+### IRK-206: External Consumer Examples
+
+- [x] Add or update external consumer examples for accepted public/stable
+      entrypoints without TPM content, routes, branding, or private paths.
+- [x] Add verification proving examples consume only stable/public seams and do
+      not drift.
+- [x] Document the example contract and handoff expectations.
+- [x] Verify focused example, docs, and release-facing checks before updating
+      Linear.
+
+### IRK-207: CLI Release Pipeline And Generated Command Documentation
+
+- [x] Design the CLI distribution slice, supported artifact expectations,
+      generated/help documentation, smoke tests, and install/update docs.
+- [x] Add generated or checked CLI command documentation from the actual CLI
+      command model.
+- [x] Add reproducible local release/smoke checks for the current CLI binary
+      without turning repo `just` recipes into product CLI behavior.
+- [x] Verify focused CLI, docs, and Rust checks before updating Linear.
+
+### IRK-208: Tauri Studio Packaging, Signing, And Update Plan
+
+- [x] Define platform targets, unsigned local packaging checks,
+      signing/notarization/update-channel requirements, and credential policy.
+- [x] Add or document Tauri packaging verification that is safe without
+      private signing credentials.
+- [x] Document packaged-app smoke tests for startup, status, diagnostics, and
+      authoring workflows.
+- [x] Verify focused Studio/Tauri/docs checks before updating Linear.
+
+### IRK-215, IRK-217, And IRK-218: Advanced Rust QA Hardening
+
+- [x] Evaluate public API, Miri, sanitizer, fuzzing, mutation, dependency
+      cleanup, unsafe inventory, and binary-size tooling against current crate
+      maturity and false-positive cost.
+- [x] Adopt low-noise commands or review-only policies where useful, with
+      clear promotion triggers and ownership.
+- [x] Reject or defer noisy/theatrical checks with concrete reasons.
+- [x] Verify focused Rust/docs checks before updating Linear.
+
+### IRK-209: Public Distribution Readiness Verification
+
+- [x] Add a single distribution-readiness checklist/report covering package
+      boundaries, examples, CLI artifacts/docs, Tauri packaging, security,
+      supply chain, release governance, and TPM-leakage risks.
+- [x] Add or wire focused verification into `just` where practical without
+      overloading the normal release gate with noisy optional tools.
+- [x] Run focused checks plus release checks, fix issues, attach docs to
+      relevant Linear issues, and move completed issues to In Review.
+
 ## Active Milestone 12: Studio Authoring, Preview, Release, And Publish
 
 This pass implements Linear Milestone 12 issue-by-issue. The goal is to move

@@ -48,6 +48,8 @@ describe("command surface", () => {
       "test",
       "test-e2e-built",
       "docs-check",
+      "cli-reference",
+      "cli-reference-check",
       "author-check",
       "review-assets",
       "review-markdown",
@@ -58,6 +60,10 @@ describe("command surface", () => {
       "secrets",
       "deploy-cloudflare",
       "rust-check",
+      "rust-public-api-check",
+      "cli-release-smoke",
+      "studio-package-check",
+      "distribution-check",
       "cli",
     ]) {
       expect(justfile).toContain(`\n${recipe}`);
@@ -93,6 +99,29 @@ describe("command surface", () => {
         `${retiredRecipe} should not be a public just recipe`,
       ).toBe(false);
     }
+  });
+
+  test("keeps public distribution checks explicit and generated docs owned by xtask", async () => {
+    const justfile = await readJustfile();
+
+    expect(justRecipeBlock(justfile, "cli-reference")).toContain(
+      "just _xtask cli-reference {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "cli-reference-check")).toContain(
+      "just _xtask cli-reference-check {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "rust-public-api-check")).toContain(
+      "just _xtask public-api-check {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "distribution-check")).toContain(
+      "just _xtask distribution-check {{args}}",
+    );
+    expect(justRecipeBlock(justfile, "cli-release-smoke")).toContain(
+      "cargo build --package tpm-cli --bin tpm --release --locked",
+    );
+    expect(justRecipeBlock(justfile, "studio-package-check")).toContain(
+      "cargo build --package tpm-studio --bin tpm-studio --locked",
+    );
   });
 
   test("keeps asset review recipes aligned with typed xtask arguments", async () => {
@@ -183,12 +212,14 @@ describe("command surface", () => {
 
     expect(normalCheck).toContain("check-fast");
     expect(docsCheck).toContain("docs-references-check");
+    expect(docsCheck).toContain("cli-reference-check");
     expect(docsCheck).toContain("test-docs-site");
     expect(releaseCheck).toContain("build-release");
     expect(releaseCheck).toContain("docs-check");
     expect(releaseCheck).toContain("review-markdown");
     expect(releaseCheck).toContain("payload-check");
     expect(releaseCheck).toContain("test-e2e-built");
+    expect(releaseCheck).toContain("distribution-check");
     expect(releaseCheck).not.toContain("test-e2e ");
   });
 
