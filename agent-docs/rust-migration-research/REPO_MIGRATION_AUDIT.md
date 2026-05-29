@@ -7,8 +7,8 @@ roadmap, and the CLI strategy at the time it was written.
 
 Status note: the current repository now has a Rust workspace, a canonical
 `just` command router, and no package scripts. Use
-`agent-docs/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`,
-`agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`, and `COMMANDS.md` for
+`agent-docs/migrations/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`,
+`agent-docs/migrations/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`, and `COMMANDS.md` for
 the current command state. This document remains useful as migration rationale
 and historical baseline.
 

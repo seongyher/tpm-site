@@ -36,7 +36,7 @@ export const fixtureMarkdownExtension = defineExtensionManifest({
     },
     {
       audience: "developer",
-      path: "docs/SOURCE_CONTRACTS.md",
+      path: "docs/platform/SOURCE_CONTRACTS.md",
     },
   ],
   id: "fixture.markdown-mdx",
@@ -79,7 +79,7 @@ export const fixturePdfExtension = defineExtensionManifest({
   docs: [
     {
       audience: "owner",
-      path: "docs/ARTICLE_PDF_EXPORT.md",
+      path: "docs/authoring/ARTICLE_PDF_EXPORT.md",
     },
   ],
   generatedArtifacts: [
@@ -139,7 +139,7 @@ export const fixtureCalloutExtension = defineExtensionManifest({
   docs: [
     {
       audience: "extension-author",
-      path: "docs/EXTENSION_ARCHITECTURE.md",
+      path: "docs/operations/EXTENSION_ARCHITECTURE.md",
     },
   ],
   id: "fixture.callout",
@@ -182,7 +182,7 @@ export const fixtureThirdPartyEmbedExtension = defineExtensionManifest({
   docs: [
     {
       audience: "extension-author",
-      path: "docs/EXTENSION_ARCHITECTURE.md",
+      path: "docs/operations/EXTENSION_ARCHITECTURE.md",
     },
   ],
   externalOrigins: [
@@ -247,7 +247,7 @@ export const fixtureMigratingImporterExtension = defineExtensionManifest({
   docs: [
     {
       audience: "owner",
-      path: "docs/IMPORT_EXPORT_POLICY.md",
+      path: "docs/governance/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md",
     },
   ],
   id: "fixture.legacy-importer",

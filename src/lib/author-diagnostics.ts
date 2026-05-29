@@ -335,44 +335,46 @@ function relatedDocsForCategory(
 ): readonly string[] {
   switch (category) {
     case "accessibility":
-      return ["docs/AUTHOR_DIAGNOSTICS.md"];
+      return ["docs/authoring/AUTHOR_DIAGNOSTICS.md"];
 
     case "assets":
     case "media":
-      return ["docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"];
+      return ["docs/operations/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"];
 
     case "citations":
-      return ["docs/ARTICLE_REFERENCE_AUTHORING.md"];
+      return ["docs/authoring/ARTICLE_REFERENCE_AUTHORING.md"];
 
     case "config":
     case "redirects":
-      return ["docs/SITE_ANATOMY.md"];
+      return ["docs/authoring/SITE_ANATOMY.md"];
 
     case "content":
     case "frontmatter":
-      return ["docs/AUTHORING_WORKFLOW.md"];
+      return ["docs/authoring/AUTHORING_WORKFLOW.md"];
 
     case "deployment":
-      return ["docs/CLOUDFLARE_WORKERS_MIGRATION.md"];
+      return ["docs/operations/CLOUDFLARE_WORKERS_MIGRATION.md"];
 
     case "feeds":
-      return ["docs/PUBLISHABLE_FEED_ARTICLE_CONTINUITY_AND_EMBEDS.md"];
+      return [
+        "docs/platform/PUBLISHABLE_FEED_ARTICLE_CONTINUITY_AND_EMBEDS.md",
+      ];
 
     case "generated-artifacts":
-      return ["docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"];
+      return ["docs/platform/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"];
 
     case "metadata":
     case "search":
-      return ["docs/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"];
+      return ["docs/metadata/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"];
 
     case "pdfs":
-      return ["docs/ARTICLE_PDF_EXPORT.md"];
+      return ["docs/authoring/ARTICLE_PDF_EXPORT.md"];
 
     case "performance":
       return ["docs/performance/route-class-performance-budgets.md"];
 
     case "routes":
-      return ["docs/SOURCE_CONTRACTS.md"];
+      return ["docs/platform/SOURCE_CONTRACTS.md"];
   }
 }
 

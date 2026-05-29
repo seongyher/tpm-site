@@ -344,6 +344,6 @@ Route-class budget implementation is complete when:
 
 This design was checked against `lighthouserc.json`, `package.json`,
 `docs/performance/unlighthouse-audit-2026-05-17.md`,
-`docs/ARTICLE_PDF_EXPORT.md`, `docs/SOCIAL_PREVIEW_IMAGES.md`,
+`docs/authoring/ARTICLE_PDF_EXPORT.md`, `docs/metadata/SOCIAL_PREVIEW_IMAGES.md`,
 `site/public/_headers`, `just payload-report`, `just verify`, and a fresh
 local `dist/` generated with `just build`.

@@ -66,4 +66,4 @@ not hero-marketing styled.
 ## Follow-Up Notes
 
 - If author pages later get portraits, use Astro assets and document image
-  approval/privacy rules in `docs/AUTHORS.md`.
+  approval/privacy rules in `docs/authoring/AUTHORS.md`.

@@ -349,7 +349,7 @@ export function unsupportedFieldDiagnostic(
     location: {
       fieldPath: fieldDescriptor.fieldPath,
     },
-    relatedDocs: ["docs/STUDIO_READINESS_CONTRACTS.md"],
+    relatedDocs: ["docs/studio/STUDIO_READINESS_CONTRACTS.md"],
     remediation: "Edit this field in source or enable a compatible extension.",
     repairOwner: fieldDescriptor.owner,
     severity: "warning",
@@ -458,7 +458,7 @@ function unknownFieldDiagnostic(
     location: {
       fieldPath,
     },
-    relatedDocs: ["docs/STUDIO_READINESS_CONTRACTS.md"],
+    relatedDocs: ["docs/studio/STUDIO_READINESS_CONTRACTS.md"],
     remediation:
       "Use a field declared by the current platform source contract.",
     repairOwner: source.defaultOwner,

@@ -62,7 +62,7 @@ describe("author diagnostics", () => {
       code: "accessibility.html.image-alt-missing",
       fixability: "source-edit",
       location: { outputPath: "articles/post/index.html" },
-      relatedDocs: ["docs/AUTHOR_DIAGNOSTICS.md"],
+      relatedDocs: ["docs/authoring/AUTHOR_DIAGNOSTICS.md"],
       repairOwner: "author",
       source: "generated-output",
       sourceCode: "html.image-alt-missing",
@@ -71,36 +71,56 @@ describe("author diagnostics", () => {
 
   test("maps every generated-output category to author-facing category and docs", () => {
     const cases = [
-      ["asset", "assets", ["docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"]],
+      [
+        "asset",
+        "assets",
+        ["docs/operations/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"],
+      ],
       [
         "build",
         "generated-artifacts",
-        ["docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"],
+        ["docs/platform/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"],
       ],
-      ["cache", "deployment", ["docs/CLOUDFLARE_WORKERS_MIGRATION.md"]],
-      ["content", "content", ["docs/AUTHORING_WORKFLOW.md"]],
+      [
+        "cache",
+        "deployment",
+        ["docs/operations/CLOUDFLARE_WORKERS_MIGRATION.md"],
+      ],
+      ["content", "content", ["docs/authoring/AUTHORING_WORKFLOW.md"]],
       [
         "feed",
         "feeds",
-        ["docs/PUBLISHABLE_FEED_ARTICLE_CONTINUITY_AND_EMBEDS.md"],
+        ["docs/platform/PUBLISHABLE_FEED_ARTICLE_CONTINUITY_AND_EMBEDS.md"],
       ],
       [
         "html",
         "generated-artifacts",
-        ["docs/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"],
+        ["docs/platform/GENERATED_OUTPUT_VERIFIER_CONTRACT.md"],
       ],
-      ["link", "routes", ["docs/SOURCE_CONTRACTS.md"]],
+      ["link", "routes", ["docs/platform/SOURCE_CONTRACTS.md"]],
       [
         "metadata",
         "metadata",
-        ["docs/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"],
+        ["docs/metadata/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"],
       ],
-      ["pdf", "pdfs", ["docs/ARTICLE_PDF_EXPORT.md"]],
-      ["redirect", "redirects", ["docs/SITE_ANATOMY.md"]],
-      ["route", "routes", ["docs/SOURCE_CONTRACTS.md"]],
-      ["search", "search", ["docs/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"]],
-      ["security", "deployment", ["docs/CLOUDFLARE_WORKERS_MIGRATION.md"]],
-      ["sitemap", "metadata", ["docs/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"]],
+      ["pdf", "pdfs", ["docs/authoring/ARTICLE_PDF_EXPORT.md"]],
+      ["redirect", "redirects", ["docs/authoring/SITE_ANATOMY.md"]],
+      ["route", "routes", ["docs/platform/SOURCE_CONTRACTS.md"]],
+      [
+        "search",
+        "search",
+        ["docs/metadata/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"],
+      ],
+      [
+        "security",
+        "deployment",
+        ["docs/operations/CLOUDFLARE_WORKERS_MIGRATION.md"],
+      ],
+      [
+        "sitemap",
+        "metadata",
+        ["docs/metadata/METADATA_GRAPH_AND_SEMANTIC_PROFILES.md"],
+      ],
     ] satisfies ReadonlyArray<
       readonly [
         OutputDiagnosticCategory,
@@ -202,7 +222,7 @@ describe("author diagnostics", () => {
       ),
     ).toMatchObject({
       category: "media",
-      relatedDocs: ["docs/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"],
+      relatedDocs: ["docs/operations/MEDIA_POLICY_AND_PROVIDER_ADAPTERS.md"],
     });
   });
 

@@ -2,7 +2,7 @@
 
 This folder contains research notes for an evergreen guide to excellent command
 line interface design. The final guide is
-[`CLI_DESIGN_GUIDE.md`](../CLI_DESIGN_GUIDE.md).
+[`CLI_DESIGN_GUIDE.md`](../cli/CLI_DESIGN_GUIDE.md).
 
 The research intentionally avoids designing a project-specific CLI. It records
 evidence, case studies, critiques, and principles that can guide future CLI

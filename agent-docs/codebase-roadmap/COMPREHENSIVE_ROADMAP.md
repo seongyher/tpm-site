@@ -3,7 +3,7 @@
 This document synthesizes the comprehensive roadmap audit. It is intentionally
 ambitious, actionable, and traceable to `COVERAGE_LEDGER.md`,
 `FINDINGS_SCRATCHPAD.md`, `DOMAIN_MAP.md`, and
-`agent-docs/ENGINEERING_PHILOSOPHY.md`.
+`agent-docs/core/ENGINEERING_PHILOSOPHY.md`.
 
 ## Executive Summary
 

@@ -195,7 +195,7 @@ for editorial publishing:
   plans, migrated decisions, and current reference. The next maturity step is
   stronger audience separation: non-technical author docs, site-owner config
   docs, developer module docs, and historical planning docs.
-- `docs/PLATFORM_MODULES.md` and `scripts/quality/verify-platform-boundaries.ts`
+- `docs/platform/PLATFORM_MODULES.md` and `scripts/quality/verify-platform-boundaries.ts`
   duplicate the module map by design. This catches drift but should eventually
   share a generated source of truth.
 

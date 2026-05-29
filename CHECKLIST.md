@@ -15,6 +15,152 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 15: Studio GUI MVP Design Through Figma Handoff
+
+This pass completes Linear Milestone 15 through the designer-facing
+Figma-ready screen specification. It is design and research work only: no real
+source writes, file-open/save implementation, credentialed publish flow, or
+backend operation wiring should be added here.
+
+### M15.0 Planning And Source Refresh
+
+- [x] Re-read the Milestone 15 Linear issues and current Studio, roadmap,
+      engineering philosophy, component, adapter, operation, and Tauri docs.
+- [x] Review current Studio shell/dependency state and the visual references
+      provided for this milestone.
+- [x] Research current UI/editor/Tauri dependency options from authoritative
+      sources before making build-vs-buy recommendations.
+- [x] Keep this checklist updated issue-by-issue and add finer milestones if
+      the design work reveals missing steps.
+
+### M15.1 IRK-231 Product Definition
+
+- [x] Write the Studio GUI MVP product brief covering scope, user promise,
+      non-goals, fixture-backed prototype definition, source constraints, and
+      acceptance criteria.
+- [x] Review the product brief for audience fit, scope creep, missing
+      non-goals, contradiction with existing roadmap docs, and readiness for
+      downstream visual/flow work; refine until no useful improvements remain.
+- [x] Verify the product definition satisfies `IRK-238` through `IRK-241`.
+
+### M15.2 IRK-232 Visual Language
+
+- [x] Write the Studio GUI visual language spec covering reference analysis,
+      palette, typography, spacing, surfaces, controls, tooltips, keyboard
+      hints, motion, validation, errors, and recovery presentation.
+- [x] Review the visual spec for designer usability, consistency with the
+      provided visual references, accessibility, meaningful color use,
+      non-copying language, and concrete token guidance; refine until stable.
+- [x] Verify the visual language satisfies `IRK-242` through `IRK-245`.
+
+### M15.3 IRK-233 Navigation And Screen States
+
+- [x] Write the Studio GUI navigation flow and screen-state inventory covering
+      startup, exact session restore, project home, sidebar/tree, article
+      editing, settings, media, preview, publish, autosave, failure, and
+      recovery flows.
+- [x] Review the flow inventory for happy-path bias, missing empty/loading/
+      dirty/invalid/blocked states, user-language clarity, and implementation
+      relevance; refine until complete.
+- [x] Verify the screen-state inventory satisfies `IRK-246` through
+      `IRK-250`.
+
+### M15.4 IRK-234 Dependency And Build-Vs-Buy Decisions
+
+- [x] Write the dependency decision report covering Astro/React, shadcn/Radix,
+      editor options, file tree/context menu/command palette/hotkeys, Tauri
+      plugins, and hand-rolled domain-policy boundaries.
+- [x] Review the dependency report for source-backed claims, hidden bundle/
+      accessibility/security risks, premature lock-in, and unclear fallback
+      paths; refine until implementation-ready.
+- [x] Verify the dependency decisions satisfy `IRK-251` through `IRK-255`.
+
+### M15.5 IRK-235 Component Architecture
+
+- [x] Write the Studio GUI component architecture spec covering app shell,
+      pane layout, sidebar/tree, editor/frontmatter/preview, settings, media,
+      publish, feedback, props/data shapes, state ownership, and accessibility
+      responsibilities.
+- [x] Review the component spec for oversized components, unclear ownership,
+      missing sub-components, weak responsive behavior, and poor test seams;
+      refine until developers can implement without guessing.
+- [x] Verify the component architecture satisfies `IRK-256` through
+      `IRK-260`.
+
+### M15.6 IRK-236 Fixture, State, And Operation Shapes
+
+- [x] Write the fixture/state model covering projects, session restore,
+      articles, frontmatter descriptors, settings, media, preview, publish,
+      credential, recovery, autosave, validation, and operation mapping.
+- [x] Review the fixture/state spec for throwaway frontend-only models,
+      invalid state, missing transition guards, weak source-truth boundaries,
+      and drift from Rust/Tauri operation contracts; refine until stable.
+- [x] Verify the fixture/state model satisfies `IRK-261` through `IRK-264`.
+
+### M15.7 IRK-268 Designer And Figma Handoff
+
+- [x] Write the Figma-ready designer handoff package with plain-English
+      product brief, glossary, visual reference annotations, frame list,
+      dimensions, layout anatomy, color palette, components, states,
+      interactions, tooltips, copy examples, and acceptance criteria.
+- [x] Review the Figma handoff as if handed to a designer with no technical
+      context: check ambiguity, missing frames, missing states, unclear visual
+      tokens, weak annotations, and gaps between product flows and mockup
+      requirements; refine until no useful improvements remain.
+- [x] Verify the designer handoff satisfies `IRK-269` through `IRK-275`.
+
+### M15.8 Linear And Handoff
+
+- [x] Attach relevant design documents to the corresponding Linear issues and
+      any other issues where the documents are useful context.
+- [x] Move completed Milestone 15 issues through `IRK-268` and their completed
+      child issues to In Review.
+- [x] Leave `IRK-276` and `IRK-237` untouched unless the user explicitly asks
+      to continue from Figma handoff into engineering implementation handoff.
+- [x] Summarize completed documents, remaining milestone 15 work, and any
+      open risks.
+
+### M15.9 Generated Visual Reference Refinement
+
+- [x] Import the generated Studio GUI reference images into repo-tracked docs
+      assets with stable descriptive filenames.
+- [x] Re-review all Milestone 15 design docs against the new visual reference
+      set and refine only where it improves handoff quality.
+- [x] Update the designer handoff so the generated Studio mockups are the
+      primary visual reference and Codex remains only secondary polish
+      inspiration.
+- [x] Verify the revised docs and checklist with focused documentation checks.
+- [x] Attach the new visual reference assets and updated docs to the relevant
+      Linear issues, then add a project/status note describing the refinement.
+
+### M15.10 Rough Studio Mockup Reference Refinement
+
+- [x] Inspect the rough Studio mockup visually with Playwright and screenshots,
+      noting what is useful direction versus generated/mockup noise.
+- [x] Import the rough mockup screenshots into repo-tracked docs assets with a
+      clear folder name and stable descriptive filenames.
+- [x] Re-review the Studio GUI MVP docs against the rough mockup and refine
+      only where it improves designer or implementation handoff quality.
+- [x] Verify the revised docs and checklist with focused documentation checks.
+- [x] Attach the rough mockup references and any updated docs to the relevant
+      Linear issues, then add a project/status note describing the refinement.
+
+### M15.11 Improved Studio Mockup Reference Refinement
+
+- [x] Run the improved Studio mockup in an isolated temp workspace and capture
+      Playwright screenshots for key screens.
+- [x] Read the improved mockup source to extract design intentions, screen
+      states, and interaction ideas without treating prototype code as an
+      implementation plan.
+- [x] Import the improved mockup screenshots into repo-tracked docs assets with
+      a clear folder name and stable descriptive filenames.
+- [x] Re-review the Studio GUI MVP docs against the improved mockup, with
+      special attention to the article directory/browser design.
+- [x] Verify the revised docs and checklist with focused documentation checks.
+- [x] Attach the improved mockup references and any updated docs to the
+      relevant Linear issues, then add a project/status note describing the
+      refinement.
+
 ## Active Milestone 11: Tauri/Astro Studio Shell And Read-Only Product Slice
 
 This pass implements as much of Linear Milestone 11 as can be completed before
@@ -1116,3 +1262,26 @@ replacing existing Bun/Astro behavior.
 - [x] Attach relevant docs to completed Linear issues and move completed
       issues to In Review.
 - [x] Summarize completed work and remaining blockers.
+
+## Active Docs Organization Pass
+
+### Docs Organization 1: Structure And Move Plan
+
+- [x] Inventory root-level docs and choose stable domain directories.
+- [x] Move docs and reference assets into the new directory structure.
+- [x] Inventory `agent-docs/` root files and choose planning/philosophy
+      directories.
+- [x] Move `agent-docs/` files into the new directory structure.
+
+### Docs Organization 2: Reference Repair
+
+- [x] Update AGENTS, README, COMMANDS, docs, code, and tests for new paths.
+- [x] Add or update a docs index so future docs have an obvious home.
+- [x] Add or update an `agent-docs/` index and repair references after the
+      planning-doc moves.
+
+### Docs Organization 3: Verification
+
+- [x] Scan for stale old-path references.
+- [x] Run docs checks and fix any issues.
+- [x] Re-run stale reference scans and checks after `agent-docs/` reorg.

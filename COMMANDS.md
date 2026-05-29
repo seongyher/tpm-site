@@ -27,7 +27,7 @@ package-script regressions and documented command drift.
 
 Dependency audit, secret scan, lockfile, third-party script, and generated
 secret-output expectations are documented in
-[`docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`](docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md).
+[`docs/governance/SUPPLY_CHAIN_AND_SECRET_POLICY.md`](docs/governance/SUPPLY_CHAIN_AND_SECRET_POLICY.md).
 
 ## First Commands
 

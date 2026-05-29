@@ -5,7 +5,7 @@ from ignored generated/local artifacts.
 
 ## Audit Standard
 
-- Reread `agent-docs/ENGINEERING_PHILOSOPHY.md`.
+- Reread `agent-docs/core/ENGINEERING_PHILOSOPHY.md`.
 - Apply the philosophy as the standard for platform/site separation,
   typed-domain architecture, static output, author UX, reader UX,
   generated-output safety, accessibility, performance, docs, and testing.
@@ -135,7 +135,7 @@ from ignored generated/local artifacts.
 ### Documentation
 
 - Read root `README.md`, `site/README.md`, public docs-site plan,
-  `docs/PLATFORM_MODULES.md`, component docs README/inventory, and
+  `docs/platform/PLATFORM_MODULES.md`, component docs README/inventory, and
   representative docs by topic.
 - Inventoried documentation across authoring, articles, citations, PDFs,
   sharing, platformization, component architecture, performance, metadata,

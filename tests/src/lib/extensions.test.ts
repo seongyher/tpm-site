@@ -46,7 +46,7 @@ describe("extension manifest contracts", () => {
       docs: [
         {
           audience: "owner",
-          path: "docs/ARTICLE_PDF_EXPORT.md",
+          path: "docs/authoring/ARTICLE_PDF_EXPORT.md",
         },
       ],
       generatedArtifacts: [
@@ -372,7 +372,7 @@ describe("extension manifest contracts", () => {
     ]);
     expect(rows[1]).toMatchObject({
       disabledBehavior: "remove-artifacts",
-      docs: ["docs/ARTICLE_PDF_EXPORT.md"],
+      docs: ["docs/authoring/ARTICLE_PDF_EXPORT.md"],
       generatedArtifactPaths: ["/articles/:slug/:slug.pdf"],
       migrationCount: 0,
       summary: "Fixture generated-artifact extension.",

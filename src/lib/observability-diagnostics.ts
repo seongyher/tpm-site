@@ -92,7 +92,7 @@ export function authorDiagnosticsFromObservabilityReport(
         },
         relatedDocs: [
           ...(finding.finding.relatedDocs ?? []),
-          "docs/OBSERVABILITY_AND_WEBMASTER_REPORTS.md",
+          "docs/metadata/OBSERVABILITY_AND_WEBMASTER_REPORTS.md",
         ],
         remediation: finding.finding.remediation,
         repairOwner: authorRepairOwnerForObservabilityOwner(

@@ -108,7 +108,7 @@ describe("observability diagnostics", () => {
         sourcePath: undefined,
         url: undefined,
       },
-      relatedDocs: ["docs/OBSERVABILITY_AND_WEBMASTER_REPORTS.md"],
+      relatedDocs: ["docs/metadata/OBSERVABILITY_AND_WEBMASTER_REPORTS.md"],
       repairOwner: "author",
       severity: "error",
       source: "observability-import",

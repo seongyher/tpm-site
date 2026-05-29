@@ -1,6 +1,6 @@
 # The Philosopher's Meme
 
-![https://thephilosophersmeme.com/](docs/site-demo.png)
+![https://thephilosophersmeme.com/](docs/assets/site-demo.png)
 
 Astro static site for The Philosopher's Meme.
 
@@ -53,9 +53,9 @@ just verify
 
 For a short explanation of every repository command, see `COMMANDS.md`.
 For documentation ownership, generated-reference, and drift-check planning,
-see `docs/DOCUMENTATION_LIFECYCLE.md`.
+see `docs/governance/DOCUMENTATION_LIFECYCLE.md`.
 For the additive Rust workspace and `just` command router, see
-`docs/RUST_WORKSPACE.md`.
+`docs/rust/RUST_WORKSPACE.md`.
 
 List the repository command router recipes:
 

@@ -7,7 +7,7 @@ Rules for this pass:
 
 - Do not use the previous `agent-docs/codebase-roadmap/` files while writing
   the fresh audit.
-- Use `agent-docs/ENGINEERING_PHILOSOPHY.md` as the evaluation standard.
+- Use `agent-docs/core/ENGINEERING_PHILOSOPHY.md` as the evaluation standard.
 - Track coverage explicitly so the final roadmap is grounded in the files that
   were examined.
 - Separate observations from recommendations.

@@ -2,7 +2,7 @@
 
 Source: `src/components/articles/ArticleShareMenu.astro`
 
-Design: `docs/ARTICLE_SHARE_MENU.md`
+Design: `docs/authoring/ARTICLE_SHARE_MENU.md`
 
 ## Purpose
 

@@ -1,7 +1,7 @@
 # Rust Engineering Research Notes
 
 These notes support
-[`RUST_ENGINEERING_GUIDE.md`](../RUST_ENGINEERING_GUIDE.md). They are not a
+[`RUST_ENGINEERING_GUIDE.md`](../rust/RUST_ENGINEERING_GUIDE.md). They are not a
 separate policy surface. They record the source-backed reasoning behind the
 guide's Rust style and engineering recommendations.
 

@@ -15,5 +15,6 @@
   "src/components/ui/assets/**",
   "tests/fixtures/site-instance/assets/**",
   "tests/fixtures/site-instance/public/favicon.svg",
-  "docs/site-demo.png"
+  "docs/assets/site-demo.png",
+  "docs/studio/gui-mvp/assets/reference/**"
 ]

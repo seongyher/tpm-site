@@ -264,7 +264,7 @@ export function observabilityFindingsFromStatusRows(
         owner: noise === "actionable" ? "site-owner" : "external",
         provider: options.provider ?? "cloudflare",
         providerCode: `http-${status}`,
-        relatedDocs: ["docs/CLOUDFLARE_WORKERS_MIGRATION.md"],
+        relatedDocs: ["docs/operations/CLOUDFLARE_WORKERS_MIGRATION.md"],
         remediation:
           noise === "actionable"
             ? "Add or fix the source route, redirect, public file, or deploy configuration."
@@ -315,7 +315,7 @@ export function observabilityFindingsFromWebmasterRows(
         owner: route === undefined ? "unknown" : "site-owner",
         provider: options.provider ?? options.source,
         providerCode: issue.toLowerCase().replace(/\s+/gu, "-"),
-        relatedDocs: ["docs/OBSERVABILITY_AND_WEBMASTER_REPORTS.md"],
+        relatedDocs: ["docs/metadata/OBSERVABILITY_AND_WEBMASTER_REPORTS.md"],
         remediation:
           "Triage the finding against current source routes, redirects, metadata, and generated-output verifier results.",
         route,
@@ -355,7 +355,7 @@ export function observabilityFindingsFromLinkScannerRows(
         owner: "author",
         provider: "local-link-scanner",
         providerCode: "broken-link",
-        relatedDocs: ["docs/AUTHORING_WORKFLOW.md"],
+        relatedDocs: ["docs/authoring/AUTHORING_WORKFLOW.md"],
         remediation:
           "Update the source link target, add the missing source asset, or add an intentional redirect.",
         route: internalRouteFromUrl(page),

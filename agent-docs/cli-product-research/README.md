@@ -2,10 +2,10 @@
 
 This folder contains working notes for a product-specific CLI strategy report.
 The final report is
-[`TPM_CLI_PRODUCT_STRATEGY.md`](../TPM_CLI_PRODUCT_STRATEGY.md).
+[`TPM_CLI_PRODUCT_STRATEGY.md`](../cli/TPM_CLI_PRODUCT_STRATEGY.md).
 
 This research applies the general
-[`CLI_DESIGN_GUIDE.md`](../CLI_DESIGN_GUIDE.md) to the TPM platform. It should
+[`CLI_DESIGN_GUIDE.md`](../cli/CLI_DESIGN_GUIDE.md) to the TPM platform. It should
 not become a final command reference yet. The goal is to understand users,
 market patterns, product opportunities, platform seams, and implementation
 slices that work backward from the mature CLI vision before command specs are

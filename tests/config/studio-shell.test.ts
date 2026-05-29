@@ -116,7 +116,7 @@ describe("studio shell configuration", () => {
     const config = await readWorkspaceFile(
       "apps/studio/src-tauri/tauri.conf.json",
     );
-    const design = await readWorkspaceFile("docs/STUDIO_TAURI_SHELL.md");
+    const design = await readWorkspaceFile("docs/studio/STUDIO_TAURI_SHELL.md");
 
     expect(capability).toContain('"windows": ["main"]');
     expect(capability).toContain('"permissions": []');
@@ -129,7 +129,7 @@ describe("studio shell configuration", () => {
 
   test("documents and verifies read-only Tauri command bindings", async () => {
     const commandDesign = await readWorkspaceFile(
-      "docs/STUDIO_TAURI_READ_ONLY_COMMANDS.md",
+      "docs/studio/STUDIO_TAURI_READ_ONLY_COMMANDS.md",
     );
     const commands = await readWorkspaceFile(
       "apps/studio/src-tauri/src/commands.rs",
@@ -224,11 +224,15 @@ describe("studio shell configuration", () => {
   });
 
   test("documents the shell boundary and later handoff", async () => {
-    const design = await readWorkspaceFile("docs/STUDIO_FRONTEND_SHELL.md");
-    const typeStrategy = await readWorkspaceFile(
-      "docs/STUDIO_FRONTEND_OPERATION_TYPES.md",
+    const design = await readWorkspaceFile(
+      "docs/studio/STUDIO_FRONTEND_SHELL.md",
     );
-    const parity = await readWorkspaceFile("docs/STUDIO_CLI_GUI_PARITY.md");
+    const typeStrategy = await readWorkspaceFile(
+      "docs/studio/STUDIO_FRONTEND_OPERATION_TYPES.md",
+    );
+    const parity = await readWorkspaceFile(
+      "docs/studio/STUDIO_CLI_GUI_PARITY.md",
+    );
 
     expect(design).toContain("IRK-184");
     expect(design).toContain("separate GUI diagnostic or source model");

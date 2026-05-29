@@ -320,6 +320,6 @@ Policy notes:
 ## Command Design Guardrail
 
 For every future command, fill the command contract template from
-`agent-docs/CLI_DESIGN_GUIDE.md` before implementation. If the command cannot
+`agent-docs/cli/CLI_DESIGN_GUIDE.md` before implementation. If the command cannot
 answer its mutation risk, output mode, platform contract, and non-interactive
 behavior, it is not ready to build.

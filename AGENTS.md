@@ -145,103 +145,83 @@ the correct boundary.
 - `DEFERRED.md`: postponed work with reasons and resume triggers.
 - `COMMANDS.md`: brief reference for repository `just` recipes and the
   retained TypeScript PDF-generation exception.
-- `agent-docs/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
+- `agent-docs/README.md`: agent documentation map, placement rules, and
+  planning/research directory ownership.
+- `agent-docs/core/ENGINEERING_PHILOSOPHY.md`: repo-wide code-health,
   strictness, modularity, type-driven design, and testing philosophy.
-- `agent-docs/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
+- `agent-docs/roadmap/PLATFORM_ROADMAP.md`: long-term platform, CMS, CLI, MCP,
   tooling, and productization roadmap.
-- `agent-docs/TPM_CLI_PRODUCT_STRATEGY.md`: product strategy, command
+- `agent-docs/cli/TPM_CLI_PRODUCT_STRATEGY.md`: product strategy, command
   language, user journeys, and implementation direction for the future CLI.
-- `agent-docs/RUST_MIGRATION_AND_CLI_PLAN.md`: Rust-first migration plan,
+- `agent-docs/rust/RUST_MIGRATION_AND_CLI_PLAN.md`: Rust-first migration plan,
   crate boundaries, CLI/Tauri/MCP reuse model, `just` orchestration, and Rust
   QA strategy.
-- `agent-docs/RUST_ENGINEERING_GUIDE.md`: project-specific idiomatic Rust
+- `agent-docs/rust/RUST_ENGINEERING_GUIDE.md`: project-specific idiomatic Rust
   guide for domain modeling, pure/impure seams, diagnostics, tests, docs,
   dependency policy, and strict tooling.
-- `agent-docs/XTASK_ARCHITECTURE_REDESIGN.md`: internal Rust xtask
+- `agent-docs/rust/XTASK_ARCHITECTURE_REDESIGN.md`: internal Rust xtask
   architecture redesign for moving repository automation toward domain modules,
   parse-first options, pure planning seams, and auditable coverage exceptions.
-- `agent-docs/CLI_RUST_GUI_INTEGRATION_PLAN.md`: coordinated high-level plan
+- `agent-docs/roadmap/CLI_RUST_GUI_INTEGRATION_PLAN.md`: coordinated high-level plan
   for the Rust operation core, CLI, MCP, and Tauri/Astro studio GUI.
-- `agent-docs/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`: current
+- `agent-docs/migrations/MILESTONE_9_DUAL_RUN_MIGRATION_REPORT.md`: current
   parity-protected Rust/`just` migration classifications, promoted/internal
   command surfaces, accepted differences, and verification expectations.
-- `agent-docs/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`: current milestone 9
+- `agent-docs/migrations/MILESTONE_9_COMMAND_SURFACE_MIGRATION.md`: current milestone 9
   command-surface inventory, package-script retirement policy, allowed Bun
   adapter rules, and remaining migration fallback plan.
 - `agent-docs/rust-migration-research/RUST_QA_TOOLING_EVALUATION.md`:
   source-checked Rust QA/static-analysis tooling evaluation, adoption timing,
   and blocking versus review-only gate guidance.
-- `agent-docs/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
+- `agent-docs/studio/STUDIO_PRODUCT_VISION.md`: end-product studio/CMS vision,
   product modes, default author UX, and non-goals.
-- `agent-docs/STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md`: studio product
+- `agent-docs/studio/STUDIO_ARCHITECTURE_AND_WORKSPACE_MODEL.md`: studio product
   architecture decision, publication workspace model, product surface
   traceability, and first product-slice boundaries.
-- `agent-docs/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,
+- `agent-docs/studio/STUDIO_ADAPTER_MODEL.md`: source, media, history, workflow,
   build, deploy, identity, and diagnostics adapter boundaries.
-- `agent-docs/STUDIO_EXTENSION_MODEL.md`: core, bundled, optional, site, and
+- `agent-docs/studio/STUDIO_EXTENSION_MODEL.md`: core, bundled, optional, site, and
   third-party extension boundaries for the future studio.
-- `agent-docs/QA_PREFLIGHT.md`: QA command inventory, CI parity model,
+- `agent-docs/qa/QA_PREFLIGHT.md`: QA command inventory, CI parity model,
   failure-probe plan, diagnostic-diff design, and scope-cleanup notes.
-- `agent-docs/DESIGN_PHILOSOPHY.md`: expanded design philosophy notes.
-- `agent-docs/COMPONENT_ARCHITECTURE.md`: target component hierarchy,
+- `agent-docs/core/DESIGN_PHILOSOPHY.md`: expanded design philosophy notes.
+- `agent-docs/core/COMPONENT_ARCHITECTURE.md`: target component hierarchy,
   component responsibilities, navigation redesign direction, and migration
   sequence.
-- `agent-docs/ASTRO_GUIDANCE.md`: expanded Astro notes.
-- `agent-docs/TAILWIND_GUIDANCE.md`: expanded Tailwind notes.
-- `docs/PLATFORM_MODULES.md`: map of current platform modules, entrypoints,
-  contracts, and package-boundary intent.
-- `docs/STARTER_TEMPLATES.md`: starter-template product contract, registry,
-  fixture matrix, and verification model.
-- `docs/EXTENSION_ARCHITECTURE.md`: extension manifest, lifecycle, security,
-  and compatibility planning.
-- `docs/DEPLOYMENT_ADAPTER_CONTRACT.md`: deploy target capability model and
-  adapter expectations.
-- `docs/STUDIO_EDITING_SURFACES.md`: schema-driven editing, media, metadata,
-  preview, source-view, and extension-owned GUI surface design.
-- `docs/STUDIO_PROVIDER_CAPABILITY_MATRIX.md`: provider capability taxonomy,
-  unsupported-operation behavior, adapter sequencing, and runtime handoff.
-- `docs/STUDIO_PUBLISH_WORKFLOWS.md`: provider-backed publish, rollback,
-  credential, permission, audit, and release workflow design.
-- `docs/HEADLESS_STUDIO_CORE_CONTRACT.md`: shared studio operation core and
-  GUI/CLI/MCP/CI adapter contract.
-- `docs/STUDIO_PROGRESSIVE_ADOPTION_PATHS.md`: migration and upgrade paths
-  from simple local publishing to complex provider-backed workflows.
-- `docs/CLI_PRODUCT_CONTRACT.md`: future `tpm` CLI command language, output,
-  safety, workspace discovery, and product-contract design.
-- `docs/STUDIO_MCP_SAFETY_MODEL.md`: MCP resource/tool, permission,
-  plan/apply, redaction, and agent safety model.
-- `docs/STUDIO_MCP_RESOURCE_CONTRACTS.md`: implemented read-only MCP resource
-  catalog, permission defaults, redaction summary, unsupported capability
-  behavior, and Milestone 13 handoff notes.
-- `docs/STUDIO_PRODUCT_TEST_PLAN.md`: mocked-provider product test matrix for
-  studio workflows, accessibility, recovery, security, and provider failures.
-- `docs/STUDIO_PARITY_FIXTURE_STRATEGY.md`: GUI/CLI/MCP/CI parity fixture
-  strategy over shared studio operation results.
-- `docs/STUDIO_FRONTEND_SHELL.md`: first read-only Astro studio frontend shell
-  design, app boundary, fixture data model, responsive behavior, and handoff to
-  later Tauri/operation binding issues.
-- `docs/STUDIO_TAURI_SHELL.md`: minimal Tauri package design, capability
-  boundary, command-router surface, and security assumptions for the first
-  read-only desktop shell.
-- `docs/IMPORT_EXPORT_AND_PRESERVATION_POLICY.md`: import/export and content
-  preservation contracts.
-- `docs/LOCALIZATION_CONTRACTS.md`: locale and inclusive-defaults contracts.
-- `docs/RELEASE_GOVERNANCE.md`: versioning, compatibility, release-note, and
-  migration policy.
-- `docs/STATIC_OUTPUT_SECURITY.md`: generated-output security invariants.
-- `docs/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md`: future studio credential,
-  provider permission, redaction, audit, recovery, and fixture contract.
-- `docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md`: dependency, lockfile, secret, and
-  provenance policy.
-- `docs/TEST_MATRIX_AND_FIXTURE_STRATEGY.md`: fixture matrix and test strategy
-  for platform/studio readiness.
-- `docs/RUST_WORKSPACE.md`: additive Rust workspace, `just`, blocking/review
-  Rust checks, fixture, and migration policy.
-- `docs/RUST_OPERATION_CONTRACTS.md`: diagnostic, workspace, operation
-  envelope, and operation fixture contracts.
-- `docs/RUST_ADAPTER_RUNTIME.md`: Rust adapter capability runtime,
-  mock-provider profiles, credential redaction, unavailable-operation
-  diagnostics, and inspection command contract.
+- `agent-docs/core/ASTRO_GUIDANCE.md`: expanded Astro notes.
+- `agent-docs/core/TAILWIND_GUIDANCE.md`: expanded Tailwind notes.
+- `docs/README.md`: documentation map, placement rules, and directory
+  ownership.
+- `docs/authoring/`: author and site-owner workflows, diagnostics, site
+  anatomy, article features, authors, tags, bibliography, and PDFs.
+- `docs/citations/`: citation, BibTeX, article-reference, corpus-audit, and
+  canonical-verification work.
+- `docs/platform/`: platform module contracts, source contracts, routing,
+  starter templates, package boundaries, homepage model, and generated-output
+  contracts.
+- `docs/metadata/`: metadata, semantic graph, social preview, webmaster, and
+  machine-readability contracts.
+- `docs/studio/`: Studio/CMS contracts shared by GUI, CLI, MCP, Tauri,
+  publishing, provider capabilities, credentials, parity, and test plans.
+- `docs/studio/gui-mvp/`: first shippable Studio GUI MVP product, visual,
+  fixture, component, dependency, and Figma handoff specs.
+- `docs/cli/`: product-facing CLI contracts and command-language designs.
+- `docs/rust/`: Rust workspace, operation, adapter runtime, and TypeScript
+  automation migration docs.
+- `docs/operations/`: deployment, Cloudflare, extension, and media/provider
+  adapter contracts.
+- `docs/governance/`: release, security, localization, import/export,
+  documentation lifecycle, generated-output security, and supply-chain
+  policies.
+- `docs/qa/`: QA pipeline, site doctor, fixture matrix, and test strategy
+  docs.
+- `docs/performance/`: Lighthouse, build, payload, minification, and
+  performance optimization research and plans.
+- `docs/components/`, `docs/layouts/`, `docs/navigation/`,
+  `docs/rehype-plugins/`, and `docs/remark-plugins/`: component, layout,
+  navigation, and Markdown pipeline contracts.
+- `docs/assets/`, `docs/generated/`, and `docs/deferred/`: shared doc media,
+  generated artifacts, and postponed notes.
 
 ## Project-Local Skills
 
@@ -269,8 +249,8 @@ theme, and typed config; platform code validates and normalizes that intent,
 then emits static routes, HTML, metadata, feeds, search data, PDFs, assets, and
 diagnostics.
 
-Use `agent-docs/ENGINEERING_PHILOSOPHY.md` as the decision aid for substantial
-platform work. Use `agent-docs/PLATFORM_ROADMAP.md` when work touches roadmap
+Use `agent-docs/core/ENGINEERING_PHILOSOPHY.md` as the decision aid for substantial
+platform work. Use `agent-docs/roadmap/PLATFORM_ROADMAP.md` when work touches roadmap
 domains, future CMS/studio readiness, CLI/MCP behavior, public generated
 output, or platform productization.
 
@@ -331,14 +311,14 @@ configuration, not in platform entrypoints or starter examples.
 Starters are maintained distribution assets, not throwaway fixtures. When
 adding or changing starters:
 
-- update `src/lib/starter-templates.ts`, `docs/STARTER_TEMPLATES.md`, and any
+- update `src/lib/starter-templates.ts`, `docs/platform/STARTER_TEMPLATES.md`, and any
   affected examples together;
 - keep default copy generic, inclusive, and suitable for a new publication;
 - verify every starter uses only supported source contracts and no accidental
   TPM-only assumptions;
 - run `just starters-check` or a broader check that includes it.
 
-When adding a new platform-facing domain, update `docs/PLATFORM_MODULES.md` and
+When adding a new platform-facing domain, update `docs/platform/PLATFORM_MODULES.md` and
 the relevant contract document before relying on the seam from examples,
 future studio code, CLI/MCP plans, or tests.
 
@@ -1707,7 +1687,7 @@ before code changes.
 
 Do not create planning docs for routine QA commands. Routine tooling
 expectations belong in this file, `COMMANDS.md`, and the QA command
-registry. Use `agent-docs/QA_PREFLIGHT.md` only when changing the QA foundation
+registry. Use `agent-docs/qa/QA_PREFLIGHT.md` only when changing the QA foundation
 or resuming scoped QA-tooling work from the roadmap.
 
 ## Generated Files And Historical Assets

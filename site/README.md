@@ -313,7 +313,7 @@ See the [Know Your Meme entry](https://knowyourmeme.com/).
 
 For footnotes, citations, and bibliography entries, use the project citation
 format documented in
-[`../docs/ARTICLE_REFERENCE_AUTHORING.md`](../docs/ARTICLE_REFERENCE_AUTHORING.md).
+[`../docs/authoring/ARTICLE_REFERENCE_AUTHORING.md`](../docs/authoring/ARTICLE_REFERENCE_AUTHORING.md).
 The short version:
 
 - explanatory notes use `[^note-something]`;

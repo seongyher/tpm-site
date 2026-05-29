@@ -3,7 +3,7 @@
 This folder contains the working documents and final synthesis for the
 comprehensive repo roadmap audit.
 
-The audit uses `agent-docs/ENGINEERING_PHILOSOPHY.md` as its standard. The goal
+The audit uses `agent-docs/core/ENGINEERING_PHILOSOPHY.md` as its standard. The goal
 is to map what the repo should become, not merely what should be fixed in the
 next patch.
 
