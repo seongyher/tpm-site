@@ -99,6 +99,13 @@ Use release governance when changes touch:
   provider credentials, or rollback behavior;
 - package/platform entrypoints or future extractable APIs.
 
+When a change affects public package, CLI, Studio, or distribution surfaces,
+also update the relevant public distribution docs:
+[`PUBLIC_API_COMPATIBILITY.md`](./PUBLIC_API_COMPATIBILITY.md),
+[`CLI_DISTRIBUTION.md`](./CLI_DISTRIBUTION.md),
+[`STUDIO_TAURI_DISTRIBUTION.md`](./STUDIO_TAURI_DISTRIBUTION.md), and
+[`PUBLIC_DISTRIBUTION_READINESS.md`](./PUBLIC_DISTRIBUTION_READINESS.md).
+
 Patch-level implementation-only changes can still record a change row when a
 maintainer wants traceability, but only breaking and deprecation changes have
 strict note requirements.

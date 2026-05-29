@@ -137,10 +137,11 @@ just quality-release
 
 `release-check` includes the blocking release gates: normal checks, production
 build verification, browser smoke/responsive/search tests, high-severity
-dependency audit, and secrets checks. `quality-release` also runs the
-non-blocking review signals: Markdown style, asset cleanup, accessibility,
-Lighthouse, coverage, and all-severity dependency audit. The secrets check
-expects the `gitleaks` binary to be available locally.
+dependency audit, secrets checks, Rust checks, and public-distribution
+readiness invariants. `quality-release` also runs the non-blocking review
+signals: Markdown style, asset cleanup, accessibility, Lighthouse, coverage,
+and all-severity dependency audit. The secrets check expects the `gitleaks`
+binary to be available locally.
 
 ## Content Model
 

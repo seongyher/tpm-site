@@ -126,6 +126,7 @@ overflow-checks = true
 clap = { version = "4.5.51", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
+tpm-cli = { path = "crates/tpm-cli", version = "0.1.0" }
 tpm-core = { path = "crates/tpm-core", version = "0.1.0" }
 tpm-diagnostics = { path = "crates/tpm-diagnostics", version = "0.1.0" }
 tpm-operations = { path = "crates/tpm-operations", version = "0.1.0" }

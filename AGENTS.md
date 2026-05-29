@@ -208,6 +208,14 @@ the correct boundary.
   from simple local publishing to complex provider-backed workflows.
 - `docs/CLI_PRODUCT_CONTRACT.md`: future `tpm` CLI command language, output,
   safety, workspace discovery, and product-contract design.
+- `docs/CLI_DISTRIBUTION.md`: `tpm` CLI binary distribution, release smoke,
+  and generated command-reference policy.
+- `docs/generated/tpm-cli-reference.md`: generated `tpm` CLI command
+  reference. Do not edit by hand; run `just cli-reference`.
+- `docs/PUBLIC_API_COMPATIBILITY.md`: public/package-like API stability tiers,
+  compatibility policy, and future semver-check rules.
+- `docs/PUBLIC_DISTRIBUTION_READINESS.md`: Milestone 14 public distribution
+  readiness checklist and focused distribution commands.
 - `docs/STUDIO_MCP_SAFETY_MODEL.md`: MCP resource/tool, permission,
   plan/apply, redaction, and agent safety model.
 - `docs/STUDIO_MCP_RESOURCE_CONTRACTS.md`: implemented MCP resource/tool
@@ -223,6 +231,8 @@ the correct boundary.
 - `docs/STUDIO_TAURI_SHELL.md`: minimal Tauri package design, capability
   boundary, command-router surface, and security assumptions for the first
   read-only desktop shell.
+- `docs/STUDIO_TAURI_DISTRIBUTION.md`: unsigned Tauri packageability, signing,
+  notarization, update-channel, and release-secret plan.
 - `docs/STUDIO_AUTHORING_OPERATIONS.md`: implemented Milestone 12 Studio
   authoring operation slice for settings, content, media, preview, release,
   publish apply gates, rollback, credentials, audit, and product verification.
@@ -245,6 +255,9 @@ the correct boundary.
 - `docs/RUST_ADAPTER_RUNTIME.md`: Rust adapter capability runtime,
   mock-provider profiles, credential redaction, unavailable-operation
   diagnostics, and inspection command contract.
+- `docs/RUST_ADVANCED_QA_POLICY.md`: advanced Rust QA/static-analysis,
+  dependency cleanup, unsafe inventory, fuzzing, Miri/sanitizer, and binary
+  size review policy.
 
 ## Project-Local Skills
 

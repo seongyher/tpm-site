@@ -14,11 +14,12 @@ use std::sync::Mutex;
 
 use super::{
     AssetReference, CATALOG_OUTPUT_DIR, CATALOG_PLAYWRIGHT_SPEC, ExternalCommand,
-    ExternalCommandRunner, Workspace, absolutize, build_raw, collect_asset_references,
-    collect_files_with_extensions, collect_redirects, duplicate_image_groups, extension_in,
-    extension_is, fnv64, glob_matches, ignored_dir, ignored_path, image_files, is_inside,
-    load_ignore_list, local_binary, local_binary_for_platform, normalize_path_components,
-    normalize_tags, output_dir_arg, path_has_extension, quoted_or_parenthesized_values,
+    ExternalCommandRunner, Workspace, absolutize, build_raw, cli_reference_issues,
+    collect_asset_references, collect_files_with_extensions, collect_redirects,
+    distribution_readiness_issues, duplicate_image_groups, extension_in, extension_is, fnv64,
+    glob_matches, ignored_dir, ignored_path, image_files, is_inside, load_ignore_list,
+    local_binary, local_binary_for_platform, normalize_path_components, normalize_tags,
+    output_dir_arg, path_has_extension, public_api_issues, quoted_or_parenthesized_values,
     relative_display, remove_unreferenced_astro_rasters, require_dir, require_file,
     resolve_asset_reference, run, shared_asset_violations, test_catalog, test_flake, validate_html,
     verify_content, wildcard_matches,
@@ -201,9 +202,12 @@ fn active_tasks_with_options_have_help_before_side_effects() {
         "build-optimize",
         "build-raw",
         "catalog-check",
+        "cli-reference",
+        "cli-reference-check",
         "content-check",
         "coverage-verify",
         "diagnostics-diff",
+        "distribution-check",
         "docs-references",
         "docs-references-check",
         "migration-baseline",
@@ -211,6 +215,7 @@ fn active_tasks_with_options_have_help_before_side_effects() {
         "payload-check",
         "payload-report",
         "platform-check",
+        "public-api-check",
         "qa-registry",
         "site-schema",
         "site-schema-check",
@@ -256,6 +261,238 @@ fn catalog_test_target_matches_current_playwright_suite() {
         "tests/e2e/catalog-invariants.pw.ts"
     );
     assert_eq!(CATALOG_OUTPUT_DIR, "dist-catalog");
+}
+
+fn write_distribution_manifest_set(root: &Path) -> Result<(), Box<dyn Error>> {
+    write_text(
+        &root.join("Cargo.toml"),
+        "[workspace.package]\npublish = false\n",
+    )?;
+
+    for manifest in [
+        "crates/tpm-core/Cargo.toml",
+        "crates/tpm-diagnostics/Cargo.toml",
+        "crates/tpm-workspace/Cargo.toml",
+        "crates/tpm-operations/Cargo.toml",
+        "crates/tpm-cli/Cargo.toml",
+        "crates/tpm-mcp/Cargo.toml",
+        "crates/tpm-xtask/Cargo.toml",
+        "apps/studio/src-tauri/Cargo.toml",
+    ] {
+        write_text(
+            &root.join(manifest),
+            "[package]\nname = \"fixture\"\ndescription = \"Fixture package.\"\npublish.workspace = true\n\n[lints]\nworkspace = true\n",
+        )?;
+    }
+
+    Ok(())
+}
+
+fn write_distribution_docs(root: &Path) -> Result<(), Box<dyn Error>> {
+    for doc in [
+        "docs/PACKAGE_BOUNDARIES_AND_EXTRACTION_CRITERIA.md",
+        "docs/PUBLIC_API_COMPATIBILITY.md",
+        "docs/CLI_DISTRIBUTION.md",
+        "docs/RUST_ADVANCED_QA_POLICY.md",
+        "docs/PUBLIC_DISTRIBUTION_READINESS.md",
+        "docs/RELEASE_GOVERNANCE.md",
+        "docs/SUPPLY_CHAIN_AND_SECRET_POLICY.md",
+    ] {
+        write_text(&root.join(doc), "# Fixture\n")?;
+    }
+
+    write_text(
+        &root.join("docs/STUDIO_TAURI_DISTRIBUTION.md"),
+        "# Fixture\n\nsigning\nnotarization\nupdate\nsecret\n",
+    )?;
+    write_text(
+        &root.join("docs/generated/tpm-cli-reference.md"),
+        tpm_cli::render_command_reference_markdown().as_str(),
+    )?;
+    write_text(
+        &root.join("examples/platform-entrypoint-consumer/platform-consumer.ts"),
+        "export const fixture = true;\n",
+    )?;
+    write_text(
+        &root.join("justfile"),
+        "\ncli-reference:\ncli-reference-check:\ncli-release-smoke:\nstudio-package-check:\nrust-public-api-check:\ndistribution-check:\n",
+    )?;
+
+    Ok(())
+}
+
+#[test]
+fn generated_cli_reference_check_reports_missing_and_stale_docs() -> Result<(), Box<dyn Error>> {
+    let root = temp_workspace("cli-reference");
+    remove_test_dir(&root);
+    let ws = workspace(&root);
+
+    assert_eq!(
+        cli_reference_issues(&ws)?,
+        vec![String::from(
+            "docs/generated/tpm-cli-reference.md: generated CLI reference is missing"
+        )]
+    );
+
+    write_text(
+        &root.join("docs/generated/tpm-cli-reference.md"),
+        "# stale\n",
+    )?;
+    assert_eq!(
+        cli_reference_issues(&ws)?,
+        vec![String::from(
+            "docs/generated/tpm-cli-reference.md: generated CLI reference is stale; run `just cli-reference`"
+        )]
+    );
+
+    write_text(
+        &root.join("docs/generated/tpm-cli-reference.md"),
+        tpm_cli::render_command_reference_markdown().as_str(),
+    )?;
+    assert!(cli_reference_issues(&ws)?.is_empty());
+
+    remove_test_dir(root);
+    Ok(())
+}
+
+#[test]
+fn public_api_policy_reports_manifest_drift() -> Result<(), Box<dyn Error>> {
+    let root = temp_workspace("public-api");
+    remove_test_dir(&root);
+    write_distribution_manifest_set(&root)?;
+
+    assert!(public_api_issues(&root)?.is_empty());
+
+    write_text(&root.join("Cargo.toml"), "[workspace.package]\n")?;
+    write_text(
+        &root.join("crates/tpm-cli/Cargo.toml"),
+        "[package]\nname = \"tpm-cli\"\npublish = true\n",
+    )?;
+
+    let issues = public_api_issues(&root)?;
+    let text = issues.join("\n");
+    assert!(text.contains("workspace package policy"));
+    assert!(text.contains("directly publishable"));
+    assert!(text.contains("inherit the workspace publish policy"));
+    assert!(text.contains("package description"));
+    assert!(text.contains("inherit workspace lint policy"));
+
+    remove_test_dir(root);
+    Ok(())
+}
+
+#[test]
+fn distribution_readiness_policy_checks_public_release_artifacts() -> Result<(), Box<dyn Error>> {
+    let root = temp_workspace("distribution-readiness");
+    remove_test_dir(&root);
+    let ws = workspace(&root);
+    write_distribution_manifest_set(&root)?;
+    write_distribution_docs(&root)?;
+
+    assert!(distribution_readiness_issues(&ws)?.is_empty());
+
+    write_text(
+        &root.join("examples/platform-entrypoint-consumer/platform-consumer.ts"),
+        "export const bad = 'thephilosophersmeme.com';\n",
+    )?;
+    let issues = distribution_readiness_issues(&ws)?;
+    assert!(issues.join("\n").contains("TPM-only boundary"));
+
+    remove_test_dir(root);
+    Ok(())
+}
+
+#[test]
+fn distribution_readiness_reports_artifact_and_recipe_drift() -> Result<(), Box<dyn Error>> {
+    let root = temp_workspace("distribution-drift");
+    remove_test_dir(&root);
+    let ws = workspace(&root);
+    write_distribution_manifest_set(&root)?;
+    write_distribution_docs(&root)?;
+
+    fs::remove_file(root.join("docs/CLI_DISTRIBUTION.md"))?;
+    fs::remove_file(root.join("examples/platform-entrypoint-consumer/platform-consumer.ts"))?;
+    write_text(
+        &root.join("docs/generated/tpm-cli-reference.md"),
+        "# stale\n",
+    )?;
+    write_text(
+        &root.join("docs/STUDIO_TAURI_DISTRIBUTION.md"),
+        "# Fixture\n\nsigning\nnotarization\nupdate\n",
+    )?;
+    write_text(
+        &root.join("justfile"),
+        "\ncli-reference:\ncli-reference-check:\ncli-release-smoke:\nstudio-package-check:\nrust-public-api-check:\n",
+    )?;
+
+    let issues = distribution_readiness_issues(&ws)?;
+    let text = issues.join("\n");
+    assert!(text.contains("docs/CLI_DISTRIBUTION.md: required distribution document is missing"));
+    assert!(text.contains("generated CLI reference is stale"));
+    assert!(text.contains("required distribution recipe `distribution-check` is missing"));
+    assert!(text.contains("external consumer example is missing"));
+    assert!(text.contains("Tauri distribution plan should document secret"));
+
+    fs::remove_file(root.join("justfile"))?;
+    let text = distribution_readiness_issues(&ws)?.join("\n");
+    assert!(text.contains("justfile: command router is missing"));
+
+    remove_test_dir(root);
+    Ok(())
+}
+
+#[test]
+fn distribution_task_commands_render_success_failure_and_quiet_paths() -> Result<(), Box<dyn Error>>
+{
+    let _lock = lock_process_state();
+    let root = temp_workspace("distribution-commands");
+    remove_test_dir(&root);
+    write_distribution_manifest_set(&root)?;
+    write_distribution_docs(&root)?;
+    fs::remove_file(root.join("docs/generated/tpm-cli-reference.md"))?;
+
+    let cwd = CurrentDirGuard::enter(&root)?;
+
+    let (exit, output) = run_text(vec!["cli-reference"]);
+    assert_eq!(exit, CommandExit::Success);
+    assert!(output.contains("Generated CLI reference at docs/generated/tpm-cli-reference.md"));
+    assert_eq!(
+        fs::read_to_string(root.join("docs/generated/tpm-cli-reference.md"))?,
+        tpm_cli::render_command_reference_markdown()
+    );
+
+    let (exit, output) = run_text(vec!["cli-reference-check"]);
+    assert_eq!(exit, CommandExit::Success);
+    assert!(output.contains("CLI reference check passed."));
+
+    let (exit, output) = run_text(vec!["cli-reference-check", "--quiet"]);
+    assert_eq!(exit, CommandExit::Success);
+    assert!(output.is_empty());
+
+    let (exit, output) = run_text(vec!["public-api-check"]);
+    assert_eq!(exit, CommandExit::Success);
+    assert!(output.contains("Public API compatibility policy passed."));
+
+    let (exit, output) = run_text(vec!["distribution-check"]);
+    assert_eq!(exit, CommandExit::Success);
+    assert!(output.contains("Public distribution readiness check passed."));
+
+    write_text(&root.join("Cargo.toml"), "[workspace.package]\n")?;
+    let (exit, output) = run_text(vec!["public-api-check"]);
+    assert_eq!(exit, CommandExit::Failure);
+    assert!(output.contains("Public API compatibility policy failed."));
+    assert!(output.contains("publish = false"));
+
+    fs::remove_file(root.join("justfile"))?;
+    let (exit, output) = run_text(vec!["distribution-check"]);
+    assert_eq!(exit, CommandExit::Failure);
+    assert!(output.contains("Public distribution readiness check failed."));
+    assert!(output.contains("justfile: command router is missing"));
+
+    drop(cwd);
+
+    remove_test_dir(root);
+    Ok(())
 }
 
 #[test]

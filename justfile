@@ -28,7 +28,7 @@ check-fast: content-check tags-check site-doctor site-schema-check starters-chec
 check: check-fast typecheck lint format deadcode test rust-check-fast
 
 # Run the heavier pre-release validation path.
-release-check: test-accountability-release check review-markdown docs-check test-catalog test-catalog-site-instance build-release payload-check verify validate-html test-e2e-built audit secrets rust-check
+release-check: test-accountability-release check review-markdown docs-check test-catalog test-catalog-site-instance build-release payload-check verify validate-html test-e2e-built audit secrets rust-check distribution-check
 
 # Run all automatic fixes for JS/TS/Astro/Tailwind, Markdown/MDX, package ordering, and Rust.
 fix: js-fix markdown-fix rust-fix
@@ -196,7 +196,15 @@ docs-references *args:
     just _xtask docs-references {{args}}
 
 # Run documentation checks, including generated references and docs-site validation.
-docs-check: docs-references-check test-docs-site
+docs-check: docs-references-check cli-reference-check test-docs-site
+
+# Generate the TPM CLI command reference.
+cli-reference *args:
+    just _xtask cli-reference {{args}}
+
+# Check whether the TPM CLI command reference is current.
+cli-reference-check *args:
+    just _xtask cli-reference-check {{args}}
 
 # Build the documentation-site example.
 docs-site-build:
@@ -245,6 +253,11 @@ studio-tauri-dev *args:
 [working-directory: 'apps/studio']
 studio-tauri-build *args:
     ../../node_modules/.bin/tauri build {{args}}
+
+# Run unsigned Studio packageability checks that do not require signing credentials.
+studio-package-check:
+    just studio-build
+    cargo build --package tpm-studio --bin tpm-studio --locked
 
 # Build the private component catalog.
 catalog-build:
@@ -522,6 +535,36 @@ rust-deny:
 rust-nextest:
     @cargo nextest --version >/dev/null 2>&1 || (echo 'cargo-nextest is review-only and is not installed. Install it with: cargo install cargo-nextest --locked' >&2; exit 127)
     cargo nextest run --workspace --all-features --locked
+
+# Check current public API/package compatibility policy.
+rust-public-api-check *args:
+    just _xtask public-api-check {{args}}
+
+# Run optional Rust dependency cleanup review.
+rust-dependency-review:
+    @cargo machete --version >/dev/null 2>&1 || (echo 'cargo-machete is review-only and is not installed. Install it with: cargo install cargo-machete --locked' >&2; exit 127)
+    cargo machete
+
+# Run optional CLI binary size review.
+rust-binary-size-review:
+    @cargo bloat --version >/dev/null 2>&1 || (echo 'cargo-bloat is review-only and is not installed. Install it with: cargo install cargo-bloat --locked' >&2; exit 127)
+    cargo bloat --package tpm-cli --release --crates
+
+# Run all optional Rust public-distribution review signals.
+rust-distribution-review: rust-public-api-check
+    -just rust-dependency-review
+    -just rust-binary-size-review
+
+# Run local CLI release artifact smoke checks.
+cli-release-smoke:
+    cargo build --package tpm-cli --bin tpm --release --locked
+    ./target/release/tpm --help >/dev/null
+    ./target/release/tpm --version >/dev/null
+    ./target/release/tpm site status --site tests/fixtures/rust-workspace --format json >/dev/null
+
+# Verify public distribution readiness invariants.
+distribution-check *args:
+    just _xtask distribution-check {{args}}
 
 # Run internal Rust repository automation used by named just recipes.
 _xtask *args:
