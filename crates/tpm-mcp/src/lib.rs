@@ -13,7 +13,9 @@ use tpm_core::Severity;
 use tpm_diagnostics::{Diagnostic, DiagnosticCode, DiagnosticReport};
 use tpm_operations::{
     OperationInterface, OperationResult, run_image_asset_verification, run_redirect_report,
-    run_release_inspect, run_site_doctor, run_workspace_status,
+    run_release_inspect, run_site_doctor, run_studio_content_editor, run_studio_media_library,
+    run_studio_preview_plan, run_studio_publish_apply, run_studio_release_plan,
+    run_studio_settings_inspect, run_studio_workflow_verify, run_workspace_status,
 };
 
 /// Current schema version for serialized MCP resource responses.
@@ -48,6 +50,20 @@ pub enum ResourceKind {
     RoutesRedirects,
     /// Site workspace diagnostics.
     SiteDiagnostics,
+    /// Studio content and source-edit plan report.
+    StudioContentPlan,
+    /// Studio media materialization/change plan report.
+    StudioMediaPlan,
+    /// Studio preview report over shared operation data.
+    StudioPreviewReport,
+    /// Studio publish plan and apply-gate report.
+    StudioPublishPlan,
+    /// Studio release manifest and health report.
+    StudioReleasePlan,
+    /// Studio settings change plan report.
+    StudioSettingsPlan,
+    /// Studio authoring/publish workflow verification report.
+    StudioWorkflowVerify,
     /// Workspace source-root and source-inventory status.
     WorkspaceStatus,
 }
@@ -64,6 +80,25 @@ impl ResourceKind {
             Self::ReleaseInspect => ResourceUri::from_static("tpm://resources/release/inspect"),
             Self::RoutesRedirects => ResourceUri::from_static("tpm://resources/routes/redirects"),
             Self::SiteDiagnostics => ResourceUri::from_static("tpm://resources/site/diagnostics"),
+            Self::StudioContentPlan => {
+                ResourceUri::from_static("tpm://resources/studio/content-plan")
+            }
+            Self::StudioMediaPlan => ResourceUri::from_static("tpm://resources/studio/media-plan"),
+            Self::StudioPreviewReport => {
+                ResourceUri::from_static("tpm://resources/studio/preview-report")
+            }
+            Self::StudioPublishPlan => {
+                ResourceUri::from_static("tpm://resources/studio/publish-plan")
+            }
+            Self::StudioReleasePlan => {
+                ResourceUri::from_static("tpm://resources/studio/release-plan")
+            }
+            Self::StudioSettingsPlan => {
+                ResourceUri::from_static("tpm://resources/studio/settings-plan")
+            }
+            Self::StudioWorkflowVerify => {
+                ResourceUri::from_static("tpm://resources/studio/workflow-verify")
+            }
             Self::WorkspaceStatus => ResourceUri::from_static("tpm://resources/workspace/status"),
         }
     }
@@ -77,6 +112,13 @@ impl ResourceKind {
             Self::ReleaseInspect => "Release inspection",
             Self::RoutesRedirects => "Route redirects",
             Self::SiteDiagnostics => "Site diagnostics",
+            Self::StudioContentPlan => "Studio content plan",
+            Self::StudioMediaPlan => "Studio media plan",
+            Self::StudioPreviewReport => "Studio preview report",
+            Self::StudioPublishPlan => "Studio publish plan",
+            Self::StudioReleasePlan => "Studio release plan",
+            Self::StudioSettingsPlan => "Studio settings plan",
+            Self::StudioWorkflowVerify => "Studio workflow verification",
             Self::WorkspaceStatus => "Workspace status",
         }
     }
@@ -92,6 +134,13 @@ impl ResourceKind {
             Self::ReleaseInspect => "Wraps the read-only generated-output release inspection.",
             Self::RoutesRedirects => "Wraps the read-only route and redirect report.",
             Self::SiteDiagnostics => "Wraps the read-only site doctor diagnostic operation.",
+            Self::StudioContentPlan => "Wraps the Studio content editor source plan.",
+            Self::StudioMediaPlan => "Wraps the Studio media materialization plan.",
+            Self::StudioPreviewReport => "Wraps the Studio preview plan and parity report.",
+            Self::StudioPublishPlan => "Wraps the Studio publish apply gate as a plan report.",
+            Self::StudioReleasePlan => "Wraps the Studio release manifest and health report.",
+            Self::StudioSettingsPlan => "Wraps the Studio settings inspection and change plan.",
+            Self::StudioWorkflowVerify => "Wraps the Studio workflow verification report.",
             Self::WorkspaceStatus => "Wraps the read-only workspace status operation.",
         }
     }
@@ -110,14 +159,60 @@ impl ResourceKind {
             Self::SiteDiagnostics => {
                 vec![PermissionScope::Inspect, PermissionScope::DiagnosticsRead]
             }
+            Self::StudioContentPlan | Self::StudioSettingsPlan => vec![
+                PermissionScope::Inspect,
+                PermissionScope::SourceRead,
+                PermissionScope::SourcePropose,
+            ],
+            Self::StudioMediaPlan => {
+                vec![PermissionScope::Inspect, PermissionScope::MediaRead]
+            }
+            Self::StudioPreviewReport => {
+                vec![PermissionScope::Inspect, PermissionScope::PreviewRun]
+            }
+            Self::StudioPublishPlan | Self::StudioReleasePlan => vec![
+                PermissionScope::Inspect,
+                PermissionScope::ReleaseRead,
+                PermissionScope::ProviderStatusRead,
+            ],
+            Self::StudioWorkflowVerify => vec![
+                PermissionScope::Inspect,
+                PermissionScope::DiagnosticsRead,
+                PermissionScope::ProviderStatusRead,
+            ],
             Self::WorkspaceStatus => vec![PermissionScope::Inspect, PermissionScope::SourceRead],
         }
     }
 
-    const fn all() -> [Self; 6] {
+    const fn safety_class(self) -> ResourceSafetyClass {
+        match self {
+            Self::AdapterCapabilities
+            | Self::MediaImages
+            | Self::ReleaseInspect
+            | Self::RoutesRedirects
+            | Self::SiteDiagnostics
+            | Self::WorkspaceStatus => ResourceSafetyClass::ReadOnly,
+            Self::StudioContentPlan
+            | Self::StudioMediaPlan
+            | Self::StudioPreviewReport
+            | Self::StudioPublishPlan
+            | Self::StudioReleasePlan
+            | Self::StudioSettingsPlan
+            | Self::StudioWorkflowVerify => ResourceSafetyClass::PlanOnly,
+        }
+    }
+
+    const fn all() -> [Self; 13] {
         [
             Self::WorkspaceStatus,
             Self::SiteDiagnostics,
+            Self::StudioSettingsPlan,
+            Self::StudioContentPlan,
+            Self::StudioMediaPlan,
+            Self::StudioPreviewReport,
+            Self::StudioReleasePlan,
+            Self::StudioPublishPlan,
+            Self::StudioWorkflowVerify,
             Self::ReleaseInspect,
             Self::MediaImages,
             Self::RoutesRedirects,
@@ -143,6 +238,34 @@ impl ResourceKind {
             Self::SiteDiagnostics => {
                 ResourceOperation::Operation(run_site_doctor(workspace, OperationInterface::Mcp))
             }
+            Self::StudioContentPlan => ResourceOperation::Operation(run_studio_content_editor(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioMediaPlan => ResourceOperation::Operation(run_studio_media_library(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioPreviewReport => ResourceOperation::Operation(run_studio_preview_plan(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioPublishPlan => ResourceOperation::Operation(run_studio_publish_apply(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioReleasePlan => ResourceOperation::Operation(run_studio_release_plan(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioSettingsPlan => ResourceOperation::Operation(run_studio_settings_inspect(
+                workspace,
+                OperationInterface::Mcp,
+            )),
+            Self::StudioWorkflowVerify => ResourceOperation::Operation(run_studio_workflow_verify(
+                workspace,
+                OperationInterface::Mcp,
+            )),
             Self::WorkspaceStatus => ResourceOperation::Operation(run_workspace_status(
                 workspace,
                 OperationInterface::Mcp,
@@ -173,20 +296,44 @@ impl ResourceUri {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum PermissionScope {
+    /// Administrative access to extension or server-level configuration.
+    Admin,
+    /// Run build/report planning.
+    BuildRun,
+    /// Test credential references without exposing secret values.
+    CredentialTest,
+    /// Run preview or preview-report planning.
+    DeployPreview,
+    /// Publish deploy output.
+    DeployPublish,
+    /// Roll back a deploy or published artifact.
+    DeployRollback,
     /// Read current diagnostics.
     DiagnosticsRead,
+    /// Configure extensions.
+    ExtensionConfigure,
     /// Inspect read-only platform state.
     Inspect,
     /// Read media reports.
     MediaRead,
+    /// Write media or materialized media references.
+    MediaWrite,
     /// Read provider status and capabilities.
     ProviderStatusRead,
+    /// Run preview or preview-report planning.
+    PreviewRun,
     /// Read release and generated-output reports.
     ReleaseRead,
     /// Read route and redirect reports.
     RoutesRead,
+    /// Propose source changes without applying them.
+    SourcePropose,
     /// Read source/workspace summaries.
     SourceRead,
+    /// Write source files through an approved plan/apply operation.
+    SourceWrite,
+    /// Transition editorial or publishing workflow state.
+    WorkflowTransition,
 }
 
 /// Permission set granted to an MCP request.
@@ -212,9 +359,11 @@ impl PermissionSet {
             PermissionScope::DiagnosticsRead,
             PermissionScope::Inspect,
             PermissionScope::MediaRead,
+            PermissionScope::PreviewRun,
             PermissionScope::ProviderStatusRead,
             PermissionScope::ReleaseRead,
             PermissionScope::RoutesRead,
+            PermissionScope::SourcePropose,
             PermissionScope::SourceRead,
         ])
     }
@@ -243,6 +392,8 @@ impl PermissionSet {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ResourceSafetyClass {
+    /// The resource exposes a dry-run or plan report but performs no writes.
+    PlanOnly,
     /// The resource performs no source, provider, credential, or output writes.
     ReadOnly,
 }
@@ -271,7 +422,7 @@ impl ResourceDescriptor {
             description: kind.description().to_owned(),
             mime_type: "application/json".to_owned(),
             required_scopes: kind.required_scopes(),
-            safety_class: ResourceSafetyClass::ReadOnly,
+            safety_class: kind.safety_class(),
         }
     }
 
@@ -439,8 +590,31 @@ impl From<ToolStatus> for AuditOutcome {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum AuditSafetyClass {
+    /// The request targeted an apply gate but did not perform a mutation.
+    ApplyGate,
+    /// The request produced or inspected a dry-run plan without applying it.
+    PlanOnly,
     /// The request performed no source, provider, credential, or output writes.
     ReadOnly,
+}
+
+impl From<ResourceSafetyClass> for AuditSafetyClass {
+    fn from(value: ResourceSafetyClass) -> Self {
+        match value {
+            ResourceSafetyClass::PlanOnly => Self::PlanOnly,
+            ResourceSafetyClass::ReadOnly => Self::ReadOnly,
+        }
+    }
+}
+
+impl From<ToolSafetyClass> for AuditSafetyClass {
+    fn from(value: ToolSafetyClass) -> Self {
+        match value {
+            ToolSafetyClass::ApplyGate => Self::ApplyGate,
+            ToolSafetyClass::PlanOnly => Self::PlanOnly,
+            ToolSafetyClass::ReadOnly => Self::ReadOnly,
+        }
+    }
 }
 
 /// Credential access recorded in MCP audit events.
@@ -449,6 +623,8 @@ pub enum AuditSafetyClass {
 pub enum AuditCredentialAccess {
     /// The request did not access credential references or secret values.
     None,
+    /// The request may expose non-secret credential references, never values.
+    ReferenceOnly,
 }
 
 /// Mutation class recorded in MCP audit events.
@@ -457,6 +633,10 @@ pub enum AuditCredentialAccess {
 pub enum AuditMutation {
     /// The request did not mutate source, providers, credentials, or output.
     None,
+    /// The request generated or inspected a plan but did not apply it.
+    Planned,
+    /// The request targeted a mutation gate and was rejected before mutation.
+    Rejected,
 }
 
 /// Deterministic MCP audit event for the current read-only safety envelope.
@@ -573,14 +753,36 @@ pub fn read_resource(request: ResourceRequest) -> ResourceResponse {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ToolKind {
+    /// Reject an unsafe media apply request unless the future apply engine exists.
+    ApplyMediaChange,
+    /// Reject an unsafe publish apply request unless the future apply engine exists.
+    ApplyPublish,
+    /// Reject an unsafe settings apply request unless the future apply engine exists.
+    ApplySettingsChange,
+    /// Reject an unsafe source apply request unless the future apply engine exists.
+    ApplySourceEdit,
     /// Inspect adapter capability availability.
     AdapterCapabilities,
     /// Inspect current site diagnostics.
     Diagnostics,
+    /// Inspect a media materialization/change plan without mutating source.
+    MediaChangePlan,
+    /// Inspect a provider-neutral publish plan without applying it.
+    PublishPlan,
+    /// Inspect a Studio preview report without generating new output.
+    PreviewReport,
+    /// Inspect a Studio release manifest and health report.
+    ReleasePlan,
     /// List available read-only MCP resources.
     ResourceCatalog,
+    /// Inspect a settings change plan without mutating source.
+    SettingsChangePlan,
     /// Inspect workspace status.
     SiteStatus,
+    /// Inspect a source edit plan without mutating source.
+    SourceEditPlan,
+    /// Inspect Studio workflow verification status.
+    WorkflowVerify,
 }
 
 impl ToolKind {
@@ -588,10 +790,21 @@ impl ToolKind {
     #[must_use]
     pub const fn name(self) -> &'static str {
         match self {
+            Self::ApplyMediaChange => "apply_media_change",
+            Self::ApplyPublish => "apply_publish",
+            Self::ApplySettingsChange => "apply_settings_change",
+            Self::ApplySourceEdit => "apply_source_edit",
             Self::AdapterCapabilities => "adapter_capabilities",
             Self::Diagnostics => "site_diagnostics",
+            Self::MediaChangePlan => "media_change_plan",
+            Self::PublishPlan => "publish_plan",
+            Self::PreviewReport => "preview_report",
+            Self::ReleasePlan => "release_plan",
             Self::ResourceCatalog => "resource_catalog",
+            Self::SettingsChangePlan => "settings_change_plan",
             Self::SiteStatus => "site_status",
+            Self::SourceEditPlan => "source_edit_plan",
+            Self::WorkflowVerify => "workflow_verify",
         }
     }
 
@@ -599,30 +812,92 @@ impl ToolKind {
     #[must_use]
     pub const fn description(self) -> &'static str {
         match self {
+            Self::ApplyMediaChange => {
+                "Apply an approved media change plan when mutation support exists."
+            }
+            Self::ApplyPublish => {
+                "Apply an approved publish plan when provider mutation support exists."
+            }
+            Self::ApplySettingsChange => {
+                "Apply an approved settings change plan when mutation support exists."
+            }
+            Self::ApplySourceEdit => {
+                "Apply an approved source edit plan when mutation support exists."
+            }
             Self::AdapterCapabilities => {
                 "Inspect adapter capability availability when the runtime exists."
             }
             Self::Diagnostics => "Return the current site diagnostic operation resource.",
+            Self::MediaChangePlan => "Return the Studio media materialization plan resource.",
+            Self::PublishPlan => "Return the Studio publish plan and apply gate resource.",
+            Self::PreviewReport => "Return the Studio preview report resource.",
+            Self::ReleasePlan => "Return the Studio release plan and health report resource.",
             Self::ResourceCatalog => "List read-only MCP resources and required scopes.",
+            Self::SettingsChangePlan => "Return the Studio settings change plan resource.",
             Self::SiteStatus => "Return the current workspace status operation resource.",
+            Self::SourceEditPlan => "Return the Studio source edit plan resource.",
+            Self::WorkflowVerify => "Return the Studio workflow verification resource.",
         }
     }
 
     fn required_scopes(self) -> Vec<PermissionScope> {
         match self {
+            Self::ApplyMediaChange => vec![PermissionScope::Inspect, PermissionScope::MediaWrite],
+            Self::ApplyPublish => vec![PermissionScope::Inspect, PermissionScope::DeployPublish],
+            Self::ApplySettingsChange | Self::ApplySourceEdit => {
+                vec![PermissionScope::Inspect, PermissionScope::SourceWrite]
+            }
             Self::AdapterCapabilities => ResourceKind::AdapterCapabilities.required_scopes(),
             Self::Diagnostics => ResourceKind::SiteDiagnostics.required_scopes(),
+            Self::MediaChangePlan => ResourceKind::StudioMediaPlan.required_scopes(),
+            Self::PublishPlan => ResourceKind::StudioPublishPlan.required_scopes(),
+            Self::PreviewReport => ResourceKind::StudioPreviewReport.required_scopes(),
+            Self::ReleasePlan => ResourceKind::StudioReleasePlan.required_scopes(),
             Self::ResourceCatalog => vec![PermissionScope::Inspect],
+            Self::SettingsChangePlan => ResourceKind::StudioSettingsPlan.required_scopes(),
             Self::SiteStatus => ResourceKind::WorkspaceStatus.required_scopes(),
+            Self::SourceEditPlan => ResourceKind::StudioContentPlan.required_scopes(),
+            Self::WorkflowVerify => ResourceKind::StudioWorkflowVerify.required_scopes(),
         }
     }
 
-    const fn all() -> [Self; 4] {
+    const fn safety_class(self) -> ToolSafetyClass {
+        match self {
+            Self::AdapterCapabilities
+            | Self::Diagnostics
+            | Self::ResourceCatalog
+            | Self::SiteStatus => ToolSafetyClass::ReadOnly,
+            Self::MediaChangePlan
+            | Self::PublishPlan
+            | Self::PreviewReport
+            | Self::ReleasePlan
+            | Self::SettingsChangePlan
+            | Self::SourceEditPlan
+            | Self::WorkflowVerify => ToolSafetyClass::PlanOnly,
+            Self::ApplyMediaChange
+            | Self::ApplyPublish
+            | Self::ApplySettingsChange
+            | Self::ApplySourceEdit => ToolSafetyClass::ApplyGate,
+        }
+    }
+
+    const fn all() -> [Self; 15] {
         [
             Self::SiteStatus,
             Self::Diagnostics,
             Self::ResourceCatalog,
             Self::AdapterCapabilities,
+            Self::SettingsChangePlan,
+            Self::SourceEditPlan,
+            Self::MediaChangePlan,
+            Self::PreviewReport,
+            Self::ReleasePlan,
+            Self::PublishPlan,
+            Self::WorkflowVerify,
+            Self::ApplySettingsChange,
+            Self::ApplySourceEdit,
+            Self::ApplyMediaChange,
+            Self::ApplyPublish,
         ]
     }
 }
@@ -631,6 +906,10 @@ impl ToolKind {
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum ToolSafetyClass {
+    /// The tool rejects apply requests until the required plan/apply engine exists.
+    ApplyGate,
+    /// The tool returns a dry-run or plan response and performs no writes.
+    PlanOnly,
     /// The tool performs no source, provider, credential, or output writes.
     ReadOnly,
 }
@@ -655,7 +934,7 @@ impl ToolDescriptor {
             name: kind.name().to_owned(),
             description: kind.description().to_owned(),
             required_scopes: kind.required_scopes(),
-            safety_class: ToolSafetyClass::ReadOnly,
+            safety_class: kind.safety_class(),
         }
     }
 
@@ -819,14 +1098,111 @@ pub fn call_tool(request: &ToolRequest) -> ToolResponse {
             descriptor,
             &resource_for_tool(request, ResourceKind::SiteDiagnostics),
         ),
+        ToolKind::MediaChangePlan => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioMediaPlan),
+        ),
+        ToolKind::PublishPlan => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioPublishPlan),
+        ),
+        ToolKind::PreviewReport => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioPreviewReport),
+        ),
+        ToolKind::ReleasePlan => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioReleasePlan),
+        ),
         ToolKind::ResourceCatalog => resource_catalog_tool_response(descriptor),
+        ToolKind::SettingsChangePlan => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioSettingsPlan),
+        ),
         ToolKind::SiteStatus => resource_tool_response(
             descriptor,
             &resource_for_tool(request, ResourceKind::WorkspaceStatus),
         ),
+        ToolKind::SourceEditPlan => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioContentPlan),
+        ),
+        ToolKind::WorkflowVerify => resource_tool_response(
+            descriptor,
+            &resource_for_tool(request, ResourceKind::StudioWorkflowVerify),
+        ),
+        ToolKind::ApplyMediaChange => {
+            apply_gate_tool_response(descriptor, ApplyToolKind::MediaChange)
+        }
+        ToolKind::ApplyPublish => apply_gate_tool_response(descriptor, ApplyToolKind::Publish),
+        ToolKind::ApplySettingsChange => {
+            apply_gate_tool_response(descriptor, ApplyToolKind::SettingsChange)
+        }
+        ToolKind::ApplySourceEdit => {
+            apply_gate_tool_response(descriptor, ApplyToolKind::SourceEdit)
+        }
     };
 
     audited_tool_response(response, &request.permissions, Vec::new())
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ApplyToolKind {
+    MediaChange,
+    Publish,
+    SettingsChange,
+    SourceEdit,
+}
+
+impl ApplyToolKind {
+    const fn tool_kind(self) -> ToolKind {
+        match self {
+            Self::MediaChange => ToolKind::ApplyMediaChange,
+            Self::Publish => ToolKind::ApplyPublish,
+            Self::SettingsChange => ToolKind::ApplySettingsChange,
+            Self::SourceEdit => ToolKind::ApplySourceEdit,
+        }
+    }
+
+    const fn required_plan_tool(self) -> ToolKind {
+        match self {
+            Self::MediaChange => ToolKind::MediaChangePlan,
+            Self::Publish => ToolKind::PublishPlan,
+            Self::SettingsChange => ToolKind::SettingsChangePlan,
+            Self::SourceEdit => ToolKind::SourceEditPlan,
+        }
+    }
+}
+
+fn apply_gate_tool_response(descriptor: ToolDescriptor, kind: ApplyToolKind) -> ToolResponse {
+    let tool_kind = kind.tool_kind();
+    let required_plan_tool = kind.required_plan_tool().name();
+
+    ToolResponse {
+        schema_version: MCP_RESOURCE_SCHEMA_VERSION,
+        tool: descriptor,
+        status: ToolStatus::Unsupported,
+        result: Some(json!({
+            "mutation": "none",
+            "requiredPlanTool": required_plan_tool,
+            "reason": "MCP apply tools are gated until source/provider mutation operations are implemented.",
+        })),
+        diagnostics: DiagnosticReport::from_diagnostics(vec![
+            Diagnostic::new(
+                diagnostic_code("TPM-MCP-APPLY-GATE-UNAVAILABLE"),
+                Severity::Error,
+                format!(
+                    "MCP apply tool '{}' is not available because the shared plan/apply mutation engine is not implemented.",
+                    tool_kind.name()
+                ),
+            )
+            .with_remediation(format!(
+                "Use '{required_plan_tool}' to inspect the plan. Apply support must be implemented in the shared operation core before this MCP tool can mutate source files or providers."
+            )),
+        ]),
+        redaction: RedactionSummary::default(),
+        audit_events: Vec::new(),
+    }
 }
 
 fn resource_for_tool(request: &ToolRequest, kind: ResourceKind) -> ResourceResponse {
@@ -1007,13 +1383,13 @@ fn audited_resource_response(
         action: AuditAction::ResourceRead,
         interface: OperationInterface::Mcp,
         target: response.resource.uri().as_str().to_owned(),
-        safety_class: AuditSafetyClass::ReadOnly,
+        safety_class: AuditSafetyClass::from(response.resource.safety_class),
         outcome: AuditOutcome::from(response.status()),
         required_scopes: response.resource.required_scopes().to_vec(),
         granted_scopes: permissions.scopes().collect(),
         missing_scopes,
-        credential_access: AuditCredentialAccess::None,
-        mutation: AuditMutation::None,
+        credential_access: credential_access_for_resource(response.resource.kind()),
+        mutation: mutation_for_resource(response.resource.kind()),
         redaction: response.redaction(),
     }];
 
@@ -1030,17 +1406,70 @@ fn audited_tool_response(
         action: AuditAction::ToolCall,
         interface: OperationInterface::Mcp,
         target: response.tool.name().to_owned(),
-        safety_class: AuditSafetyClass::ReadOnly,
+        safety_class: AuditSafetyClass::from(response.tool.safety_class),
         outcome: AuditOutcome::from(response.status()),
         required_scopes: response.tool.required_scopes().to_vec(),
         granted_scopes: permissions.scopes().collect(),
         missing_scopes,
-        credential_access: AuditCredentialAccess::None,
-        mutation: AuditMutation::None,
+        credential_access: credential_access_for_tool(response.tool.kind()),
+        mutation: mutation_for_tool(response.tool.kind()),
         redaction: response.redaction,
     }];
 
     response
+}
+
+const fn credential_access_for_resource(kind: ResourceKind) -> AuditCredentialAccess {
+    match kind {
+        ResourceKind::StudioContentPlan
+        | ResourceKind::StudioMediaPlan
+        | ResourceKind::StudioPreviewReport
+        | ResourceKind::StudioPublishPlan
+        | ResourceKind::StudioReleasePlan
+        | ResourceKind::StudioSettingsPlan
+        | ResourceKind::StudioWorkflowVerify => AuditCredentialAccess::ReferenceOnly,
+        ResourceKind::AdapterCapabilities
+        | ResourceKind::MediaImages
+        | ResourceKind::ReleaseInspect
+        | ResourceKind::RoutesRedirects
+        | ResourceKind::SiteDiagnostics
+        | ResourceKind::WorkspaceStatus => AuditCredentialAccess::None,
+    }
+}
+
+const fn credential_access_for_tool(kind: ToolKind) -> AuditCredentialAccess {
+    match kind {
+        ToolKind::ApplyPublish
+        | ToolKind::MediaChangePlan
+        | ToolKind::PublishPlan
+        | ToolKind::PreviewReport
+        | ToolKind::ReleasePlan
+        | ToolKind::SettingsChangePlan
+        | ToolKind::SourceEditPlan
+        | ToolKind::WorkflowVerify => AuditCredentialAccess::ReferenceOnly,
+        ToolKind::ApplyMediaChange
+        | ToolKind::ApplySettingsChange
+        | ToolKind::ApplySourceEdit
+        | ToolKind::AdapterCapabilities
+        | ToolKind::Diagnostics
+        | ToolKind::ResourceCatalog
+        | ToolKind::SiteStatus => AuditCredentialAccess::None,
+    }
+}
+
+const fn mutation_for_resource(kind: ResourceKind) -> AuditMutation {
+    match kind.safety_class() {
+        ResourceSafetyClass::PlanOnly => AuditMutation::Planned,
+        ResourceSafetyClass::ReadOnly => AuditMutation::None,
+    }
+}
+
+const fn mutation_for_tool(kind: ToolKind) -> AuditMutation {
+    match kind.safety_class() {
+        ToolSafetyClass::ApplyGate => AuditMutation::Rejected,
+        ToolSafetyClass::PlanOnly => AuditMutation::Planned,
+        ToolSafetyClass::ReadOnly => AuditMutation::None,
+    }
 }
 
 fn redact_json(value: &mut Value) -> u32 {
@@ -1065,13 +1494,25 @@ fn should_redact(value: &str) -> bool {
 
 const fn scope_label(scope: PermissionScope) -> &'static str {
     match scope {
+        PermissionScope::Admin => "admin",
+        PermissionScope::BuildRun => "build.run",
+        PermissionScope::CredentialTest => "credential.test",
+        PermissionScope::DeployPreview => "deploy.preview",
+        PermissionScope::DeployPublish => "deploy.publish",
+        PermissionScope::DeployRollback => "deploy.rollback",
         PermissionScope::DiagnosticsRead => "diagnostics.read",
+        PermissionScope::ExtensionConfigure => "extension.configure",
         PermissionScope::Inspect => "inspect",
         PermissionScope::MediaRead => "media.read",
+        PermissionScope::MediaWrite => "media.write",
+        PermissionScope::PreviewRun => "preview.run",
         PermissionScope::ProviderStatusRead => "provider.status.read",
         PermissionScope::ReleaseRead => "release.read",
         PermissionScope::RoutesRead => "routes.read",
+        PermissionScope::SourcePropose => "source.propose",
         PermissionScope::SourceRead => "source.read",
+        PermissionScope::SourceWrite => "source.write",
+        PermissionScope::WorkflowTransition => "workflow.transition",
     }
 }
 
@@ -1093,6 +1534,10 @@ mod tests {
     use std::path::PathBuf;
 
     use serde_json::json;
+    use tpm_operations::{
+        OperationInterface, run_studio_preview_plan, run_studio_publish_apply,
+        run_studio_release_plan,
+    };
 
     use super::{
         AuditAction, AuditOutcome, PermissionScope, PermissionSet, ResourceCatalog, ResourceKind,
@@ -1120,6 +1565,13 @@ mod tests {
             vec![
                 ResourceKind::WorkspaceStatus,
                 ResourceKind::SiteDiagnostics,
+                ResourceKind::StudioSettingsPlan,
+                ResourceKind::StudioContentPlan,
+                ResourceKind::StudioMediaPlan,
+                ResourceKind::StudioPreviewReport,
+                ResourceKind::StudioReleasePlan,
+                ResourceKind::StudioPublishPlan,
+                ResourceKind::StudioWorkflowVerify,
                 ResourceKind::ReleaseInspect,
                 ResourceKind::MediaImages,
                 ResourceKind::RoutesRedirects,
@@ -1148,6 +1600,17 @@ mod tests {
                 ToolKind::Diagnostics,
                 ToolKind::ResourceCatalog,
                 ToolKind::AdapterCapabilities,
+                ToolKind::SettingsChangePlan,
+                ToolKind::SourceEditPlan,
+                ToolKind::MediaChangePlan,
+                ToolKind::PreviewReport,
+                ToolKind::ReleasePlan,
+                ToolKind::PublishPlan,
+                ToolKind::WorkflowVerify,
+                ToolKind::ApplySettingsChange,
+                ToolKind::ApplySourceEdit,
+                ToolKind::ApplyMediaChange,
+                ToolKind::ApplyPublish,
             ]
         );
         assert_eq!(catalog.tools()[0].name(), "site_status");
@@ -1219,6 +1682,50 @@ mod tests {
     }
 
     #[test]
+    fn studio_plan_resources_wrap_operation_results() {
+        let workspace = fixture_root();
+        let cases = [
+            (ResourceKind::StudioSettingsPlan, "studio.settings.inspect"),
+            (ResourceKind::StudioContentPlan, "studio.content.editor"),
+            (ResourceKind::StudioMediaPlan, "studio.media.library"),
+            (ResourceKind::StudioPreviewReport, "studio.preview.plan"),
+            (ResourceKind::StudioReleasePlan, "studio.release.plan"),
+            (ResourceKind::StudioPublishPlan, "studio.publish.apply"),
+            (ResourceKind::StudioWorkflowVerify, "studio.workflow.verify"),
+        ];
+
+        for (kind, operation_id) in cases {
+            let response = read_resource(ResourceRequest::new(kind, workspace.clone()));
+
+            assert_eq!(response.status(), ResourceStatus::Available);
+            assert_eq!(response.redaction().redacted_values(), 0);
+
+            let payload = response.payload().expect("payload should be present");
+            assert_eq!(
+                payload.pointer("/operationResult/request/operationId"),
+                Some(&json!(operation_id))
+            );
+            assert_eq!(
+                payload.pointer("/operationResult/request/interface"),
+                Some(&json!("mcp"))
+            );
+            assert_eq!(
+                payload.pointer("/operationResult/payload/kind"),
+                Some(&json!("studio-authoring"))
+            );
+
+            let audit = serde_json::to_value(&response.audit_events()[0])
+                .expect("audit event should serialize");
+            assert_eq!(audit.pointer("/safetyClass"), Some(&json!("plan-only")));
+            assert_eq!(
+                audit.pointer("/credentialAccess"),
+                Some(&json!("reference-only"))
+            );
+            assert_eq!(audit.pointer("/mutation"), Some(&json!("planned")));
+        }
+    }
+
+    #[test]
     fn site_status_tool_wraps_workspace_status_resource() {
         let response = call_tool(&ToolRequest::new(ToolKind::SiteStatus, fixture_root()));
 
@@ -1272,9 +1779,118 @@ mod tests {
             Some(&json!("tpm://resources/workspace/status"))
         );
         assert_eq!(
-            result.pointer("/resources/5/kind"),
+            result.pointer("/resources/12/kind"),
             Some(&json!("adapter-capabilities"))
         );
+    }
+
+    #[test]
+    fn studio_report_tools_wrap_plan_resources() {
+        let workspace = fixture_root();
+        let cases = [
+            (
+                ToolKind::SettingsChangePlan,
+                "studio-settings-plan",
+                "studio.settings.inspect",
+            ),
+            (
+                ToolKind::SourceEditPlan,
+                "studio-content-plan",
+                "studio.content.editor",
+            ),
+            (
+                ToolKind::MediaChangePlan,
+                "studio-media-plan",
+                "studio.media.library",
+            ),
+            (
+                ToolKind::PreviewReport,
+                "studio-preview-report",
+                "studio.preview.plan",
+            ),
+            (
+                ToolKind::ReleasePlan,
+                "studio-release-plan",
+                "studio.release.plan",
+            ),
+            (
+                ToolKind::PublishPlan,
+                "studio-publish-plan",
+                "studio.publish.apply",
+            ),
+            (
+                ToolKind::WorkflowVerify,
+                "studio-workflow-verify",
+                "studio.workflow.verify",
+            ),
+        ];
+
+        for (kind, resource_kind, operation_id) in cases {
+            let response = call_tool(&ToolRequest::new(kind, workspace.clone()));
+
+            assert_eq!(response.status(), ToolStatus::Completed);
+
+            let result = response.result().expect("tool result should be present");
+            assert_eq!(
+                result.pointer("/resource/resource/kind"),
+                Some(&json!(resource_kind))
+            );
+            assert_eq!(
+                result.pointer("/resource/payload/operationResult/request/operationId"),
+                Some(&json!(operation_id))
+            );
+            assert_eq!(
+                result.pointer("/resource/payload/operationResult/request/interface"),
+                Some(&json!("mcp"))
+            );
+
+            let audit = serde_json::to_value(&response.audit_events()[0])
+                .expect("audit event should serialize");
+            assert_eq!(audit.pointer("/safetyClass"), Some(&json!("plan-only")));
+            assert_eq!(audit.pointer("/mutation"), Some(&json!("planned")));
+        }
+    }
+
+    #[test]
+    fn studio_report_resources_match_shared_operation_results_exactly() {
+        let workspace = fixture_root();
+        let cases = [
+            (
+                ResourceKind::StudioPreviewReport,
+                run_studio_preview_plan(workspace.clone(), OperationInterface::Mcp),
+            ),
+            (
+                ResourceKind::StudioReleasePlan,
+                run_studio_release_plan(workspace.clone(), OperationInterface::Mcp),
+            ),
+            (
+                ResourceKind::StudioPublishPlan,
+                run_studio_publish_apply(workspace.clone(), OperationInterface::Mcp),
+            ),
+        ];
+
+        for (kind, operation) in cases {
+            let response = read_resource(ResourceRequest::new(kind, workspace.clone()));
+            let expected = serde_json::to_value(operation).expect("operation should serialize");
+            let payload = response.payload().expect("payload should be present");
+
+            assert_eq!(payload.pointer("/operationResult"), Some(&expected));
+        }
+    }
+
+    #[test]
+    fn publish_plan_tool_exposes_redacted_credential_references_only() {
+        let response = call_tool(&ToolRequest::new(ToolKind::PublishPlan, fixture_root()));
+
+        assert_eq!(response.status(), ToolStatus::Completed);
+        assert_eq!(response.redaction().redacted_values(), 0);
+
+        let serialized = serde_json::to_string(&response).expect("response should serialize");
+
+        assert!(serialized.contains("[redacted]"));
+        assert!(!serialized.contains("desktop-keychain-cloudflare-publish-handle"));
+        assert!(!serialized.contains("token="));
+        assert!(!serialized.contains("api_key="));
     }
 
     #[test]
@@ -1324,6 +1940,34 @@ mod tests {
                 ResourceKind::AdapterCapabilities,
                 &["inspect", "provider.status.read"][..],
             ),
+            (
+                ResourceKind::StudioSettingsPlan,
+                &["inspect", "source.read", "source.propose"][..],
+            ),
+            (
+                ResourceKind::StudioContentPlan,
+                &["inspect", "source.read", "source.propose"][..],
+            ),
+            (
+                ResourceKind::StudioMediaPlan,
+                &["inspect", "media.read"][..],
+            ),
+            (
+                ResourceKind::StudioPreviewReport,
+                &["inspect", "preview.run"][..],
+            ),
+            (
+                ResourceKind::StudioReleasePlan,
+                &["inspect", "release.read", "provider.status.read"][..],
+            ),
+            (
+                ResourceKind::StudioPublishPlan,
+                &["inspect", "release.read", "provider.status.read"][..],
+            ),
+            (
+                ResourceKind::StudioWorkflowVerify,
+                &["inspect", "diagnostics.read", "provider.status.read"][..],
+            ),
         ];
 
         for (kind, labels) in cases {
@@ -1364,6 +2008,133 @@ mod tests {
             response.audit_events()[0].missing_scopes(),
             &[PermissionScope::SourceRead]
         );
+    }
+
+    #[test]
+    fn permission_scope_labels_cover_all_modeled_scopes() {
+        let cases = [
+            (PermissionScope::Admin, "admin"),
+            (PermissionScope::BuildRun, "build.run"),
+            (PermissionScope::CredentialTest, "credential.test"),
+            (PermissionScope::DeployPreview, "deploy.preview"),
+            (PermissionScope::DeployPublish, "deploy.publish"),
+            (PermissionScope::DeployRollback, "deploy.rollback"),
+            (PermissionScope::DiagnosticsRead, "diagnostics.read"),
+            (PermissionScope::ExtensionConfigure, "extension.configure"),
+            (PermissionScope::Inspect, "inspect"),
+            (PermissionScope::MediaRead, "media.read"),
+            (PermissionScope::MediaWrite, "media.write"),
+            (PermissionScope::PreviewRun, "preview.run"),
+            (PermissionScope::ProviderStatusRead, "provider.status.read"),
+            (PermissionScope::ReleaseRead, "release.read"),
+            (PermissionScope::RoutesRead, "routes.read"),
+            (PermissionScope::SourcePropose, "source.propose"),
+            (PermissionScope::SourceRead, "source.read"),
+            (PermissionScope::SourceWrite, "source.write"),
+            (PermissionScope::WorkflowTransition, "workflow.transition"),
+        ];
+
+        for (scope, label) in cases {
+            assert_eq!(super::scope_label(scope), label);
+        }
+    }
+
+    #[test]
+    fn resource_tool_response_preserves_resource_permission_denials() {
+        let tool_descriptor = super::ToolDescriptor::for_kind(ToolKind::SiteStatus);
+        let resource_descriptor =
+            super::ResourceDescriptor::for_kind(ResourceKind::WorkspaceStatus);
+        let denied_resource =
+            super::permission_denied_response(resource_descriptor, &[PermissionScope::SourceRead]);
+
+        let response = super::resource_tool_response(tool_descriptor, &denied_resource);
+
+        assert_eq!(response.status(), ToolStatus::PermissionDenied);
+        assert_eq!(
+            response.diagnostics().errors()[0].code().as_str(),
+            "TPM-MCP-PERMISSION-DENIED"
+        );
+    }
+
+    #[test]
+    fn apply_tools_require_write_or_publish_scopes_before_reaching_gate() {
+        let cases = [
+            (ToolKind::ApplySettingsChange, PermissionScope::SourceWrite),
+            (ToolKind::ApplySourceEdit, PermissionScope::SourceWrite),
+            (ToolKind::ApplyMediaChange, PermissionScope::MediaWrite),
+            (ToolKind::ApplyPublish, PermissionScope::DeployPublish),
+        ];
+
+        for (kind, missing_scope) in cases {
+            let response = call_tool(&ToolRequest::new(kind, fixture_root()));
+
+            assert_eq!(response.status(), ToolStatus::PermissionDenied);
+            assert!(response.result().is_none());
+            assert_eq!(
+                response.audit_events()[0].outcome(),
+                AuditOutcome::PermissionDenied
+            );
+            assert_eq!(
+                response.audit_events()[0].missing_scopes(),
+                &[missing_scope]
+            );
+
+            let audit = serde_json::to_value(&response.audit_events()[0])
+                .expect("audit event should serialize");
+            assert_eq!(audit.pointer("/safetyClass"), Some(&json!("apply-gate")));
+            assert_eq!(audit.pointer("/mutation"), Some(&json!("rejected")));
+        }
+    }
+
+    #[test]
+    fn apply_tools_remain_unsupported_after_permission_until_core_mutations_exist() {
+        let cases = [
+            (
+                ToolKind::ApplySettingsChange,
+                PermissionScope::SourceWrite,
+                "settings_change_plan",
+            ),
+            (
+                ToolKind::ApplySourceEdit,
+                PermissionScope::SourceWrite,
+                "source_edit_plan",
+            ),
+            (
+                ToolKind::ApplyMediaChange,
+                PermissionScope::MediaWrite,
+                "media_change_plan",
+            ),
+            (
+                ToolKind::ApplyPublish,
+                PermissionScope::DeployPublish,
+                "publish_plan",
+            ),
+        ];
+
+        for (kind, apply_scope, plan_tool) in cases {
+            let response = call_tool(
+                &ToolRequest::new(kind, fixture_root())
+                    .with_permissions(PermissionSet::new([PermissionScope::Inspect, apply_scope])),
+            );
+
+            assert_eq!(response.status(), ToolStatus::Unsupported);
+            assert_eq!(
+                response.diagnostics().errors()[0].code().as_str(),
+                "TPM-MCP-APPLY-GATE-UNAVAILABLE"
+            );
+
+            let result = response
+                .result()
+                .expect("unsupported gate explains next step");
+            assert_eq!(result.pointer("/mutation"), Some(&json!("none")));
+            assert_eq!(result.pointer("/requiredPlanTool"), Some(&json!(plan_tool)));
+
+            let audit = serde_json::to_value(&response.audit_events()[0])
+                .expect("audit event should serialize");
+            assert_eq!(audit.pointer("/outcome"), Some(&json!("unsupported")));
+            assert_eq!(audit.pointer("/safetyClass"), Some(&json!("apply-gate")));
+            assert_eq!(audit.pointer("/mutation"), Some(&json!("rejected")));
+        }
     }
 
     #[test]

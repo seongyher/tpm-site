@@ -308,6 +308,64 @@ Remaining blocker notes:
 - [x] Run appropriate final checks and summarize completed work plus remaining
       blockers.
 
+### Milestone 13.5: Re-open Remaining MCP Work After Milestone 12
+
+- [x] Re-read `IRK-200`, `IRK-202`, `IRK-203`, MCP safety/resource docs,
+      Studio authoring operations, adapter runtime docs, Rust operation
+      contracts, and Rust engineering guide.
+- [x] Confirm the remaining work can consume existing operation payloads
+      without creating an MCP-only source, preview, publish, credential, or
+      mutation model.
+- [x] Record the implementation shape for release/preview reports,
+      plan/apply gates, parity tests, docs, and Linear handoff.
+
+### IRK-200: MCP Release-Plan And Preview-Report Tools
+
+- [x] Design the MCP release/preview report slice around existing
+      `studio.preview.plan`, `studio.release.plan`, `studio.publish.apply`,
+      and workflow verification operations.
+- [x] Add read/report MCP resources for preview reports, release plans,
+      publish plans, and workflow verification.
+- [x] Add read/report MCP tools that wrap those resources with stable
+      diagnostics, permission requirements, redaction summaries, and audit
+      events.
+- [x] Add focused tests for catalog order, operation wrapping, permission
+      denial, provider-capability diagnostics, and redaction behavior.
+- [x] Update MCP docs and verify focused Rust checks before updating Linear.
+
+### IRK-202: Gated MCP Plan/Apply Contracts
+
+- [x] Design the plan/apply MCP surface so plans can be inspected now while
+      applies remain impossible without explicit scopes, approval data, and
+      implemented mutation operations.
+- [x] Add explicit MCP permission scopes for source proposals/writes, media
+      writes, preview/build, workflow transitions, deploy publish/rollback,
+      credential tests, extensions, and admin-level actions.
+- [x] Add plan tools for source edits, settings changes, media changes, and
+      publish operations over shared Studio operation results.
+- [x] Add apply-gate tools that reject unsafe or unsupported applies with
+      diagnostics instead of mutating source files, providers, credentials, or
+      generated output.
+- [x] Add focused tests for denied applies, missing scopes, unsupported apply
+      operations, audit events, and zero-mutation guarantees.
+- [x] Update MCP safety docs and verify focused Rust checks before updating
+      Linear.
+
+### IRK-203: MCP Parity And Safety Verification
+
+- [x] Add parity tests proving MCP read/report/plan responses preserve shared
+      operation IDs, `interface: "mcp"`, diagnostics, payloads, redaction, and
+      audit shape.
+- [x] Add safety tests covering read-only defaults, plan-only behavior,
+      denied writes, unsupported applies, missing capabilities, and redaction.
+- [x] Add or update safe MCP usage documentation for current defaults,
+      implemented tools/resources, non-goals, and future transport/server
+      handoff.
+- [x] Run focused MCP/Rust checks plus accountability/release-relevant checks
+      and fix any issues.
+- [x] Attach relevant docs to Milestone 13 Linear issues, move remaining
+      issues and parent to In Review, and summarize handoff.
+
 ## Active Milestone 10: Adapter Contracts And Provider Capability Runtime
 
 This pass implements provider-neutral adapter contracts and capability

@@ -59,23 +59,23 @@ The current ownership model is:
 
 ## Workspace Layout
 
-| Path                              | Purpose                                                                                |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy. |
-| `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.         |
-| `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                         |
-| `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                |
-| `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                             |
-| `justfile`                        | Local command router over Rust operations and JS/Astro ecosystem adapters.             |
-| `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                 |
-| `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                 |
-| `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
-| `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
-| `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
-| `crates/tpm-mcp/`                 | Transport-agnostic read-only MCP resource and safety contracts over operation results. |
-| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
-| `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
-| `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
+| Path                              | Purpose                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy.                |
+| `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.                        |
+| `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                                        |
+| `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                               |
+| `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                                            |
+| `justfile`                        | Local command router over Rust operations and JS/Astro ecosystem adapters.                            |
+| `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                                |
+| `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                                |
+| `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                                            |
+| `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                                       |
+| `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                                |
+| `crates/tpm-mcp/`                 | Transport-agnostic MCP resource, tool, plan, apply-gate, and safety contracts over operation results. |
+| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.                            |
+| `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.                              |
+| `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.                            |
 
 ## Blocking Rust Gates
 
