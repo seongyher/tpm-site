@@ -187,21 +187,21 @@ surface scoped to the Studio product.
 
 Use mature, common infrastructure for solved UI problems:
 
-| Need                  | Decision                                                               |
-| --------------------- | ---------------------------------------------------------------------- |
-| Frontend shell        | Astro static app                                                       |
-| Interactive workspace | Bounded React island/app through Astro                                 |
-| UI primitives         | shadcn/Radix source-owned components                                   |
-| Icons                 | lucide React icons                                                     |
-| Resizable panes       | shadcn Resizable / `react-resizable-panels`                            |
-| Dialogs/menus         | shadcn/Radix Dialog, AlertDialog, DropdownMenu, ContextMenu, Tooltip   |
-| Command palette       | shadcn Command / `cmdk` with Studio-owned command registry             |
-| Forms                 | shadcn fields plus Studio field descriptors                            |
-| Editor                | CodeMirror 6 for source-faithful Markdown/MDX editing                  |
-| Tree                  | React Aria Tree or equivalent if true tree semantics are implemented   |
-| Hotkeys               | Central command registry plus a small hotkey integration               |
-| Tauri capabilities    | Narrow Rust/Tauri command boundaries, not broad frontend permissions   |
-| Credentials           | Credential references in fixtures; real secure storage later           |
+| Need                  | Decision                                                             |
+| --------------------- | -------------------------------------------------------------------- |
+| Frontend shell        | Astro static app                                                     |
+| Interactive workspace | Bounded React island/app through Astro                               |
+| UI primitives         | shadcn/Radix source-owned components                                 |
+| Icons                 | lucide React icons                                                   |
+| Resizable panes       | shadcn Resizable / `react-resizable-panels`                          |
+| Dialogs/menus         | shadcn/Radix Dialog, AlertDialog, DropdownMenu, ContextMenu, Tooltip |
+| Command palette       | shadcn Command / `cmdk` with Studio-owned command registry           |
+| Forms                 | shadcn fields plus Studio field descriptors                          |
+| Editor                | CodeMirror 6 for source-faithful Markdown/MDX editing                |
+| Tree                  | React Aria Tree or equivalent if true tree semantics are implemented |
+| Hotkeys               | Central command registry plus a small hotkey integration             |
+| Tauri capabilities    | Narrow Rust/Tauri command boundaries, not broad frontend permissions |
+| Credentials           | Credential references in fixtures; real secure storage later         |
 
 Hand-roll Studio domain logic:
 
@@ -364,20 +364,20 @@ StudioApp
 
 ### State Ownership
 
-| State                            | Owner                                                      |
-| -------------------------------- | ---------------------------------------------------------- |
-| Current screen                   | `StudioApp` reducer/router                                 |
-| Panel sizes and collapse         | `WorkspaceLayout`, persisted through session fixture       |
-| Article directory filters/search | directory state, persisted through session fixture         |
-| Article tree expansion           | sidebar state, persisted per project                       |
-| Selected article/media/settings  | app session state                                          |
-| Editor buffer and selection      | editor state linked to draft operation model               |
-| Frontmatter draft values         | form state over field descriptors                          |
-| Canonical source                 | future Rust/source operation, not UI                       |
-| Preview route/status             | preview state machine                                      |
-| Publish plan/apply               | publish state machine                                      |
-| Credentials                      | credential reference/status, future secure provider        |
-| Toasts, dialogs, context menus   | overlay manager and command registry                       |
+| State                            | Owner                                                |
+| -------------------------------- | ---------------------------------------------------- |
+| Current screen                   | `StudioApp` reducer/router                           |
+| Panel sizes and collapse         | `WorkspaceLayout`, persisted through session fixture |
+| Article directory filters/search | directory state, persisted through session fixture   |
+| Article tree expansion           | sidebar state, persisted per project                 |
+| Selected article/media/settings  | app session state                                    |
+| Editor buffer and selection      | editor state linked to draft operation model         |
+| Frontmatter draft values         | form state over field descriptors                    |
+| Canonical source                 | future Rust/source operation, not UI                 |
+| Preview route/status             | preview state machine                                |
+| Publish plan/apply               | publish state machine                                |
+| Credentials                      | credential reference/status, future secure provider  |
+| Toasts, dialogs, context menus   | overlay manager and command registry                 |
 
 ### Major Component Families
 
@@ -444,23 +444,23 @@ validation accepts them.
 
 Every visible action should map to a future operation family.
 
-| GUI action                | Future operation family                         |
-| ------------------------- | ----------------------------------------------- |
-| Create/open site          | workspace discover/create/read                  |
-| Restore exact session     | session/app state read                          |
-| Browse articles           | source inventory and article directory          |
-| Open article              | get editor document                             |
-| Edit metadata             | propose patch and validate patch                |
-| Save draft/autosave       | write draft and checkpoint                      |
-| Restore version           | history list, restore plan, restore apply       |
-| Insert image              | media resolve and document patch                |
-| Edit media alt/caption    | media metadata patch                            |
-| Edit settings             | config patch and validation                     |
-| Preview route             | preview route/build preview                     |
-| Publish preview           | publish plan                                    |
-| Confirm publish           | publish apply                                   |
-| Cloudflare connect/status | provider capability and credential status       |
-| Show blocked action       | diagnostics and capability action behavior      |
+| GUI action                | Future operation family                    |
+| ------------------------- | ------------------------------------------ |
+| Create/open site          | workspace discover/create/read             |
+| Restore exact session     | session/app state read                     |
+| Browse articles           | source inventory and article directory     |
+| Open article              | get editor document                        |
+| Edit metadata             | propose patch and validate patch           |
+| Save draft/autosave       | write draft and checkpoint                 |
+| Restore version           | history list, restore plan, restore apply  |
+| Insert image              | media resolve and document patch           |
+| Edit media alt/caption    | media metadata patch                       |
+| Edit settings             | config patch and validation                |
+| Preview route             | preview route/build preview                |
+| Publish preview           | publish plan                               |
+| Confirm publish           | publish apply                              |
+| Cloudflare connect/status | provider capability and credential status  |
+| Show blocked action       | diagnostics and capability action behavior |
 
 The UI may simulate these actions in fixtures, but it should keep operation
 names, state transitions, and diagnostics aligned with the future Rust core.
@@ -638,16 +638,16 @@ The fixture-backed GUI prototype is complete when:
 
 ## Implementation Risks
 
-| Risk                                          | Required mitigation                                                              |
-| --------------------------------------------- | -------------------------------------------------------------------------------- |
-| Prototype creates a frontend-only CMS model   | Keep fixtures operation-shaped and source references explicit                    |
-| Components become large and hard to test      | Build from screen, block, component, primitive layers with typed props           |
-| Editor commands become string hacks           | Centralize commands and test pure transformations                                |
-| Reference mockup code is ported directly      | Rebuild using Astro/React/shadcn/Radix/CodeMirror/Tauri architecture             |
-| Responsive behavior copies squeezed mockups   | Implement explicit collapse thresholds and compact density states                |
-| Publish flow appears production-backed        | Label fixture behavior and keep real provider mutation out of scope              |
-| Accessibility is added after layout is fixed  | Design keyboard, focus, labels, and invalid states with each component family    |
-| Figma mockups drift from implementation       | Map Figma components to Studio component families and preserve written contracts |
+| Risk                                         | Required mitigation                                                              |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| Prototype creates a frontend-only CMS model  | Keep fixtures operation-shaped and source references explicit                    |
+| Components become large and hard to test     | Build from screen, block, component, primitive layers with typed props           |
+| Editor commands become string hacks          | Centralize commands and test pure transformations                                |
+| Reference mockup code is ported directly     | Rebuild using Astro/React/shadcn/Radix/CodeMirror/Tauri architecture             |
+| Responsive behavior copies squeezed mockups  | Implement explicit collapse thresholds and compact density states                |
+| Publish flow appears production-backed       | Label fixture behavior and keep real provider mutation out of scope              |
+| Accessibility is added after layout is fixed | Design keyboard, focus, labels, and invalid states with each component family    |
+| Figma mockups drift from implementation      | Map Figma components to Studio component families and preserve written contracts |
 
 ## Engineering Handoff
 
