@@ -7,9 +7,11 @@ GUI operation model.
 
 ## Goal
 
-Package the static `apps/studio` Astro app in a Tauri desktop shell so later
-milestone 11 issues can bind read-only Rust operation commands into the GUI.
-The first Tauri slice should prove the packaging and security boundary only.
+Package the static `apps/studio` Astro app in a Tauri desktop shell so Studio
+features can bind Rust operation commands into the GUI. The first Tauri slice
+proved the packaging and security boundary; later slices add narrowly scoped
+operation commands without broad filesystem, shell, network, credential, or
+provider permissions.
 
 ## App Boundary
 
@@ -49,11 +51,11 @@ The commands run from `apps/studio` so the Tauri CLI sees the expected
 
 ## Security Boundary
 
-This slice grants the frontend no invokable Tauri commands.
-
-The capability file uses an empty permission list because the static shell does
-not call Tauri APIs yet. Later read-only commands should add narrowly named
-permissions only for the operation results they expose.
+The capability file uses an empty permission list for broad plugin-style
+permissions. Current frontend-invokable commands are local Rust operation
+adapters registered in the app, and they expose operation envelopes rather than
+granting direct filesystem, shell, network, credential, provider, or publish
+access.
 
 The first shell must not grant:
 
@@ -61,7 +63,8 @@ The first shell must not grant:
 2. shell plugin access;
 3. network plugin access;
 4. credential, keychain, or provider access;
-5. source mutation, deploy, publish, rollback, or workflow transition access.
+5. direct source mutation, deploy, publish, rollback, or workflow transition
+   access outside shared plan/apply operation gates.
 
 The CSP allows local app assets and inline styles needed by the current static
 Astro/Tailwind output. If later frontend code introduces scripts, remote media,
@@ -102,6 +105,9 @@ app boundary.
   separate diagnostic model.
 - `IRK-189` should prove CLI and GUI fixture parity over shared operation
   results.
+- `IRK-190` through `IRK-196` add operation-backed authoring, preview,
+  release, publish-gate, credential, audit, rollback, and verification
+  commands over the same local Rust envelope contract.
 
 ## Verification
 

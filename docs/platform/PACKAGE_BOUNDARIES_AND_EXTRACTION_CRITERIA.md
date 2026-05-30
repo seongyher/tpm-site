@@ -1,6 +1,7 @@
 # Package Boundaries And Extraction Criteria
 
-This document completes the design pass for `IRK-112`. It identifies internal
+This document started as the design pass for `IRK-112` and now also records
+the Milestone 14 extraction decisions for `IRK-204`. It identifies internal
 package-boundary candidates and defines the criteria that must be met before
 any domain is treated as extractable.
 
@@ -191,3 +192,76 @@ This example gives each accepted candidate current evidence:
 The example is covered by tests that execute it and scan it for accidental TPM
 imports or publication-specific literals. This keeps the package-boundary proof
 concrete without publishing external packages prematurely.
+
+## Milestone 14 Current Extraction Decisions
+
+Milestone 14 starts from a stricter standard than the original candidate
+matrix. A boundary is not considered externally publishable merely because it
+has clean code or a plausible future audience. It needs demonstrated consumers,
+stable contracts, package-facing docs, compatibility policy, and verification
+that keeps TPM-specific assumptions out.
+
+Current decisions:
+
+| Boundary                                 | Current state                                        | Milestone 14 decision                          | Reason                                                                                             | Revisit trigger                                                                 |
+| ---------------------------------------- | ---------------------------------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `tpm-core`                               | Shared Rust primitives consumed by all Rust surfaces | Private workspace crate, package-like          | Stable, dependency-light, documented, and already consumed across CLI, operations, MCP, and Tauri. | Promote only when an external crate or published CLI needs a public baseline.   |
+| `tpm-diagnostics`                        | Structured Rust diagnostics consumed by operations   | Private workspace crate, package-like          | Strong candidate for public reuse, but the public diagnostic taxonomy is still growing.            | Promote after public API docs and a semver baseline are accepted.               |
+| `tpm-workspace`                          | Workspace/site-instance path modeling                | Private workspace crate, internal adapter core | Useful but still tied to current workspace conventions and local filesystem assumptions.           | Promote after workspace markers/provider-backed workspaces stabilize.           |
+| `tpm-operations`                         | Operation envelopes, adapters, studio payloads       | Private workspace crate, package-like          | Central contract for CLI, GUI, MCP, CI, and tests, but payloads are still expanding quickly.       | Promote after operation schema versioning and migration policy are exercised.   |
+| `tpm-cli`                                | Product CLI shell over operation contracts           | Distributable binary candidate, crate private  | The binary is a product artifact; the library API is currently for internal docs/tests only.       | Publish binary after generated command docs, smoke tests, and release pipeline. |
+| `tpm-mcp`                                | Transport-agnostic MCP resource/tool safety model    | Private workspace crate, future MCP package    | Safety model is valuable, but transport packaging and public MCP compatibility are not finalized.  | Promote after read/write MCP surfaces prove stable against real clients.        |
+| `tpm-xtask`                              | Internal repo automation behind `just`               | Repo-private, never public product surface     | It encodes repo maintenance, generated-output checks, and migration plumbing.                      | Re-evaluate only if a submodule becomes a standalone report tool.               |
+| `tpm-studio` Tauri backend               | Desktop shell command adapter                        | App-private Tauri adapter                      | Tauri command bindings should remain app packaging code over shared operations.                    | Extract only if a reusable Tauri adapter crate appears across apps.             |
+| `src/platform/*` TypeScript entrypoints  | Stable internal platform seams with example consumer | Internal public entrypoints, not package yet   | They prove import boundaries but still rely on the Astro/TypeScript app layout.                    | Promote after a second non-TPM consumer or package-boundary example is added.   |
+| `examples/platform-entrypoint-consumer/` | Site-neutral import-boundary consumer                | Required consumer evidence                     | This is the current proof that selected platform entrypoints are usable outside TPM pages.         | Expand whenever new public/platform entrypoints are accepted.                   |
+| Starter templates and docs-site examples | Site-neutral adoption fixtures                       | Distribution assets, not package APIs          | They prove product adoption paths and defaults, not reusable library contracts.                    | Add package-facing examples only after a boundary has a documented API.         |
+
+No Rust crate should be externally published in its current state. The
+workspace-level `publish = false` policy remains intentional until Milestone 14
+or a later release explicitly changes a crate's support contract.
+
+## Milestone 14 Public Boundary Rules
+
+Milestone 14 uses these extra rules before any boundary can be called public:
+
+1. The package must identify the user-facing or developer-facing job it solves.
+2. The package must have at least one maintained consumer outside its owning
+   crate and one fixture or example that does not import TPM site content.
+3. The package must document public types, feature flags, diagnostics, version
+   policy, migration policy, and non-goals.
+4. The package must be covered by strict Rust docs, focused unit tests, and a
+   compatibility gate once a baseline exists.
+5. The package must declare whether it is framework-agnostic, Astro-adapter,
+   Tauri-adapter, MCP-adapter, CLI binary, or repo-private automation.
+6. The package must not require a current working directory, active `site/`,
+   `thephilosophersmeme.com`, Cloudflare, GitHub, Tauri, Astro, DOM, or Bun
+   unless that dependency is named as an adapter boundary.
+
+## Milestone 14 Deferred Or Rejected Extractions
+
+Deferred:
+
+- Metadata and semantic profiles: strong candidate, but still needs a
+  framework-agnostic Rust or TypeScript core with generated-output consumers
+  before package extraction.
+- References and bibliography: strong candidate, but current code still mixes
+  article rendering, BibTeX normalization, bibliography aggregation, and
+  migration audit history.
+- Media policy: useful boundary, but remote media/provider provenance and
+  materialization behavior should stabilize before publishing.
+- Generated-output verification: likely reusable report/check package, but the
+  public diagnostic registry should mature first.
+- Interaction primitives: useful platform entrypoint, but the browser custom
+  element/DOM adapter split needs package-shape documentation before release.
+- UI primitives/catalog: keep internal until a site-neutral component library
+  contract and visual compatibility policy exist.
+
+Rejected for public extraction:
+
+- TPM homepage composition, support CTAs, publication branding, and article
+  content.
+- `tpm-xtask` as a whole. Individual report/check domains may be extracted in
+  the future, but the binary is repo maintenance plumbing.
+- Tauri app command glue as a public library. Shared logic belongs in
+  `tpm-operations`; app glue stays in the app.

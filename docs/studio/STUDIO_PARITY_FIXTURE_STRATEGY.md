@@ -127,8 +127,11 @@ that detail.
   emits the shared `workspace.status` fixture exactly, and the Studio fallback
   fixture is the same operation envelope with only `request.interface` changed
   to `gui`.
-- Milestone 12: add authoring, preview, publish, rollback, migration, and GUI
-  parity fixtures.
+- Milestone 12: add the first Rust-validated `studio-authoring` GUI fixture and
+  shared operation commands for settings, content, media, preview, release,
+  publish apply gates, rollback, credentials, audit, and product workflow
+  verification. Later parity runners can promote these fixtures into broader
+  GUI/CLI/MCP/CI comparisons as provider mutations become real.
 - Milestone 13: add MCP resources/tools and safety parity fixtures.
 - Milestone 14: add package/API/distribution compatibility parity fixtures.
 

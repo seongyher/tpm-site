@@ -7,6 +7,7 @@ mod migration;
 mod qa;
 mod redirects;
 mod site_doctor;
+mod studio;
 
 use std::fmt::{Display, Formatter, Result as FormatResult};
 use std::fs;
@@ -36,6 +37,11 @@ pub use migration::{
 pub use qa::{DiagnosticRecord, run_qa_diagnostic_diff, run_qa_registry};
 pub use redirects::run_redirect_report;
 pub use site_doctor::run_site_doctor;
+pub use studio::{
+    StudioAuthoringPayload, run_studio_content_editor, run_studio_media_library,
+    run_studio_preview_plan, run_studio_publish_apply, run_studio_release_plan,
+    run_studio_settings_inspect, run_studio_workflow_verify,
+};
 
 /// Current schema version for serialized operation reports.
 pub const OPERATION_SCHEMA_VERSION: u16 = 1;
@@ -161,6 +167,14 @@ pub enum OperationStatus {
     Warning,
     /// The operation failed because at least one diagnostic was blocking.
     Failed,
+    /// The operation produced a plan that needs explicit approval before apply.
+    RequiresApproval,
+    /// The operation needs credentials before the requested provider action can run.
+    RequiresCredentials,
+    /// The operation is only partially available for the configured providers.
+    Partial,
+    /// The operation is unavailable for the configured providers.
+    Unsupported,
 }
 
 impl OperationStatus {
@@ -183,6 +197,10 @@ impl Display for OperationStatus {
             Self::Success => "success",
             Self::Warning => "warning",
             Self::Failed => "failed",
+            Self::RequiresApproval => "requires-approval",
+            Self::RequiresCredentials => "requires-credentials",
+            Self::Partial => "partial",
+            Self::Unsupported => "unsupported",
         };
 
         formatter.write_str(label)
@@ -267,6 +285,8 @@ impl OperationTiming {
 pub enum OperationPayload {
     /// Adapter capability inspection payload.
     AdapterInspection(AdapterInspectionPayload),
+    /// Studio authoring and publish workflow payload.
+    StudioAuthoring(Box<StudioAuthoringPayload>),
 }
 
 impl OperationPayload {
@@ -275,6 +295,7 @@ impl OperationPayload {
     pub fn render_human(&self) -> String {
         match self {
             Self::AdapterInspection(payload) => payload.render_human(),
+            Self::StudioAuthoring(payload) => payload.render_human(),
         }
     }
 }
@@ -357,6 +378,14 @@ impl OperationResult {
     #[must_use]
     pub fn with_payload(mut self, payload: OperationPayload) -> Self {
         self.payload = Some(payload);
+        self
+    }
+
+    /// Overrides the derived lifecycle status for plan/apply operations whose
+    /// state is not equivalent to diagnostic severity.
+    #[must_use]
+    pub const fn with_status(mut self, status: OperationStatus) -> Self {
+        self.status = status;
         self
     }
 
@@ -903,6 +932,31 @@ mod tests {
     }
 
     #[test]
+    fn operation_status_display_covers_plan_apply_states() {
+        assert_eq!(
+            OperationStatus::RequiresApproval.to_string(),
+            "requires-approval"
+        );
+        assert_eq!(
+            OperationStatus::RequiresCredentials.to_string(),
+            "requires-credentials"
+        );
+        assert_eq!(OperationStatus::Partial.to_string(), "partial");
+        assert_eq!(OperationStatus::Unsupported.to_string(), "unsupported");
+
+        let result = OperationResult::new(
+            request(),
+            OperationSummary::new("Plan created"),
+            OperationTiming::default(),
+            DiagnosticReport::new(),
+        )
+        .with_status(OperationStatus::RequiresApproval);
+
+        assert_eq!(result.status(), OperationStatus::RequiresApproval);
+        assert!(result.render_human().contains("(requires-approval)"));
+    }
+
+    #[test]
     fn operation_result_renders_human_success() {
         let result = OperationResult::new(
             request(),
@@ -1070,9 +1124,15 @@ mod tests {
         ] {
             let result =
                 run_adapter_inspect_for_profile(fixture_root(), OperationInterface::Test, profile);
-            let OperationPayload::AdapterInspection(payload) = result
+            let payload = match result
                 .payload()
-                .expect("adapter inspect should include payload");
+                .expect("adapter inspect should include payload")
+            {
+                OperationPayload::AdapterInspection(payload) => payload,
+                OperationPayload::StudioAuthoring(_) => {
+                    panic!("adapter inspect should not include a studio authoring payload")
+                }
+            };
 
             assert_eq!(result.status(), OperationStatus::Warning);
             assert_eq!(result.request().operation_id().as_str(), "adapters.inspect");

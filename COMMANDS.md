@@ -69,6 +69,7 @@ used by browser-backed tests.
 | `just studio-preview-fresh` | Build, then preview the static Studio frontend shell.         |
 | `just studio-tauri-dev`     | Start the desktop Studio shell in Tauri dev mode.             |
 | `just studio-tauri-build`   | Build the desktop Studio shell with the static Astro shell.   |
+| `just studio-package-check` | Run unsigned Studio packageability checks.                    |
 
 ## Author And Site Checks
 
@@ -122,15 +123,28 @@ used by browser-backed tests.
 
 ## Rust And CLI
 
-| Command                   | Purpose                                                  |
-| ------------------------- | -------------------------------------------------------- |
-| `just rust-check`         | Run all blocking Rust gates.                             |
-| `just rust-check-fast`    | Run the fastest Rust type-check gate.                    |
-| `just rust-fix`           | Run Rust formatting and Clippy machine-applicable fixes. |
-| `just rust-nextest`       | Run review-only `cargo-nextest` when installed.          |
-| `just cli --help`         | Run the additive Rust CLI shell.                         |
-| `just migration-baseline` | Show migration classifications and command debt.         |
-| `just qa-registry`        | Run the Rust QA registry report.                         |
+| Command                         | Purpose                                                     |
+| ------------------------------- | ----------------------------------------------------------- |
+| `just rust-check`               | Run all blocking Rust gates.                                |
+| `just rust-check-fast`          | Run the fastest Rust type-check gate.                       |
+| `just rust-fix`                 | Run Rust formatting and Clippy machine-applicable fixes.    |
+| `just rust-nextest`             | Run review-only `cargo-nextest` when installed.             |
+| `just rust-public-api-check`    | Check current Rust package/API compatibility policy.        |
+| `just rust-distribution-review` | Run optional Rust public-distribution review signals.       |
+| `just cli --help`               | Run the additive Rust CLI shell.                            |
+| `just cli-reference`            | Generate the `tpm` CLI command reference.                   |
+| `just cli-reference-check`      | Check whether the generated `tpm` CLI reference is current. |
+| `just cli-release-smoke`        | Build and smoke-test the local release CLI binary.          |
+| `just migration-baseline`       | Show migration classifications and command debt.            |
+| `just qa-registry`              | Run the Rust QA registry report.                            |
+
+## Public Distribution
+
+| Command                     | Purpose                                                        |
+| --------------------------- | -------------------------------------------------------------- |
+| `just distribution-check`   | Verify current public distribution readiness invariants.       |
+| `just cli-release-smoke`    | Build and smoke-test the local release CLI artifact.           |
+| `just studio-package-check` | Verify unsigned Studio packageability without release secrets. |
 
 ## Performance
 

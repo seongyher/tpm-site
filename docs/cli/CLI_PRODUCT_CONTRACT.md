@@ -15,6 +15,8 @@ Related documents:
 - [TPM_CLI_PRODUCT_STRATEGY.md](../../agent-docs/cli/TPM_CLI_PRODUCT_STRATEGY.md)
 - [RUST_MIGRATION_AND_CLI_PLAN.md](../../agent-docs/rust/RUST_MIGRATION_AND_CLI_PLAN.md)
 - [CLI_RUST_GUI_INTEGRATION_PLAN.md](../../agent-docs/roadmap/CLI_RUST_GUI_INTEGRATION_PLAN.md)
+- [CLI_DISTRIBUTION.md](./CLI_DISTRIBUTION.md)
+- [generated/tpm-cli-reference.md](../generated/tpm-cli-reference.md)
 - [HEADLESS_STUDIO_CORE_CONTRACT.md](../studio/HEADLESS_STUDIO_CORE_CONTRACT.md)
 - [STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md](../studio/STUDIO_CREDENTIAL_AND_PROVIDER_SECURITY.md)
 
@@ -36,6 +38,11 @@ Related documents:
 - This document does not replace current repository `just` recipes.
 - This document does not require GitHub, Cloudflare, Wrangler, or repo-local
   assets.
+
+The currently implemented command model is documented by the generated
+[`tpm` CLI reference](../generated/tpm-cli-reference.md). Use
+`just cli-reference` after changing the command model and
+`just cli-reference-check` to catch drift.
 
 ## Command Design Principles
 

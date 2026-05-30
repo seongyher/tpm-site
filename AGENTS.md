@@ -91,10 +91,10 @@ the correct boundary.
 - `apps/studio/`: static Astro frontend shell and minimal Tauri desktop shell
   for the future studio. Keep it read-only until operation-backed Tauri
   bindings, plan/apply safety, and provider capabilities are implemented.
-- `crates/tpm-mcp/`: transport-agnostic read-only MCP resource and safety
-  contracts over shared operation results. Do not add source writes or provider
-  mutations here before plan/apply, permission, audit, and capability gates
-  exist.
+- `crates/tpm-mcp/`: transport-agnostic MCP resource, tool, plan, apply-gate,
+  and safety contracts over shared operation results. Do not add source writes
+  or provider mutations here before plan/apply, permission, audit, and
+  capability gates exist.
 - `site/`: default TPM site instance. Publication-specific content, assets,
   public files, theme overrides, redirects, and site config belong here.
 - `site/config/site.json`: publication configuration. Keep TPM-specific text,
@@ -220,8 +220,10 @@ the correct boundary.
 - `docs/components/`, `docs/layouts/`, `docs/navigation/`,
   `docs/rehype-plugins/`, and `docs/remark-plugins/`: component, layout,
   navigation, and Markdown pipeline contracts.
-- `docs/assets/`, `docs/generated/`, and `docs/deferred/`: shared doc media,
-  generated artifacts, and postponed notes.
+- `docs/assets/`: shared documentation media.
+- `docs/generated/`: generated documentation artifacts, including platform and
+  `tpm` CLI references. Do not edit generated files by hand.
+- `docs/deferred/`: postponed notes.
 
 ## Project-Local Skills
 

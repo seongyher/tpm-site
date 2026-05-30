@@ -37,8 +37,10 @@ just cli site status --format json
 The current CLI slice supports `tpm --help`, `tpm --version`,
 `tpm site status`, `tpm site doctor`, `tpm check`, `tpm doctor`,
 `tpm media images`, `tpm routes redirects`, `tpm release inspect`, and
-`tpm adapters inspect`. These commands are product-interface proofs over Rust
-operation contracts.
+`tpm adapters inspect`, plus read-only Studio inspection commands. The
+generated command reference is refreshed with `just cli-reference` and checked
+with `just cli-reference-check`. These commands are product-interface proofs
+over Rust operation contracts.
 
 Repository maintenance automation is intentionally not exposed as `tpm`
 commands. Focused `just` recipes call the internal `tpm-xtask` binary when a
@@ -59,23 +61,23 @@ The current ownership model is:
 
 ## Workspace Layout
 
-| Path                              | Purpose                                                                                |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy. |
-| `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.         |
-| `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                         |
-| `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                |
-| `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                             |
-| `justfile`                        | Local command router over Rust operations and JS/Astro ecosystem adapters.             |
-| `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                 |
-| `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                 |
-| `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                             |
-| `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                        |
-| `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                 |
-| `crates/tpm-mcp/`                 | Transport-agnostic read-only MCP resource and safety contracts over operation results. |
-| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.             |
-| `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.               |
-| `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.             |
+| Path                              | Purpose                                                                                               |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `Cargo.toml`                      | Root Rust workspace, shared package metadata, workspace dependencies, and lint policy.                |
+| `Cargo.lock`                      | Locked Rust dependency graph. Commit it because the repo ships binaries/tools.                        |
+| `rust-toolchain.toml`             | Pinned Rust toolchain and required components.                                                        |
+| `rustfmt.toml`                    | Explicit stable Rust formatting policy.                                                               |
+| `deny.toml`                       | Blocking `cargo-deny` supply-chain policy.                                                            |
+| `justfile`                        | Local command router over Rust operations and JS/Astro ecosystem adapters.                            |
+| `crates/tpm-core/`                | Shared domain primitives such as severity and command exit categories.                                |
+| `crates/tpm-diagnostics/`         | Structured diagnostic codes, diagnostics, and reports.                                                |
+| `crates/tpm-workspace/`           | Workspace and site-instance path modeling.                                                            |
+| `crates/tpm-operations/`          | Shared operation request/result envelopes and stable renderers.                                       |
+| `crates/tpm-cli/`                 | Additive CLI shell and first command grammar over operation contracts.                                |
+| `crates/tpm-mcp/`                 | Transport-agnostic MCP resource, tool, plan, apply-gate, and safety contracts over operation results. |
+| `crates/tpm-xtask/`               | Internal repository automation adapters invoked by focused `just` recipes.                            |
+| `tests/fixtures/rust-workspace/`  | Neutral site-like fixture for Rust workspace and future operation tests.                              |
+| `tests/fixtures/rust-operations/` | Stable machine-output fixtures for operation envelope compatibility tests.                            |
 
 ## Blocking Rust Gates
 
@@ -121,6 +123,9 @@ or the current release gate:
 ```sh
 just coverage-rust
 just rust-nextest
+just rust-dependency-review
+just rust-binary-size-review
+just rust-distribution-review
 ```
 
 `coverage-rust` uses `cargo llvm-cov` and `llvm-tools-preview` when both are
@@ -144,6 +149,10 @@ Current policy decisions:
   accepted.
 - Rust coverage remains review-only and should be used to inspect meaningful
   operation-core gaps before any percentage threshold is considered.
+- `cargo-machete` and `cargo-bloat` remain review-only distribution signals
+  until they are installed, low-noise, and useful enough to promote.
+- Public Rust API compatibility checks stay policy-based until a crate is
+  intentionally published with a semver baseline.
 
 ## Fixture Policy
 

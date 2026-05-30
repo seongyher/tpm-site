@@ -1,0 +1,43 @@
+---
+import StatusBadge from "../StatusBadge.astro";
+import {
+  surfaceStatusLabel,
+  surfaceStatusTone,
+  type StudioAuthoringPayload,
+} from "../../data/authoring-operation";
+
+interface Props {
+  preview: StudioAuthoringPayload["preview"];
+}
+
+const { preview } = Astro.props;
+---
+
+<section
+  class="border-border bg-panel-muted rounded-md border p-4"
+  id="preview"
+  aria-labelledby="preview-heading"
+>
+  <h3 id="preview-heading" class="text-lg font-bold tracking-normal">
+    Preview
+  </h3>
+  <div class="mt-3 grid gap-2">
+    {
+      preview.modes.map((mode) => (
+        <article class="border-border bg-panel rounded-md border p-3">
+          <div class="flex items-center justify-between gap-3">
+            <h4 class="font-bold tracking-normal">{mode.label}</h4>
+            <StatusBadge
+              label={surfaceStatusLabel(mode.status)}
+              tone={surfaceStatusTone(mode.status)}
+            />
+          </div>
+          <p class="text-muted-foreground mt-1 text-sm">{mode.cost}</p>
+        </article>
+      ))
+    }
+  </div>
+  <p class="text-muted-foreground mt-3 text-sm leading-6">
+    {preview.parityPolicy}
+  </p>
+</section>

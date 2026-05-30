@@ -54,8 +54,14 @@ pub(crate) enum XtaskCommand {
     ContentCheck(QuietArgs),
     #[command(name = "coverage-verify")]
     CoverageVerify(QuietArgs),
+    #[command(name = "cli-reference")]
+    CliReference(QuietArgs),
+    #[command(name = "cli-reference-check")]
+    CliReferenceCheck(QuietArgs),
     #[command(name = "diagnostics-diff")]
     DiagnosticsDiff(DiagnosticsDiffArgs),
+    #[command(name = "distribution-check")]
+    DistributionCheck(QuietArgs),
     #[command(name = "docs-references")]
     DocsReferences(QuietArgs),
     #[command(name = "docs-references-check")]
@@ -70,6 +76,8 @@ pub(crate) enum XtaskCommand {
     PayloadReport(OutputDirArgs),
     #[command(name = "platform-check")]
     PlatformCheck(QuietArgs),
+    #[command(name = "public-api-check")]
+    PublicApiCheck(QuietArgs),
     #[command(name = "qa-registry")]
     QaRegistry(OperationArgs),
     #[command(name = "site-schema")]

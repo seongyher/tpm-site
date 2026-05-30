@@ -1,6 +1,6 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
-  "description": "Read-only shell capability for the static TPM Studio frontend. This slice grants no frontend-invokable commands.",
+  "description": "Narrow shell capability for the static TPM Studio frontend. Current commands expose local Rust operation envelopes only and grant no broad filesystem, shell, network, credential, provider, or publish permissions.",
   "identifier": "studio-read-only-shell",
   "permissions": [],
   "windows": ["main"]

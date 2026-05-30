@@ -56,9 +56,10 @@ failure behavior do not depend on the developer's current directory.
 
 The Tauri v2 command model allows registered commands to be invoked by app
 webviews by default, while capabilities control plugin/core permissions and
-remote access. The current shell registers only the two read-only commands and
-still grants no filesystem, shell, network, credential, provider, publish, or
-rollback permissions.
+remote access. This `IRK-187` slice registered only the two read-only commands.
+Later Milestone 12 work adds authoring and publish-plan commands, but those
+commands still return local Rust operation envelopes and grant no filesystem,
+shell, network, credential, provider, publish, or rollback permissions.
 
 Reference:
 [Tauri capabilities](https://v2.tauri.app/security/capabilities/) and

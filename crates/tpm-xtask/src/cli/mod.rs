@@ -62,9 +62,12 @@ mod tests {
             XtaskCommand::BuildOptimize(_) => "build-optimize",
             XtaskCommand::BuildRaw(_) => "build-raw",
             XtaskCommand::CatalogCheck(_) => "catalog-check",
+            XtaskCommand::CliReference(_) => "cli-reference",
+            XtaskCommand::CliReferenceCheck(_) => "cli-reference-check",
             XtaskCommand::ContentCheck(_) => "content-check",
             XtaskCommand::CoverageVerify(_) => "coverage-verify",
             XtaskCommand::DiagnosticsDiff(_) => "diagnostics-diff",
+            XtaskCommand::DistributionCheck(_) => "distribution-check",
             XtaskCommand::DocsReferences(_) => "docs-references",
             XtaskCommand::DocsReferencesCheck(_) => "docs-references-check",
             XtaskCommand::MigrationBaseline(_) => "migration-baseline",
@@ -72,6 +75,7 @@ mod tests {
             XtaskCommand::PayloadCheck(_) => "payload-check",
             XtaskCommand::PayloadReport(_) => "payload-report",
             XtaskCommand::PlatformCheck(_) => "platform-check",
+            XtaskCommand::PublicApiCheck(_) => "public-api-check",
             XtaskCommand::QaRegistry(_) => "qa-registry",
             XtaskCommand::SiteSchema(_) => "site-schema",
             XtaskCommand::SiteSchemaCheck(_) => "site-schema-check",
@@ -101,6 +105,10 @@ mod tests {
     }
 
     #[test]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "command parser fixture intentionally enumerates supported active command shapes"
+    )]
     fn parses_documented_active_command_shapes() {
         for (expected_name, values) in [
             (
@@ -126,6 +134,11 @@ mod tests {
                 vec!["build-raw", "--dir", "dist-test", "--quiet"],
             ),
             ("catalog-check", vec!["catalog-check", "--quiet"]),
+            ("cli-reference", vec!["cli-reference", "--quiet"]),
+            (
+                "cli-reference-check",
+                vec!["cli-reference-check", "--quiet"],
+            ),
             ("content-check", vec!["content-check", "--quiet"]),
             ("coverage-verify", vec!["coverage-verify", "--quiet"]),
             (
@@ -140,6 +153,7 @@ mod tests {
                     "ndjson",
                 ],
             ),
+            ("distribution-check", vec!["distribution-check", "--quiet"]),
             ("docs-references", vec!["docs-references", "--quiet"]),
             (
                 "docs-references-check",
@@ -159,6 +173,7 @@ mod tests {
                 vec!["payload-report", "--dir", "dist-test", "--quiet"],
             ),
             ("platform-check", vec!["platform-check", "--quiet"]),
+            ("public-api-check", vec!["public-api-check", "--quiet"]),
             ("qa-registry", vec!["qa-registry"]),
             (
                 "site-schema",

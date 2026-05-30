@@ -1,8 +1,8 @@
 # Studio MCP Resource Contracts
 
-This document records the first implemented Milestone 13 MCP slice. It is the
-implementation handoff for `IRK-197` and a constraint document for later MCP
-tools, permission gates, and write-capable plan/apply work.
+This document records the implemented Milestone 13 MCP contract slice. It is
+the implementation handoff for `IRK-197`, `IRK-199`, `IRK-200`, `IRK-201`,
+`IRK-202`, and `IRK-203`.
 
 Related documents:
 
@@ -14,10 +14,11 @@ Related documents:
 
 ## Purpose
 
-The first MCP implementation is deliberately read-only and transport-agnostic.
-It lives in `crates/tpm-mcp` and models resource descriptors, permission
-defaults, response envelopes, operation-result wrapping, unsupported-resource
-diagnostics, and redaction summaries.
+The MCP implementation is deliberately transport-agnostic. It lives in
+`crates/tpm-mcp` and models resource descriptors, tool descriptors, permission
+defaults, response envelopes, operation-result wrapping, plan-only reports,
+apply gates, unsupported diagnostics, redaction summaries, and deterministic
+response-local audit events.
 
 This crate does not yet run an MCP server. It defines the domain contract that
 a future server can expose over the Model Context Protocol without inventing a
@@ -25,36 +26,58 @@ second diagnostics, workspace, or provider model.
 
 ## Current Tool Catalog
 
-The implemented read-only tool catalog is also transport-agnostic. Tools call
-the same resource functions instead of re-running unrelated MCP-only logic:
+The implemented tool catalog is transport-agnostic. Report and plan tools call
+the same resource functions instead of re-running unrelated MCP-only logic.
+Apply tools are present as explicit gates and reject mutation until shared
+operation-core apply support exists:
 
-| Tool name              | Backing resource or behavior                                                |
-| ---------------------- | --------------------------------------------------------------------------- |
-| `site_status`          | Wraps `tpm://resources/workspace/status`                                    |
-| `site_diagnostics`     | Wraps `tpm://resources/site/diagnostics`                                    |
-| `resource_catalog`     | Returns the current read-only resource descriptors                          |
-| `adapter_capabilities` | Returns the same unsupported capability-registry diagnostic as the resource |
+| Tool name               | Backing resource or behavior                                                |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `site_status`           | Wraps `tpm://resources/workspace/status`                                    |
+| `site_diagnostics`      | Wraps `tpm://resources/site/diagnostics`                                    |
+| `resource_catalog`      | Returns the current resource descriptors                                    |
+| `adapter_capabilities`  | Returns the same unsupported capability-registry diagnostic as the resource |
+| `settings_change_plan`  | Wraps `tpm://resources/studio/settings-plan`                                |
+| `source_edit_plan`      | Wraps `tpm://resources/studio/content-plan`                                 |
+| `media_change_plan`     | Wraps `tpm://resources/studio/media-plan`                                   |
+| `preview_report`        | Wraps `tpm://resources/studio/preview-report`                               |
+| `release_plan`          | Wraps `tpm://resources/studio/release-plan`                                 |
+| `publish_plan`          | Wraps `tpm://resources/studio/publish-plan`                                 |
+| `workflow_verify`       | Wraps `tpm://resources/studio/workflow-verify`                              |
+| `apply_settings_change` | Apply gate; returns unsupported until source mutation apply exists          |
+| `apply_source_edit`     | Apply gate; returns unsupported until source mutation apply exists          |
+| `apply_media_change`    | Apply gate; returns unsupported until media mutation apply exists           |
+| `apply_publish`         | Apply gate; returns unsupported until provider publish apply exists         |
 
-The tool layer is intentionally small. It proves the command shape,
-permission gate, response envelope, redaction propagation, and diagnostics
-mapping for agent-facing inspection. It does not introduce mutating tools,
+The tool layer proves command shape, permission gates, response envelopes,
+redaction propagation, audit semantics, and diagnostics mapping for
+agent-facing inspection and planning. It does not introduce live mutation,
 provider-specific tools, or a second capability model.
 
 ## Current Resource Catalog
 
-The implemented read-only catalog exposes:
+The implemented resource catalog exposes:
 
-| Resource URI                           | Backing operation or status                                          |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| `tpm://resources/workspace/status`     | `workspace.status` operation result                                  |
-| `tpm://resources/site/diagnostics`     | `site.doctor` operation result                                       |
-| `tpm://resources/release/inspect`      | `release.inspect` operation result                                   |
-| `tpm://resources/media/images`         | `media.images` operation result                                      |
-| `tpm://resources/routes/redirects`     | `routes.redirects` operation result                                  |
-| `tpm://resources/adapter-capabilities` | unsupported diagnostic until Milestone 10 capability registry exists |
+| Resource URI                             | Backing operation or status                                          |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| `tpm://resources/workspace/status`       | `workspace.status` operation result                                  |
+| `tpm://resources/site/diagnostics`       | `site.doctor` operation result                                       |
+| `tpm://resources/studio/settings-plan`   | `studio.settings.inspect` operation result                           |
+| `tpm://resources/studio/content-plan`    | `studio.content.editor` operation result                             |
+| `tpm://resources/studio/media-plan`      | `studio.media.library` operation result                              |
+| `tpm://resources/studio/preview-report`  | `studio.preview.plan` operation result                               |
+| `tpm://resources/studio/release-plan`    | `studio.release.plan` operation result                               |
+| `tpm://resources/studio/publish-plan`    | `studio.publish.apply` operation result as a gated plan              |
+| `tpm://resources/studio/workflow-verify` | `studio.workflow.verify` operation result                            |
+| `tpm://resources/release/inspect`        | `release.inspect` operation result                                   |
+| `tpm://resources/media/images`           | `media.images` operation result                                      |
+| `tpm://resources/routes/redirects`       | `routes.redirects` operation result                                  |
+| `tpm://resources/adapter-capabilities`   | unsupported diagnostic until Milestone 10 capability registry exists |
 
 The resources wrap existing `OperationResult` data with `interface: "mcp"`.
-They do not reformat the operation into a separate MCP-specific model.
+They do not reformat the operation into a separate MCP-specific model. Studio
+plan/report resources expose the shared `StudioAuthoringPayload` operation
+payload with `request.interface: "mcp"`.
 
 ## Permission Defaults
 
@@ -63,7 +86,9 @@ The current permission model is intentionally small and read-only:
 - `inspect`
 - `diagnostics.read`
 - `source.read`
+- `source.propose`
 - `media.read`
+- `preview.run`
 - `routes.read`
 - `release.read`
 - `provider.status.read`
@@ -72,8 +97,22 @@ Missing scopes return a `permission-denied` resource response with
 `TPM-MCP-PERMISSION-DENIED`. The response has no payload and includes an
 actionable remediation.
 
-No write, provider mutation, publish, rollback, credential rotation, or
-destructive scope exists in this slice.
+Additional apply-capable scopes are modeled but not granted by default:
+
+- `source.write`
+- `media.write`
+- `deploy.publish`
+- `deploy.rollback`
+- `build.run`
+- `workflow.transition`
+- `credential.test`
+- `extension.configure`
+- `admin`
+
+No tool currently mutates source, providers, credentials, or generated output.
+Apply tools require the relevant write/publish scope before reaching the apply
+gate, then return `unsupported` with `TPM-MCP-APPLY-GATE-UNAVAILABLE` until
+the shared mutation operation exists.
 
 ## Unsupported Capability Resource
 
@@ -99,17 +138,17 @@ provider scopes, and audit records explicitly.
 
 ## Audit Events
 
-Every current resource read and tool call emits a deterministic read-only audit
-event in the response. These events record:
+Every current resource read and tool call emits a deterministic audit event in
+the response. These events record:
 
 - action: `resource-read` or `tool-call`;
 - interface: `mcp`;
 - target resource URI or tool name;
-- safety class: `read-only`;
+- safety class: `read-only`, `plan-only`, or `apply-gate`;
 - outcome: `completed`, `permission-denied`, or `unsupported`;
 - required, granted, and missing scopes;
-- credential access: `none`;
-- mutation: `none`;
+- credential access: `none` or `reference-only`;
+- mutation: `none`, `planned`, or `rejected`;
 - redaction summary.
 
 This is the current safety envelope, not the final persisted audit log. The
@@ -158,16 +197,27 @@ The current tool tests cover:
 - `resource_catalog` returning resource descriptors;
 - permission-denied behavior for tools;
 - adapter-capability tool fallback while the capability registry is missing;
-- read-only audit events for completed and permission-denied tool calls.
+- Studio report tools wrapping shared Studio operation resources;
+- exact operation-result parity for Studio preview, release, and publish plan
+  resources;
+- apply tools denying missing write/publish scopes before any mutation path;
+- apply tools returning unsupported after permission until operation-core
+  mutation exists;
+- credential secret handles staying absent from serialized MCP publish-plan
+  responses;
+- audit events for read-only, plan-only, permission-denied, unsupported, and
+  apply-gated responses.
 
 ## Blocked Follow-Up
 
 `IRK-199` has an initial read-only tool slice for status, diagnostics,
-resource discovery, and adapter-capability fallback. Full provider-aware
-adapter-capability inspection remains blocked on `IRK-181`.
+resource discovery, and adapter-capability fallback.
 
-`IRK-201` can build on the permission and redaction primitives after the
-read-only resource skeleton exists. This slice now covers read-only permission
-gates, redaction summaries, and deterministic response-local audit events. The
-full credential/audit integration still depends on the Milestone 10 identity
-and credential boundaries.
+`IRK-201` now covers permission gates, redaction summaries, and deterministic
+response-local audit events for the current MCP contract surface. The full
+credential/audit integration for persisted audit storage and live providers
+belongs to future provider/runtime work.
+
+`IRK-202` intentionally stops at apply gates. Real source writes, provider
+publishes, rollbacks, and credential tests must be implemented in the shared
+operation core first, then exposed through MCP as thin adapters.
