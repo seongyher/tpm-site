@@ -204,7 +204,8 @@ the correct boundary.
 - `docs/studio/`: Studio/CMS contracts shared by GUI, CLI, MCP, Tauri,
   publishing, provider capabilities, credentials, parity, and test plans.
 - `docs/studio/gui-mvp/`: first shippable Studio GUI MVP product, visual,
-  fixture, component, dependency, and Figma handoff specs.
+  navigation, dependency, component, fixture, Figma, engineering, and
+  implementation handoff specs.
 - `docs/cli/`: product-facing CLI contracts and command-language designs.
 - `docs/rust/`: Rust workspace, operation, adapter runtime, and TypeScript
   automation migration docs.

@@ -15,12 +15,14 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
-## Active Milestone 15: Studio GUI MVP Design Through Figma Handoff
+## Active Milestone 15: Studio GUI MVP Design And Implementation Handoff
 
 This pass completes Linear Milestone 15 through the designer-facing
-Figma-ready screen specification. It is design and research work only: no real
-source writes, file-open/save implementation, credentialed publish flow, or
-backend operation wiring should be added here.
+Figma-ready screen specification, consolidated engineering design
+specification, and implementation handoff for the next fixture-backed GUI
+prototype milestone. It is design and research work only: no real source
+writes, file-open/save implementation, credentialed publish flow, or backend
+operation wiring should be added here.
 
 ### M15.0 Planning And Source Refresh
 
@@ -160,6 +162,49 @@ backend operation wiring should be added here.
 - [x] Attach the improved mockup references and any updated docs to the
       relevant Linear issues, then add a project/status note describing the
       refinement.
+
+### M15.12 IRK-276 Consolidated Engineering Design Specification
+
+- [x] Read the completed Milestone 15 product, visual, navigation,
+      dependency, component, fixture, Figma handoff, visual reference, Studio
+      core, Tauri, and roadmap docs.
+- [x] Write the engineering-facing Studio GUI MVP design specification,
+      consolidating final scope, non-goals, screen inventory, visual tokens,
+      dependency decisions, component hierarchy, fixture/state model,
+      operation mapping, accessibility, keyboard, responsive, tooltip, context
+      menu, validation, and error/recovery requirements.
+- [x] Objectively review the engineering spec for implementation ambiguity,
+      missing states, contradictions with the designer handoff, weak operation
+      boundaries, oversized component risks, missing test seams, and scope
+      creep; refine until developers can start the prototype without guessing.
+- [x] Verify the engineering spec with focused documentation checks before
+      updating Linear.
+
+### M15.13 IRK-237 And IRK-265 Implementation Handoff Plan
+
+- [x] Read the completed engineering design specification and relevant
+      fixture, parity, Tauri, product-test, and dependency docs.
+- [x] Write the next implementation milestone handoff plan, including the
+      milestone name, goal, definition of done, implementation issue
+      breakdown, sequencing, blockers, dependency setup plan, fixture plan,
+      visual QA, accessibility, keyboard, responsive, tooltip, context menu,
+      and screenshot test plan.
+- [x] Objectively review the handoff for fake precision, missing blockers,
+      unsafe implementation scope, missing non-goals, weak QA gates, and
+      unclear parallelization; refine until it is ready to create or update
+      Linear implementation issues.
+- [x] Verify the handoff with focused documentation checks before updating
+      Linear.
+
+### M15.14 Linear And Final Milestone Verification
+
+- [x] Attach the consolidated engineering spec and implementation handoff docs
+      to `IRK-276`, `IRK-237`, `IRK-265`, and any other Linear issues where
+      they are useful context.
+- [x] Move completed Milestone 15 remaining issues to In Review.
+- [x] Run final focused verification for the Milestone 15 docs and checklist.
+- [x] Summarize Milestone 15 completion, remaining risks, and the next
+      implementation milestone.
 
 ## Active Milestone 14: Packaging, Extraction, And Public Distribution
 

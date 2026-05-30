@@ -42,8 +42,9 @@ that should survive beyond a single planning pass.
   automation migration docs.
 - `studio/`: Studio/CMS contracts shared by GUI, CLI, MCP, Tauri, publishing,
   provider capabilities, credentials, parity, and test plans.
-- `studio/gui-mvp/`: first shippable Studio GUI MVP product, visual, fixture,
-  component, dependency, and Figma handoff specs.
+- `studio/gui-mvp/`: first shippable Studio GUI MVP product, visual,
+  navigation, dependency, component, fixture, Figma, engineering, and
+  implementation handoff specs.
 
 ## Placement Rules
 
