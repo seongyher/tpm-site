@@ -15,6 +15,30 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Planning: Milestone 16 Linear Setup
+
+This planning pass transfers the completed Studio GUI MVP design and handoff
+documents into a concrete Linear milestone for the fixture-backed GUI
+prototype. It is planning work only: do not implement React, shadcn, editor,
+fixture, or Tauri code in this pass.
+
+- [x] Re-read the Studio GUI MVP handoff/spec documents, current Studio app
+      baseline, and relevant operation/Tauri/QA docs.
+- [x] Verify dependency assumptions against current project context and
+      authoritative docs where useful.
+- [x] Create the Linear milestone and parent issue for the fixture-backed
+      Studio GUI MVP prototype.
+- [x] Create foundation issues for dependency setup, tokens/shell,
+      operation-shaped fixtures, and command/state/session models.
+- [x] Create product-surface issues for startup/project home, article
+      directory, editor/preview, media, settings, publish, and restore flows.
+- [x] Create hardening and closeout issues for accessibility, keyboard,
+      context menus, tooltips, responsive behavior, visual QA, tests, docs, and
+      Linear handoff.
+- [x] Review Linear blockers for false positives/negatives and attach
+      relevant docs to each issue.
+- [x] Add a TPM project status update summarizing the new milestone plan.
+
 ## Active Milestone 15: Studio GUI MVP Design And Implementation Handoff
 
 This pass completes Linear Milestone 15 through the designer-facing
