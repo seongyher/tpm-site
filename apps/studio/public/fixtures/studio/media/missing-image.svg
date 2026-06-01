@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Missing image fixture</title>
+  <desc id="desc">Placeholder for a missing media source file.</desc>
+  <rect width="1600" height="900" fill="#f7f7f5"/>
+  <rect x="420" y="190" width="760" height="520" rx="24" fill="#ffffff" stroke="#d45145" stroke-width="12" stroke-dasharray="32 24"/>
+  <path d="M560 590l180-190 130 135 90-95 210 210H560z" fill="#f5d7d4"/>
+  <circle cx="940" cy="340" r="58" fill="#f0b9b3"/>
+  <text x="800" y="770" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="54" fill="#9b312a">Missing source file</text>
+</svg>

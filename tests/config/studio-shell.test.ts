@@ -38,6 +38,7 @@ describe("studio shell configuration", () => {
         "studio-dev",
         "studio-preview",
         "studio-preview-fresh",
+        "studio-test-e2e",
         "studio-tauri-build",
         "studio-tauri-dev",
       ]),
@@ -50,6 +51,9 @@ describe("studio shell configuration", () => {
     );
     expect(justRecipeBlock(justfile, "studio-dev")).toContain(
       "astro dev --root apps/studio",
+    );
+    expect(justRecipeBlock(justfile, "studio-test-e2e")).toContain(
+      "playwright test --config playwright.studio.config.ts",
     );
     expect(justRecipeBlock(justfile, "studio-tauri-build")).toContain(
       "tauri build",
@@ -206,12 +210,14 @@ describe("studio shell configuration", () => {
     const styles = await readWorkspaceFile("apps/studio/src/styles/studio.css");
 
     expect(styles).toContain('@import "tailwindcss"');
-    expect(page).toContain("StudioAppBar");
-    expect(page).toContain("StudioNavigation");
-    expect(page).toContain("StudioSummaryPanel");
-    expect(page).toContain("OperationDetailsPanel");
-    expect(page).toContain("OperationRuntimePanel");
-    expect(page).toContain("StudioAuthoringPanel");
+    expect(page).toContain("StudioWorkspace");
+    expect(page).toContain("studio-gui-mvp-fixture");
+    expect(page).not.toContain("StudioAppBar");
+    expect(page).not.toContain("StudioNavigation");
+    expect(page).not.toContain("StudioSummaryPanel");
+    expect(page).not.toContain("OperationDetailsPanel");
+    expect(page).not.toContain("OperationRuntimePanel");
+    expect(page).not.toContain("StudioAuthoringPanel");
     expect(page).not.toContain("SourceRootsPanel");
     expect(page).not.toContain("ArtifactsPanel");
   });

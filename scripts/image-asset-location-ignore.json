@@ -1,5 +1,6 @@
 [
   "apps/studio/src-tauri/icons/**",
+  "apps/studio/public/fixtures/studio/media/**",
   "site/public/apple-touch-icon-precomposed.png",
   "site/public/apple-touch-icon.png",
   "site/public/favicon.ico",

@@ -16,6 +16,7 @@
     "examples/platform-entrypoint-consumer/**/*.ts",
     "knip.ts",
     "playwright.config.ts",
+    "playwright.studio.config.ts",
     "scripts/**/*.ts",
     "tests/.env.catalog.test.ts",
     "tests/**/*.ts",

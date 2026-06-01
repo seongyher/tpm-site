@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Unsupported image fixture</title>
+  <desc id="desc">Placeholder for an unsupported image format.</desc>
+  <rect width="1600" height="900" fill="#f7f7f5"/>
+  <rect x="455" y="175" width="690" height="550" rx="34" fill="#fff7df" stroke="#d99025" stroke-width="12"/>
+  <path d="M800 285v235" stroke="#d99025" stroke-width="36" stroke-linecap="round"/>
+  <circle cx="800" cy="610" r="28" fill="#d99025"/>
+  <text x="800" y="775" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="54" fill="#8a530f">Unsupported format</text>
+</svg>

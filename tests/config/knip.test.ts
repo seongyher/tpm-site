@@ -6,7 +6,7 @@ describe("Knip config", () => {
   test("tracks app, tooling, scripts, and tests as project entrypoints", () => {
     expect(config.entry).toContain("astro.config.ts");
     expect(config.entry).toContain("apps/studio/astro.config.mjs");
-    expect(config.entry).toContain("apps/studio/src/**/*.{astro,ts}");
+    expect(config.entry).toContain("apps/studio/src/**/*.{astro,ts,tsx}");
     expect(config.entry).toContain("eslint/**/*.ts");
     expect(config.entry).toContain("scripts/**/*.ts");
     expect(config.entry).toContain("tests/**/*.ts");

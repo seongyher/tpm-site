@@ -81,12 +81,61 @@ complete and attached to the relevant Linear issues:
 - [STUDIO_GUI_MVP_FIGMA_HANDOFF.md](./STUDIO_GUI_MVP_FIGMA_HANDOFF.md)
 - [STUDIO_GUI_MVP_VISUAL_REFERENCES.md](./STUDIO_GUI_MVP_VISUAL_REFERENCES.md)
 - [STUDIO_GUI_MVP_ENGINEERING_SPEC.md](./STUDIO_GUI_MVP_ENGINEERING_SPEC.md)
+- [STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md](./STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md)
 
 If Figma mockups are available before implementation starts, use them as visual
 input. They are not blockers for building the fixture and component
 foundation, but they are blockers for final visual polish unless the team
 explicitly accepts using the current reference image set as the visual source
 of truth.
+
+## Current Implementation Status
+
+Milestone 16 now implements the fixture-backed Studio GUI prototype in
+`apps/studio`.
+
+Implemented:
+
+- bounded React workspace mounted from the static Astro Studio app;
+- Studio shell, toolbar, sidebar, resizable/collapsible panes, preview rail,
+  and native-toolbar placeholders;
+- operation-shaped fixture graph and pure view models for startup, recent
+  projects, project home, article directory, article editor, media, settings,
+  preview, publish, and restore states;
+- shared command registry for toolbar actions, hotkeys, command palette,
+  context menus, dropdown menus, and disabled/blocked reasons;
+- source-editor shell with CodeMirror and command-backed Markdown
+  transformations;
+- descriptor-backed article and settings forms with local validation and
+  actionable diagnostics;
+- media browser with local fixture assets, selected detail pane, alt/caption
+  fields, warning states, and fixture-only insert flow;
+- publish preview, confirmation, progress, success, blocked, and failed states
+  with redacted credential references and no provider mutation;
+- restore checkpoint selection, confirmation, completion, and unavailable
+  capability states;
+- Playwright coverage for required MVP screen states, keyboard behavior,
+  sidebar resizing, command surfaces, dialogs, high text zoom, reduced motion,
+  and axe accessibility scans;
+- unit coverage for fixture validation, view models, command availability,
+  reducers, editor transformations, pane policy, interaction-state matrix
+  invariants, and visual contrast tokens.
+
+Accepted fixture-prototype differences:
+
+- previews are rendered from fixture view models, not live Astro route output;
+- article saves, media insertion, restore, and publish transitions mutate only
+  in-memory fixture state;
+- Cloudflare credentials and deploys are represented by redacted fixture
+  references only;
+- the app does not open real folders, write real source files, call provider
+  APIs, or require broad Tauri capabilities;
+- the visual source of truth is the written GUI MVP docs plus the committed
+  reference image library until approved Figma mockups replace or refine it.
+
+The next operation-binding milestone should preserve these component,
+command, fixture, diagnostic, and test seams while replacing selected fixture
+transitions with Rust/Tauri operations behind the same contracts.
 
 ## Definition Of Done
 
