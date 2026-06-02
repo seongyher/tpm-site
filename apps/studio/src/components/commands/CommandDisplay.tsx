@@ -12,6 +12,7 @@ import { CommandShortcut } from "./CommandShortcut";
 interface CommandDisplayProps {
   className?: string | undefined;
   item: StudioCommandSurfaceItem;
+  showDescription?: boolean;
   showGroup?: boolean;
   showSafety?: boolean;
 }
@@ -24,6 +25,7 @@ interface CommandDisplayProps {
 export function CommandDisplay({
   className,
   item,
+  showDescription = false,
   showGroup = false,
   showSafety = false,
 }: CommandDisplayProps): ReactElement {
@@ -45,11 +47,11 @@ export function CommandDisplay({
             </Badge>
           ) : null}
         </span>
-        {item.record.description === undefined ? null : (
+        {showDescription && item.record.description !== undefined ? (
           <span className="text-muted-foreground truncate text-xs">
             {item.record.description}
           </span>
-        )}
+        ) : null}
         {unavailable ? (
           <span className="text-warning text-xs">
             {item.availability.reason ??

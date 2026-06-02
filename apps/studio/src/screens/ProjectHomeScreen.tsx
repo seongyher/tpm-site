@@ -33,7 +33,6 @@ interface ProjectHomeScreenProps {
 
 interface ProjectAction {
   commandId: StudioCommandId;
-  description: string;
   icon: LucideIcon;
   label: string;
 }
@@ -41,37 +40,31 @@ interface ProjectAction {
 const projectActions = [
   {
     commandId: "article.create",
-    description: "Start writing a new article.",
     icon: FileText,
     label: "New article",
   },
   {
     commandId: "article.directory.open",
-    description: "Browse and edit your articles.",
     icon: FileText,
     label: "Open article",
   },
   {
     commandId: "media.open",
-    description: "Upload and manage images.",
     icon: Image,
     label: "Media",
   },
   {
     commandId: "settings.open",
-    description: "Edit project settings.",
     icon: Settings,
     label: "Settings",
   },
   {
     commandId: "preview.open",
-    description: "See how your site will look.",
     icon: FileText,
     label: "Preview site",
   },
   {
     commandId: "publish.prepare",
-    description: "Make your latest changes live.",
     icon: UploadCloud,
     label: "Publish",
   },
@@ -92,20 +85,16 @@ export function ProjectHomeScreen({
   const deployProvider = fixture.workspace.providers.deploy;
 
   return (
-    <main className="min-h-full overflow-auto p-6 md:p-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+    <main className="min-h-full overflow-auto p-4 md:p-5">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
         <header>
-          <h1 className="text-foreground text-3xl font-semibold">
+          <h1 className="text-foreground text-2xl font-semibold">
             Project Home
           </h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Create, manage, and publish content for{" "}
-            {fixture.workspace.displayName}.
-          </p>
         </header>
 
         <section aria-label="Common project actions">
-          <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
             {projectActions.map((action) => (
               <ProjectActionCard
                 action={action}
@@ -116,7 +105,7 @@ export function ProjectHomeScreen({
           </div>
         </section>
 
-        <section className="grid gap-5 lg:grid-cols-2">
+        <section className="grid gap-4 lg:grid-cols-2">
           <ArticleSummaryPanel
             items={recentWork}
             onCommand={onCommand}
@@ -130,9 +119,9 @@ export function ProjectHomeScreen({
           />
         </section>
 
-        <Panel className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-start gap-4">
-            <span className="bg-success-muted text-success grid size-10 shrink-0 place-items-center rounded-full">
+        <Panel className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <span className="bg-success-muted text-success grid size-9 shrink-0 place-items-center rounded-full">
               <CheckCircle2 aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -145,7 +134,9 @@ export function ProjectHomeScreen({
             </div>
           </div>
           <Button
-            onClick={() => onCommand("settings.open")}
+            onClick={() =>
+              onCommand("settings.open", { settingsSectionId: "publishing" })
+            }
             variant="secondary"
           >
             Manage connection
@@ -168,7 +159,7 @@ function ArticleSummaryPanel({
   title: string;
 }): ReactElement {
   return (
-    <Panel className="p-5">
+    <Panel className="p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-foreground text-base font-semibold">{title}</h2>
         <button
@@ -182,7 +173,7 @@ function ArticleSummaryPanel({
       {items.length === 0 ? (
         <p className="text-muted-foreground text-sm">{emptyLabel}</p>
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-3 p-0">
+        <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
           {items.map((item) => (
             <ArticleSummaryRow
               item={item}
@@ -235,21 +226,18 @@ function ProjectActionCard({
   const Icon = action.icon;
 
   return (
-    <Panel className="p-5">
+    <Panel className="p-4">
       <button
-        className="focus-visible:outline-accent flex w-full items-center gap-5 text-left focus-visible:outline-2"
+        className="focus-visible:outline-accent flex w-full items-center gap-4 text-left focus-visible:outline-2"
         onClick={() => onCommand(action.commandId)}
         type="button"
       >
-        <span className="bg-accent-muted text-accent-foreground grid size-14 shrink-0 place-items-center rounded-[var(--radius-control)]">
+        <span className="bg-accent-muted text-accent-foreground grid size-11 shrink-0 place-items-center rounded-[var(--radius-control)] [&_svg]:size-5">
           <Icon aria-hidden="true" />
         </span>
-        <span className="min-w-0">
+        <span className="min-w-0 flex-1">
           <span className="text-foreground block font-semibold">
             {action.label}
-          </span>
-          <span className="text-muted-foreground mt-1 block text-sm leading-5">
-            {action.description}
           </span>
         </span>
       </button>

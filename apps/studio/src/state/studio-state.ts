@@ -7,7 +7,9 @@ import {
 import type {
   ArticleDirectoryFixture,
   ArticleDocumentFixture,
+  ArticleTreeNodeFixture,
   EditorSessionStateFixture,
+  FieldValueFixture,
   MediaItemFixture,
   PanelStateFixture,
   SettingsFixture,
@@ -54,6 +56,23 @@ export interface StudioMediaBrowserState {
   readonly viewMode: StudioMvpFixture["media"]["viewMode"];
 }
 
+/** Preview viewport modes rendered by the fixture route preview. */
+export type StudioPreviewViewport = "desktop" | "mobile";
+
+/** Reducer-owned inline article title editing state. */
+export interface StudioEditorTitleState {
+  /** Last accepted title value used when cancelling edits. */
+  readonly baseline: string;
+  /** Diagnostic code attached to invalid title drafts. */
+  readonly diagnosticCode?: "STUDIO-ARTICLE-TITLE-REQUIRED";
+  /** Current inline title draft. */
+  readonly draft: string;
+  /** Whether the title is being edited or only displayed. */
+  readonly mode: "editing" | "viewing";
+  /** Local validation status for the draft title. */
+  readonly status: "invalid" | "valid";
+}
+
 /** Fixture-backed Studio app state shared by all GUI command surfaces. */
 export interface StudioAppState {
   /** Active article ID when editing or previewing article context. */
@@ -78,18 +97,26 @@ export interface StudioAppState {
   readonly activeSettingsState?: SettingsFixture["state"];
   /** Directory filter/search state. */
   readonly articleDirectory: StudioArticleDirectoryState;
+  /** Collapsed article-tree folder node IDs in the sidebar. */
+  readonly collapsedArticleTreeNodeIds: readonly string[];
   /** Recent-project IDs dismissed from the startup recovery list. */
   readonly dismissedRecentProjectIds?: readonly string[];
   /** Editor cursor and context state. */
   readonly editor?: StudioSessionFixture["editor"];
   /** Local source editor buffer before an operation-backed draft write. */
   readonly editorDraftSource?: string;
+  /** Collapsible Properties panel state. */
+  readonly editorProperties: PanelStateFixture;
+  /** Inline title editing state for the selected article. */
+  readonly editorTitle?: StudioEditorTitleState;
   /** Media browser search/view state. */
   readonly media: StudioMediaBrowserState;
   /** Overlay state for dialogs, menus, and command palette. */
   readonly overlay: StudioOverlayState;
   /** Preview pane collapse/size state. */
   readonly previewPane: PanelStateFixture;
+  /** Current preview viewport mode. */
+  readonly previewViewport: StudioPreviewViewport;
   /** Restore status from the exact session model. */
   readonly restoreStatus: StudioSessionFixture["restoreStatus"];
   /** Sidebar collapse/size state. */
@@ -100,6 +127,8 @@ export interface StudioAppState {
 export interface StudioCommandPayload {
   /** Article to open or use as action target. */
   readonly articleId?: string;
+  /** Article tree node to collapse or expand. */
+  readonly articleTreeNodeId?: string;
   /** Category filter to apply in the article directory. */
   readonly categoryFilter?: string | undefined;
   /** Cursor offset after an editor transaction. */
@@ -116,6 +145,8 @@ export interface StudioCommandPayload {
   readonly mediaQuery?: string;
   /** Media browser display mode to apply. */
   readonly mediaViewMode?: StudioMediaBrowserState["viewMode"];
+  /** Preview viewport mode to apply. */
+  readonly previewViewport?: StudioPreviewViewport;
   /** Search query to apply in the article directory. */
   readonly query?: string;
   /** Recent project to open or remove from startup recovery surfaces. */
@@ -132,6 +163,8 @@ export interface StudioCommandPayload {
   readonly statusFilter?: StudioArticleDirectoryState["statusFilter"];
   /** Tag filter to apply in the article directory. */
   readonly tagFilter?: string | undefined;
+  /** Inline article title draft. */
+  readonly titleDraft?: string;
 }
 
 /** Pure action accepted by the Studio app reducer. */
@@ -232,7 +265,7 @@ export function runStudioCommand(
     return failed(state, `Unknown Studio command: ${commandId}.`);
   }
 
-  const availability = studioCommandAvailability(commandId, state);
+  const availability = studioCommandAvailability(commandId, state, payload);
 
   if (availability.status !== "available") {
     return failed(
@@ -287,10 +320,13 @@ function defaultState(fixture: StudioMvpFixture): StudioAppState {
         query: fixture.media.query,
         viewMode: fixture.media.viewMode,
       },
+      editorProperties: { visibility: "visible" },
       overlay: { kind: "none" },
-      previewPane: { visibility: "collapsed" },
+      previewPane: { visibility: "hidden" },
+      previewViewport: "desktop",
       restoreStatus: "failed",
-      sidebar: { visibility: "expanded" },
+      sidebar: { visibility: "visible" },
+      collapsedArticleTreeNodeIds: [],
     };
   }
 
@@ -350,21 +386,26 @@ function stateFromSession(
     session.activeArticleId === undefined
       ? undefined
       : articleById(fixture, session.activeArticleId);
+  const editorTitle = articleTitleStateFromArticle(article);
 
   return {
     activeScreen: session.activeScreen,
     articleDirectory: selectedDirectoryState(fixture, session),
+    collapsedArticleTreeNodeIds: [],
+    editorProperties: { visibility: "visible" },
     media: {
       query: fixture.media.query,
       viewMode: fixture.media.viewMode,
     },
     overlay: overlayFromSession(session),
     previewPane: session.previewPane,
+    previewViewport: "desktop",
     restoreStatus: session.restoreStatus,
     sidebar: session.sidebar,
     ...(article === undefined
       ? {}
       : { activeArticleState: article.workingCopyState }),
+    ...(editorTitle === undefined ? {} : { editorTitle }),
     ...(session.activeArticleId === undefined
       ? {}
       : { activeArticleId: session.activeArticleId }),
@@ -491,6 +532,13 @@ function transitionAvailableCommand(
         },
         commandRecord,
       );
+    case "articleTree.toggleFolder":
+      return transitionArticleTreeToggle(
+        fixture,
+        state,
+        commandRecord,
+        payload,
+      );
     case "commandPalette.close":
       return succeeded({ ...state, overlay: { kind: "none" } }, commandRecord);
     case "commandPalette.open":
@@ -498,6 +546,19 @@ function transitionAvailableCommand(
         { ...state, overlay: { kind: "command-palette" } },
         commandRecord,
       );
+    case "editor.properties.toggle":
+      return succeeded(
+        { ...state, editorProperties: toggledPanel(state.editorProperties) },
+        commandRecord,
+      );
+    case "editor.title.beginEdit":
+      return transitionTitleBeginEdit(fixture, state, commandRecord);
+    case "editor.title.cancel":
+      return transitionTitleCancel(fixture, state, commandRecord);
+    case "editor.title.commit":
+      return transitionTitleCommit(state, commandRecord);
+    case "editor.title.update":
+      return transitionTitleUpdate(fixture, state, commandRecord, payload);
     case "editor.updateSource":
       return transitionEditorSourceUpdate(state, commandRecord, payload);
     case "format.blockquote":
@@ -540,6 +601,8 @@ function transitionAvailableCommand(
       return transitionPreviewOpen(state, commandRecord);
     case "preview.openExternal":
       return succeeded({ ...state, overlay: { kind: "none" } }, commandRecord);
+    case "preview.setViewport":
+      return transitionPreviewViewport(state, commandRecord, payload);
     case "project.createSite":
       return succeeded(
         {
@@ -619,7 +682,7 @@ function transitionAvailableCommand(
           activePublishScenarioId: "publish-preview",
           activeScreen: "publish-preview",
           overlay: { kind: "none" },
-          previewPane: { ...state.previewPane, visibility: "collapsed" },
+          previewPane: { ...state.previewPane, visibility: "hidden" },
         },
         commandRecord,
       );
@@ -767,6 +830,74 @@ function articleById(
   return fixture.articles.find((article) => article.id === articleId);
 }
 
+function activeArticle(
+  fixture: StudioMvpFixture,
+  state: StudioAppState,
+): ArticleDocumentFixture | undefined {
+  return state.activeArticleId === undefined
+    ? undefined
+    : articleById(fixture, state.activeArticleId);
+}
+
+function articleTitleStateFromArticle(
+  article: ArticleDocumentFixture | undefined,
+): StudioEditorTitleState | undefined {
+  const titleField = article?.frontmatter
+    .flatMap((section) => section.fields)
+    .find((field) => field.id === "title");
+
+  if (article === undefined || titleField?.validation.status !== "invalid") {
+    return undefined;
+  }
+
+  return titleState({
+    baseline: article.title,
+    draft: fieldValueString(titleField.draftValue ?? ""),
+    mode: "editing",
+  });
+}
+
+function fieldValueString(value: FieldValueFixture): string {
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  if (value === null) {
+    return "";
+  }
+
+  return String(value);
+}
+
+function normalizedTitleDraft(draft: string): string {
+  return draft.trim().replace(/\s+/g, " ");
+}
+
+function titleState({
+  baseline,
+  draft,
+  mode,
+}: {
+  readonly baseline: string;
+  readonly draft: string;
+  readonly mode: StudioEditorTitleState["mode"];
+}): StudioEditorTitleState {
+  return normalizedTitleDraft(draft).length === 0
+    ? {
+        baseline,
+        diagnosticCode: "STUDIO-ARTICLE-TITLE-REQUIRED",
+        draft,
+        mode,
+        status: "invalid",
+      }
+    : {
+        baseline,
+        draft,
+        mode,
+        status: "valid",
+      };
+}
+
 function transitionArticleDirectoryFilter(
   state: StudioAppState,
   commandRecord: StudioCommandRecord,
@@ -879,9 +1010,61 @@ function transitionRemoveRecentProject(
 }
 
 function toggledPanel(panel: PanelStateFixture): PanelStateFixture {
-  return panel.visibility === "expanded"
-    ? { ...panel, visibility: "collapsed" }
-    : { ...panel, visibility: "expanded" };
+  return panel.visibility === "visible"
+    ? { ...panel, visibility: "hidden" }
+    : { ...panel, visibility: "visible" };
+}
+
+function transitionArticleTreeToggle(
+  fixture: StudioMvpFixture,
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+  payload?: StudioCommandPayload,
+): StudioTransitionResult {
+  const nodeId = payload?.articleTreeNodeId;
+
+  if (nodeId === undefined) {
+    return failed(state, "Choose an article folder before toggling it.", {
+      command: commandRecord,
+    });
+  }
+
+  if (!articleTreeFolderExists(fixture, nodeId)) {
+    return failed(state, `Unknown article folder: ${nodeId}.`, {
+      command: commandRecord,
+    });
+  }
+
+  const collapsedIds = new Set(state.collapsedArticleTreeNodeIds);
+
+  if (collapsedIds.has(nodeId)) {
+    collapsedIds.delete(nodeId);
+  } else {
+    collapsedIds.add(nodeId);
+  }
+
+  return succeeded(
+    {
+      ...state,
+      collapsedArticleTreeNodeIds: Array.from(collapsedIds),
+      overlay: { kind: "none" },
+    },
+    commandRecord,
+  );
+}
+
+function articleTreeFolderExists(
+  fixture: StudioMvpFixture,
+  nodeId: string,
+): boolean {
+  const visit = (nodes: readonly ArticleTreeNodeFixture[]): boolean =>
+    nodes.some(
+      (node) =>
+        (node.kind === "folder" && node.id === nodeId) ||
+        (node.children === undefined ? false : visit(node.children)),
+    );
+
+  return visit(fixture.navigation.articleTree);
 }
 
 function transitionEditorCommand(
@@ -928,6 +1111,145 @@ function transitionEditorCommand(
           : { selection: nextEditor.selection }),
       },
       editorDraftSource: nextEditor.source,
+    },
+    commandRecord,
+  );
+}
+
+function transitionTitleBeginEdit(
+  fixture: StudioMvpFixture,
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+): StudioTransitionResult {
+  const article = activeArticle(fixture, state);
+
+  if (article === undefined) {
+    return failed(state, "Open an article before editing the title.", {
+      command: commandRecord,
+    });
+  }
+
+  const currentTitle = state.editorTitle?.draft ?? article.title;
+
+  return succeeded(
+    {
+      ...state,
+      editorTitle: titleState({
+        baseline: currentTitle,
+        draft: currentTitle,
+        mode: "editing",
+      }),
+      overlay: { kind: "none" },
+    },
+    commandRecord,
+  );
+}
+
+function transitionTitleCancel(
+  fixture: StudioMvpFixture,
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+): StudioTransitionResult {
+  const article = activeArticle(fixture, state);
+
+  if (article === undefined || state.editorTitle === undefined) {
+    return failed(state, "Start editing the title before cancelling.", {
+      command: commandRecord,
+    });
+  }
+
+  const baseline = state.editorTitle.baseline;
+  const restoredArticleState =
+    article.workingCopyState === "invalid" || baseline !== article.title
+      ? "dirty"
+      : article.workingCopyState;
+  const { editorTitle: _editorTitle, ...stateWithoutEditorTitle } = state;
+  void _editorTitle;
+  const titlePatch =
+    baseline === article.title
+      ? {}
+      : {
+          editorTitle: titleState({
+            baseline,
+            draft: baseline,
+            mode: "viewing",
+          }),
+        };
+
+  return succeeded(
+    {
+      ...stateWithoutEditorTitle,
+      activeArticleState: restoredArticleState,
+      activePreviewScenarioId:
+        restoredArticleState === "dirty" ? "preview-stale" : "preview-ready",
+      ...titlePatch,
+      overlay: { kind: "none" },
+    },
+    commandRecord,
+  );
+}
+
+function transitionTitleCommit(
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+): StudioTransitionResult {
+  if (state.editorTitle === undefined) {
+    return failed(state, "Start editing the title before applying it.", {
+      command: commandRecord,
+    });
+  }
+
+  if (state.editorTitle.status === "invalid") {
+    return failed(state, "Add a title before applying it.", {
+      command: commandRecord,
+      diagnosticCode: "STUDIO-ARTICLE-TITLE-REQUIRED",
+    });
+  }
+
+  const title = normalizedTitleDraft(state.editorTitle.draft);
+
+  return succeeded(
+    {
+      ...state,
+      activeArticleState: "dirty",
+      activePreviewScenarioId: "preview-stale",
+      editorTitle: titleState({
+        baseline: title,
+        draft: title,
+        mode: "viewing",
+      }),
+      overlay: { kind: "none" },
+    },
+    commandRecord,
+  );
+}
+
+function transitionTitleUpdate(
+  fixture: StudioMvpFixture,
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+  payload?: StudioCommandPayload,
+): StudioTransitionResult {
+  const article = activeArticle(fixture, state);
+
+  if (article === undefined) {
+    return failed(state, "Open an article before editing the title.", {
+      command: commandRecord,
+    });
+  }
+
+  const baseline = state.editorTitle?.baseline ?? article.title;
+  const draft = payload?.titleDraft ?? "";
+  const nextTitleState = titleState({ baseline, draft, mode: "editing" });
+  const invalid = nextTitleState.status === "invalid";
+
+  return succeeded(
+    {
+      ...state,
+      activeArticleState: invalid ? "invalid" : "dirty",
+      activePreviewScenarioId: invalid ? "preview-blocked" : "preview-stale",
+      editorTitle: nextTitleState,
+      overlay: { kind: "none" },
     },
     commandRecord,
   );
@@ -1024,7 +1346,7 @@ function transitionMediaInsert(
         source.slice(cursorOffset),
       ].join(""),
       overlay: { kind: "none" },
-      previewPane: { sizePx: 520, visibility: "expanded" },
+      previewPane: { sizePx: 520, visibility: "visible" },
     },
     commandRecord,
   );
@@ -1046,7 +1368,7 @@ function transitionInsertImageCommand(
         viewMode: state.media.viewMode,
       },
       overlay: { kind: "none" },
-      previewPane: { sizePx: 0, visibility: "collapsed" },
+      previewPane: { sizePx: 0, visibility: "hidden" },
       ...(activeMediaId === undefined ? {} : { activeMediaId }),
     },
     commandRecord,
@@ -1071,7 +1393,7 @@ function transitionMediaOpen(
         viewMode: state.media.viewMode,
       },
       overlay: { kind: "none" },
-      previewPane: { sizePx: 0, visibility: "collapsed" },
+      previewPane: { sizePx: 0, visibility: "hidden" },
       ...(nextMediaId === undefined ? {} : { activeMediaId: nextMediaId }),
     },
     commandRecord,
@@ -1153,6 +1475,11 @@ function transitionPreviewOpen(
   state: StudioAppState,
   commandRecord: StudioCommandRecord,
 ): StudioTransitionResult {
+  const previewPane =
+    state.activeScreen === "article-editor"
+      ? { sizePx: 520, visibility: "visible" as const }
+      : { ...state.previewPane, visibility: "hidden" as const };
+
   return succeeded(
     {
       ...state,
@@ -1161,7 +1488,22 @@ function transitionPreviewOpen(
           ? "preview-home-ready"
           : "preview-ready",
       overlay: { kind: "none" },
-      previewPane: { sizePx: 520, visibility: "expanded" },
+      previewPane,
+    },
+    commandRecord,
+  );
+}
+
+function transitionPreviewViewport(
+  state: StudioAppState,
+  commandRecord: StudioCommandRecord,
+  payload?: StudioCommandPayload,
+): StudioTransitionResult {
+  return succeeded(
+    {
+      ...state,
+      overlay: { kind: "none" },
+      previewViewport: payload?.previewViewport ?? state.previewViewport,
     },
     commandRecord,
   );
@@ -1182,9 +1524,14 @@ function transitionOpenArticle(
     });
   }
 
-  const { editorDraftSource: _editorDraftSource, ...stateWithoutEditorDraft } =
-    state;
+  const {
+    editorDraftSource: _editorDraftSource,
+    editorTitle: _editorTitle,
+    ...stateWithoutEditorDraft
+  } = state;
   void _editorDraftSource;
+  void _editorTitle;
+  const editorTitle = articleTitleStateFromArticle(article);
 
   return succeeded(
     {
@@ -1202,7 +1549,10 @@ function transitionOpenArticle(
         lastCommandId: commandRecord.id,
         scrollTop: 0,
       },
+      editorProperties: { visibility: "visible" },
+      ...(editorTitle === undefined ? {} : { editorTitle }),
       overlay: { kind: "none" },
+      previewPane: { sizePx: 520, visibility: "visible" },
     },
     commandRecord,
   );

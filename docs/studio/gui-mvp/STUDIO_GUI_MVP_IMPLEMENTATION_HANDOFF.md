@@ -82,6 +82,7 @@ complete and attached to the relevant Linear issues:
 - [STUDIO_GUI_MVP_VISUAL_REFERENCES.md](./STUDIO_GUI_MVP_VISUAL_REFERENCES.md)
 - [STUDIO_GUI_MVP_ENGINEERING_SPEC.md](./STUDIO_GUI_MVP_ENGINEERING_SPEC.md)
 - [STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md](./STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md)
+- [STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md](./STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md)
 
 If Figma mockups are available before implementation starts, use them as visual
 input. They are not blockers for building the fixture and component
@@ -93,6 +94,17 @@ of truth.
 
 Milestone 16 now implements the fixture-backed Studio GUI prototype in
 `apps/studio`.
+
+Quality recovery is active. The current prototype proves many useful seams,
+but final handoff is blocked until the implementation satisfies
+[STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md](./STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md).
+In particular, hidden panes must leave no visible rails, sidebar selection must
+derive from one active location, article preview must be scoped to article
+editing, the article editor must treat the title as the primary editable
+heading, compact menus must not render visible headings that merely restate
+their trigger, fixture controls must have visible behavior or disabled reasons,
+and manual Playwright visual inspection must verify the product against the
+visual references before handoff.
 
 Implemented:
 
@@ -147,21 +159,25 @@ The prototype milestone is complete when:
 4. The app uses a component hierarchy aligned with the engineering spec.
 5. The article directory/browser exists as a main-pane surface.
 6. The article editor shows frontmatter forms, source editor, toolbar, status,
-   preview, invalid-field state, and preview-collapsed state.
+   preview, invalid-field state, and preview-hidden state.
 7. Media and settings surfaces render realistic fixture data and local
    validation states.
 8. Publish uses preview, confirm, progress, blocked, failed, and success
    states; no provider mutation exists.
 9. Command records power toolbar, hotkey, context menu, and command palette
    actions where practical.
-10. Pane collapse, responsive behavior, long content, and compact layouts are
-    tested or manually screenshot-verified.
+10. Pane hide/show, responsive behavior, long content, and compact layouts are
+    tested and manually screenshot-verified; hidden panes leave no residual
+    rail or label.
 11. Accessibility checks cover shell landmarks, labels, forms, dialogs,
     tooltips, context menus, keyboard navigation, and focus restoration.
 12. Fixture and state tests cover high-risk pure logic without test-only
     exports.
 13. Docs and Linear issues are updated with scope decisions, accepted
     differences, and follow-up blockers.
+14. The elevated quality standard is satisfied, including purposeful density,
+    no unexplained dead controls, compact screen hierarchy, and a documented
+    manual Playwright visual inspection pass.
 
 ## Proposed Implementation Issues
 
@@ -331,7 +347,7 @@ Likely tasks:
 - editor toolbar;
 - editor context menu;
 - editor status strip and autosave state;
-- preview-collapsed writing mode;
+- preview-hidden writing mode;
 - command transformations for bold, italic, link, heading, quote, code,
   lists, image insert, and footnote placeholder where supported.
 
@@ -446,7 +462,7 @@ Likely tasks:
 - tooltip labels with shortcut pills;
 - focus trap and return for dialogs/context menus;
 - reduced-motion handling;
-- long text, compact width, collapsed panes, and high zoom checks;
+- long text, compact width, hidden panes, and high zoom checks;
 - no pointer-only required actions.
 
 Blocks:

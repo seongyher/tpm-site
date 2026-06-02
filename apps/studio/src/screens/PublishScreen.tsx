@@ -152,7 +152,6 @@ function PublishPreview({
 }): ReactElement {
   return (
     <div className="mx-auto max-w-6xl px-8 py-8">
-      <PublishPrototypeNotice />
       <div className="shadow-panel border-border bg-background overflow-hidden rounded-[var(--radius-panel)] border">
         <article className="mx-auto max-w-5xl px-10 py-10">
           <div className="border-border flex items-center justify-between gap-6 border-b pb-8">
@@ -176,15 +175,6 @@ function PublishPreview({
   );
 }
 
-function PublishPrototypeNotice(): ReactElement {
-  return (
-    <div className="border-border bg-panel text-muted-foreground mb-4 rounded-[var(--radius-control)] border px-4 py-3 text-sm">
-      This fixture preview shows the publish plan and rendered route before any
-      live provider mutation. No Cloudflare deploy runs from this prototype.
-    </div>
-  );
-}
-
 function RoutePreviewContent({
   preview,
 }: {
@@ -200,8 +190,7 @@ function RoutePreviewContent({
           Thoughtful guides for a well-crafted life
         </h1>
         <p className="text-muted-foreground mt-5 max-w-2xl text-lg leading-8">
-          This home-page fixture is used when publishing from the project home
-          instead of an article-specific editor.
+          Publishing from the project home starts the preview at the home page.
         </p>
       </section>
     );
@@ -303,7 +292,7 @@ function PublishFailed({
       publish={publish}
       title="Publish failed"
     >
-      The fixture apply step reached a retryable failure after confirmation. The
+      The publish step reached a retryable failure after confirmation. The
       release candidate and checkpoint remain available.
     </PublishStatePanel>
   );
@@ -328,8 +317,7 @@ function PublishPreparing({
       publish={publish}
       title="Prepare publish preview"
     >
-      Studio will run a fixture-backed preview and plan before any publish
-      confirmation can appear.
+      Studio prepares a preview and publish plan before confirmation can appear.
     </PublishStatePanel>
   );
 }
@@ -345,7 +333,7 @@ function PublishProgress({
     <PublishStatePanel
       actions={
         <Button onClick={() => onCommand("publish.finish")} variant="primary">
-          Show success state
+          Complete publish
         </Button>
       }
       diagnostics={publish.diagnostics}
@@ -355,8 +343,8 @@ function PublishProgress({
     >
       <div className="space-y-4">
         <p>
-          The confirmed fixture plan is in its apply phase. This prototype does
-          not send credentials or deploy output to Cloudflare.
+          The confirmed publish plan is being applied. You can keep working
+          after this finishes.
         </p>
         <Progress.Root
           aria-label="Publishing progress"
@@ -407,8 +395,8 @@ function PublishSuccess({
       publish={publish}
       title="Publish complete"
     >
-      The fixture result reached the published state. In the real provider flow,
-      this state will be backed by a release record and deploy provider result.
+      Your latest changes are live. A checkpoint is available if you need to
+      roll back.
     </PublishStatePanel>
   );
 }
@@ -548,10 +536,10 @@ function PublishFallback({
     <main className="grid min-h-full place-items-center p-6">
       <Panel className="max-w-lg p-6">
         <h1 className="text-foreground text-xl font-semibold">
-          Publish fixture unavailable
+          Publish plan unavailable
         </h1>
         <p className="text-muted-foreground mt-2 text-sm leading-6">
-          The publish screen could not resolve fixture-backed plan data.
+          The publish screen could not resolve a publish plan for this state.
         </p>
         <Button
           className="mt-5"

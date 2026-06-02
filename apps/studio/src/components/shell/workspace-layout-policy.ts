@@ -1,48 +1,43 @@
 /** Serializable visibility state for the three-pane Studio workspace. */
 export interface StudioWorkspacePaneVisibility {
-  /** Whether the preview pane is collapsed to its rail. */
-  readonly previewCollapsed: boolean;
-  /** Whether the sidebar is collapsed to its rail. */
-  readonly sidebarCollapsed: boolean;
+  /** Whether the preview pane participates in the layout. */
+  readonly previewVisible: boolean;
+  /** Whether the sidebar participates in the layout. */
+  readonly sidebarVisible: boolean;
 }
 
 /** Percentage sizes consumed by react-resizable-panels. */
 export interface StudioWorkspacePaneLayout {
-  /** Preview pane size percentage. */
-  readonly preview: number;
-  /** Sidebar pane size percentage. */
-  readonly sidebar: number;
+  /** Preview pane size percentage when visible. */
+  readonly preview?: number;
+  /** Sidebar pane size percentage when visible. */
+  readonly sidebar?: number;
   /** Main work pane size percentage. */
   readonly work: number;
 }
 
-const COLLAPSED_PANE_SIZE = 5;
 const EXPANDED_PREVIEW_SIZE = 35;
-const EXPANDED_SIDEBAR_SIZE = 22;
+const EXPANDED_SIDEBAR_SIZE = 20;
 const TOTAL_LAYOUT_SIZE = 100;
 
 /**
  * Computes a stable workspace pane layout that always sums to 100%.
  *
  * @param visibility Current sidebar and preview visibility state.
- * @param visibility.previewCollapsed Whether the preview pane is collapsed.
- * @param visibility.sidebarCollapsed Whether the sidebar pane is collapsed.
+ * @param visibility.previewVisible Whether the preview pane is visible.
+ * @param visibility.sidebarVisible Whether the sidebar pane is visible.
  * @returns Resizable panel default sizes.
  */
 export function studioWorkspacePaneLayout({
-  previewCollapsed,
-  sidebarCollapsed,
+  previewVisible,
+  sidebarVisible,
 }: StudioWorkspacePaneVisibility): StudioWorkspacePaneLayout {
-  const sidebar = sidebarCollapsed
-    ? COLLAPSED_PANE_SIZE
-    : EXPANDED_SIDEBAR_SIZE;
-  const preview = previewCollapsed
-    ? COLLAPSED_PANE_SIZE
-    : EXPANDED_PREVIEW_SIZE;
+  const sidebar = sidebarVisible ? EXPANDED_SIDEBAR_SIZE : undefined;
+  const preview = previewVisible ? EXPANDED_PREVIEW_SIZE : undefined;
 
   return {
-    preview,
-    sidebar,
-    work: TOTAL_LAYOUT_SIZE - sidebar - preview,
+    ...(preview === undefined ? {} : { preview }),
+    ...(sidebar === undefined ? {} : { sidebar }),
+    work: TOTAL_LAYOUT_SIZE - (sidebar ?? 0) - (preview ?? 0),
   };
 }

@@ -89,33 +89,30 @@ export function SettingsScreen({
 
   return (
     <main
-      className="min-h-full overflow-auto p-5 md:p-6"
+      className="min-h-full overflow-auto p-4 md:p-5"
       data-testid="settings-screen"
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-        <SettingsHeader
-          settingsState={effectiveState}
-          workspaceName={fixture.workspace.displayName}
-        />
-        <SettingsStateBanner
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <SettingsStateNotice
           diagnostics={viewModel.diagnostics}
           settingsState={effectiveState}
         />
-        <div className="grid min-w-0 gap-5 xl:grid-cols-[16rem_minmax(0,1fr)]">
+        <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[15rem_minmax(0,1fr)]">
           <SettingsSectionNav
             activeSectionId={viewModel.activeSection.id}
             onCommand={onCommand}
             sections={viewModel.sections}
           />
-          <Panel className="min-w-0 p-5 md:p-6">
+          <Panel className="min-w-0 p-4 md:p-5">
             <SettingsSectionHeader section={viewModel.activeSection} />
-            <div className="mt-5">
+            <div className="mt-4">
               <DescriptorForm
                 diagnostics={viewModel.diagnostics}
                 draftValues={draftValues}
                 mediaItems={fixture.media.items}
                 sections={[viewModel.activeSection]}
                 setDraftValues={setDraftValues}
+                showSectionHeadings={false}
               />
             </div>
             <AdvancedSettingsDisclosure />
@@ -126,38 +123,17 @@ export function SettingsScreen({
   );
 }
 
-function SettingsHeader({
-  settingsState,
-  workspaceName,
-}: {
-  settingsState: EffectiveSettingsState;
-  workspaceName: string;
-}): ReactElement {
-  return (
-    <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div className="min-w-0">
-        <p className="text-muted-foreground text-xs font-semibold uppercase">
-          Project settings
-        </p>
-        <h1 className="text-foreground mt-2 text-2xl font-semibold">
-          Settings
-        </h1>
-        <p className="text-muted-foreground mt-2 text-sm leading-6">
-          Update site details for {workspaceName}.
-        </p>
-      </div>
-      <SettingsStateBadge settingsState={settingsState} />
-    </header>
-  );
-}
-
-function SettingsStateBanner({
+function SettingsStateNotice({
   diagnostics,
   settingsState,
 }: {
   diagnostics: readonly DiagnosticFixture[];
   settingsState: EffectiveSettingsState;
-}): ReactElement {
+}): null | ReactElement {
+  if (settingsState === "saved") {
+    return null;
+  }
+
   const diagnostic = diagnostics[0];
   const copy = settingsStateCopy(settingsState, diagnostic);
 
@@ -192,7 +168,7 @@ function SettingsSectionNav({
   sections: readonly FieldSectionFixture[];
 }): ReactElement {
   return (
-    <Panel as="aside" className="min-w-0 p-2" variant="plain">
+    <Panel as="aside" className="min-w-0 self-start p-1.5" variant="plain">
       <nav aria-label="Settings sections">
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
           {sections.map((section) => (
@@ -231,7 +207,7 @@ function SettingsSectionButton({
     <button
       aria-current={active ? "page" : undefined}
       className={cn(
-        "focus-visible:outline-accent flex w-full min-w-0 items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-2",
+        "focus-visible:outline-accent flex w-full min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2.5 py-2 text-left text-sm transition-colors focus-visible:outline-2 [&_svg]:size-4 [&_svg]:shrink-0",
         active
           ? "bg-accent-muted text-accent-foreground"
           : "text-foreground hover:bg-panel-muted",
@@ -257,16 +233,10 @@ function SettingsSectionHeader({
   section: FieldSectionFixture;
 }): ReactElement {
   return (
-    <header className="border-border border-b pb-4">
-      <p className="text-muted-foreground text-xs font-semibold uppercase">
-        {section.label}
-      </p>
-      <h2 className="text-foreground mt-2 text-xl font-semibold">
+    <header className="border-border border-b pb-3">
+      <h1 className="text-foreground text-lg font-semibold">
         {settingsSectionTitle(section)}
-      </h2>
-      <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
-        {settingsSectionDescription(section)}
-      </p>
+      </h1>
     </header>
   );
 }
@@ -298,28 +268,11 @@ function MissingSettingsScreen(): ReactElement {
           Settings are unavailable
         </h1>
         <p className="text-muted-foreground mt-2 text-sm leading-6">
-          The fixture does not include a settings scenario for this screen.
+          Studio could not resolve settings for this screen.
         </p>
       </Panel>
     </main>
   );
-}
-
-function SettingsStateBadge({
-  settingsState,
-}: {
-  settingsState: EffectiveSettingsState;
-}): ReactElement {
-  switch (settingsState) {
-    case "autosaving":
-      return <Badge tone="warning">Autosaving</Badge>;
-    case "dirty":
-      return <Badge tone="warning">Unsaved changes</Badge>;
-    case "invalid":
-      return <Badge tone="danger">Needs attention</Badge>;
-    case "saved":
-      return <Badge tone="success">All changes saved</Badge>;
-  }
 }
 
 function settingsStateCopy(
@@ -340,7 +293,7 @@ function settingsStateCopy(
     case "dirty":
       return {
         description:
-          "Your settings changes are staged locally in this prototype.",
+          "Changes will save automatically when the section is valid.",
         indicatorState: "dirty",
         label: "Unsaved settings changes",
       };
@@ -380,30 +333,5 @@ function settingsSectionTitle(section: FieldSectionFixture): string {
       return "Theme basics";
     default:
       return section.label;
-  }
-}
-
-function settingsSectionDescription(section: FieldSectionFixture): string {
-  switch (section.id) {
-    case "authors":
-      return "Choose default author behavior for new articles and article pages.";
-    case "categories":
-      return "Set the default taxonomy choices readers use to browse the site.";
-    case "domain":
-      return "Control the public URL used for canonical links, feeds, and publishing.";
-    case "homepage":
-      return "Choose the introductory copy and featured collection for the site home page.";
-    case "navigation":
-      return "Decide which top-level destinations appear in reader navigation.";
-    case "publishing":
-      return "Choose the publish target and preview safety defaults.";
-    case "site-identity":
-      return "Set the basic name and summary used across the site and social previews.";
-    case "social-support":
-      return "Add reader support and social identity links without editing code.";
-    case "theme":
-      return "Choose simple visual defaults that stay within the supported theme system.";
-    default:
-      return "Edit supported project settings for this section.";
   }
 }

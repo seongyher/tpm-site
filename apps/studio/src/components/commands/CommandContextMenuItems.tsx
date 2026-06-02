@@ -14,7 +14,6 @@ import { CommandDisplay } from "./CommandDisplay";
 
 interface CommandContextMenuItemsProps {
   commandIds: readonly StudioCommandId[];
-  label: string;
   onCommand: (commandId: StudioCommandId) => void;
   state: StudioAppState;
 }
@@ -22,11 +21,10 @@ interface CommandContextMenuItemsProps {
 /**
  * Shared ContextMenu item renderer for command-backed contextual actions.
  *
- * @returns A labeled group of context-menu command rows.
+ * @returns Context-menu command rows without redundant visible headings.
  */
 export function CommandContextMenuItems({
   commandIds,
-  label,
   onCommand,
   state,
 }: CommandContextMenuItemsProps): ReactElement {
@@ -38,9 +36,6 @@ export function CommandContextMenuItems({
 
   return (
     <>
-      <ContextMenu.Label className="text-muted-foreground px-2 py-1.5 text-xs font-semibold uppercase">
-        {label}
-      </ContextMenu.Label>
       {items.map((item) => (
         <CommandContextMenuItem
           item={item}

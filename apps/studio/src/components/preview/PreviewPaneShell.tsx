@@ -10,14 +10,22 @@ import {
 } from "lucide-react";
 import type { ReactElement } from "react";
 
-import type { StudioCommandId } from "../../commands/studio-commands";
+import {
+  studioCommandAvailability,
+  type StudioCommandId,
+} from "../../commands/studio-commands";
+import { cn } from "../../lib/cn";
 import {
   type DiagnosticFixture,
   type PreviewPaneViewModel,
   previewPaneViewModel,
   type StudioMvpFixture,
 } from "../../models/studio-fixtures";
-import type { StudioAppState } from "../../state/studio-state";
+import type {
+  StudioAppState,
+  StudioCommandPayload,
+  StudioPreviewViewport,
+} from "../../state/studio-state";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { IconButton } from "../ui/IconButton";
@@ -26,7 +34,10 @@ import { Tooltip } from "../ui/Tooltip";
 
 interface PreviewPaneShellProps {
   fixture: StudioMvpFixture;
-  onCommand: (commandId: StudioCommandId) => void;
+  onCommand: (
+    commandId: StudioCommandId,
+    payload?: StudioCommandPayload,
+  ) => void;
   state: StudioAppState;
 }
 
@@ -44,7 +55,7 @@ export function PreviewPaneShell({
 
   return (
     <aside aria-label="Preview pane" className="flex h-full min-h-0 flex-col">
-      <div className="border-border flex min-h-14 items-center justify-between gap-3 border-b px-4">
+      <div className="border-border flex min-h-12 items-center justify-between gap-2 border-b px-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <h2 className="text-foreground text-sm font-semibold">Preview</h2>
@@ -57,12 +68,23 @@ export function PreviewPaneShell({
           </p>
         </div>
         <div className="flex items-center gap-1">
-          <PreviewModeToggle />
-          <Tooltip content="Open preview externally">
+          <PreviewModeToggle onCommand={onCommand} state={state} />
+          <Tooltip
+            content={
+              studioCommandAvailability("preview.openExternal", state).reason ??
+              "Open preview externally"
+            }
+          >
             <IconButton
-              disabled={state.activePreviewScenarioId === undefined}
+              disabled={
+                studioCommandAvailability("preview.openExternal", state)
+                  .status !== "available"
+              }
               label="Open preview externally"
               onClick={() => onCommand("preview.openExternal")}
+              title={
+                studioCommandAvailability("preview.openExternal", state).reason
+              }
             >
               <ExternalLink aria-hidden="true" />
             </IconButton>
@@ -75,15 +97,23 @@ export function PreviewPaneShell({
               <PanelRight aria-hidden="true" />
             </IconButton>
           </Tooltip>
-          <Tooltip content="More preview actions">
-            <IconButton disabled label="More preview actions">
+          <Tooltip content="More preview actions will appear when preview extensions are connected.">
+            <IconButton
+              disabled
+              label="More preview actions. More preview actions will appear when preview extensions are connected."
+              title="More preview actions will appear when preview extensions are connected."
+            >
               <MoreHorizontal aria-hidden="true" />
             </IconButton>
           </Tooltip>
         </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-5">
-        <PreviewContent onCommand={onCommand} preview={preview} />
+      <div className="min-h-0 flex-1 overflow-auto p-4">
+        <PreviewContent
+          onCommand={onCommand}
+          preview={preview}
+          viewport={state.previewViewport}
+        />
       </div>
     </aside>
   );
@@ -92,12 +122,20 @@ export function PreviewPaneShell({
 function PreviewContent({
   onCommand,
   preview,
+  viewport,
 }: {
   onCommand: PreviewPaneShellProps["onCommand"];
   preview: PreviewPaneViewModel;
+  viewport: StudioPreviewViewport;
 }): ReactElement {
   if (preview.renderMode === "article") {
-    return <ArticleRoutePreview onCommand={onCommand} preview={preview} />;
+    return (
+      <ArticleRoutePreview
+        onCommand={onCommand}
+        preview={preview}
+        viewport={viewport}
+      />
+    );
   }
 
   if (preview.renderMode === "status") {
@@ -113,8 +151,8 @@ function PreviewContent({
         Open a page preview
       </h3>
       <p className="text-muted-foreground mt-2 text-sm leading-6">
-        Use Preview from an article or project screen to build a fixture-backed
-        route preview.
+        Use Preview from an article or project screen to render the selected
+        route.
       </p>
       <Button
         className="mt-4"
@@ -130,12 +168,23 @@ function PreviewContent({
 function ArticleRoutePreview({
   onCommand,
   preview,
+  viewport,
 }: {
   onCommand: PreviewPaneShellProps["onCommand"];
   preview: PreviewPaneViewModel;
+  viewport: StudioPreviewViewport;
 }): ReactElement {
   return (
-    <article className="mx-auto max-w-2xl" data-testid="route-preview">
+    <article
+      className={cn(
+        "mx-auto",
+        viewport === "mobile"
+          ? "border-border bg-background max-w-[23rem] rounded-[var(--radius-panel)] border p-4 shadow-sm"
+          : "max-w-2xl",
+      )}
+      data-preview-viewport={viewport}
+      data-testid="route-preview"
+    >
       {preview.statusLabel === "Stale" ? (
         <PreviewNotice
           actionLabel="Refresh preview"
@@ -145,10 +194,7 @@ function ArticleRoutePreview({
           tone="warning"
         />
       ) : null}
-      <p className="text-muted-foreground text-xs font-semibold uppercase">
-        Rendered route preview
-      </p>
-      <h1 className="text-foreground mt-4 text-3xl leading-tight font-semibold">
+      <h1 className="text-foreground text-3xl leading-tight font-semibold">
         {preview.title}
       </h1>
       <PreviewByline preview={preview} />
@@ -181,8 +227,8 @@ function ArticleRoutePreviewSummary(): ReactElement {
         Planning Your Desk
       </h2>
       <p className="text-muted-foreground mt-2 text-sm leading-6">
-        This fixture represents the generated route preview. Future backend
-        wiring will replace the fixture with the built static route artifact.
+        Before cutting any wood, take time to plan your materials, workspace,
+        and measurements.
       </p>
     </section>
   );
@@ -195,8 +241,8 @@ function HomeRoutePreviewSummary(): ReactElement {
         Home page preview
       </h2>
       <p className="text-muted-foreground mt-2 text-sm leading-6">
-        This fixture represents the generated home page route. Publishing
-        preview starts here when no article-specific context is active.
+        Thoughtful guides, practical notes, and workshop ideas appear here when
+        readers open the site.
       </p>
     </section>
   );
@@ -258,17 +304,37 @@ function PreviewDiagnostics({
   );
 }
 
-function PreviewModeToggle(): ReactElement {
+function PreviewModeToggle({
+  onCommand,
+  state,
+}: {
+  onCommand: PreviewPaneShellProps["onCommand"];
+  state: StudioAppState;
+}): ReactElement {
   return (
     <div
       aria-label="Preview viewport"
       className="border-border bg-panel-muted hidden rounded-[var(--radius-control)] border p-0.5 xl:flex"
       role="group"
     >
-      <IconButton aria-pressed="true" label="Desktop preview" variant="ghost">
+      <IconButton
+        aria-pressed={state.previewViewport === "desktop"}
+        label="Desktop preview"
+        onClick={() =>
+          onCommand("preview.setViewport", { previewViewport: "desktop" })
+        }
+        variant={state.previewViewport === "desktop" ? "secondary" : "ghost"}
+      >
         <Monitor aria-hidden="true" />
       </IconButton>
-      <IconButton disabled label="Mobile preview" variant="ghost">
+      <IconButton
+        aria-pressed={state.previewViewport === "mobile"}
+        label="Mobile preview"
+        onClick={() =>
+          onCommand("preview.setViewport", { previewViewport: "mobile" })
+        }
+        variant={state.previewViewport === "mobile" ? "secondary" : "ghost"}
+      >
         <Smartphone aria-hidden="true" />
       </IconButton>
     </div>
@@ -419,8 +485,7 @@ function previewStatusContent(
       return {
         icon: "refresh",
         iconClassName: "mt-0.5 text-warning",
-        message:
-          "Studio is preparing a route preview from the current fixture state.",
+        message: "Studio is preparing a route preview from the current state.",
         retryDisabled: false,
         title: "Preparing preview",
       };

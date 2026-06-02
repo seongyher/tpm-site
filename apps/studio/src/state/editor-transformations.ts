@@ -36,8 +36,14 @@ export function isEditorTextCommandId(
     case "article.open":
     case "article.restoreVersion":
     case "article.saveDraft":
+    case "articleTree.toggleFolder":
     case "commandPalette.close":
     case "commandPalette.open":
+    case "editor.properties.toggle":
+    case "editor.title.beginEdit":
+    case "editor.title.cancel":
+    case "editor.title.commit":
+    case "editor.title.update":
     case "editor.updateSource":
       return false;
     case "format.blockquote":
@@ -62,6 +68,7 @@ export function isEditorTextCommandId(
     case "pane.toggleSidebar":
     case "preview.open":
     case "preview.openExternal":
+    case "preview.setViewport":
     case "project.createSite":
     case "project.openHome":
     case "project.openSite":

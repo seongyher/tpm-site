@@ -32,7 +32,7 @@ export function Button({
   return (
     <Comp
       className={cn(
-        "inline-flex shrink-0 items-center gap-2 rounded-[var(--radius-control)] border font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70",
+        "inline-flex shrink-0 items-center gap-2 rounded-[var(--radius-control)] border font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70 [&_svg]:size-4 [&_svg]:shrink-0",
         buttonVariantClass(variant),
         buttonSizeClass(size),
         className,
@@ -48,11 +48,11 @@ export function Button({
 function buttonSizeClass(size: ButtonSize): string {
   switch (size) {
     case "icon":
-      return "size-9 justify-center px-0";
+      return "size-8 justify-center px-0";
     case "md":
-      return "h-10 px-4 text-sm";
-    case "sm":
       return "h-9 px-3 text-sm";
+    case "sm":
+      return "h-8 px-2.5 text-xs";
   }
 }
 

@@ -54,7 +54,7 @@ export function CommandPalette({
             {groupItems.map((item) => (
               <Command.Item
                 aria-disabled={item.availability.status !== "available"}
-                className="data-[selected=true]:bg-accent-muted data-[selected=true]:text-accent-foreground my-0.5 flex min-h-14 cursor-default scroll-m-1 items-center rounded-[var(--radius-control)] px-3 py-2 text-sm outline-none aria-disabled:opacity-65"
+                className="data-[selected=true]:bg-accent-muted data-[selected=true]:text-accent-foreground my-0.5 flex min-h-10 cursor-default scroll-m-1 items-center rounded-[var(--radius-control)] px-3 py-2 text-sm outline-none aria-disabled:opacity-65"
                 disabled={item.availability.status !== "available"}
                 key={item.record.id}
                 onSelect={() => onCommand(item.record.id)}

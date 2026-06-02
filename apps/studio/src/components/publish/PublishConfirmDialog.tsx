@@ -46,9 +46,9 @@ export function PublishConfirmDialog({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/35" />
         <Dialog.Content
           aria-describedby="publish-confirm-description"
-          className="border-border bg-panel shadow-panel fixed top-1/2 left-1/2 z-50 flex max-h-[min(42rem,calc(100vh-2rem))] w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[var(--radius-panel)] border"
+          className="border-border bg-panel shadow-panel fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100vh-2rem)] w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[var(--radius-panel)] border"
         >
-          <div className="border-border flex items-start justify-between gap-4 border-b p-6">
+          <div className="border-border flex items-start justify-between gap-4 border-b p-5">
             <div className="min-w-0">
               <Dialog.Title className="text-foreground text-xl font-semibold">
                 Confirm publish
@@ -72,7 +72,7 @@ export function PublishConfirmDialog({
             className="min-h-0 flex-1 overflow-auto p-6"
             tabIndex={0}
           >
-            <div className="space-y-5">
+            <div className="space-y-4">
               <PublishDialogRow
                 icon={<Cloud aria-hidden="true" />}
                 label="Destination"
@@ -104,13 +104,13 @@ export function PublishConfirmDialog({
                 label="Credential"
                 title={publish.credentialStateLabel}
               >
-                Studio is using a redacted credential reference. No secret value
-                is stored in this fixture.
+                Studio will use the connected publish credential without showing
+                the secret value.
               </PublishDialogRow>
               <PublishDialogWarnings diagnostics={publish.diagnostics} />
             </div>
           </div>
-          <div className="border-border flex justify-end gap-3 border-t p-6">
+          <div className="border-border flex justify-end gap-3 border-t p-4">
             <Dialog.Close asChild>
               <Button>Cancel</Button>
             </Dialog.Close>
@@ -150,7 +150,7 @@ function PublishDialogRow({
 }): ReactElement {
   return (
     <section className="flex gap-4">
-      <div className="bg-panel-muted text-muted-foreground flex size-11 shrink-0 items-center justify-center rounded-[var(--radius-control)]">
+      <div className="bg-panel-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-control)]">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
@@ -179,7 +179,7 @@ function PublishDialogWarnings({
             Warnings
           </p>
           <p className="text-muted-foreground mt-1 text-sm">
-            No blocking diagnostics were found for this fixture plan.
+            No blocking diagnostics were found for this publish plan.
           </p>
         </div>
         <Badge tone="success">Ready</Badge>

@@ -25,7 +25,7 @@ export function AutosaveIndicator({
     <span
       aria-live="polite"
       className={cn(
-        "inline-flex items-center gap-2 text-sm",
+        "inline-flex items-center gap-1.5 text-sm [&_svg]:size-4 [&_svg]:shrink-0",
         autosaveClass(state),
       )}
     >

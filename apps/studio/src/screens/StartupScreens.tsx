@@ -1,19 +1,10 @@
-import {
-  AlertTriangle,
-  CheckCircle2,
-  FolderOpen,
-  MoreHorizontal,
-  Plus,
-  Trash2,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, FolderOpen, Plus } from "lucide-react";
 import type { ReactElement } from "react";
 
 import type { StudioCommandId } from "../commands/studio-commands";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { IconButton } from "../components/ui/IconButton";
 import { Panel } from "../components/ui/Panel";
-import { Tooltip } from "../components/ui/Tooltip";
 import type {
   RecentProjectFixture,
   StudioMvpFixture,
@@ -46,10 +37,7 @@ export function FirstLaunchScreen({
         <div className="bg-accent text-panel mx-auto grid size-14 place-items-center rounded-[var(--radius-control)]">
           <FolderOpen aria-hidden="true" />
         </div>
-        <p className="text-muted-foreground mt-6 text-sm font-semibold">
-          Studio
-        </p>
-        <h1 className="text-foreground mt-3 text-3xl font-semibold">
+        <h1 className="text-foreground mt-6 text-3xl font-semibold">
           Welcome to Studio
         </h1>
         <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-6">
@@ -97,9 +85,6 @@ export function RecentProjectsScreen({
             <h1 className="text-foreground text-3xl font-semibold">
               Recent Projects
             </h1>
-            <p className="text-muted-foreground mt-2 text-sm">
-              Pick up where you left off.
-            </p>
           </div>
           <Button
             onClick={() => onCommand("project.createSite")}
@@ -228,15 +213,6 @@ function RecentProjectRow({
               Open
             </Button>
           )}
-          <Tooltip content="More options">
-            <IconButton label={`More options for ${project.displayName}`}>
-              {missing ? (
-                <Trash2 aria-hidden="true" />
-              ) : (
-                <MoreHorizontal aria-hidden="true" />
-              )}
-            </IconButton>
-          </Tooltip>
         </div>
       </div>
     </li>

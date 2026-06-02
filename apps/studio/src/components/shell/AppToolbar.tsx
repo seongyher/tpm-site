@@ -3,7 +3,6 @@ import {
   ArrowRight,
   ChevronDown,
   PanelLeft,
-  PanelRight,
   Plus,
   Search,
 } from "lucide-react";
@@ -11,7 +10,6 @@ import type { ReactElement, ReactNode } from "react";
 
 import {
   studioCommandAvailability,
-  studioCommandById,
   type StudioCommandId,
 } from "../../commands/studio-commands";
 import type {
@@ -57,8 +55,8 @@ export function AppToolbar({
   const autosave = toolbarAutosaveStatus(state);
 
   return (
-    <header className="border-border bg-panel flex min-h-16 items-center justify-between gap-3 border-b px-4">
-      <div className="flex min-w-0 items-center gap-2">
+    <header className="border-border bg-panel flex min-h-12 items-center justify-between gap-2 border-b px-3">
+      <div className="flex min-w-0 items-center gap-1.5">
         <Tooltip content="Back" shortcut="⌘[">
           <IconButton disabled label="Back">
             <ArrowLeft aria-hidden="true" />
@@ -81,7 +79,7 @@ export function AppToolbar({
         <Tooltip content="Open command palette" shortcut="⌘K">
           <Button
             aria-keyshortcuts="Meta+K Control+K"
-            className="text-muted-foreground hidden min-w-56 justify-start xl:inline-flex"
+            className="text-muted-foreground hidden min-w-52 justify-start xl:inline-flex"
             data-command-palette-trigger=""
             onClick={() => onCommand("commandPalette.open")}
             variant="secondary"
@@ -93,7 +91,7 @@ export function AppToolbar({
           </Button>
         </Tooltip>
       </div>
-      <div className="flex min-w-0 shrink-0 items-center gap-3">
+      <div className="flex min-w-0 shrink-0 items-center gap-2">
         <AutosaveIndicator label={autosave.label} state={autosave.state} />
         {startupMode ? (
           <ToolbarTextCommand
@@ -132,15 +130,6 @@ export function AppToolbar({
             />
           </>
         )}
-        <ToolbarIconCommand
-          commandId="pane.togglePreview"
-          label="Toggle preview"
-          onCommand={onCommand}
-          shortcut="⌥⌘P"
-          state={state}
-        >
-          <PanelRight aria-hidden="true" />
-        </ToolbarIconCommand>
         <CommandDropdownMenu
           commandIds={publishOptionCommandIds}
           label="Publish options"
@@ -211,17 +200,10 @@ function ToolbarCommandButton({
 }: ToolbarCommandButtonProps): ReactElement {
   const availability = studioCommandAvailability(commandId, state);
   const disabled = availability.status !== "available";
-  const command = studioCommandById(commandId);
   const tooltip = availability.reason ?? label;
 
   return (
-    <Tooltip
-      content={tooltip}
-      description={
-        availability.reason === undefined ? command?.description : undefined
-      }
-      shortcut={shortcut}
-    >
+    <Tooltip content={tooltip} shortcut={shortcut}>
       <Button
         aria-disabled={disabled}
         disabled={disabled}
@@ -244,17 +226,10 @@ function ToolbarIconCommand({
 }: Omit<ToolbarCommandButtonProps, "variant">): ReactElement {
   const availability = studioCommandAvailability(commandId, state);
   const disabled = availability.status !== "available";
-  const command = studioCommandById(commandId);
   const tooltip = availability.reason ?? label;
 
   return (
-    <Tooltip
-      content={tooltip}
-      description={
-        availability.reason === undefined ? command?.description : undefined
-      }
-      shortcut={shortcut}
-    >
+    <Tooltip content={tooltip} shortcut={shortcut}>
       <IconButton
         aria-disabled={disabled}
         disabled={disabled}

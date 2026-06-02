@@ -10,7 +10,6 @@ import {
   Home,
   Image,
   type LucideIcon,
-  MoreHorizontal,
   Settings,
   Trash2,
 } from "lucide-react";
@@ -24,11 +23,16 @@ import type {
   NavigationFixture,
   WorkspaceFixture,
 } from "../../models/studio-fixtures";
+import {
+  studioArticleTreeFolderCollapsed,
+  type StudioSidebarSelection,
+  studioSidebarSelection,
+} from "../../state/studio-selectors";
 import type {
   StudioAppState,
   StudioCommandPayload,
 } from "../../state/studio-state";
-import { Badge } from "../ui/Badge";
+import { ArticleActionMenu } from "../articles/ArticleActionMenu";
 import { IconButton } from "../ui/IconButton";
 import { Tooltip } from "../ui/Tooltip";
 
@@ -43,7 +47,8 @@ interface WorkspaceSidebarProps {
 }
 
 interface SidebarNavItem {
-  commandId: StudioCommandId;
+  commandId?: StudioCommandId;
+  disabledReason?: string;
   icon: LucideIcon;
   id: string;
   label: string;
@@ -52,7 +57,24 @@ interface SidebarNavItem {
 interface ArticleTreeNodeProps {
   node: ArticleTreeNodeFixture;
   onCommand: WorkspaceSidebarProps["onCommand"];
+  selection: StudioSidebarSelection;
   state: StudioAppState;
+}
+
+type ArticleTreeFolderNodeFixture = ArticleTreeNodeFixture & {
+  readonly kind: "folder";
+};
+
+type ArticleTreeLeafNodeFixture = ArticleTreeNodeFixture & {
+  readonly kind: "article";
+};
+
+interface ArticleTreeFolderNodeProps extends ArticleTreeNodeProps {
+  node: ArticleTreeFolderNodeFixture;
+}
+
+interface ArticleTreeLeafNodeProps extends Omit<ArticleTreeNodeProps, "state"> {
+  node: ArticleTreeLeafNodeFixture;
 }
 
 interface ArticleTreeStatusProps {
@@ -89,19 +111,22 @@ const startupItems = [
     label: "Recent Projects",
   },
   {
-    commandId: "project.createSite",
+    disabledReason:
+      "Template browsing will be available when starter templates are connected.",
     icon: FileText,
     id: "templates",
     label: "Templates",
   },
   {
-    commandId: "commandPalette.open",
+    disabledReason:
+      "Learning resources will open after documentation routes are connected.",
     icon: BookOpen,
     id: "learn",
     label: "Learn",
   },
   {
-    commandId: "settings.open",
+    disabledReason:
+      "Cloud account management is available after a site is opened.",
     icon: Cloud,
     id: "cloud",
     label: "Cloud",
@@ -134,16 +159,15 @@ export function WorkspaceSidebar({
       aria-label="Studio navigation"
       className="bg-sidebar flex h-full min-h-0 flex-col"
     >
-      <div className="border-border border-b px-4 py-4">
-        <button
-          className="text-foreground hover:bg-panel/70 focus-visible:outline-accent flex min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm font-semibold focus-visible:outline-2"
-          type="button"
+      <div className="border-border border-b px-3 py-3">
+        <div
+          className="text-foreground flex min-w-0 items-center gap-2 px-2 py-1.5 text-sm font-semibold"
+          title="Project switching will be available when multiple workspaces are connected."
         >
           <span className="truncate">{workspace.displayName}</span>
-          <ChevronDown aria-hidden="true" className="shrink-0" />
-        </button>
+        </div>
       </div>
-      <nav aria-label="Primary Studio sections" className="px-4 py-3">
+      <nav aria-label="Primary Studio sections" className="px-3 py-2">
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
           {primaryItems.map((item) => (
             <li key={item.id}>
@@ -154,9 +178,9 @@ export function WorkspaceSidebar({
       </nav>
       <section
         aria-label="Articles"
-        className="border-border min-h-0 flex-1 border-t px-4 py-3"
+        className="border-border min-h-0 flex-1 border-t px-3 py-2.5"
       >
-        <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="mb-1.5 flex items-center justify-between gap-2">
           <h2 className="text-muted-foreground text-xs font-semibold uppercase">
             Articles
           </h2>
@@ -170,20 +194,23 @@ export function WorkspaceSidebar({
             </IconButton>
           </Tooltip>
         </div>
-        <ul className="m-0 flex list-none flex-col gap-1 overflow-auto p-0">
+        <ul className="m-0 flex list-none flex-col gap-0.5 overflow-auto p-0">
           {navigation.articleTree.map((node) => (
             <ArticleTreeNode
               key={node.id}
               node={node}
               onCommand={onCommand}
+              selection={studioSidebarSelection(state)}
               state={state}
             />
           ))}
         </ul>
       </section>
-      <div className="border-border border-t px-4 py-3">
+      <div className="border-border border-t px-3 py-2.5">
         <button
-          className="text-muted-foreground hover:bg-panel/70 focus-visible:outline-accent flex w-full items-center gap-3 rounded-[var(--radius-control)] px-2 py-2 text-left text-sm focus-visible:outline-2"
+          className="text-muted-foreground flex w-full cursor-not-allowed items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm opacity-65 [&_svg]:size-4 [&_svg]:shrink-0"
+          disabled
+          title="Trash will open when deleted articles or media are available."
           type="button"
         >
           <Trash2 aria-hidden="true" />
@@ -206,43 +233,37 @@ function StartupSidebar({
       aria-label="Studio navigation"
       className="bg-sidebar flex h-full min-h-0 flex-col"
     >
-      <div className="border-border border-b px-4 py-4">
-        <button
-          className="text-foreground hover:bg-panel/70 focus-visible:outline-accent flex min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm font-semibold focus-visible:outline-2"
-          type="button"
+      <div className="border-border border-b px-3 py-3">
+        <div
+          className="text-foreground flex min-w-0 items-center gap-2 px-2 py-1.5 text-sm font-semibold [&_svg]:size-4 [&_svg]:shrink-0"
+          title="Open or create a site to choose a workspace."
         >
           <Home aria-hidden="true" className="shrink-0" />
           <span className="truncate">Studio</span>
-          <ChevronDown aria-hidden="true" className="shrink-0" />
-        </button>
+        </div>
       </div>
-      <nav aria-label="Startup sections" className="px-4 py-3">
+      <nav aria-label="Startup sections" className="px-3 py-2">
         <ul className="m-0 flex list-none flex-col gap-1 p-0">
           {startupItems.map((item) => (
             <li key={item.id}>
               <StartupSidebarButton
                 item={item}
                 onCommand={onCommand}
-                selected={startupSelected(state, item.id)}
+                selected={startupSelected(
+                  studioSidebarSelection(state),
+                  item.id,
+                )}
               />
             </li>
           ))}
         </ul>
       </nav>
-      <section
-        aria-label="Recent"
-        className="border-border min-h-0 flex-1 border-t px-6 py-6"
-      >
-        <h2 className="text-muted-foreground text-xs font-semibold uppercase">
-          Recent
-        </h2>
-        <p className="text-muted-foreground mt-5 max-w-40 text-center text-sm leading-6">
-          Create a site or open an existing one.
-        </p>
-      </section>
-      <div className="border-border border-t px-4 py-3">
+      <div className="border-border min-h-0 flex-1 border-t" />
+      <div className="border-border border-t px-3 py-2.5">
         <button
-          className="text-muted-foreground hover:bg-panel/70 focus-visible:outline-accent flex w-full items-center gap-3 rounded-[var(--radius-control)] px-2 py-2 text-left text-sm focus-visible:outline-2"
+          className="text-muted-foreground flex w-full cursor-not-allowed items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm opacity-65 [&_svg]:size-4 [&_svg]:shrink-0"
+          disabled
+          title="Trash will open after a site with deleted items is available."
           type="button"
         >
           <Trash2 aria-hidden="true" />
@@ -256,65 +277,133 @@ function StartupSidebar({
 function ArticleTreeNode({
   node,
   onCommand,
+  selection,
   state,
 }: ArticleTreeNodeProps): ReactElement {
-  if (node.kind === "folder") {
+  if (isArticleTreeFolderNode(node)) {
     return (
-      <li>
-        <div className="text-muted-foreground mb-1 flex items-center gap-2 px-2 py-1 text-sm">
+      <ArticleTreeFolderNode
+        node={node}
+        onCommand={onCommand}
+        selection={selection}
+        state={state}
+      />
+    );
+  }
+
+  if (isArticleTreeLeafNode(node)) {
+    return (
+      <ArticleTreeLeafNode
+        node={node}
+        onCommand={onCommand}
+        selection={selection}
+      />
+    );
+  }
+
+  throw new Error(`Unsupported article tree node kind: ${node.kind}`);
+}
+
+function ArticleTreeFolderNode({
+  node,
+  onCommand,
+  selection,
+  state,
+}: ArticleTreeFolderNodeProps): ReactElement {
+  const collapsed = studioArticleTreeFolderCollapsed(state, node.id);
+
+  return (
+    <li>
+      <button
+        aria-expanded={!collapsed}
+        className="text-muted-foreground hover:bg-panel/70 focus-visible:outline-accent mb-0.5 flex w-full min-w-0 items-center gap-1.5 rounded-[var(--radius-control)] px-2 py-1 text-left text-sm focus-visible:outline-2 [&_svg]:size-4 [&_svg]:shrink-0"
+        onClick={() =>
+          onCommand("articleTree.toggleFolder", {
+            articleTreeNodeId: node.id,
+          })
+        }
+        type="button"
+      >
+        {collapsed ? (
+          <ChevronRight aria-hidden="true" />
+        ) : (
           <ChevronDown aria-hidden="true" />
-          <Folder aria-hidden="true" />
-          <span className="truncate">{node.title}</span>
-        </div>
-        <ul className="m-0 flex list-none flex-col gap-1 p-0 pl-4">
+        )}
+        <Folder aria-hidden="true" />
+        <span className="truncate">{node.title}</span>
+      </button>
+      {collapsed ? null : (
+        <ul className="m-0 flex list-none flex-col gap-0.5 p-0 pl-4">
           {(node.children ?? []).map((child) => (
             <ArticleTreeNode
               key={child.id}
               node={child}
               onCommand={onCommand}
+              selection={selection}
               state={state}
             />
           ))}
         </ul>
-      </li>
-    );
-  }
+      )}
+    </li>
+  );
+}
 
-  const selected = state.activeArticleId === node.articleId;
+function ArticleTreeLeafNode({
+  node,
+  onCommand,
+  selection,
+}: ArticleTreeLeafNodeProps): ReactElement {
+  const selected =
+    selection.kind === "article" && selection.articleId === node.articleId;
 
   return (
     <li>
       <div
         className={cn(
-          "group text-foreground flex min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2 py-2 text-sm",
+          "group text-foreground flex min-w-0 items-center rounded-[var(--radius-control)] text-sm",
           selected
             ? "bg-accent-muted text-accent-foreground"
             : "hover:bg-panel/70",
         )}
+        data-selected={selected ? "true" : undefined}
       >
-        <FileText aria-hidden="true" className="shrink-0" />
         <button
-          className="focus-visible:outline-accent min-w-0 flex-1 truncate text-left focus-visible:outline-2"
+          aria-current={selected ? "page" : undefined}
+          className="focus-visible:outline-accent flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left focus-visible:outline-2 [&_svg]:size-4 [&_svg]:shrink-0"
           onClick={() => openArticleNode(onCommand, node.articleId)}
           title={node.title}
           type="button"
         >
-          {node.title}
+          <FileText aria-hidden="true" className="shrink-0" />
+          <span className="min-w-0 flex-1 truncate">{node.title}</span>
+          <ArticleTreeStatus status={node.status} />
         </button>
-        <ArticleTreeStatus status={node.status} />
-        <Tooltip content="Article actions">
-          <IconButton
-            aria-haspopup="menu"
-            className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100"
-            label={`Actions for ${node.title}`}
-            variant="ghost"
-          >
-            <MoreHorizontal aria-hidden="true" />
-          </IconButton>
-        </Tooltip>
+        {node.articleId === undefined ? null : (
+          <div className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
+            <ArticleActionMenu
+              articleId={node.articleId}
+              articleTitle={node.title}
+              onCommand={onCommand}
+              restoreEnabled={selected}
+            />
+          </div>
+        )}
       </div>
     </li>
   );
+}
+
+function isArticleTreeFolderNode(
+  node: ArticleTreeNodeFixture,
+): node is ArticleTreeFolderNodeFixture {
+  return node.kind === "folder";
+}
+
+function isArticleTreeLeafNode(
+  node: ArticleTreeNodeFixture,
+): node is ArticleTreeLeafNodeFixture {
+  return node.kind === "article";
 }
 
 function ArticleTreeStatus({
@@ -322,22 +411,41 @@ function ArticleTreeStatus({
 }: ArticleTreeStatusProps): null | ReactElement {
   switch (status) {
     case "dirty":
-      return <Badge tone="warning">Unsaved</Badge>;
+      return <StatusDot className="bg-warning" label="Unsaved changes" />;
     case "draft":
-      return <Badge tone="neutral">Draft</Badge>;
+      return <StatusDot className="bg-muted-foreground" label="Draft" />;
     case "invalid":
     case "missing-media":
       return (
-        <span className="text-warning inline-flex items-center">
+        <span
+          className="text-warning inline-flex items-center"
+          title="Needs attention"
+        >
           <AlertTriangle aria-hidden="true" />
           <span className="sr-only">Needs attention</span>
         </span>
       );
     case "published":
-      return <Badge tone="success">Live</Badge>;
+      return <StatusDot className="bg-success" label="Published" />;
     case undefined:
       return null;
   }
+}
+
+function StatusDot({
+  className,
+  label,
+}: {
+  className: string;
+  label: string;
+}): ReactElement {
+  return (
+    <span
+      aria-label={label}
+      className={cn("inline-flex size-2 shrink-0 rounded-full", className)}
+      title={label}
+    />
+  );
 }
 
 function openArticleNode(
@@ -363,17 +471,24 @@ function SidebarButton({
   state: StudioAppState;
 }): ReactElement {
   const Icon = item.icon;
-  const selected = selectedNavId(state) === item.id;
+  const selection = studioSidebarSelection(state);
+  const selected = selection.kind === "nav" && selection.id === item.id;
 
   return (
     <button
+      aria-current={selected ? "page" : undefined}
       className={cn(
-        "focus-visible:outline-accent flex w-full min-w-0 items-center gap-3 rounded-[var(--radius-control)] px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2",
+        "focus-visible:outline-accent flex w-full min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm transition-colors focus-visible:outline-2 [&_svg]:size-4 [&_svg]:shrink-0",
         selected
           ? "bg-accent-muted text-accent-foreground"
           : "text-foreground hover:bg-panel/70",
       )}
-      onClick={() => onCommand(item.commandId)}
+      data-selected={selected ? "true" : undefined}
+      onClick={() => {
+        if (item.commandId !== undefined) {
+          onCommand(item.commandId);
+        }
+      }}
       type="button"
     >
       <Icon aria-hidden="true" />
@@ -383,25 +498,6 @@ function SidebarButton({
       ) : null}
     </button>
   );
-}
-
-function selectedNavId(state: StudioAppState): string {
-  switch (state.activeScreen) {
-    case "article-directory":
-    case "article-editor":
-      return "articles";
-    case "first-launch":
-    case "project-home":
-    case "recent-projects":
-    case "restore":
-      return "project-home";
-    case "media":
-      return "media";
-    case "publish-preview":
-      return "project-home";
-    case "settings":
-      return "settings";
-  }
 }
 
 function StartupSidebarButton({
@@ -414,16 +510,20 @@ function StartupSidebarButton({
   selected: boolean;
 }): ReactElement {
   const Icon = item.icon;
+  const disabled = item.commandId === undefined;
 
   return (
     <button
-      className={cn(
-        "focus-visible:outline-accent flex w-full min-w-0 items-center gap-3 rounded-[var(--radius-control)] px-3 py-2 text-left text-sm transition-colors focus-visible:outline-2",
-        selected
-          ? "bg-accent-muted text-accent-foreground"
-          : "text-foreground hover:bg-panel/70",
-      )}
-      onClick={() => onCommand(item.commandId)}
+      aria-current={selected ? "page" : undefined}
+      className={startupSidebarButtonClassName(selected, disabled)}
+      data-selected={selected ? "true" : undefined}
+      disabled={disabled}
+      onClick={() => {
+        if (item.commandId !== undefined) {
+          onCommand(item.commandId);
+        }
+      }}
+      title={item.disabledReason}
       type="button"
     >
       <Icon aria-hidden="true" />
@@ -432,14 +532,36 @@ function StartupSidebarButton({
   );
 }
 
-function startupSelected(state: StudioAppState, itemId: string): boolean {
-  if (
-    itemId === "recent-projects" &&
-    (state.activeScreen === "first-launch" ||
-      state.activeScreen === "recent-projects")
-  ) {
-    return true;
+function startupSidebarButtonClassName(
+  selected: boolean,
+  disabled: boolean,
+): string {
+  const stateClass = startupSidebarButtonStateClassName(selected, disabled);
+
+  return cn(
+    "focus-visible:outline-accent flex w-full min-w-0 items-center gap-2 rounded-[var(--radius-control)] px-2 py-1.5 text-left text-sm transition-colors focus-visible:outline-2 [&_svg]:size-4 [&_svg]:shrink-0",
+    stateClass,
+  );
+}
+
+function startupSidebarButtonStateClassName(
+  selected: boolean,
+  disabled: boolean,
+): string {
+  if (selected) {
+    return "bg-accent-muted text-accent-foreground";
   }
 
-  return false;
+  if (disabled) {
+    return "text-muted-foreground cursor-not-allowed opacity-65";
+  }
+
+  return "text-foreground hover:bg-panel/70";
+}
+
+function startupSelected(
+  selection: StudioSidebarSelection,
+  itemId: string,
+): boolean {
+  return selection.kind === "nav" && selection.id === itemId;
 }

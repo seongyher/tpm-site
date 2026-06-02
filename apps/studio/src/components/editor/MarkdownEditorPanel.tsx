@@ -136,11 +136,11 @@ export function MarkdownEditorPanel({
         ".cm-content": {
           fontFamily: "var(--font-mono)",
           minHeight: "24rem",
-          padding: "1rem",
+          padding: "0",
         },
         ".cm-gutters": {
           backgroundColor: "transparent",
-          borderRightColor: "var(--border)",
+          borderRightColor: "transparent",
         },
         ".cm-scroller": {
           fontFamily: "var(--font-mono)",
@@ -153,7 +153,8 @@ export function MarkdownEditorPanel({
   return (
     <section
       aria-label={`${format.toUpperCase()} source editor`}
-      className="border-border bg-panel flex min-h-0 flex-col overflow-hidden rounded-[var(--radius-panel)] border"
+      className="flex min-h-0 flex-col"
+      data-testid="markdown-editor-shell"
     >
       <MarkdownEditorToolbar onCommand={onCommand} />
       <ContextMenu.Root>
@@ -172,7 +173,7 @@ export function MarkdownEditorPanel({
                 foldGutter: false,
                 highlightActiveLine: false,
                 highlightActiveLineGutter: false,
-                lineNumbers: true,
+                lineNumbers: false,
               }}
               className="studio-codemirror h-full"
               extensions={extensions}
@@ -229,10 +230,12 @@ function EditorContextMenu({
 
   return (
     <ContextMenu.Portal>
-      <ContextMenu.Content className="bg-panel border-border shadow-panel z-50 min-w-56 rounded-[var(--radius-panel)] border p-1">
+      <ContextMenu.Content
+        aria-label={contextMenuAccessibleLabel(target)}
+        className="bg-panel border-border shadow-panel z-50 min-w-56 rounded-[var(--radius-panel)] border p-1"
+      >
         <CommandContextMenuItems
           commandIds={commandIds}
-          label={contextMenuLabel(target)}
           onCommand={onCommand}
           state={state}
         />
@@ -247,18 +250,13 @@ function MarkdownEditorToolbar({
   onCommand: MarkdownEditorPanelProps["onCommand"];
 }): ReactElement {
   return (
-    <div className="border-border flex min-h-12 items-center gap-1 overflow-x-auto border-b px-3">
+    <div className="border-border flex min-h-10 items-center gap-1 overflow-x-auto border-y py-1">
       {primaryEditorCommands.map((command) => {
         const record = studioCommandById(command.id);
         const label = record?.label ?? command.id;
 
         return (
-          <Tooltip
-            content={label}
-            description={record?.description}
-            key={command.id}
-            shortcut={record?.shortcut}
-          >
+          <Tooltip content={label} key={command.id} shortcut={record?.shortcut}>
             <IconButton
               label={label}
               onClick={() => onCommand(command.id)}
@@ -317,7 +315,7 @@ function contextMenuCommandIds(
   }
 }
 
-function contextMenuLabel(
+function contextMenuAccessibleLabel(
   target: EditorSessionStateFixture["contextTarget"],
 ): string {
   switch (target) {

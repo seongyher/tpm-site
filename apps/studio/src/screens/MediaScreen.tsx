@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  CheckCircle2,
   Copy,
   FileImage,
   FolderOpen,
@@ -15,6 +14,7 @@ import {
 import {
   type ChangeEvent,
   type ReactElement,
+  type ReactNode,
   useEffect,
   useState,
 } from "react";
@@ -73,12 +73,13 @@ export function MediaScreen({
 
   return (
     <main className="min-h-full overflow-auto" data-testid="media-screen">
+      <h1 className="sr-only">Media</h1>
       <div className="grid min-h-full grid-cols-1 xl:grid-cols-[minmax(0,1fr)_24rem]">
-        <section className="border-border min-w-0 border-r p-5 md:p-6">
-          <MediaHeader />
+        <section className="border-border min-w-0 border-r p-4 md:p-5">
           <MediaToolbar
             onCommand={onCommand}
             query={viewModel.query}
+            resultCount={viewModel.items.length}
             viewMode={viewModel.viewMode}
           />
           <MediaCollection
@@ -105,36 +106,23 @@ export function MediaScreen({
   );
 }
 
-function MediaHeader(): ReactElement {
-  return (
-    <header className="mb-5 flex flex-col gap-2">
-      <p className="text-muted-foreground text-xs font-semibold uppercase">
-        Media library
-      </p>
-      <h1 className="text-foreground text-2xl font-semibold">Media</h1>
-      <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-        Browse images, repair image metadata, and insert selected media into the
-        current article.
-      </p>
-    </header>
-  );
-}
-
 function MediaToolbar({
   onCommand,
   query,
+  resultCount,
   viewMode,
 }: {
   onCommand: MediaScreenProps["onCommand"];
   query: string;
+  resultCount: number;
   viewMode: "grid" | "list";
 }): ReactElement {
   return (
-    <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
-      <Button disabled>
+    <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+      <DisabledAction reason="Connect a writable media source to add files.">
         <Plus aria-hidden="true" />
         Add
-      </Button>
+      </DisabledAction>
       <label className="relative min-w-0 flex-1">
         <span className="sr-only">Search media</span>
         <Search
@@ -142,7 +130,7 @@ function MediaToolbar({
           className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
         />
         <input
-          className="border-border bg-panel text-foreground focus-visible:outline-accent h-10 w-full rounded-[var(--radius-control)] border py-2 pr-3 pl-9 text-sm focus-visible:outline-2"
+          className="border-border bg-panel text-foreground focus-visible:outline-accent h-9 w-full rounded-[var(--radius-control)] border py-2 pr-3 pl-9 text-sm focus-visible:outline-2"
           onChange={(event: ChangeEvent<HTMLInputElement>) =>
             onCommand("media.setSearch", {
               mediaQuery: event.currentTarget.value,
@@ -179,7 +167,44 @@ function MediaToolbar({
           <List aria-hidden="true" />
         </IconButton>
       </div>
+      <span className="text-muted-foreground shrink-0 text-sm">
+        {resultCount} {resultCount === 1 ? "item" : "items"}
+      </span>
     </div>
+  );
+}
+
+function DisabledAction({
+  children,
+  reason,
+}: {
+  children: ReactNode;
+  reason: string;
+}): ReactElement {
+  return (
+    <span className="inline-flex" title={reason}>
+      <Button disabled title={reason}>
+        {children}
+      </Button>
+    </span>
+  );
+}
+
+function DisabledIconAction({
+  children,
+  label,
+  reason,
+}: {
+  children: ReactNode;
+  label: string;
+  reason: string;
+}): ReactElement {
+  return (
+    <span className="inline-flex" title={reason}>
+      <IconButton disabled label={`${label}. ${reason}`} title={reason}>
+        {children}
+      </IconButton>
+    </span>
   );
 }
 
@@ -217,7 +242,7 @@ function MediaCollection({
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-4">
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3">
       {items.map((item) => (
         <MediaCard
           displayStatus={
@@ -250,7 +275,7 @@ function MediaCard({
     <button
       aria-pressed={selected}
       className={cn(
-        "focus-visible:outline-accent group bg-panel min-w-0 rounded-[var(--radius-panel)] border p-2 text-left transition-colors focus-visible:outline-2",
+        "focus-visible:outline-accent group bg-panel min-w-0 rounded-[var(--radius-control)] border p-1.5 text-left transition-colors focus-visible:outline-2",
         selected
           ? "border-accent shadow-sm"
           : "border-border hover:border-accent/50 hover:bg-panel-muted",
@@ -269,7 +294,7 @@ function MediaCard({
           status={displayStatus ?? item.item.status}
         />
       </span>
-      <span className="text-foreground mt-2 block truncate text-sm font-medium">
+      <span className="text-foreground mt-2 block truncate text-xs font-medium">
         {media.displayName}
       </span>
       <span className="text-muted-foreground mt-1 block truncate text-xs">
@@ -296,7 +321,7 @@ function MediaListItem({
     <button
       aria-pressed={selected}
       className={cn(
-        "focus-visible:outline-accent bg-panel flex min-w-0 items-center gap-3 rounded-[var(--radius-control)] border p-2 text-left focus-visible:outline-2",
+        "focus-visible:outline-accent bg-panel flex min-w-0 items-center gap-3 rounded-[var(--radius-control)] border p-1.5 text-left focus-visible:outline-2",
         selected ? "border-accent bg-accent-muted" : "border-border",
       )}
       onClick={() => onCommand("media.open", { mediaId: media.id })}
@@ -304,7 +329,7 @@ function MediaListItem({
     >
       <img
         alt={media.altText.length > 0 ? media.altText : ""}
-        className="border-border size-14 rounded-[var(--radius-control)] border object-cover"
+        className="border-border size-12 rounded-[var(--radius-control)] border object-cover"
         src={media.thumbnailUrl}
       />
       <span className="min-w-0 flex-1">
@@ -370,6 +395,10 @@ function MediaDetailPane({
   const displayDiagnostic =
     displayStatus === media.status ? selectedItem.diagnostic : undefined;
   const insertDisabled = state.activeArticleId === undefined || missingAlt;
+  const insertDisabledReason = mediaInsertDisabledReason(
+    state.activeArticleId,
+    missingAlt,
+  );
 
   return (
     <aside
@@ -377,20 +406,20 @@ function MediaDetailPane({
       className="border-border bg-panel min-w-0 border-t xl:border-t-0 xl:border-l"
     >
       <div className="flex h-full min-h-0 flex-col">
-        <div className="border-border flex items-center justify-between border-b px-5 py-4">
+        <div className="border-border flex items-center justify-between border-b px-4 py-3">
           <div className="min-w-0">
-            <p className="text-muted-foreground text-xs font-semibold uppercase">
-              Media details
-            </p>
-            <h2 className="text-foreground mt-1 truncate text-base font-semibold">
+            <h2 className="text-foreground truncate text-base font-semibold">
               {media.displayName}
             </h2>
           </div>
-          <IconButton label="More media actions">
+          <DisabledIconAction
+            label="More media actions"
+            reason="More media actions will appear when extensions provide them."
+          >
             <MoreHorizontal aria-hidden="true" />
-          </IconButton>
+          </DisabledIconAction>
         </div>
-        <div className="min-h-0 flex-1 overflow-auto p-5">
+        <div className="min-h-0 flex-1 overflow-auto p-4">
           <img
             alt={draft.altText.trim().length > 0 ? draft.altText : ""}
             className="border-border bg-panel-muted aspect-[4/3] w-full rounded-[var(--radius-panel)] border object-cover"
@@ -404,7 +433,7 @@ function MediaDetailPane({
             helpText={
               missingAlt
                 ? "Add useful alt text before inserting this image."
-                : "Great. This image has descriptive alt text."
+                : undefined
             }
             invalid={missingAlt}
             label="Alt text"
@@ -419,7 +448,7 @@ function MediaDetailPane({
           <MediaFacts displayStatus={displayStatus} item={selectedItem} />
           <MediaUsageList item={selectedItem} />
         </div>
-        <div className="border-border flex flex-wrap justify-end gap-2 border-t p-4">
+        <div className="border-border flex flex-wrap justify-end gap-2 border-t p-3">
           <Button
             disabled={insertDisabled}
             onClick={() =>
@@ -429,22 +458,26 @@ function MediaDetailPane({
                 mediaId: media.id,
               })
             }
+            title={insertDisabledReason}
             variant="primary"
           >
             <ImagePlus aria-hidden="true" />
             Insert into article
           </Button>
-          <Button disabled>
+          <DisabledAction reason="Replacing files requires a writable media source.">
             <Upload aria-hidden="true" />
             Replace
-          </Button>
-          <Button disabled>
+          </DisabledAction>
+          <DisabledAction reason="Revealing files requires a local media source.">
             <FolderOpen aria-hidden="true" />
             Reveal
-          </Button>
-          <IconButton label="Copy media reference">
+          </DisabledAction>
+          <DisabledIconAction
+            label="Copy media reference"
+            reason="Copying media references will be available once source paths are writable."
+          >
             <Copy aria-hidden="true" />
-          </IconButton>
+          </DisabledIconAction>
         </div>
       </div>
     </aside>
@@ -459,12 +492,7 @@ function MediaDetailStatus({
   status: MediaDisplayStatus;
 }): null | ReactElement {
   if (diagnostic === undefined && status === "ready") {
-    return (
-      <div className="text-success mt-4 flex items-center gap-2 text-sm">
-        <CheckCircle2 aria-hidden="true" className="size-4" />
-        Ready to use
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -493,7 +521,7 @@ function MetadataField({
   onChange,
   value,
 }: {
-  helpText?: string;
+  helpText?: string | undefined;
   invalid?: boolean;
   label: string;
   onChange: (value: string) => void;
@@ -545,7 +573,9 @@ function MediaFacts({
       <MediaFact label="Dimensions" value={mediaDimensionsLabel(media)} />
       <MediaFact label="Size" value={media.fileSizeLabel ?? "Unknown"} />
       <MediaFact label="Type" value={media.kind} />
-      <MediaFact label="Status" value={displayStatus.replaceAll("-", " ")} />
+      {displayStatus === "ready" ? null : (
+        <MediaFact label="Status" value={displayStatus.replaceAll("-", " ")} />
+      )}
     </dl>
   );
 }
@@ -575,7 +605,7 @@ function MediaUsageList({
       <h3 className="text-foreground text-sm font-semibold">Used in</h3>
       {item.item.usage.length === 0 ? (
         <p className="text-muted-foreground mt-2 text-sm">
-          This image is not used by any article in the fixture.
+          This image is not used by any article in this site.
         </p>
       ) : (
         <ul className="m-0 mt-3 flex list-none flex-col gap-3 p-0">
@@ -661,7 +691,7 @@ function mediaEmptyCopy(
   switch (emptyState) {
     case "loading":
       return {
-        description: "Studio is preparing the media library fixture.",
+        description: "Studio is preparing the media library.",
         title: "Loading media",
       };
     case "no-filter-results":
@@ -697,4 +727,15 @@ function mediaDisplayStatus(
   return item.item.status === "missing-alt" && draft.altText.trim().length > 0
     ? "ready"
     : item.item.status;
+}
+
+function mediaInsertDisabledReason(
+  activeArticleId: string | undefined,
+  missingAlt: boolean,
+): string | undefined {
+  if (activeArticleId === undefined) {
+    return "Open an article before inserting media.";
+  }
+
+  return missingAlt ? "Add alt text before inserting this image." : undefined;
 }

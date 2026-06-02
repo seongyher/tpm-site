@@ -26,6 +26,7 @@ This specification consolidates:
 - [STUDIO_GUI_MVP_FIGMA_HANDOFF.md](./STUDIO_GUI_MVP_FIGMA_HANDOFF.md)
 - [STUDIO_GUI_MVP_VISUAL_REFERENCES.md](./STUDIO_GUI_MVP_VISUAL_REFERENCES.md)
 - [STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md](./STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md)
+- [STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md](./STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md)
 - [HEADLESS_STUDIO_CORE_CONTRACT.md](../HEADLESS_STUDIO_CORE_CONTRACT.md)
 - [STUDIO_EDITING_SURFACES.md](../STUDIO_EDITING_SURFACES.md)
 - [STUDIO_PUBLISH_WORKFLOWS.md](../STUDIO_PUBLISH_WORKFLOWS.md)
@@ -38,6 +39,9 @@ This specification consolidates:
 If a visual reference contradicts a written contract, follow the written
 contract. If two written contracts conflict, preserve the headless operation
 core, source-truth, capability, credential, and plan/apply safety contracts.
+If an older GUI MVP document permits a lower-quality interaction or visual
+state than the elevated quality standard, update the older document and follow
+the higher product and engineering bar.
 
 ## Product Target
 
@@ -58,6 +62,11 @@ product:
    rewrite;
 5. testable enough that layout, accessibility, keyboard, command, fixture, and
    state regressions are caught early.
+
+The prototype must not rely on explanatory scaffolding to make unfinished
+screens understandable. Page titles, subheads, placeholder controls, and
+status panels should appear only when they serve an author task, validation
+state, navigation need, or safety decision.
 
 ## Product Non-Goals
 
@@ -516,7 +525,10 @@ Errors should appear where the user can fix them.
 - keep invalid draft value local;
 - reject invalid canonical source;
 - explain the repair in author language;
-- show generated-output effects only when useful.
+- keep generated-output effects in the typed descriptor model, but hide them by
+  default in author forms. Show them only in explicit advanced/debug surfaces or
+  consequential review flows where output consequences change the user's
+  decision.
 
 ### Action Blocking
 

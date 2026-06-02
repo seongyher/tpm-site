@@ -250,7 +250,7 @@ const articleTaxonomyFields = [
 ] as const satisfies readonly FieldDescriptorFixture[];
 
 const validArticleSections = [
-  { fields: articleIdentityFields, id: "identity", label: "Identity" },
+  { fields: articleIdentityFields, id: "identity", label: "Properties" },
   { fields: articleTaxonomyFields, id: "taxonomy", label: "Taxonomy" },
 ] as const satisfies readonly FieldSectionFixture[];
 
@@ -272,7 +272,7 @@ const invalidArticleSections = [
       ...articleIdentityFields.slice(1),
     ],
     id: "identity",
-    label: "Identity",
+    label: "Properties",
   },
   { fields: articleTaxonomyFields, id: "taxonomy", label: "Taxonomy" },
 ] as const satisfies readonly FieldSectionFixture[];
@@ -1355,8 +1355,8 @@ function session(
 ): StudioMvpFixture["sessions"][number] {
   const previewPane =
     screen === "article-editor"
-      ? { sizePx: 520, visibility: "expanded" as const }
-      : { sizePx: 0, visibility: "collapsed" as const };
+      ? { sizePx: 520, visibility: "visible" as const }
+      : { sizePx: 0, visibility: "hidden" as const };
 
   return {
     activeScreen: screen,
@@ -1364,7 +1364,7 @@ function session(
     lastRestoredAt: "2026-05-29T13:41:00.000Z",
     previewPane,
     restoreStatus,
-    sidebar: { sizePx: 280, visibility: "expanded" as const },
+    sidebar: { sizePx: 280, visibility: "visible" as const },
     ...(active?.articleId === undefined
       ? {}
       : { activeArticleId: active.articleId }),
@@ -1460,7 +1460,6 @@ function settingsSections(
       fields: [
         field({
           effects: ["homepage", "route"],
-          helpText: "Show the main article index in the site navigation.",
           id: "articlesInNav",
           input: "toggle",
           label: "Show Articles in navigation",
@@ -1477,7 +1476,6 @@ function settingsSections(
       fields: [
         field({
           effects: ["metadata"],
-          helpText: "Shown wherever readers can support the publication.",
           id: "supportUrl",
           input: "url",
           label: "Support link",
@@ -1514,7 +1512,6 @@ function settingsSections(
         }),
         field({
           effects: ["metadata", "search"],
-          helpText: "Show author bios on article pages where available.",
           id: "showAuthorBio",
           input: "toggle",
           label: "Show author bios",
@@ -1530,7 +1527,6 @@ function settingsSections(
       fields: [
         field({
           effects: ["homepage", "metadata", "route", "search"],
-          helpText: "Used when creating a new article from the simple editor.",
           id: "defaultCategory",
           input: "select",
           label: "Default category",
@@ -1540,7 +1536,6 @@ function settingsSections(
         }),
         field({
           effects: ["search"],
-          helpText: "Let readers browse articles by tag.",
           id: "showTags",
           input: "toggle",
           label: "Show tags",
@@ -1556,7 +1551,6 @@ function settingsSections(
       fields: [
         field({
           effects: ["homepage"],
-          helpText: "Short copy shown near the top of the home page.",
           id: "homepageIntro",
           input: "textarea",
           label: "Home page intro",
@@ -1567,7 +1561,6 @@ function settingsSections(
         }),
         field({
           effects: ["homepage", "search"],
-          helpText: "Choose which collection is highlighted first.",
           id: "featuredCollection",
           input: "select",
           label: "Featured collection",
@@ -1583,8 +1576,6 @@ function settingsSections(
       fields: [
         field({
           effects: ["homepage", "metadata"],
-          helpText:
-            "A simple theme choice for links, buttons, and selected states.",
           id: "accentColor",
           input: "select",
           label: "Accent color",
@@ -1594,7 +1585,6 @@ function settingsSections(
         }),
         field({
           effects: ["homepage"],
-          helpText: "Use the built-in readable type system.",
           id: "typography",
           input: "select",
           label: "Typography",
@@ -1620,7 +1610,6 @@ function settingsSections(
         }),
         field({
           effects: ["sitemap"],
-          helpText: "Check the site before the final publish confirmation.",
           id: "previewBeforePublish",
           input: "toggle",
           label: "Preview before publishing",

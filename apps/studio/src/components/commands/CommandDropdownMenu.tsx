@@ -48,9 +48,6 @@ export function CommandDropdownMenu({
           className="bg-panel border-border shadow-panel z-50 min-w-72 rounded-[var(--radius-panel)] border p-1"
           sideOffset={8}
         >
-          <DropdownMenu.Label className="text-muted-foreground px-2 py-1.5 text-xs font-semibold uppercase">
-            {label}
-          </DropdownMenu.Label>
           {items.map((item) => (
             <CommandDropdownMenuItem
               item={item}

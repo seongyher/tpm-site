@@ -78,7 +78,7 @@ body {
 
 .studio-codemirror .cm-editor {
   min-height: 28rem;
-  background: var(--panel);
+  background: transparent;
   color: var(--foreground);
 }
 

@@ -1,5 +1,8 @@
 import type { StudioOperationFamily } from "../models/studio-fixtures";
-import type { StudioAppState } from "../state/studio-state";
+import type {
+  StudioAppState,
+  StudioCommandPayload,
+} from "../state/studio-state";
 
 /** Stable command IDs shared by toolbar, menus, hotkeys, and command palette. */
 export type StudioCommandId =
@@ -13,8 +16,14 @@ export type StudioCommandId =
   | "article.open"
   | "article.restoreVersion"
   | "article.saveDraft"
+  | "articleTree.toggleFolder"
   | "commandPalette.close"
   | "commandPalette.open"
+  | "editor.properties.toggle"
+  | "editor.title.beginEdit"
+  | "editor.title.cancel"
+  | "editor.title.commit"
+  | "editor.title.update"
   | "editor.updateSource"
   | "format.blockquote"
   | "format.bold"
@@ -35,6 +44,7 @@ export type StudioCommandId =
   | "pane.toggleSidebar"
   | "preview.open"
   | "preview.openExternal"
+  | "preview.setViewport"
   | "project.createSite"
   | "project.openHome"
   | "project.openSite"
@@ -165,6 +175,13 @@ export const studioCommandRegistry = [
     "⌘S",
   ),
   command(
+    "articleTree.toggleFolder",
+    "Toggle article folder",
+    "Collapse or expand an article folder in the sidebar.",
+    "safe",
+    "source.inventory",
+  ),
+  command(
     "commandPalette.close",
     "Close command palette",
     "Close the command palette.",
@@ -179,6 +196,41 @@ export const studioCommandRegistry = [
     "safe",
     "session.restore",
     "⌘K",
+  ),
+  command(
+    "editor.properties.toggle",
+    "Toggle Properties",
+    "Collapse or expand article properties.",
+    "safe",
+    "session.restore",
+  ),
+  command(
+    "editor.title.beginEdit",
+    "Edit title",
+    "Edit the article title in place.",
+    "source-write",
+    "editor.patch",
+  ),
+  command(
+    "editor.title.cancel",
+    "Cancel title edit",
+    "Cancel inline title editing.",
+    "safe",
+    "editor.patch",
+  ),
+  command(
+    "editor.title.commit",
+    "Apply title",
+    "Apply a valid inline title draft.",
+    "source-write",
+    "editor.patch",
+  ),
+  command(
+    "editor.title.update",
+    "Update title draft",
+    "Update the local inline title draft.",
+    "source-write",
+    "editor.patch",
   ),
   command(
     "editor.updateSource",
@@ -330,6 +382,13 @@ export const studioCommandRegistry = [
     "preview.route",
   ),
   command(
+    "preview.setViewport",
+    "Change preview viewport",
+    "Switch the preview pane between desktop and mobile viewport modes.",
+    "safe",
+    "preview.route",
+  ),
+  command(
     "project.createSite",
     "Create site",
     "Create a new site workspace.",
@@ -388,8 +447,8 @@ export const studioCommandRegistry = [
   ),
   command(
     "publish.finish",
-    "Finish fixture publish",
-    "Advance the fixture-backed publish progress to the success state.",
+    "Complete publish",
+    "Show the completed publish state.",
     "safe",
     "publish.apply",
   ),
@@ -479,11 +538,13 @@ export function studioCommandById(
  *
  * @param commandId Command to inspect.
  * @param state Current fixture-backed Studio state.
+ * @param payload Optional command-specific payload for availability checks.
  * @returns Availability status and any user-facing reason.
  */
 export function studioCommandAvailability(
   commandId: StudioCommandId,
   state: StudioAppState,
+  payload?: StudioCommandPayload,
 ): StudioCommandAvailability {
   const resolver = studioCommandAvailabilityResolvers.find(
     (candidate) => candidate.id === commandId,
@@ -491,7 +552,7 @@ export function studioCommandAvailability(
 
   return resolver === undefined
     ? disabled(`Unknown Studio command: ${commandId}.`)
-    : resolver.availability(state);
+    : resolver.availability(state, payload);
 }
 
 const studioCommandAvailabilityResolvers = [
@@ -505,8 +566,14 @@ const studioCommandAvailabilityResolvers = [
   resolver("article.open", articleOpenAvailability),
   resolver("article.restoreVersion", articleRestoreAvailability),
   resolver("article.saveDraft", saveDraftAvailability),
+  resolver("articleTree.toggleFolder", available),
   resolver("commandPalette.close", commandPaletteCloseAvailability),
   resolver("commandPalette.open", available),
+  resolver("editor.properties.toggle", articleEditorAvailability),
+  resolver("editor.title.beginEdit", articleEditorAvailability),
+  resolver("editor.title.cancel", titleEditingAvailability),
+  resolver("editor.title.commit", titleCommitAvailability),
+  resolver("editor.title.update", titleEditingAvailability),
   resolver("editor.updateSource", editorCommandAvailability),
   resolver("format.blockquote", editorCommandAvailability),
   resolver("format.bold", editorCommandAvailability),
@@ -523,10 +590,11 @@ const studioCommandAvailabilityResolvers = [
   resolver("media.open", available),
   resolver("media.setSearch", mediaBrowserAvailability),
   resolver("media.setViewMode", mediaBrowserAvailability),
-  resolver("pane.togglePreview", available),
+  resolver("pane.togglePreview", previewPaneAvailability),
   resolver("pane.toggleSidebar", available),
   resolver("preview.open", previewAvailability),
   resolver("preview.openExternal", previewExternalAvailability),
+  resolver("preview.setViewport", previewViewportAvailability),
   resolver("project.createSite", available),
   resolver("project.openHome", available),
   resolver("project.openSite", available),
@@ -548,7 +616,10 @@ const studioCommandAvailabilityResolvers = [
 ] as const;
 
 interface StudioCommandAvailabilityResolver {
-  readonly availability: (state: StudioAppState) => StudioCommandAvailability;
+  readonly availability: (
+    state: StudioAppState,
+    payload?: StudioCommandPayload,
+  ) => StudioCommandAvailability;
   readonly id: StudioCommandId;
 }
 
@@ -587,10 +658,15 @@ function disabled(reason: string): StudioCommandAvailability {
 
 function articleOpenAvailability(
   state: StudioAppState,
+  payload?: StudioCommandPayload,
 ): StudioCommandAvailability {
-  return state.activeArticleId === undefined
-    ? disabled("Choose an article before opening the editor.")
-    : available();
+  if (state.activeProjectId === undefined) {
+    return disabled("Open or create a site before opening articles.");
+  }
+
+  return state.activeArticleId !== undefined || payload?.articleId !== undefined
+    ? available()
+    : disabled("Choose an article before opening the editor.");
 }
 
 function articleDirectoryAvailability(
@@ -617,12 +693,52 @@ function commandPaletteCloseAvailability(
     : disabled("The command palette is not open.");
 }
 
+function articleEditorAvailability(
+  state: StudioAppState,
+): StudioCommandAvailability {
+  return state.activeScreen === "article-editor" &&
+    state.activeArticleId !== undefined
+    ? available()
+    : disabled("Open an article before editing.");
+}
+
 function editorCommandAvailability(
   state: StudioAppState,
 ): StudioCommandAvailability {
   return state.activeArticleId === undefined
     ? disabled("Open an article before editing.")
     : available();
+}
+
+function titleCommitAvailability(
+  state: StudioAppState,
+): StudioCommandAvailability {
+  const editing = titleEditingAvailability(state);
+
+  if (editing.status !== "available") {
+    return editing;
+  }
+
+  return state.editorTitle?.status === "invalid"
+    ? blocked(
+        "Add a title before applying it.",
+        "STUDIO-ARTICLE-TITLE-REQUIRED",
+      )
+    : available();
+}
+
+function titleEditingAvailability(
+  state: StudioAppState,
+): StudioCommandAvailability {
+  const articleEditor = articleEditorAvailability(state);
+
+  if (articleEditor.status !== "available") {
+    return articleEditor;
+  }
+
+  return state.editorTitle?.mode === "editing"
+    ? available()
+    : disabled("Start editing the title first.");
 }
 
 function insertImageAvailability(
@@ -651,7 +767,7 @@ function mediaBrowserAvailability(
 }
 
 function previewAvailability(state: StudioAppState): StudioCommandAvailability {
-  if (state.activeArticleState === "invalid") {
+  if (state.activeArticleState === "invalid" || titleDraftInvalid(state)) {
     return blocked(
       "Fix article errors before previewing.",
       "STUDIO-PREVIEW-BLOCKED",
@@ -661,11 +777,25 @@ function previewAvailability(state: StudioAppState): StudioCommandAvailability {
   return available();
 }
 
-function previewExternalAvailability(
+function previewPaneAvailability(
+  state: StudioAppState,
+): StudioCommandAvailability {
+  return state.activeScreen === "article-editor"
+    ? available()
+    : disabled("Open an article before showing the live article preview.");
+}
+
+function previewExternalAvailability(): StudioCommandAvailability {
+  return disabled(
+    "External preview opens after the desktop shell is connected.",
+  );
+}
+
+function previewViewportAvailability(
   state: StudioAppState,
 ): StudioCommandAvailability {
   return state.activePreviewScenarioId === undefined
-    ? disabled("Open a preview before opening it externally.")
+    ? disabled("Open a preview before changing viewport mode.")
     : available();
 }
 
@@ -698,7 +828,7 @@ function publishFinishAvailability(
 ): StudioCommandAvailability {
   return state.activePublishScenarioId === "publish-progress"
     ? available()
-    : disabled("Confirm the publish plan before completing the fixture apply.");
+    : disabled("Confirm the publish plan before completing publish.");
 }
 
 function publishOpenConfirmAvailability(
@@ -712,7 +842,7 @@ function publishOpenConfirmAvailability(
 function publishPrepareAvailability(
   state: StudioAppState,
 ): StudioCommandAvailability {
-  return state.activeArticleState === "invalid"
+  return state.activeArticleState === "invalid" || titleDraftInvalid(state)
     ? blocked(
         "Fix article errors before publishing.",
         "STUDIO-ARTICLE-TITLE-REQUIRED",
@@ -775,5 +905,16 @@ function saveDraftAvailability(
     );
   }
 
+  if (titleDraftInvalid(state)) {
+    return blocked(
+      "Add a title before saving a draft.",
+      "STUDIO-ARTICLE-TITLE-REQUIRED",
+    );
+  }
+
   return available();
+}
+
+function titleDraftInvalid(state: StudioAppState): boolean {
+  return state.editorTitle?.status === "invalid";
 }

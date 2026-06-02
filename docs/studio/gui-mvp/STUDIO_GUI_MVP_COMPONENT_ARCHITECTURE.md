@@ -194,7 +194,7 @@ Screen composition:
 - `ArticlesDirectoryHeader`
 - `ArticleDirectoryFilters`
 - `ArticleDirectorySearch`
-- `ArticleDirectoryResults`
+- `ArticleDirectoryRows`
 - `ArticleDirectoryEmptyState`
 
 Purpose:
@@ -230,12 +230,14 @@ Composes:
 Filter state should be explicit and serializable so exact session restore can
 restore the user's browse context.
 
-### `ArticleCard` / `ArticleResultRow`
+### `ArticleResultRow`
 
-The improved mockup uses article cards with thumbnails/snippets. Cards are
-acceptable here because they are repeated content items, but the final product
-may choose a denser list mode for large publications. Both forms should render
-from the same view model.
+The MVP default is a compact single-column row. Rows make it easier to scan a
+publication's title/status/date/warning state than a two-column card grid, and
+they leave card-style presentations available as a later optional view mode.
+
+Each row owns a fixed social-preview thumbnail box. Missing images use the same
+box dimensions as real images so row geometry stays stable.
 
 Data:
 
@@ -256,6 +258,30 @@ Actions:
 - context menu;
 - quick publishability details where available.
 
+## Non-Editor Screen Components
+
+Use
+[`STUDIO_GUI_MVP_NON_EDITOR_POLISH_DESIGN.md`](./STUDIO_GUI_MVP_NON_EDITOR_POLISH_DESIGN.md)
+as the component contract for settings, media, publish, restore, project home,
+and startup surfaces.
+
+These screens should be built from small product components rather than broad
+demo panels:
+
+- settings: intrinsic-height section navigation, local form state, descriptor
+  form, compact non-healthy status alert;
+- media: toolbar, stable grid/list rows, selected detail pane, local metadata
+  draft state, disabled future actions with reasons;
+- publish: route preview, plan summary, confirmation dialog, progress/result
+  panels;
+- restore: checkpoint list, selected checkpoint detail, confirmation/result
+  panels;
+- project/startup: action tiles, recent rows, missing-project recovery rows.
+
+Avoid introducing generic heading/subheading wrappers for these surfaces. The
+selected navigation item and local control labels usually provide enough
+orientation.
+
 The excerpt should be precomputed in the model or fixture. Do not strip
 Markdown in the view component.
 
@@ -265,8 +291,8 @@ Markdown in the view component.
 
 Screen composition:
 
-- `ArticleEditorToolbar`
-- `ArticleMetadataForm`
+- `EditableArticleTitle`
+- `ArticlePropertiesPanel`
 - `MarkdownEditorPanel`
 - `EditorStatusStrip`
 - optional `RestoreVersionPanel`
@@ -278,10 +304,23 @@ Props:
 - `PreviewState`;
 - command callbacks.
 
-Must not parse raw frontmatter in the component. It receives descriptors and
-values.
+The editor is writing-first: title and body are primary, while Properties is a
+secondary collapsible metadata card. Must not parse raw frontmatter in the
+component. It receives descriptors and values.
 
-### `ArticleMetadataForm`
+### `EditableArticleTitle`
+
+Owns heading-position title display and edit controls:
+
+- viewing state with subtle edit affordance;
+- editing state with large title input;
+- local validation message for empty titles;
+- save/cancel keyboard behavior;
+- command-backed transitions for begin/update/commit/cancel.
+
+The title should not be duplicated in Properties.
+
+### `ArticlePropertiesPanel`
 
 Composes schema-backed form sections:
 
@@ -309,7 +348,14 @@ Invalid inputs:
 - show local visual state;
 - keep draft value local;
 - do not write invalid canonical source;
-- surface generated-output effects where useful.
+- keep generated-output effects available in the descriptor model, but do not
+  surface them in default author forms. They belong behind advanced/debug
+  disclosure or other surfaces where the user is explicitly inspecting output
+  consequences.
+
+The panel is collapsible, named `Properties`, and contains supporting
+frontmatter fields such as description, author, date, taxonomy, tags, and
+featured image.
 
 ### `MarkdownEditorPanel`
 
@@ -340,6 +386,14 @@ Not owned:
 
 Editor commands must use a centralized `EditorCommand` model so toolbar,
 hotkeys, context menus, and command palette invoke the same behavior.
+
+Default visual contract:
+
+- flat/full-width source surface;
+- no line numbers by default;
+- no outer card border;
+- no internal content padding;
+- compact toolbar attached to the source surface.
 
 ## Preview Components
 

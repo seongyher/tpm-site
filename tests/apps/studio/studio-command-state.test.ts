@@ -18,10 +18,17 @@ import {
   studioCommandRegistry,
 } from "../../../apps/studio/src/commands/studio-commands";
 import { studioMvpFixture } from "../../../apps/studio/src/data/fixtures/studio-mvp-fixture";
+import { STUDIO_MVP_REQUIRED_SCREEN_STATE_IDS } from "../../../apps/studio/src/models/studio-fixtures";
 import {
   applyEditorTextCommand,
   isEditorTextCommandId,
 } from "../../../apps/studio/src/state/editor-transformations";
+import {
+  studioArticleTreeFolderCollapsed,
+  studioLivePreviewVisible,
+  studioSidebarSelection,
+  studioWorkspaceRegions,
+} from "../../../apps/studio/src/state/studio-selectors";
 import {
   reduceStudioAppState,
   runStudioCommand,
@@ -42,8 +49,14 @@ const interactionMatrixCommandIds = [
   "article.open",
   "article.restoreVersion",
   "article.saveDraft",
+  "articleTree.toggleFolder",
   "commandPalette.close",
   "commandPalette.open",
+  "editor.properties.toggle",
+  "editor.title.beginEdit",
+  "editor.title.cancel",
+  "editor.title.commit",
+  "editor.title.update",
   "editor.updateSource",
   "format.blockquote",
   "format.bold",
@@ -64,6 +77,7 @@ const interactionMatrixCommandIds = [
   "pane.toggleSidebar",
   "preview.open",
   "preview.openExternal",
+  "preview.setViewport",
   "project.createSite",
   "project.openHome",
   "project.openSite",
@@ -116,7 +130,7 @@ describe("studio command state", () => {
         activeScreen: "article-editor",
         restoreStatus: "restored",
       });
-      expect(restored.state.previewPane.visibility).toBe("expanded");
+      expect(restored.state.previewPane.visibility).toBe("visible");
     }
   });
 
@@ -159,7 +173,7 @@ describe("studio command state", () => {
       expect(firstLaunch.state.activeProjectId).toBeUndefined();
       expect(firstLaunch.state).toMatchObject({
         activeScreen: "first-launch",
-        previewPane: { visibility: "collapsed" },
+        previewPane: { visibility: "hidden" },
       });
     }
     expect(recentProjects).toMatchObject({
@@ -176,6 +190,420 @@ describe("studio command state", () => {
         activeProjectId: "workspace-northwind-journal",
         activeScreen: "project-home",
         restoreStatus: "restored",
+      },
+    });
+  });
+
+  test("derives workspace regions so hidden panes are absent", () => {
+    const article = requiredStudioState("article-editor-clean");
+    const projectHome = requiredStudioState("project-home");
+
+    expect(studioWorkspaceRegions(article)).toEqual([
+      "sidebar",
+      "work",
+      "preview",
+    ]);
+    expect(studioLivePreviewVisible(article)).toBe(true);
+    expect(studioWorkspaceRegions(projectHome)).toEqual(["sidebar", "work"]);
+    expect(studioLivePreviewVisible(projectHome)).toBe(false);
+
+    const hiddenPreview = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "pane.togglePreview",
+    );
+    const hiddenSidebar = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "pane.toggleSidebar",
+    );
+    const nonEditorPreviewToggle = runStudioCommand(
+      studioMvpFixture,
+      projectHome,
+      "pane.togglePreview",
+    );
+
+    expect(hiddenPreview.ok).toBe(true);
+    expect(hiddenSidebar.ok).toBe(true);
+    expect(nonEditorPreviewToggle).toMatchObject({
+      ok: false,
+      reason: "Open an article before showing the live article preview.",
+    });
+
+    if (hiddenPreview.ok) {
+      expect(hiddenPreview.state.previewPane.visibility).toBe("hidden");
+      expect(studioWorkspaceRegions(hiddenPreview.state)).toEqual([
+        "sidebar",
+        "work",
+      ]);
+    }
+
+    if (hiddenSidebar.ok) {
+      expect(hiddenSidebar.state.sidebar.visibility).toBe("hidden");
+      expect(studioWorkspaceRegions(hiddenSidebar.state)).toEqual([
+        "work",
+        "preview",
+      ]);
+    }
+  });
+
+  test("keeps workspace and selection invariants for every fixture state", () => {
+    for (const screenStateId of STUDIO_MVP_REQUIRED_SCREEN_STATE_IDS) {
+      const state = requiredStudioState(screenStateId);
+      const regions = studioWorkspaceRegions(state);
+      const uniqueRegions = new Set(regions);
+      const selection = studioSidebarSelection(state);
+
+      expect(uniqueRegions.size, screenStateId).toBe(regions.length);
+      expect(regions.includes("work"), screenStateId).toBe(true);
+      expect(regions.includes("sidebar"), screenStateId).toBe(
+        state.sidebar.visibility === "visible",
+      );
+      expect(regions.includes("preview"), screenStateId).toBe(
+        studioLivePreviewVisible(state),
+      );
+
+      if (state.activeScreen !== "article-editor") {
+        expect(studioLivePreviewVisible(state), screenStateId).toBe(false);
+        expect(regions, screenStateId).not.toContain("preview");
+      }
+
+      if (selection.kind === "article") {
+        expect(state.activeScreen, screenStateId).toBe("article-editor");
+        expect(selection.articleId, screenStateId).toBe(state.activeArticleId);
+      }
+    }
+  });
+
+  test("derives one sidebar selection from the active location", () => {
+    const article = requiredStudioState("article-editor-clean");
+    const directory = requiredStudioState("article-directory-populated");
+    const media = requiredStudioState("media-browser");
+    const publish = requiredStudioState("publish-preview");
+
+    expect(studioSidebarSelection(article)).toEqual({
+      articleId: "article-writing-desk",
+      kind: "article",
+    });
+    expect(studioSidebarSelection(directory)).toEqual({
+      id: "articles",
+      kind: "nav",
+    });
+    expect(studioSidebarSelection(media)).toEqual({
+      id: "media",
+      kind: "nav",
+    });
+    expect(studioSidebarSelection(publish)).toEqual({ kind: "none" });
+  });
+
+  test("removes editor live preview participation when leaving article editing", () => {
+    const article = requiredStudioState("article-editor-clean");
+    const projectHome = requiredStudioState("project-home");
+    const nonEditorTransitions = [
+      {
+        commandId: "article.directory.open",
+      },
+      {
+        commandId: "article.restoreVersion",
+      },
+      {
+        commandId: "media.open",
+      },
+      {
+        commandId: "project.openHome",
+      },
+      {
+        commandId: "publish.prepare",
+      },
+      {
+        commandId: "settings.open",
+      },
+    ] satisfies ReadonlyArray<{
+      readonly commandId: StudioCommandId;
+    }>;
+
+    for (const { commandId } of nonEditorTransitions) {
+      const result = runStudioCommand(studioMvpFixture, article, commandId);
+
+      expect(result.ok, commandId).toBe(true);
+
+      if (result.ok) {
+        expect(studioLivePreviewVisible(result.state), commandId).toBe(false);
+        expect(studioWorkspaceRegions(result.state), commandId).not.toContain(
+          "preview",
+        );
+      }
+    }
+
+    const directory = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "article.directory.open",
+    );
+
+    expect(directory.ok).toBe(true);
+
+    if (directory.ok) {
+      const reopenedArticle = runStudioCommand(
+        studioMvpFixture,
+        directory.state,
+        "article.open",
+        { articleId: "article-small-shop" },
+      );
+
+      expect(reopenedArticle.ok).toBe(true);
+
+      if (reopenedArticle.ok) {
+        expect(reopenedArticle.state.activeArticleId).toBe(
+          "article-small-shop",
+        );
+        expect(studioLivePreviewVisible(reopenedArticle.state)).toBe(true);
+        expect(studioWorkspaceRegions(reopenedArticle.state)).toContain(
+          "preview",
+        );
+      }
+    }
+
+    const wholeSitePreview = runStudioCommand(
+      studioMvpFixture,
+      projectHome,
+      "preview.open",
+    );
+
+    expect(wholeSitePreview.ok).toBe(true);
+
+    if (wholeSitePreview.ok) {
+      expect(studioLivePreviewVisible(wholeSitePreview.state)).toBe(false);
+      expect(studioWorkspaceRegions(wholeSitePreview.state)).not.toContain(
+        "preview",
+      );
+    }
+  });
+
+  test("tracks article tree folder expansion through reducer state", () => {
+    const article = requiredStudioState("article-editor-clean");
+
+    expect(
+      studioArticleTreeFolderCollapsed(article, "tree-workshop-folder"),
+    ).toBe(false);
+
+    const collapsed = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "articleTree.toggleFolder",
+      { articleTreeNodeId: "tree-workshop-folder" },
+    );
+
+    expect(collapsed.ok).toBe(true);
+
+    if (!collapsed.ok) {
+      return;
+    }
+
+    expect(collapsed.state.collapsedArticleTreeNodeIds).toEqual([
+      "tree-workshop-folder",
+    ]);
+    expect(
+      studioArticleTreeFolderCollapsed(collapsed.state, "tree-workshop-folder"),
+    ).toBe(true);
+
+    expect(
+      runStudioCommand(
+        studioMvpFixture,
+        collapsed.state,
+        "articleTree.toggleFolder",
+        { articleTreeNodeId: "tree-workshop-folder" },
+      ),
+    ).toMatchObject({
+      ok: true,
+      state: { collapsedArticleTreeNodeIds: [] },
+    });
+    expect(
+      runStudioCommand(studioMvpFixture, article, "articleTree.toggleFolder"),
+    ).toMatchObject({
+      ok: false,
+      reason: "Choose an article folder before toggling it.",
+    });
+    expect(
+      runStudioCommand(studioMvpFixture, article, "articleTree.toggleFolder", {
+        articleTreeNodeId: "tree-writing-desk",
+      }),
+    ).toMatchObject({
+      ok: false,
+      reason: "Unknown article folder: tree-writing-desk.",
+    });
+    expect(
+      runStudioCommand(studioMvpFixture, article, "articleTree.toggleFolder", {
+        articleTreeNodeId: "missing-folder",
+      }),
+    ).toMatchObject({
+      ok: false,
+      reason: "Unknown article folder: missing-folder.",
+    });
+  });
+
+  test("models inline title editing and Properties collapse through reducer state", () => {
+    const article = requiredStudioState("article-editor-clean");
+
+    expect(article.editorProperties.visibility).toBe("visible");
+    expect(studioCommandAvailability("editor.title.commit", article)).toEqual({
+      reason: "Start editing the title first.",
+      status: "disabled",
+    });
+
+    const collapsedProperties = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "editor.properties.toggle",
+    );
+
+    expect(collapsedProperties).toMatchObject({
+      ok: true,
+      state: {
+        editorProperties: { visibility: "hidden" },
+      },
+    });
+
+    const editing = runStudioCommand(
+      studioMvpFixture,
+      article,
+      "editor.title.beginEdit",
+    );
+
+    expect(editing).toMatchObject({
+      ok: true,
+      state: {
+        editorTitle: {
+          baseline: "How to Build a Writing Desk",
+          draft: "How to Build a Writing Desk",
+          mode: "editing",
+          status: "valid",
+        },
+      },
+    });
+
+    if (!editing.ok) {
+      return;
+    }
+
+    const invalid = runStudioCommand(
+      studioMvpFixture,
+      editing.state,
+      "editor.title.update",
+      { titleDraft: "" },
+    );
+
+    expect(invalid).toMatchObject({
+      ok: true,
+      state: {
+        activeArticleState: "invalid",
+        activePreviewScenarioId: "preview-blocked",
+        editorTitle: {
+          diagnosticCode: "STUDIO-ARTICLE-TITLE-REQUIRED",
+          draft: "",
+          mode: "editing",
+          status: "invalid",
+        },
+      },
+    });
+
+    if (!invalid.ok) {
+      return;
+    }
+
+    expect(
+      studioCommandAvailability("publish.prepare", invalid.state),
+    ).toMatchObject({
+      diagnosticCode: "STUDIO-ARTICLE-TITLE-REQUIRED",
+      status: "blocked",
+    });
+    expect(
+      runStudioCommand(studioMvpFixture, invalid.state, "editor.title.commit"),
+    ).toMatchObject({
+      diagnosticCode: "STUDIO-ARTICLE-TITLE-REQUIRED",
+      ok: false,
+      reason: "Add a title before applying it.",
+      state: invalid.state,
+    });
+
+    const validDraft = runStudioCommand(
+      studioMvpFixture,
+      invalid.state,
+      "editor.title.update",
+      { titleDraft: "  A Better Writing Desk  " },
+    );
+
+    expect(validDraft).toMatchObject({
+      ok: true,
+      state: {
+        activeArticleState: "dirty",
+        activePreviewScenarioId: "preview-stale",
+        editorTitle: {
+          draft: "  A Better Writing Desk  ",
+          mode: "editing",
+          status: "valid",
+        },
+      },
+    });
+
+    if (!validDraft.ok) {
+      return;
+    }
+
+    const committed = runStudioCommand(
+      studioMvpFixture,
+      validDraft.state,
+      "editor.title.commit",
+    );
+
+    expect(committed).toMatchObject({
+      ok: true,
+      state: {
+        editorTitle: {
+          baseline: "A Better Writing Desk",
+          draft: "A Better Writing Desk",
+          mode: "viewing",
+          status: "valid",
+        },
+      },
+    });
+
+    if (!committed.ok) {
+      return;
+    }
+
+    const editingAgain = runStudioCommand(
+      studioMvpFixture,
+      committed.state,
+      "editor.title.beginEdit",
+    );
+    const changedAgain = editingAgain.ok
+      ? runStudioCommand(
+          studioMvpFixture,
+          editingAgain.state,
+          "editor.title.update",
+          {
+            titleDraft: "Temporary title",
+          },
+        )
+      : editingAgain;
+    const cancelled = changedAgain.ok
+      ? runStudioCommand(
+          studioMvpFixture,
+          changedAgain.state,
+          "editor.title.cancel",
+        )
+      : changedAgain;
+
+    expect(cancelled).toMatchObject({
+      ok: true,
+      state: {
+        editorTitle: {
+          baseline: "A Better Writing Desk",
+          draft: "A Better Writing Desk",
+          mode: "viewing",
+          status: "valid",
+        },
       },
     });
   });
@@ -391,7 +819,7 @@ describe("studio command state", () => {
     const blockedOrDisabledCases = [
       {
         commandId: "article.open",
-        expectedReason: "Choose an article before opening the editor.",
+        expectedReason: "Open or create a site before opening articles.",
         expectedStatus: "disabled",
         state: firstLaunch,
       },
@@ -524,7 +952,7 @@ describe("studio command state", () => {
         commandId: "preview.open",
         expectedState: {
           activePreviewScenarioId: "preview-ready",
-          previewPane: { sizePx: 520, visibility: "expanded" },
+          previewPane: { sizePx: 520, visibility: "visible" },
         },
         state: article,
       },
@@ -535,7 +963,7 @@ describe("studio command state", () => {
           activePublishScenarioId: "publish-preview",
           activeScreen: "publish-preview",
           overlay: { kind: "none" },
-          previewPane: { visibility: "collapsed" },
+          previewPane: { visibility: "hidden" },
         },
         state: article,
       },
@@ -553,7 +981,7 @@ describe("studio command state", () => {
         expectedState: {
           activeScreen: "media",
           overlay: { kind: "none" },
-          previewPane: { visibility: "collapsed" },
+          previewPane: { visibility: "hidden" },
         },
         state: article,
       },
@@ -605,7 +1033,15 @@ describe("studio command state", () => {
     expect(
       studioCommandAvailability("article.open", firstLaunch.state),
     ).toEqual({
-      reason: "Choose an article before opening the editor.",
+      reason: "Open or create a site before opening articles.",
+      status: "disabled",
+    });
+    expect(
+      studioCommandAvailability("article.open", firstLaunch.state, {
+        articleId: "article-writing-desk",
+      }),
+    ).toEqual({
+      reason: "Open or create a site before opening articles.",
       status: "disabled",
     });
     expect(
@@ -636,6 +1072,12 @@ describe("studio command state", () => {
       studioCommandAvailability("media.insertSelected", firstLaunch.state),
     ).toEqual({
       reason: "Select an article and image before inserting media.",
+      status: "disabled",
+    });
+    expect(
+      studioCommandAvailability("pane.togglePreview", firstLaunch.state),
+    ).toEqual({
+      reason: "Open an article before showing the live article preview.",
       status: "disabled",
     });
     expect(
@@ -704,7 +1146,7 @@ describe("studio command state", () => {
       expect(
         studioCommandAvailability("publish.finish", publishPreview.state),
       ).toEqual({
-        reason: "Confirm the publish plan before completing the fixture apply.",
+        reason: "Confirm the publish plan before completing publish.",
         status: "disabled",
       });
 
@@ -760,7 +1202,7 @@ describe("studio command state", () => {
       expect(directory.ok).toBe(true);
 
       if (toggled.ok && formatted.ok && media.ok && directory.ok) {
-        expect(toggled.state.previewPane.visibility).toBe("collapsed");
+        expect(toggled.state.previewPane.visibility).toBe("hidden");
         expect(formatted.state.activeArticleState).toBe("dirty");
         expect(formatted.state.activePreviewScenarioId).toBe("preview-stale");
         expect(formatted.state.editorDraftSource).toContain("**bold text**");
@@ -1068,6 +1510,12 @@ describe("studio command state", () => {
     });
 
     if (openedDirectory.ok) {
+      const openedArticle = runStudioCommand(
+        studioMvpFixture,
+        openedDirectory.state,
+        "article.open",
+        { articleId: "article-writing-desk" },
+      );
       const category = runStudioCommand(
         studioMvpFixture,
         openedDirectory.state,
@@ -1090,6 +1538,14 @@ describe("studio command state", () => {
           )
         : tag;
 
+      expect(openedArticle).toMatchObject({
+        ok: true,
+        state: {
+          activeArticleId: "article-writing-desk",
+          activeScreen: "article-editor",
+          previewPane: { visibility: "visible" },
+        },
+      });
       expect(tag).toMatchObject({
         ok: true,
         state: {
@@ -1303,13 +1759,13 @@ describe("studio command state", () => {
         ok: true,
         state: {
           activePreviewScenarioId: "preview-home-ready",
-          previewPane: { sizePx: 520, visibility: "expanded" },
+          previewPane: { visibility: "hidden" },
         },
       });
       expect(missingExternalPreview).toMatchObject({
         command: { id: "preview.openExternal" },
         ok: false,
-        reason: "Open a preview before opening it externally.",
+        reason: "External preview opens after the desktop shell is connected.",
       });
 
       if (staleArticle.ok) {
@@ -1327,20 +1783,32 @@ describe("studio command state", () => {
           refreshed.ok ? refreshed.state : staleArticle.state,
           "preview.openExternal",
         );
+        const mobilePreview = runStudioCommand(
+          studioMvpFixture,
+          refreshed.ok ? refreshed.state : staleArticle.state,
+          "preview.setViewport",
+          { previewViewport: "mobile" },
+        );
 
         expect(refreshed).toMatchObject({
           command: { id: "preview.open" },
           ok: true,
           state: {
             activePreviewScenarioId: "preview-ready",
-            previewPane: { sizePx: 520, visibility: "expanded" },
+            previewPane: { sizePx: 520, visibility: "visible" },
           },
         });
         expect(externalPreview).toMatchObject({
           command: { id: "preview.openExternal" },
+          ok: false,
+          reason:
+            "External preview opens after the desktop shell is connected.",
+        });
+        expect(mobilePreview).toMatchObject({
+          command: { id: "preview.setViewport" },
           ok: true,
           state: {
-            overlay: { kind: "none" },
+            previewViewport: "mobile",
           },
         });
       }
@@ -1495,7 +1963,7 @@ describe("studio command state", () => {
       state: {
         activeArticleId: "article-writing-desk",
         activeScreen: "media",
-        previewPane: { visibility: "collapsed" },
+        previewPane: { visibility: "hidden" },
       },
     });
     expect(opened.ok).toBe(true);
@@ -1563,7 +2031,7 @@ describe("studio command state", () => {
           contextTarget: "image-markdown",
           lastCommandId: "media.insertSelected",
         },
-        previewPane: { visibility: "expanded" },
+        previewPane: { visibility: "visible" },
       },
     });
     expect(inserted.state.editorDraftSource).toContain(
@@ -1772,7 +2240,7 @@ describe("studio command state", () => {
         expect(prepared.state.activePublishScenarioId).toBe("publish-preview");
         expect(prepared.state.activePreviewScenarioId).toBe("preview-ready");
         expect(prepared.state.activeScreen).toBe("publish-preview");
-        expect(prepared.state.previewPane.visibility).toBe("collapsed");
+        expect(prepared.state.previewPane.visibility).toBe("hidden");
 
         const confirmOpen = runStudioCommand(
           studioMvpFixture,

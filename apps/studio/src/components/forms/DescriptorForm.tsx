@@ -26,6 +26,8 @@ interface DescriptorFormProps {
   mediaItems: readonly MediaItemFixture[];
   sections: readonly FieldSectionFixture[];
   setDraftValues: Dispatch<SetStateAction<DraftFieldValues>>;
+  showGeneratedEffects?: boolean;
+  showSectionHeadings?: boolean;
 }
 
 /**
@@ -39,6 +41,8 @@ export function DescriptorForm({
   mediaItems,
   sections,
   setDraftValues,
+  showGeneratedEffects = false,
+  showSectionHeadings = true,
 }: DescriptorFormProps): ReactElement {
   return (
     <form
@@ -47,9 +51,11 @@ export function DescriptorForm({
     >
       {sections.map((section) => (
         <section className="flex flex-col gap-4" key={section.id}>
-          <h2 className="text-muted-foreground text-xs font-semibold uppercase">
-            {section.label}
-          </h2>
+          {showSectionHeadings ? (
+            <h2 className="text-muted-foreground text-xs font-semibold uppercase">
+              {section.label}
+            </h2>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2">
             {section.fields.map((field) => (
               <FieldRenderer
@@ -59,6 +65,7 @@ export function DescriptorForm({
                 key={field.id}
                 mediaItems={mediaItems}
                 setDraftValues={setDraftValues}
+                showGeneratedEffects={showGeneratedEffects}
               />
             ))}
           </div>
@@ -74,12 +81,14 @@ function FieldRenderer({
   field,
   mediaItems,
   setDraftValues,
+  showGeneratedEffects,
 }: {
   diagnostics: readonly DiagnosticFixture[];
   draftValues: DraftFieldValues;
   field: FieldDescriptorFixture;
   mediaItems: readonly MediaItemFixture[];
   setDraftValues: DescriptorFormProps["setDraftValues"];
+  showGeneratedEffects: boolean;
 }): ReactElement {
   const value = draftValues.get(field.id) ?? field.draftValue ?? field.value;
   const diagnostic = fieldDiagnostic(field, diagnostics);
@@ -102,6 +111,7 @@ function FieldRenderer({
         mediaItems={mediaItems}
         message={message}
         messageId={messageId}
+        showGeneratedEffects={showGeneratedEffects}
         value={value}
       />
     );
@@ -134,7 +144,7 @@ function FieldRenderer({
         </span>
       )}
       <ValidationMessage id={messageId} invalid={invalid} message={message} />
-      <FieldEffects field={field} />
+      {showGeneratedEffects ? <FieldEffects field={field} /> : null}
     </label>
   );
 }
@@ -292,6 +302,7 @@ function ImageReferenceField({
   mediaItems,
   message,
   messageId,
+  showGeneratedEffects,
   value,
 }: {
   describedBy: string | undefined;
@@ -302,6 +313,7 @@ function ImageReferenceField({
   mediaItems: readonly MediaItemFixture[];
   message: string | undefined;
   messageId: string | undefined;
+  showGeneratedEffects: boolean;
   value: FieldValueFixture;
 }): ReactElement {
   const media =
@@ -357,7 +369,7 @@ function ImageReferenceField({
         </p>
       )}
       <ValidationMessage id={messageId} invalid={invalid} message={message} />
-      <FieldEffects field={field} />
+      {showGeneratedEffects ? <FieldEffects field={field} /> : null}
     </div>
   );
 }

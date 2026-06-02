@@ -227,14 +227,12 @@ function SourceDiffPlaceholder({
             Source preview
           </h3>
           <p className="text-muted-foreground mt-1 text-sm leading-6">
-            This checkpoint would restore the article source to{" "}
-            {checkpoint.label}. The fixture shows the restore plan without
-            changing files.
+            This checkpoint restores the article source to {checkpoint.label}.
           </p>
           <ul className="text-muted-foreground mt-3 flex list-disc flex-col gap-1 pl-5 text-sm">
             <li>Current draft remains unchanged until you confirm.</li>
-            <li>A history adapter will provide the real source diff later.</li>
-            <li>No filesystem or provider writes happen in this prototype.</li>
+            <li>The selected version replaces the current article draft.</li>
+            <li>A checkpoint remains available if you need to roll back.</li>
           </ul>
         </div>
       </div>
@@ -291,9 +289,8 @@ function RestoreConfirmation({
           </h3>
           <p className="text-muted-foreground mt-1 text-sm leading-6">
             Studio will restore this article to{" "}
-            {viewModel.selectedCheckpoint?.label ?? "the selected checkpoint"}.
-            This fixture simulates the source write and keeps the real files
-            unchanged.
+            {viewModel.selectedCheckpoint?.label ?? "the selected checkpoint"}{" "}
+            and make that version the active draft.
           </p>
           <div className="mt-4 flex flex-wrap justify-end gap-3">
             <Button onClick={() => onCommand("restore.cancel")}>Cancel</Button>
@@ -324,8 +321,7 @@ function RestoreComplete({
             Version restored
           </h3>
           <p className="text-muted-foreground mt-1 text-sm leading-6">
-            The prototype completed the restore flow without changing source
-            files. Real history writes will go through the history adapter.
+            The selected version is now the active article draft.
           </p>
           <div className="mt-4 flex justify-end">
             <Button onClick={() => onCommand("restore.cancel")}>

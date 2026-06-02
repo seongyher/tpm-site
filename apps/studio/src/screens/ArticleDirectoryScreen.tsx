@@ -1,18 +1,11 @@
-import {
-  AlertTriangle,
-  FileText,
-  MoreHorizontal,
-  Plus,
-  Search,
-} from "lucide-react";
+import { AlertTriangle, FileText, Plus, Search } from "lucide-react";
 import type { ChangeEvent, ReactElement } from "react";
 
 import type { StudioCommandId } from "../commands/studio-commands";
+import { ArticleActionMenu } from "../components/articles/ArticleActionMenu";
 import { Badge } from "../components/ui/Badge";
 import { Button } from "../components/ui/Button";
-import { IconButton } from "../components/ui/IconButton";
 import { Panel } from "../components/ui/Panel";
-import { Tooltip } from "../components/ui/Tooltip";
 import {
   type ArticleDirectoryFilterInput,
   type ArticleDirectoryViewItem,
@@ -50,17 +43,20 @@ export function ArticleDirectoryScreen({
   );
 
   return (
-    <main className="min-h-full overflow-auto p-6 md:p-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <ArticleDirectoryHeader directory={directory} onCommand={onCommand} />
-        <ArticleDirectoryFilters directory={directory} onCommand={onCommand} />
-        <ArticleDirectoryResults directory={directory} onCommand={onCommand} />
+    <main className="min-h-full overflow-auto p-4 md:p-5">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+        <ArticleDirectoryToolbar directory={directory} onCommand={onCommand} />
+        <ArticleDirectoryResults
+          directory={directory}
+          onCommand={onCommand}
+          state={state}
+        />
       </div>
     </main>
   );
 }
 
-function ArticleDirectoryHeader({
+function ArticleDirectoryToolbar({
   directory,
   onCommand,
 }: {
@@ -68,64 +64,48 @@ function ArticleDirectoryHeader({
   onCommand: ArticleDirectoryScreenProps["onCommand"];
 }): ReactElement {
   return (
-    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h1 className="text-foreground text-3xl font-semibold">Articles</h1>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Browse, filter, and open articles.
-        </p>
-        <p className="text-muted-foreground mt-1 text-xs">
-          {directory.resultCount}{" "}
-          {directory.resultCount === 1 ? "article" : "articles"} shown
-        </p>
-      </div>
-      <Button onClick={() => onCommand("article.create")} variant="primary">
-        <Plus aria-hidden="true" />
-        New article
-      </Button>
-    </header>
-  );
-}
-
-function ArticleDirectoryFilters({
-  directory,
-  onCommand,
-}: {
-  directory: ArticleDirectoryViewModel;
-  onCommand: ArticleDirectoryScreenProps["onCommand"];
-}): ReactElement {
-  return (
-    <Panel className="p-4">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <section aria-label="Article directory" className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <StatusFilter directory={directory} onCommand={onCommand} />
-          <label className="relative block min-w-0 flex-1 lg:max-w-md">
+          <span className="text-muted-foreground text-xs">
+            {directory.resultCount}{" "}
+            {directory.resultCount === 1 ? "article" : "articles"}
+          </span>
+        </div>
+        <div className="flex min-w-0 flex-1 items-center gap-2 lg:max-w-xl">
+          <label className="relative block min-w-0 flex-1">
             <span className="sr-only">Search articles</span>
             <Search
               aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+              className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
             />
             <input
-              className="border-border bg-panel text-foreground focus-visible:outline-accent h-10 w-full rounded-[var(--radius-control)] border pr-3 pl-10 text-sm focus-visible:outline-2"
+              className="border-border bg-panel text-foreground focus-visible:outline-accent h-9 w-full rounded-[var(--radius-control)] border pr-3 pl-9 text-sm focus-visible:outline-2"
               onChange={(event) => onSearchChange(onCommand, event, directory)}
-              placeholder="Search title, tag, category, author..."
+              placeholder="Search articles..."
               type="search"
               value={directory.query}
             />
           </label>
+          <Button onClick={() => onCommand("article.create")} variant="primary">
+            <Plus aria-hidden="true" />
+            New article
+          </Button>
         </div>
-        <FilterChips directory={directory} onCommand={onCommand} />
       </div>
-    </Panel>
+      <FilterChips directory={directory} onCommand={onCommand} />
+    </section>
   );
 }
-
 function ArticleDirectoryResults({
   directory,
   onCommand,
+  state,
 }: {
   directory: ArticleDirectoryViewModel;
   onCommand: ArticleDirectoryScreenProps["onCommand"];
+  state: StudioAppState;
 }): ReactElement {
   if (directory.results.length === 0) {
     return (
@@ -134,12 +114,13 @@ function ArticleDirectoryResults({
   }
 
   return (
-    <section aria-label="Article results" className="grid gap-4 xl:grid-cols-2">
+    <section aria-label="Article results" className="flex flex-col gap-2">
       {directory.results.map((item) => (
-        <ArticleResultCard
+        <ArticleResultRow
           item={item}
           key={item.result.articleId}
           onCommand={onCommand}
+          state={state}
         />
       ))}
     </section>
@@ -185,96 +166,103 @@ function ArticleDirectoryEmptyState({
   );
 }
 
-function ArticleResultCard({
+function ArticleResultRow({
   item,
   onCommand,
+  state,
 }: {
   item: ArticleDirectoryViewItem;
   onCommand: ArticleDirectoryScreenProps["onCommand"];
+  state: StudioAppState;
 }): ReactElement {
   return (
-    <Panel className="overflow-hidden">
-      <article className="grid h-full md:grid-cols-[14rem_minmax(0,1fr)] xl:flex xl:flex-col">
-        <div className="bg-panel-muted border-border flex h-44 items-center justify-center border-b md:h-auto md:border-r md:border-b-0 xl:aspect-[16/7] xl:h-auto xl:border-r-0 xl:border-b">
-          {item.featuredMedia === undefined ? (
-            <FileText
-              aria-hidden="true"
-              className="text-muted-foreground size-10"
-            />
-          ) : (
-            <img
-              alt={
-                item.featuredMedia.altText.length > 0
-                  ? item.featuredMedia.altText
-                  : ""
-              }
-              className="h-full w-full object-cover"
-              src={item.featuredMedia.thumbnailUrl}
-            />
-          )}
+    <Panel className="overflow-hidden" data-testid="article-result-row">
+      <article className="grid min-h-28 grid-cols-[8.5rem_minmax(0,1fr)] sm:grid-cols-[8.5rem_minmax(0,1fr)_auto]">
+        <div className="border-border flex min-h-28 items-center border-r p-2">
+          <div
+            className="bg-panel-muted flex aspect-[1.91/1] w-full items-center justify-center overflow-hidden rounded-[var(--radius-control)]"
+            data-testid="article-result-thumbnail"
+          >
+            {item.featuredMedia === undefined ? (
+              <FileText aria-hidden="true" className="text-muted-foreground" />
+            ) : (
+              <img
+                alt={
+                  item.featuredMedia.altText.length > 0
+                    ? item.featuredMedia.altText
+                    : ""
+                }
+                className="h-full w-full object-cover"
+                src={item.featuredMedia.thumbnailUrl}
+              />
+            )}
+          </div>
         </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-4 p-5">
-          <div className="flex min-w-0 items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="grid min-w-0 gap-1.5 p-3">
+          <div className="flex min-w-0 items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                 <StatusBadge item={item} />
                 {item.result.category === undefined ? null : (
                   <Badge tone="accent">{item.result.category}</Badge>
                 )}
+                <span className="text-muted-foreground text-xs">
+                  {item.result.author ?? "Unknown author"}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {item.result.dateLabel ?? "No date"}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  {item.result.readTimeLabel ??
+                    item.article.body.wordCountLabel}
+                </span>
               </div>
-              <h2 className="text-foreground line-clamp-2 text-lg font-semibold">
+              <h2 className="text-foreground mt-1 line-clamp-1 text-base leading-snug font-semibold">
                 {item.result.title}
               </h2>
             </div>
-            <ArticleActionsButton title={item.result.title} />
+            <ArticleActionMenu
+              articleId={item.result.articleId}
+              articleTitle={item.result.title}
+              onCommand={onCommand}
+              restoreEnabled={state.activeArticleId === item.result.articleId}
+            />
           </div>
-          <p className="text-muted-foreground line-clamp-3 text-sm leading-6">
-            {item.result.excerpt}
-          </p>
-          {item.diagnostic === undefined ? null : (
-            <div className="bg-warning-muted text-warning flex items-start gap-2 rounded-[var(--radius-control)] px-3 py-2 text-sm">
-              <AlertTriangle aria-hidden="true" className="mt-0.5 shrink-0" />
-              <span>{item.diagnostic.message}</span>
-            </div>
-          )}
-          <div className="text-muted-foreground mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-            <span>{item.result.author ?? "Unknown author"}</span>
-            <span>{item.result.dateLabel ?? "No date"}</span>
-            <span>
-              {item.result.readTimeLabel ?? item.article.body.wordCountLabel}
-            </span>
+          <div className="min-w-0">
+            {item.diagnostic === undefined ? (
+              <p className="text-muted-foreground line-clamp-1 text-sm leading-5">
+                {item.result.excerpt}
+              </p>
+            ) : (
+              <p className="text-warning flex min-w-0 items-center gap-1.5 text-sm leading-5">
+                <AlertTriangle aria-hidden="true" className="size-4 shrink-0" />
+                <span className="truncate">{item.diagnostic.message}</span>
+              </p>
+            )}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-0 flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
               {item.result.tags.map((tag) => (
                 <Badge key={tag} tone="neutral">
                   {tag}
                 </Badge>
               ))}
             </div>
-            <Button
-              onClick={() =>
-                onCommand("article.open", { articleId: item.result.articleId })
-              }
-              size="sm"
-              variant="primary"
-            >
-              Open editor
-            </Button>
           </div>
+        </div>
+        <div className="border-border flex items-end justify-end border-t p-3 sm:border-t-0 sm:pl-0">
+          <Button
+            onClick={() =>
+              onCommand("article.open", { articleId: item.result.articleId })
+            }
+            size="sm"
+            variant="primary"
+          >
+            Open editor
+          </Button>
         </div>
       </article>
     </Panel>
-  );
-}
-
-function ArticleActionsButton({ title }: { title: string }): ReactElement {
-  return (
-    <Tooltip content="Article actions: open, rename, duplicate, move, reveal, delete">
-      <IconButton aria-haspopup="menu" label={`More actions for ${title}`}>
-        <MoreHorizontal aria-hidden="true" />
-      </IconButton>
-    </Tooltip>
   );
 }
 
@@ -330,8 +318,8 @@ function FilterChip({
       aria-pressed={active}
       className={
         active
-          ? "bg-accent-muted text-accent-foreground focus-visible:outline-accent rounded-full px-3 py-1 text-sm font-medium focus-visible:outline-2"
-          : "bg-panel-muted text-muted-foreground hover:bg-accent-muted hover:text-accent-foreground focus-visible:outline-accent rounded-full px-3 py-1 text-sm font-medium focus-visible:outline-2"
+          ? "bg-accent-muted text-accent-foreground focus-visible:outline-accent rounded-full px-2.5 py-1 text-xs font-medium focus-visible:outline-2"
+          : "bg-panel-muted text-muted-foreground hover:bg-accent-muted hover:text-accent-foreground focus-visible:outline-accent rounded-full px-2.5 py-1 text-xs font-medium focus-visible:outline-2"
       }
       onClick={onClick}
       type="button"
@@ -383,8 +371,8 @@ function StatusFilter({
           aria-pressed={directory.statusFilter === filter.value}
           className={
             directory.statusFilter === filter.value
-              ? "bg-panel text-foreground shadow-panel rounded-[calc(var(--radius-control)-0.125rem)] px-3 py-1.5 text-sm font-medium"
-              : "text-muted-foreground hover:text-foreground rounded-[calc(var(--radius-control)-0.125rem)] px-3 py-1.5 text-sm font-medium"
+              ? "bg-panel text-foreground shadow-panel rounded-[calc(var(--radius-control)-0.125rem)] px-2.5 py-1 text-xs font-medium"
+              : "text-muted-foreground hover:text-foreground rounded-[calc(var(--radius-control)-0.125rem)] px-2.5 py-1 text-xs font-medium"
           }
           key={filter.value}
           onClick={() =>

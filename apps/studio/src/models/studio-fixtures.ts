@@ -74,8 +74,8 @@ export type StudioScreen =
 export interface PanelStateFixture {
   /** Optional fixed pixel size for desktop visual fixtures. */
   readonly sizePx?: number;
-  /** Whether the panel is visible in the fixture state. */
-  readonly visibility: "collapsed" | "expanded";
+  /** Whether the panel participates in the visible workspace layout. */
+  readonly visibility: "hidden" | "visible";
 }
 
 /** Stable reference to authored source, generated artifact, or operation data. */
