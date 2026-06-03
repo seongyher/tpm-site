@@ -1,3 +1,4 @@
+import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
@@ -6,6 +7,7 @@ export default defineConfig({
     format: "directory",
   },
   compressHTML: true,
+  integrations: [react()],
   outDir: "../../dist/studio",
   output: "static",
   site: "https://studio.local/",

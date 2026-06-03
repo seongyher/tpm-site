@@ -10,7 +10,7 @@ describe("typed ESLint config", () => {
     const [config] = createTypedPresetConfigs("/repo");
 
     expect(config?.files).toContain("src/**/*.{ts,tsx}");
-    expect(config?.files).toContain("apps/studio/src/**/*.ts");
+    expect(config?.files).toContain("apps/studio/src/**/*.{ts,tsx}");
     expect(config?.languageOptions?.parserOptions).toMatchObject({
       project: [
         "./apps/studio/tsconfig.json",

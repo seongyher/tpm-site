@@ -1,34 +1,20 @@
 ---
-import OperationDetailsPanel from "../components/OperationDetailsPanel.astro";
-import OperationRuntimePanel from "../components/OperationRuntimePanel.astro";
-import StudioAuthoringPanel from "../components/StudioAuthoringPanel.astro";
-import StudioAppBar from "../components/StudioAppBar.astro";
-import StudioNavigation from "../components/StudioNavigation.astro";
-import StudioSummaryPanel from "../components/StudioSummaryPanel.astro";
-import { authoringOperation } from "../data/authoring-operation";
-import {
-  readOnlyOperation,
-  studioNavigation,
-} from "../data/read-only-operation";
+import { StudioWorkspace } from "../components/react/StudioWorkspace";
 import StudioLayout from "../layouts/StudioLayout.astro";
+
+const studioOperationId = "studio-gui-mvp-fixture";
+const initialScreenStateId = Astro.url.searchParams.get("screen") ?? undefined;
 ---
 
 <StudioLayout
   title="TPM Studio"
-  description="Read-only static shell for the future TPM publishing studio."
+  description="Fixture-backed shell for the TPM Studio GUI MVP."
 >
-  <div class="bg-background text-foreground min-h-screen">
-    <StudioAppBar operation={readOnlyOperation} />
-    <StudioNavigation items={studioNavigation} />
-
-    <main
-      class="mx-auto grid w-full max-w-[86rem] gap-4 px-4 py-4 sm:px-8 sm:py-8"
-      id="overview"
-    >
-      <StudioSummaryPanel operation={readOnlyOperation} />
-      <OperationDetailsPanel operation={readOnlyOperation} />
-      <OperationRuntimePanel operation={readOnlyOperation} />
-      <StudioAuthoringPanel operation={authoringOperation} />
-    </main>
-  </div>
+  <main class="bg-background text-foreground min-h-screen" id="studio">
+    <StudioWorkspace
+      client:load
+      initialScreenStateId={initialScreenStateId}
+      operationId={studioOperationId}
+    />
+  </main>
 </StudioLayout>

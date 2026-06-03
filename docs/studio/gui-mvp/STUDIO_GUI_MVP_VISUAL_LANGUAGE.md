@@ -26,6 +26,8 @@ The primary visual direction is the generated Studio GUI reference set:
 - `docs/studio/gui-mvp/assets/reference/publish-confirm-dialog.png`
 - `docs/studio/gui-mvp/assets/reference/improved-studio-mockup/`
 - `docs/studio/gui-mvp/assets/reference/rough-studio-mockup/`
+- `docs/studio/gui-mvp/STUDIO_GUI_MVP_DENSITY_AND_HIERARCHY_RECOVERY.md`
+- `docs/studio/gui-mvp/STUDIO_GUI_MVP_NON_EDITOR_POLISH_DESIGN.md`
 
 These generated images and improved/rough mockup screenshots are closer to the
 desired product than the earlier Codex screenshots because they show the actual
@@ -75,11 +77,76 @@ Common actions should be visible and out of the way. Advanced details should be
 available through disclosure, command palette, context menu, or detailed error
 view, not forced into the default screen.
 
+## Minimum Sufficient Detail
+
+The Studio should assume competent users. Visible UI copy should provide the
+minimum amount of detail needed for a user to confidently understand and act.
+Do not fill the interface with headings, subheadings, helper descriptions, or
+instructional copy that restate what the selected navigation, control label,
+icon, placement, or visible action already makes obvious.
+
+This rule is about respect and density. A useful utility gives authors clear
+actions and fast feedback without narrating the interface back to them.
+Additional detail belongs only where it changes the user's decision:
+
+- unfamiliar domain terms;
+- destructive or irreversible actions;
+- disabled, blocked, warning, or error states;
+- publish, restore, credential, provider, or migration boundaries;
+- first-use flows where the next step is otherwise genuinely ambiguous.
+
+When extra context is useful but not essential, prefer a tooltip, accessible
+description, disclosure row, detail pane, or confirmation dialog over permanent
+visible clutter. Every visible word should earn its space.
+
+The Studio should not narrate obvious screens back to the user. Avoid headers
+and helper copy that simply restate the current navigation item, such as
+"Articles" followed by "Browse articles." Use screen-level labels only when
+they anchor a complex task, distinguish a mode, or provide safety-critical
+context. A compact utility surface should make ordinary actions clear through
+layout, labels, icons, and state, not explanatory clutter.
+
+The same rule applies even more strongly to menus, context menus, popovers,
+and other compact utility surfaces. Do not put visible headings such as
+"Article actions", "Cursor actions", "Publish options", or similarly obvious
+labels at the top of a menu when the trigger, placement, and menu items already
+make the context clear. Keep the accessible name on the menu surface and use a
+tooltip on the trigger when useful, but do not spend visible pixels telling the
+user what they just opened. A visible heading belongs in a compact menu only
+when it communicates a non-obvious mode, risk boundary, or mixed-context
+choice that the actions themselves cannot communicate.
+
+This is a repeated failure mode and should be treated as a design defect, not
+as a harmless copy choice. A menu or context menu whose first visible element
+only names the menu is not ready for review. The correct pattern is:
+
+- the trigger exposes the purpose through icon, label, tooltip, or placement;
+- the menu has an accessible name for assistive technology;
+- the visible menu content starts with the available actions, grouped only
+  when grouping changes understanding;
+- obvious action descriptions are omitted from visible rows;
+- headings appear only when they add information the trigger and actions do not
+  already provide.
+
+Permanent chrome must stay compact. The app toolbar, sidebar, icon controls,
+search fields, filter rows, and action clusters are always competing with the
+author's writing and preview space. Their default density should follow the
+recovery contract in
+`STUDIO_GUI_MVP_DENSITY_AND_HIERARCHY_RECOVERY.md`: roughly 48-52px toolbar
+height, 32px icon controls, 16px icons, compact sidebar rows, and no large
+screen-heading stacks that repeat selected navigation.
+
 The article directory is a useful example of this balance. It can expose
 status tabs, search, category filters, article previews, and metadata in the
 main work pane without making the sidebar carry every browsing task. Treat it
 as a browse/manage surface that complements the persistent article tree, not
 as a replacement for quick navigation.
+
+The same density standard applies to non-editor product surfaces. Settings
+should feel like a compact inspector, media should open directly as a browser,
+project home should privilege action and recent work over explanation, and
+publish/restore should keep concise safety context without visible prototype
+language.
 
 ## Visual Principles
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">Writing desk hero fixture</title>
+  <desc id="desc">A warm workshop scene with a simple writing desk.</desc>
+  <rect width="1600" height="900" fill="#f4eee4"/>
+  <rect y="610" width="1600" height="290" fill="#c49a6c"/>
+  <rect x="220" y="355" width="980" height="210" rx="18" fill="#b57c48"/>
+  <rect x="275" y="565" width="42" height="230" fill="#8b5b35"/>
+  <rect x="1070" y="565" width="42" height="230" fill="#8b5b35"/>
+  <rect x="250" y="390" width="900" height="42" fill="#d4a36f"/>
+  <rect x="1210" y="180" width="210" height="155" rx="10" fill="#8a735d"/>
+  <rect x="1230" y="200" width="170" height="115" fill="#d7c7ad"/>
+  <circle cx="1330" cy="455" r="42" fill="#2f2b27"/>
+  <path d="M1310 455h150" stroke="#2f2b27" stroke-width="18" stroke-linecap="round"/>
+  <path d="M1460 455c16 0 30 14 30 30s-14 30-30 30" fill="none" stroke="#2f2b27" stroke-width="18" stroke-linecap="round"/>
+  <rect x="1130" y="270" width="40" height="230" rx="20" fill="#2f2b27"/>
+  <circle cx="1150" cy="260" r="52" fill="#2f2b27"/>
+  <path d="M1110 225h80l-18-115h-44z" fill="#3a3631"/>
+  <rect x="95" y="160" width="430" height="320" rx="18" fill="#fffaf1" opacity=".78"/>
+  <path d="M845 610c40-110 115-185 220-225 58 66 90 141 96 225z" fill="#7a8d65" opacity=".42"/>
+</svg>

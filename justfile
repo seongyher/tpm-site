@@ -244,6 +244,10 @@ studio-preview-fresh *args:
     just studio-build
     just studio-preview {{args}}
 
+# Run Studio-specific Playwright browser tests against the static shell.
+studio-test-e2e *args:
+    ./node_modules/.bin/playwright test --config playwright.studio.config.ts {{args}}
+
 # Start the TPM Studio Tauri shell in development mode.
 [working-directory: 'apps/studio']
 studio-tauri-dev *args:
@@ -349,7 +353,7 @@ test: test-accountability test-unit test-astro
 
 # Run Bun unit/script/component/page tests.
 test-unit:
-    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages --reporter=dots --randomize --concurrent
+    bun test tests/*.test.ts tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages tests/apps --reporter=dots --randomize --concurrent
 
 # Run Astro component/container tests.
 test-astro:
@@ -434,7 +438,7 @@ coverage-ts *args:
 # Generate TypeScript/Astro LCOV and text coverage reports.
 [private]
 _coverage-ts-report:
-    bun test tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages --randomize --coverage --coverage-reporter=text --coverage-reporter=lcov
+    bun test tests/*.test.ts tests/config tests/eslint tests/src tests/types tests/lib tests/build tests/components tests/pages tests/apps --randomize --coverage --coverage-reporter=text --coverage-reporter=lcov
 
 # Verify broad source coverage accountability.
 [private]

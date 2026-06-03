@@ -15,6 +15,493 @@ they are useful context. Explicitly deferred work belongs in
 - Do not edit `site/content/articles/` unless the current task explicitly asks
   for article-content changes.
 
+## Active Milestone 16: Studio GUI MVP Fixture-Backed Prototype
+
+This pass implements Linear Milestone 16 issue-by-issue. The goal is to build
+the first high-fidelity, fixture-backed Studio GUI MVP inside `apps/studio`
+while preserving the operation-shaped architecture. This milestone must not add
+real source writes, broad filesystem access, real credentials, provider
+mutation, Cloudflare deploys, Git/GitHub workflows, WYSIWYG MDX, collaboration,
+or extension marketplace behavior.
+
+### M16.0 Context, Linear, And Design Readiness
+
+- [x] Re-read the Milestone 16 Linear issue tree, blockers, attachments,
+      Studio GUI MVP docs, current Studio app, operation/Tauri docs, QA docs,
+      and shadcn guidance.
+- [x] Verify whether any additional design work is needed before implementation;
+      if so, add the design milestone before code changes.
+- [x] Confirm the implementation order, verification gates, and issue
+      handoff expectations before starting code.
+
+### M16.1 IRK-278 Dependency And React Workspace Setup
+
+- [x] Read `IRK-278` and dependency/build-vs-buy docs.
+- [x] Add/configure bounded React support for `apps/studio` only.
+- [x] Add or prepare the selected Studio GUI dependencies and shadcn/Radix
+      primitives needed by this milestone.
+- [x] Verify Studio build/check surfaces still work and no package scripts or
+      broad Tauri capabilities were introduced.
+- [x] Update Linear with docs/evidence and move `IRK-278` to In Review.
+
+### M16.2 IRK-279 Studio Tokens, UI Primitives, And Shell Foundation
+
+- [x] Read `IRK-279`, visual language, component architecture, and engineering
+      spec docs.
+- [x] Implement Studio tokens, base styles, UI primitives, providers, shell
+      skeleton, and shared feedback/status primitives.
+- [x] Verify the foundation is small, typed, accessible, and reusable.
+- [x] Update Linear with docs/evidence and move `IRK-279` to In Review.
+
+### M16.3 IRK-280 Operation-Shaped Fixtures
+
+- [x] Read `IRK-280`, fixture/state, operation contract, parity fixture, and
+      visual-reference docs.
+- [x] Implement fixture types, validation, fixture files, and stable local
+      fixture media assets for all required MVP states.
+- [x] Add tests for fixture validation, references, invalid combinations, and
+      high-risk view-model derivations.
+- [x] Update Linear with docs/evidence and move `IRK-280` to In Review.
+
+### M16.4 IRK-281 Command Registry, Reducer, And Session Restore
+
+- [x] Read `IRK-281`, command/state, fixture, and component architecture docs.
+- [x] Implement command records, app reducer/router, overlay state, panel
+      state, exact restore, restore failure, and state-machine transitions.
+- [x] Add pure tests for command availability, disabled reasons, transitions,
+      and invalid-state prevention.
+- [x] Update Linear with docs/evidence and move `IRK-281` to In Review.
+
+### M16.5 IRK-282 Workspace Shell, Toolbar, Sidebar, And Panes
+
+- [x] Read `IRK-282`, visual references, visual language, component hierarchy,
+      and navigation docs.
+- [x] Implement shared shell, toolbar, sidebar, article tree shell,
+      preview/detail pane, overlay layer, pane collapse/resize behavior, and
+      native/menu placeholders where practical.
+- [x] Verify keyboard access, long-content behavior, compact widths, and
+      command-backed shell actions.
+- [x] Add focused unit/config and Studio Playwright tests for the standalone
+      shell, legacy-dashboard removal, sidebar sizing/resizing, command
+      toggles, compact layout, and no-overflow invariants.
+- [x] Capture Playwright screenshots and visually compare the shell against the
+      GUI MVP visual references and design docs before handoff; fix any real
+      visual/design drift.
+- [x] Update Linear with docs/evidence and move `IRK-282` to In Review.
+
+### M16.6 IRK-283 Startup, Recent Projects, Restore Failure, And Home
+
+- [x] Read `IRK-283`, product, navigation, and Figma handoff docs.
+- [x] Implement first launch, recent projects, missing-folder recovery, exact
+      restore states, and project home over fixtures.
+- [x] Add/extend unit tests for restore and recovery transitions.
+- [x] Add/extend Playwright tests for startup, recent-project, restore-failure,
+      project-home, and compact visual states.
+- [x] Verify non-technical copy, no real folder operations, compact layouts,
+      and screenshot/visual states.
+- [x] Update Linear with docs/evidence and move `IRK-283` to In Review.
+
+### M16.7 IRK-284 Article Directory And Article Tree Workflows
+
+- [x] Read `IRK-284`, article directory references, fixture model, and component
+      architecture docs.
+- [x] Implement directory filters/search, cards/rows, warning markers, empty
+      states, new/open actions, and tree context-menu entry points.
+- [x] Add/extend unit tests for directory restore, filter/search transitions,
+      and article open/create commands.
+- [x] Add/extend Playwright tests for populated, filtered, no-result, empty,
+      warning, long-title, and compact directory states.
+- [x] Verify serializable filters, shared view models, long-title behavior, and
+      command-backed actions with screenshot/visual inspection.
+- [x] Update Linear with docs/evidence and move `IRK-284` to In Review.
+
+### M16.8 IRK-285 Article Editor, Metadata Forms, And Editor Commands
+
+- [x] Read `IRK-285`, editor, dependency, Figma, fixture, and component docs.
+- [x] Implement descriptor-backed metadata forms, CodeMirror source editor,
+      editor toolbar, editor status strip, autosave states, local validation,
+      preview-collapsed mode, and editor context-menu states.
+- [x] Add focused unit tests for editor view models, command transformations,
+      invalid draft handling, and preview/sidebar collapse state.
+- [x] Add Playwright tests for default, invalid, unsupported-body,
+      command-backed toolbar, and preview-collapsed editor states.
+- [x] Capture and visually inspect Playwright screenshots against the GUI docs
+      and reference images before marking the editor slice complete.
+- [x] Update Linear with docs/evidence and move `IRK-285` to In Review.
+
+### M16.9 IRK-286 Preview Pane And Preview States
+
+- [x] Read `IRK-286`, preview, publish workflow, navigation, and engineering
+      spec docs.
+- [x] Implement preview toolbar, route label, ready/stale/loading/blocked/failed
+      states, collapsed/expanded modes, diagnostics, and publish-preview mode.
+- [x] Add focused unit tests for preview view-model derivation, preview command
+      transitions, home-route preview selection, stale refresh, blocked/failed
+      recovery, and external-preview command availability.
+- [x] Add Playwright tests for ready, stale, loading, blocked, failed,
+      command-backed refresh/retry, external-preview, and project-home preview
+      states.
+- [x] Capture and visually inspect preview screenshots against the GUI docs and
+      visual references; fix genuine layout drift before handoff.
+- [x] Verify the preview does not become a second canonical Markdown renderer.
+- [x] Update Linear with docs/evidence and move `IRK-286` to In Review.
+
+### M16.10 IRK-287 Settings Surfaces
+
+- [x] Read `IRK-287`, editing surfaces, fixture, and component docs.
+- [x] Implement descriptor-backed settings navigation/forms, autosave states,
+      invalid-field states, advanced disclosure, and beginner-safe copy.
+- [x] Add unit coverage for settings view-model and reducer transitions.
+- [x] Add Playwright coverage for saved, dirty, invalid, and section-navigation
+      settings states.
+- [x] Capture and visually inspect settings screenshots against the GUI docs and
+      visual references.
+- [x] Verify settings do not perform real config writes and share field
+      infrastructure where practical.
+- [x] Update Linear with docs/evidence and move `IRK-287` to In Review.
+
+### M16.11 IRK-288 Restore Version Flow
+
+- [x] Read `IRK-288`, provider capability, publish/recovery, and fixture docs.
+- [x] Implement checkpoint list/detail, restore confirmation, diff placeholder,
+      unavailable-history state, and recovery copy over fixtures.
+- [x] Add unit coverage for restore view-model and reducer transitions.
+- [x] Add Playwright coverage for checkpoint selection, confirmation, cancel,
+      completed restore, and unavailable-history states.
+- [x] Capture and visually inspect restore screenshots against the GUI docs and
+      visual references.
+- [x] Verify no real history/source writes occur and broad/destructive actions
+      require confirmation.
+- [x] Update Linear with docs/evidence and move `IRK-288` to In Review.
+
+### M16.12 IRK-289 Media Browser, Detail, And Insert Flow
+
+- [x] Read `IRK-289`, media, editing surfaces, fixture, Figma, and component
+      docs.
+- [x] Implement media view-model derivation for filtered grid/list data,
+      selected detail, diagnostics, missing-alt state, and compact/empty
+      variants.
+- [x] Implement media grid/list, search, Add placeholder, selected detail,
+      alt/caption local editing, warning states, usage list, and insert-image
+      command over fixture editor state.
+- [x] Add unit coverage for media view-model derivation, media selection,
+      missing-alt diagnostics, and insert-image reducer state.
+- [x] Add Playwright coverage for media browser, selected detail, missing-alt,
+      search/no-result, compact, and insert-image states.
+- [x] Capture and visually inspect media screenshots against the GUI docs and
+      visual references.
+- [x] Verify missing alt text is non-color-only, images use stable local
+      fixtures, and no real source writes occur.
+- [x] Update Linear with docs/evidence and move `IRK-289` to In Review.
+
+### M16.13 IRK-290 Publish Flow
+
+- [x] Read `IRK-290`, publish workflow, credential/security, provider
+      capability, and Figma docs.
+- [x] Fix and test shared workspace pane sizing so the sidebar does not collapse
+      to a sliver when the preview pane is collapsed.
+- [x] Implement publish view-model derivation for preview, confirm, progress,
+      success, blocked, failed, destination, credential, checkpoint, warnings,
+      and diagnostics.
+- [x] Implement the publish preview screen, confirm dialog, progress, success,
+      blocked, failed, retry, destination, checkpoint, warnings, and repair
+      actions over fixtures.
+- [x] Add unit coverage for publish view-model derivation, command state
+      transitions, blocked/failed diagnostics, and preview-origin behavior.
+- [x] Add Playwright coverage for publish preview, confirm modal keyboard/focus,
+      progress, success, blocked, failed, retry, and no-direct-publish states.
+- [x] Capture and visually inspect publish screenshots against the GUI docs and
+      visual references.
+- [x] Verify publish always follows preview/plan/confirm/apply-state shape,
+      redacts credentials, and performs no real provider mutation.
+- [x] Update Linear with docs/evidence and move `IRK-290` to In Review.
+
+### M16.14 IRK-293 Command Surfaces
+
+- [x] Read `IRK-293`, command/navigation, dependency, and component docs.
+- [x] Add or restore the battle-tested GUI dependencies needed for command
+      palette and menu primitives, with no unused dependency drift.
+- [x] Design and implement shared command display helpers for command items,
+      shortcut pills, availability status, disabled reasons, and safety labels.
+- [x] Replace the placeholder command palette with a searchable command surface
+      opened from toolbar search and `Command+K`/`Ctrl+K`.
+- [x] Add centralized global hotkey handling through the command registry for
+      navigation, save draft, preview, publish, pane toggles, and supported
+      editor commands.
+- [x] Add shared dropdown/context-menu command adapters and wire the toolbar
+      publish/options menu and editor context menu to shared command records.
+- [x] Keep native/Tauri menu integration as a documented placeholder with
+      equivalent in-app command coverage for this fixture milestone.
+- [x] Add unit coverage for command grouping/filtering, shortcut rendering,
+      availability labels, disabled reasons, and hotkey command mapping.
+- [x] Add Playwright coverage for command palette search/invocation/escape,
+      toolbar search trigger, hotkeys, dropdown menu, context menu, disabled
+      command reasons, and shortcut tooltips.
+- [x] Capture and visually inspect command palette/menu/tooltip screenshots
+      against the GUI docs and visual references.
+- [x] Verify command surfaces consume shared command records, remain keyboard
+      accessible, do not mutate providers/source files, and pass focused checks.
+- [x] Update Linear with docs/evidence and move `IRK-293` to In Review.
+
+### M16.15 IRK-291 Accessibility, Keyboard, Tooltip, Motion, And Responsive Hardening
+
+- [x] Read `IRK-291`, accessibility requirements, visual language, and product
+      test plan docs.
+- [x] Audit shell, sidebar, directory, editor, dialogs, menus, media,
+      settings, preview, publish, restore, tooltips, keyboard behavior,
+      reduced motion, long content, and compact layouts.
+- [x] Fix semantic labels, aria relationships, status regions, focus return,
+      disabled/blocked explanations, and non-color state indicators.
+- [x] Fix responsive/minimum-width issues so sidebar, work pane, preview,
+      dialogs, toolbar controls, and long strings do not overlap or squeeze.
+- [x] Add unit coverage for accessibility/responsive policy helpers or state
+      seams introduced during hardening.
+- [x] Add Playwright coverage for keyboard traversal, dialog/menu behavior,
+      tooltip labels/shortcuts, reduced motion, long content, and compact
+      layouts.
+- [x] Capture and visually inspect accessibility/responsive screenshots against
+      the GUI docs and visual references.
+- [x] Fix all genuine issues or document accepted follow-up risks.
+- [x] Update Linear with docs/evidence and move `IRK-291` to In Review.
+
+### M16.16 IRK-292 Visual QA, Tests, Docs, Release Checks, And Handoff
+
+- [x] Read `IRK-292`, QA pipeline, product test plan, implementation handoff,
+      and visual reference docs.
+- [x] Add/verify unit, component, accessibility, and Playwright screenshot
+      coverage for the required fixture states.
+- [x] Visually inspect Playwright screenshots against the reference images,
+      visual language, navigation/screen-state docs, and Figma handoff spec
+      before final handoff; fix any genuine design drift.
+- [x] Update docs for implemented component, fixture, command, dependency, QA,
+      and accepted-difference decisions.
+- [x] Run `just studio-check`, `just studio-build`, relevant focused checks,
+      docs checks, and release checks; fix issues.
+- [x] Attach final evidence/docs to Linear, move `IRK-292` and the parent
+      milestone issue to In Review, and summarize the milestone handoff.
+
+### M16.17 Interaction Matrix, Invariant Tests, And Visual Reinspection
+
+- [x] Re-read the current Studio command registry, reducer, fixture states,
+      component screens, Playwright coverage, and GUI MVP docs.
+- [x] Write the interaction/state matrix and invariant contract doc for the
+      fixture-backed Studio GUI.
+- [x] Add focused unit coverage for command-state invariants and representative
+      interaction contracts without adding test-only exports.
+- [x] Add Playwright coverage that renders every required fixture state and
+      verifies core layout/accessibility invariants.
+- [x] Run the Studio UI locally, exercise representative interactions with
+      Playwright, capture screenshots, and visually compare them against the
+      GUI MVP docs and reference images.
+- [x] Fix any genuine implementation/spec drift discovered during inspection.
+- [x] Run focused checks, coverage checks, and release checks before handoff.
+
+### M16.18 IRK-294 Recovery Track Planning And Status Reset
+
+- [x] Add the Linear recovery parent issue for the fixture GUI quality reset.
+- [x] Add child issues for elevated quality standards, state-model repair,
+      visual polish, editor redesign, article directory redesign, broader
+      screen polish, interaction completeness, invariant tests, and final
+      recovery QA.
+- [x] Reopen Milestone 16 parent/closeout status in Linear so the milestone
+      cannot be treated as ready until the recovery gate passes.
+- [x] Keep this checklist aligned with the recovery issue order as new defects
+      or design refinements are discovered.
+
+### M16.19 IRK-295 Elevated GUI Quality Standard
+
+- [x] Re-read the Studio GUI MVP docs, engineering philosophy, user feedback,
+      current implementation, and visual references.
+- [x] Treat prior Studio GUI docs as revisable design inputs, not fixed
+      authority; identify any earlier design assumptions that should change to
+      meet the elevated quality bar.
+- [x] Explicitly identify any current implementation foundations that should be
+      replaced rather than patched, even when replacement is a larger diff.
+- [x] Draft the elevated Studio GUI quality standard covering design taste,
+      UX polish, engineering state-model rigor, fixture interactivity, visual
+      QA, testing, and definition of done.
+- [x] Critique the draft against the current failure modes: pointless copy,
+      wasted space, dead controls, contradictory state, weak visual hierarchy,
+      insufficient manual inspection, and lax handoff gates.
+- [x] Critique whether previous momentum is biasing the plan toward preserving
+      weak implementation choices; revise the plan to prefer the best product
+      and engineering foundation over minimal diff size.
+- [x] Iterate the quality standard until it is concrete enough to guide
+      implementation and prevent checkbox-driven work.
+- [x] Update related GUI MVP docs and interaction invariants if the quality
+      standard changes the contract.
+- [x] Verify the doc references are valid and update Linear with the final
+      documentation attachment/evidence.
+
+### M16.20 IRK-296 State Model And Pane Invariant Repair
+
+- [x] Re-read the elevated quality standard, interaction matrix, command
+      registry, reducer, shell, sidebar, panes, preview, and article tree code.
+- [x] Design the stricter state model for current location, selected sidebar
+      item, pane visibility, editor-preview scope, article switching, and
+      folder expansion.
+- [x] Critique the design for invalid representable states and iterate until
+      hidden panes, double selection, sticky preview, and nondeterministic
+      article switching are impossible or rejected.
+- [x] Implement the state-model repairs through typed reducers/selectors and
+      command-backed transitions.
+- [x] Add/adjust unit and Playwright tests for hidden panes, one selected
+      sidebar item, deterministic article switching, editor-only live preview,
+      and folder collapse/expand.
+- [x] Verify focused tests and visually inspect the repaired shell behavior
+      before updating Linear.
+
+### M16.21 IRK-297 Visual Density, Hierarchy, And Taste Pass
+
+- [x] Re-read the elevated quality standard, visual language, visual
+      references, tokens, shell primitives, toolbar, sidebar, layout, and
+      representative screens.
+- [x] Revise the visual language or component architecture docs if the density
+      pass discovers stronger product patterns than the previous docs specify.
+- [x] Design the compact product-density system for toolbar, sidebar, icons,
+      rows, cards, forms, headings, helper copy, status surfaces, and spacing.
+- [x] Critique the design against visual references and reviewer feedback,
+      removing clutter and over-explanation until every visible element earns
+      its space.
+- [x] Implement shared token/component/style updates instead of one-off screen
+      patches.
+- [x] Add/adjust Playwright coverage for compact shell/sidebar/toolbar states,
+      no unnecessary placeholder copy, and no overflow.
+- [x] Capture and visually inspect representative screenshots before updating
+      Linear.
+
+### M16.22 IRK-302 Invariant Test Suite
+
+- [x] Re-read the elevated quality standard, interaction matrix, current unit
+      tests, Playwright tests, and coverage policy.
+- [x] Design invariant tests that catch the current defect classes without
+      brittle pixel assertions or test-only exports.
+- [x] Add reducer/selector tests for navigation, pane visibility, sidebar
+      selection, folder expansion, editor preview scope, inline title state,
+      properties collapse, and command availability as those seams land.
+- [x] Add Playwright tests for hidden pane absence, single selection, preview
+      scope, compact layout, stable thumbnails, settings nav height, and
+      keyboard/accessibility behavior.
+- [x] Run focused checks and coverage, then justify any remaining coverage gaps.
+- [x] Update Linear with test evidence.
+
+### M16.23 IRK-298 Article Editor Redesign
+
+- [x] Re-read the elevated quality standard, state/visual foundation, editor
+      docs, editor components, CodeMirror integration, title/frontmatter
+      fixtures, and editor tests.
+- [x] Revise editor-related docs if inline title editing, Properties collapse,
+      or flat source editing supersedes earlier form/card assumptions.
+- [x] Design the editor as a writing-first surface: inline title editing,
+      collapsible Properties card, flat full-width source editor, no line
+      numbers by default, and preview controls owned by the preview pane.
+- [x] Critique the editor design for visual taste, writing ergonomics,
+      validation behavior, keyboard behavior, accessibility, and future real
+      operation wiring.
+- [x] Iterate the design until it is precise enough to implement without
+      drifting into a generic form/card dashboard.
+- [x] Implement the editor redesign with command-backed state transitions.
+- [x] Add/adjust unit and Playwright tests for inline title editing,
+      properties collapse, source editing, preview control placement, and
+      invalid title behavior.
+- [x] Capture and visually inspect editor screenshots before updating Linear.
+
+### M16.24 IRK-299 Article Directory And Article Tree Redesign
+
+- [x] Re-read the elevated quality standard, state/visual foundation,
+      article-directory docs, sidebar/tree components, directory view models,
+      fixtures, and tests.
+- [x] Revise article directory/tree docs if compact browsing patterns supersede
+      earlier card-heavy or overexplained designs.
+- [x] Design the compact directory and article tree: uniform social-preview
+      thumbnails, stable dimensions, compact rows/cards, warning/status
+      markers, folder collapse, and deterministic article switching.
+- [x] Critique the browsing design for scanability, information density,
+      visual stability, keyboard/mouse behavior, and long-title resilience.
+- [x] Iterate until the directory and tree feel like efficient product
+      surfaces rather than oversized demo cards.
+- [x] Implement the directory/tree redesign.
+- [x] Add/adjust unit and Playwright tests for uniform thumbnails, no layout
+      shift, compact browsing, folder collapse, and article switching.
+- [x] Capture and visually inspect directory/tree screenshots before updating
+      Linear.
+
+### M16.25 IRK-300 Settings, Media, Publish, Restore, And Project Screen Polish
+
+- [x] Re-read the elevated quality standard, visual foundation, screen-state
+      docs, fixtures, and each non-editor screen implementation.
+- [x] Revise screen-state, visual, or component docs where the polish pass
+      changes what the product should do or how it should feel.
+- [x] Audit copy, headings, helper text, controls, card usage, density,
+      feedback states, and layout shifts across settings, media, publish,
+      restore, project home, recent projects, and startup.
+- [x] Design screen-specific polish changes that keep useful guidance while
+      removing obvious explanatory clutter and wasted space.
+- [x] Critique the screen designs for product usefulness, non-technical
+      clarity, visual hierarchy, compactness, and state completeness.
+- [x] Implement settings nav fixed-height behavior, media/detail polish,
+      publish/restore/project screen polish, and visible control feedback.
+- [x] Add/adjust unit and Playwright tests for settings layout stability,
+      media no-clutter states, and representative publish/restore/project
+      interactions.
+- [x] Capture and visually inspect each polished screen before updating Linear.
+
+### M16.26 IRK-301 Interaction Completeness Audit
+
+- [x] Re-read the elevated quality standard, interaction matrix, command
+      registry, toolbar/menu/context-menu code, and all visible controls.
+- [x] Build or update the visible-control inventory with intended resulting
+      states and disabled reasons.
+- [x] Audit every visible control for command-backed behavior, meaningful
+      fixture state, focus behavior, accessibility, and no silent no-ops.
+- [x] Fix all genuine interaction gaps or remove/disable controls that do not
+      earn their place in the fixture prototype.
+- [x] Add/adjust Playwright tests for primary and representative secondary
+      interactions.
+- [x] Run manual before/after visual inspection for major flows and update
+      Linear.
+
+### M16.27 IRK-303 Elevated Recovery QA And Handoff
+
+- [x] Re-read all recovery docs, known reviewer defects, visual references,
+      interaction matrix, implementation changes, tests, and Linear issues.
+- [x] Run the Studio app locally and use Playwright to inspect every major
+      workflow with before/after screenshots.
+- [x] Build contact sheets or equivalent visual artifacts for manual review.
+- [x] Compare screenshots against the visual references and quality standard,
+      explicitly looking for clutter, wasted space, broken state, dead
+      controls, layout shifts, inaccessible interactions, and obvious ugliness.
+- [x] Fix all genuine issues discovered during visual QA.
+- [x] Run focused Studio checks, coverage checks, docs checks, and full release
+      checks.
+- [x] Attach docs/evidence to Linear, move recovery issues to In Review, move
+      `IRK-292` and `IRK-277` back to In Review only after the final gate
+      passes.
+
+## Active Planning: Milestone 16 Linear Setup
+
+This planning pass transfers the completed Studio GUI MVP design and handoff
+documents into a concrete Linear milestone for the fixture-backed GUI
+prototype. It is planning work only: do not implement React, shadcn, editor,
+fixture, or Tauri code in this pass.
+
+- [x] Re-read the Studio GUI MVP handoff/spec documents, current Studio app
+      baseline, and relevant operation/Tauri/QA docs.
+- [x] Verify dependency assumptions against current project context and
+      authoritative docs where useful.
+- [x] Create the Linear milestone and parent issue for the fixture-backed
+      Studio GUI MVP prototype.
+- [x] Create foundation issues for dependency setup, tokens/shell,
+      operation-shaped fixtures, and command/state/session models.
+- [x] Create product-surface issues for startup/project home, article
+      directory, editor/preview, media, settings, publish, and restore flows.
+- [x] Create hardening and closeout issues for accessibility, keyboard,
+      context menus, tooltips, responsive behavior, visual QA, tests, docs, and
+      Linear handoff.
+- [x] Review Linear blockers for false positives/negatives and attach
+      relevant docs to each issue.
+- [x] Add a TPM project status update summarizing the new milestone plan.
+
 ## Active Milestone 15: Studio GUI MVP Design And Implementation Handoff
 
 This pass completes Linear Milestone 15 through the designer-facing

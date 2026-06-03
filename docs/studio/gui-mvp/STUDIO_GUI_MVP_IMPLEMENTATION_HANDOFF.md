@@ -81,12 +81,73 @@ complete and attached to the relevant Linear issues:
 - [STUDIO_GUI_MVP_FIGMA_HANDOFF.md](./STUDIO_GUI_MVP_FIGMA_HANDOFF.md)
 - [STUDIO_GUI_MVP_VISUAL_REFERENCES.md](./STUDIO_GUI_MVP_VISUAL_REFERENCES.md)
 - [STUDIO_GUI_MVP_ENGINEERING_SPEC.md](./STUDIO_GUI_MVP_ENGINEERING_SPEC.md)
+- [STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md](./STUDIO_GUI_MVP_INTERACTION_STATE_MATRIX.md)
+- [STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md](./STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md)
 
 If Figma mockups are available before implementation starts, use them as visual
 input. They are not blockers for building the fixture and component
 foundation, but they are blockers for final visual polish unless the team
 explicitly accepts using the current reference image set as the visual source
 of truth.
+
+## Current Implementation Status
+
+Milestone 16 now implements the fixture-backed Studio GUI prototype in
+`apps/studio`.
+
+Quality recovery is active. The current prototype proves many useful seams,
+but final handoff is blocked until the implementation satisfies
+[STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md](./STUDIO_GUI_MVP_ELEVATED_QUALITY_STANDARD.md).
+In particular, hidden panes must leave no visible rails, sidebar selection must
+derive from one active location, article preview must be scoped to article
+editing, the article editor must treat the title as the primary editable
+heading, compact menus must not render visible headings that merely restate
+their trigger, fixture controls must have visible behavior or disabled reasons,
+and manual Playwright visual inspection must verify the product against the
+visual references before handoff.
+
+Implemented:
+
+- bounded React workspace mounted from the static Astro Studio app;
+- Studio shell, toolbar, sidebar, resizable/collapsible panes, preview rail,
+  and native-toolbar placeholders;
+- operation-shaped fixture graph and pure view models for startup, recent
+  projects, project home, article directory, article editor, media, settings,
+  preview, publish, and restore states;
+- shared command registry for toolbar actions, hotkeys, command palette,
+  context menus, dropdown menus, and disabled/blocked reasons;
+- source-editor shell with CodeMirror and command-backed Markdown
+  transformations;
+- descriptor-backed article and settings forms with local validation and
+  actionable diagnostics;
+- media browser with local fixture assets, selected detail pane, alt/caption
+  fields, warning states, and fixture-only insert flow;
+- publish preview, confirmation, progress, success, blocked, and failed states
+  with redacted credential references and no provider mutation;
+- restore checkpoint selection, confirmation, completion, and unavailable
+  capability states;
+- Playwright coverage for required MVP screen states, keyboard behavior,
+  sidebar resizing, command surfaces, dialogs, high text zoom, reduced motion,
+  and axe accessibility scans;
+- unit coverage for fixture validation, view models, command availability,
+  reducers, editor transformations, pane policy, interaction-state matrix
+  invariants, and visual contrast tokens.
+
+Accepted fixture-prototype differences:
+
+- previews are rendered from fixture view models, not live Astro route output;
+- article saves, media insertion, restore, and publish transitions mutate only
+  in-memory fixture state;
+- Cloudflare credentials and deploys are represented by redacted fixture
+  references only;
+- the app does not open real folders, write real source files, call provider
+  APIs, or require broad Tauri capabilities;
+- the visual source of truth is the written GUI MVP docs plus the committed
+  reference image library until approved Figma mockups replace or refine it.
+
+The next operation-binding milestone should preserve these component,
+command, fixture, diagnostic, and test seams while replacing selected fixture
+transitions with Rust/Tauri operations behind the same contracts.
 
 ## Definition Of Done
 
@@ -98,21 +159,25 @@ The prototype milestone is complete when:
 4. The app uses a component hierarchy aligned with the engineering spec.
 5. The article directory/browser exists as a main-pane surface.
 6. The article editor shows frontmatter forms, source editor, toolbar, status,
-   preview, invalid-field state, and preview-collapsed state.
+   preview, invalid-field state, and preview-hidden state.
 7. Media and settings surfaces render realistic fixture data and local
    validation states.
 8. Publish uses preview, confirm, progress, blocked, failed, and success
    states; no provider mutation exists.
 9. Command records power toolbar, hotkey, context menu, and command palette
    actions where practical.
-10. Pane collapse, responsive behavior, long content, and compact layouts are
-    tested or manually screenshot-verified.
+10. Pane hide/show, responsive behavior, long content, and compact layouts are
+    tested and manually screenshot-verified; hidden panes leave no residual
+    rail or label.
 11. Accessibility checks cover shell landmarks, labels, forms, dialogs,
     tooltips, context menus, keyboard navigation, and focus restoration.
 12. Fixture and state tests cover high-risk pure logic without test-only
     exports.
 13. Docs and Linear issues are updated with scope decisions, accepted
     differences, and follow-up blockers.
+14. The elevated quality standard is satisfied, including purposeful density,
+    no unexplained dead controls, compact screen hierarchy, and a documented
+    manual Playwright visual inspection pass.
 
 ## Proposed Implementation Issues
 
@@ -282,7 +347,7 @@ Likely tasks:
 - editor toolbar;
 - editor context menu;
 - editor status strip and autosave state;
-- preview-collapsed writing mode;
+- preview-hidden writing mode;
 - command transformations for bold, italic, link, heading, quote, code,
   lists, image insert, and footnote placeholder where supported.
 
@@ -397,7 +462,7 @@ Likely tasks:
 - tooltip labels with shortcut pills;
 - focus trap and return for dialogs/context menus;
 - reduced-motion handling;
-- long text, compact width, collapsed panes, and high zoom checks;
+- long text, compact width, hidden panes, and high zoom checks;
 - no pointer-only required actions.
 
 Blocks:

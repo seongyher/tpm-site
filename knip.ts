@@ -4,7 +4,7 @@ const config = {
   entry: [
     "astro.config.ts",
     "apps/studio/astro.config.mjs",
-    "apps/studio/src/**/*.{astro,ts}",
+    "apps/studio/src/**/*.{astro,ts,tsx}",
     "eslint/**/*.ts",
     "eslint.config.ts",
     "examples/platform-entrypoint-consumer/**/*.ts",
@@ -57,7 +57,7 @@ const config = {
   project: [
     "astro.config.ts",
     "apps/studio/astro.config.mjs",
-    "apps/studio/src/**/*.{astro,ts}",
+    "apps/studio/src/**/*.{astro,ts,tsx}",
     "eslint/**/*.ts",
     "eslint.config.ts",
     "examples/platform-entrypoint-consumer/**/*.ts",

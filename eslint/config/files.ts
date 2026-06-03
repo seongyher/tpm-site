@@ -1,10 +1,11 @@
 export const typedFiles = [
-  "apps/studio/src/**/*.ts",
+  "apps/studio/src/**/*.{ts,tsx}",
   "astro.config.ts",
   "eslint.config.ts",
   "eslint/**/*.ts",
   "examples/platform-entrypoint-consumer/**/*.ts",
   "knip.ts",
+  "playwright.studio.config.ts",
   "src/**/*.{ts,tsx}",
   "scripts/**/*.ts",
   "tests/**/*.{ts,tsx}",

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1067" role="img" aria-labelledby="title desc">
+  <title id="title">Desk sketch fixture</title>
+  <desc id="desc">Notebook sketch of a writing desk plan.</desc>
+  <rect width="1600" height="1067" fill="#d9c7ad"/>
+  <rect x="310" y="120" width="980" height="790" rx="34" fill="#f8f4ea"/>
+  <line x1="430" y1="245" x2="1130" y2="245" stroke="#c5baaa" stroke-width="8"/>
+  <line x1="430" y1="350" x2="1130" y2="350" stroke="#c5baaa" stroke-width="8"/>
+  <line x1="430" y1="455" x2="1130" y2="455" stroke="#c5baaa" stroke-width="8"/>
+  <path d="M520 660h560v70H520zM585 730v100M1015 730v100M520 660l75-95h420l65 95" fill="none" stroke="#6f7b82" stroke-width="14" stroke-linejoin="round"/>
+  <path d="M1030 220l250 560" stroke="#6f553c" stroke-width="30" stroke-linecap="round"/>
+  <circle cx="1030" cy="220" r="24" fill="#3e332a"/>
+</svg>
