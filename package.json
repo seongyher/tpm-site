@@ -192,7 +192,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
-    "sort-package-json": "^3.6.1",
+    "sort-package-json": "^4.0.0",
     "svgo": "^4.0.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
