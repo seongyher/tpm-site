@@ -10,9 +10,19 @@ describe("Studio workspace pane layout policy", () => {
         sidebarVisible: true,
       }),
     ).toEqual({
-      preview: 35,
-      sidebar: 20,
-      work: 45,
+      preview: {
+        defaultSize: 35,
+        minSize: 24,
+      },
+      sidebar: {
+        defaultSize: 20,
+        maxSize: 30,
+        minSize: 16,
+      },
+      work: {
+        defaultSize: 45,
+        minSize: 28,
+      },
     });
   });
 
@@ -23,12 +33,17 @@ describe("Studio workspace pane layout policy", () => {
     });
 
     expect(layout).toEqual({
-      sidebar: 20,
-      work: 80,
+      sidebar: {
+        defaultSize: 20,
+        maxSize: 30,
+        minSize: 16,
+      },
+      work: {
+        defaultSize: 80,
+        minSize: 28,
+      },
     });
-    expect((layout.preview ?? 0) + (layout.sidebar ?? 0) + layout.work).toBe(
-      100,
-    );
+    expect(defaultTotal(layout)).toBe(100);
   });
 
   test("removes hidden sidebar and preview from the layout", () => {
@@ -38,10 +53,43 @@ describe("Studio workspace pane layout policy", () => {
     });
 
     expect(layout).toEqual({
-      work: 100,
+      work: {
+        defaultSize: 100,
+        minSize: 28,
+      },
     });
-    expect((layout.preview ?? 0) + (layout.sidebar ?? 0) + layout.work).toBe(
-      100,
+    expect(defaultTotal(layout)).toBe(100);
+  });
+
+  test("keeps pane minimums compatible when all panes are visible", () => {
+    const layout = studioWorkspacePaneLayout({
+      previewVisible: true,
+      sidebarVisible: true,
+    });
+
+    expect(minimumTotal(layout)).toBeLessThanOrEqual(100);
+    expect(layout.sidebar?.maxSize).toBeGreaterThanOrEqual(
+      layout.sidebar?.minSize ?? 0,
     );
   });
 });
+
+function defaultTotal(
+  layout: ReturnType<typeof studioWorkspacePaneLayout>,
+): number {
+  return (
+    (layout.preview?.defaultSize ?? 0) +
+    (layout.sidebar?.defaultSize ?? 0) +
+    layout.work.defaultSize
+  );
+}
+
+function minimumTotal(
+  layout: ReturnType<typeof studioWorkspacePaneLayout>,
+): number {
+  return (
+    (layout.preview?.minSize ?? 0) +
+    (layout.sidebar?.minSize ?? 0) +
+    layout.work.minSize
+  );
+}

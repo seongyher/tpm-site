@@ -66,6 +66,103 @@ async function expectNoToolbarControlOverlap(page: Page): Promise<void> {
   expect(overlaps).toEqual([]);
 }
 
+async function expectWorkspacePanesBounded(page: Page): Promise<void> {
+  const issues = await page.evaluate(() => {
+    interface PaneBox {
+      readonly bottom: number;
+      readonly clientWidth: number;
+      readonly label: string;
+      readonly left: number;
+      readonly right: number;
+      readonly scrollWidth: number;
+      readonly top: number;
+      readonly width: number;
+    }
+
+    function paneBox(element: HTMLElement, label: string): PaneBox {
+      const rect = element.getBoundingClientRect();
+
+      return {
+        bottom: rect.bottom,
+        clientWidth: element.clientWidth,
+        label,
+        left: rect.left,
+        right: rect.right,
+        scrollWidth: element.scrollWidth,
+        top: rect.top,
+        width: rect.width,
+      };
+    }
+
+    function labelledPane(label: string): null | PaneBox {
+      const element = Array.from(
+        document.querySelectorAll("[aria-label]"),
+      ).find((candidate) => candidate.getAttribute("aria-label") === label);
+
+      return element instanceof HTMLElement ? paneBox(element, label) : null;
+    }
+
+    const workElement = document.querySelector("[data-testid='work']");
+    const panes = [
+      labelledPane("Studio navigation"),
+      workElement instanceof HTMLElement ? paneBox(workElement, "Work") : null,
+      labelledPane("Preview pane"),
+    ].filter((pane): pane is PaneBox => pane !== null);
+
+    const paneIssues = panes.flatMap((pane, index) => {
+      const nextPane = panes[index + 1];
+      const overflowIssue =
+        pane.scrollWidth > pane.clientWidth + 1
+          ? [
+              `${pane.label} scroll width ${pane.scrollWidth} exceeds client width ${pane.clientWidth}`,
+            ]
+          : [];
+
+      if (nextPane === undefined) {
+        return overflowIssue;
+      }
+
+      const overlaps = pane.right > nextPane.left + 1;
+
+      return [
+        ...overflowIssue,
+        ...(overlaps
+          ? [
+              `${pane.label} right ${pane.right} overlaps ${nextPane.label} left ${nextPane.left}`,
+            ]
+          : []),
+      ];
+    });
+
+    if (!(workElement instanceof HTMLElement)) {
+      return ["Missing work pane."];
+    }
+
+    const workRect = workElement.getBoundingClientRect();
+    const immediateContentIssues = Array.from(workElement.children).flatMap(
+      (child) => {
+        if (!(child instanceof HTMLElement)) {
+          return [];
+        }
+
+        const childRect = child.getBoundingClientRect();
+        const leaksLeft = childRect.left < workRect.left - 1;
+        const leaksRight = childRect.right > workRect.right + 1;
+
+        return leaksLeft || leaksRight
+          ? [
+              `Work child leaks outside pane: ${childRect.left}-${childRect.right} versus ${workRect.left}-${workRect.right}`,
+            ]
+          : [];
+      },
+    );
+
+    return [...paneIssues, ...immediateContentIssues];
+  });
+
+  expect(issues).toEqual([]);
+}
+
 async function expectNoSidebarArtifacts(page: Page): Promise<void> {
   await expect(page.getByLabel("Studio navigation")).toHaveCount(0);
   await expect(page.getByLabel("Sidebar collapsed")).toHaveCount(0);
@@ -571,6 +668,7 @@ test("lets the article sidebar resize wider without clipping content", async ({
   );
   await expect(page.getByText("Northwind Journal")).toBeVisible();
   await expect(page.getByTitle("How to Build a Writing Desk")).toBeVisible();
+  await expectWorkspacePanesBounded(page);
   await expectNoDocumentOverflow(page);
 });
 
@@ -585,9 +683,42 @@ test("keeps the shell usable at compact desktop widths", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByLabel("Studio navigation")).toBeVisible();
   await expect(page.getByLabel("Preview pane")).toBeVisible();
+  await expectWorkspacePanesBounded(page);
   await expectNoDocumentOverflow(page);
 
   await test.info().attach("studio-shell-compact", {
+    body: await page.screenshot({ fullPage: true }),
+    contentType: "image/png",
+  });
+});
+
+test("keeps resized editor panes bounded at narrow desktop widths", async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 900, width: 1180 });
+  await openStudio(page, "/?screen=article-editor-clean");
+
+  const resizeHandle = page.getByLabel("Resize sidebar");
+  const handleBox = await resizeHandle.boundingBox();
+
+  expect(handleBox).not.toBeNull();
+
+  if (handleBox === null) {
+    throw new Error("Missing sidebar resize handle.");
+  }
+
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + 100);
+  await page.mouse.down();
+  await page.mouse.move(handleBox.x + 240, handleBox.y + 100, { steps: 12 });
+  await page.mouse.up();
+
+  await expect(page.getByLabel("Studio navigation")).toBeVisible();
+  await expect(page.getByTestId("work")).toBeVisible();
+  await expect(page.getByLabel("Preview pane")).toBeVisible();
+  await expectWorkspacePanesBounded(page);
+  await expectNoDocumentOverflow(page);
+
+  await test.info().attach("studio-shell-narrow-resized-bounded", {
     body: await page.screenshot({ fullPage: true }),
     contentType: "image/png",
   });

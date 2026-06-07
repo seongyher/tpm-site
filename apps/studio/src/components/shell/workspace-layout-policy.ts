@@ -6,18 +6,32 @@ export interface StudioWorkspacePaneVisibility {
   readonly sidebarVisible: boolean;
 }
 
-/** Percentage sizes consumed by react-resizable-panels. */
+/** Percentage constraints consumed by react-resizable-panels. */
+export interface StudioWorkspacePaneSize {
+  /** Initial pane size percentage. */
+  readonly defaultSize: number;
+  /** Maximum pane size percentage while visible. */
+  readonly maxSize?: number;
+  /** Minimum pane size percentage while visible. */
+  readonly minSize: number;
+}
+
+/** Percentage sizes and constraints consumed by react-resizable-panels. */
 export interface StudioWorkspacePaneLayout {
-  /** Preview pane size percentage when visible. */
-  readonly preview?: number;
-  /** Sidebar pane size percentage when visible. */
-  readonly sidebar?: number;
-  /** Main work pane size percentage. */
-  readonly work: number;
+  /** Preview pane size policy when visible. */
+  readonly preview?: StudioWorkspacePaneSize;
+  /** Sidebar pane size policy when visible. */
+  readonly sidebar?: StudioWorkspacePaneSize;
+  /** Main work pane size policy. */
+  readonly work: StudioWorkspacePaneSize;
 }
 
 const EXPANDED_PREVIEW_SIZE = 35;
 const EXPANDED_SIDEBAR_SIZE = 20;
+const MAX_SIDEBAR_SIZE = 30;
+const MIN_PREVIEW_SIZE = 24;
+const MIN_SIDEBAR_SIZE = 16;
+const MIN_WORK_SIZE = 28;
 const TOTAL_LAYOUT_SIZE = 100;
 
 /**
@@ -32,12 +46,28 @@ export function studioWorkspacePaneLayout({
   previewVisible,
   sidebarVisible,
 }: StudioWorkspacePaneVisibility): StudioWorkspacePaneLayout {
-  const sidebar = sidebarVisible ? EXPANDED_SIDEBAR_SIZE : undefined;
-  const preview = previewVisible ? EXPANDED_PREVIEW_SIZE : undefined;
+  const sidebar = sidebarVisible
+    ? {
+        defaultSize: EXPANDED_SIDEBAR_SIZE,
+        maxSize: MAX_SIDEBAR_SIZE,
+        minSize: MIN_SIDEBAR_SIZE,
+      }
+    : undefined;
+  const preview = previewVisible
+    ? {
+        defaultSize: EXPANDED_PREVIEW_SIZE,
+        minSize: MIN_PREVIEW_SIZE,
+      }
+    : undefined;
+  const occupiedSize =
+    (sidebar?.defaultSize ?? 0) + (preview?.defaultSize ?? 0);
 
   return {
     ...(preview === undefined ? {} : { preview }),
     ...(sidebar === undefined ? {} : { sidebar }),
-    work: TOTAL_LAYOUT_SIZE - (sidebar ?? 0) - (preview ?? 0),
+    work: {
+      defaultSize: TOTAL_LAYOUT_SIZE - occupiedSize,
+      minSize: MIN_WORK_SIZE,
+    },
   };
 }

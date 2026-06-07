@@ -12,6 +12,7 @@ import {
 import type { StudioAppState } from "../../state/studio-state";
 import {
   studioWorkspacePaneLayout,
+  type StudioWorkspacePaneSize,
   type StudioWorkspacePaneVisibility,
 } from "./workspace-layout-policy";
 
@@ -47,7 +48,7 @@ export function WorkspaceLayout({
     >
       {sidebarVisible && layout.sidebar !== undefined ? (
         <>
-          <SidebarPane defaultSize={layout.sidebar}>{sidebar}</SidebarPane>
+          <SidebarPane size={layout.sidebar}>{sidebar}</SidebarPane>
           <ResizeSeparator
             aria-label="Resize sidebar"
             className="bg-border hover:bg-accent focus-visible:bg-accent w-px transition-colors focus-visible:outline-none"
@@ -55,7 +56,7 @@ export function WorkspaceLayout({
           />
         </>
       ) : null}
-      <WorkPane defaultSize={layout.work}>{main}</WorkPane>
+      <WorkPane size={layout.work}>{main}</WorkPane>
       {previewVisible && layout.preview !== undefined ? (
         <>
           <ResizeSeparator
@@ -63,7 +64,7 @@ export function WorkspaceLayout({
             className="bg-border hover:bg-accent focus-visible:bg-accent w-px transition-colors focus-visible:outline-none"
             id="preview-resize"
           />
-          <PreviewPane defaultSize={layout.preview}>{preview}</PreviewPane>
+          <PreviewPane size={layout.preview}>{preview}</PreviewPane>
         </>
       ) : null}
     </ResizableGroup>
@@ -72,61 +73,67 @@ export function WorkspaceLayout({
 
 function PreviewPane({
   children,
-  defaultSize,
+  size,
 }: {
   children: ReactNode;
-  defaultSize: number;
+  size: StudioWorkspacePaneSize;
 }): ReactElement {
   return (
     <ResizablePanel
       className="border-border bg-panel min-w-0 border-l"
-      defaultSize={`${defaultSize}%`}
+      defaultSize={percentage(size.defaultSize)}
       id="preview"
-      minSize="24%"
+      minSize={percentage(size.minSize)}
     >
-      <div className="h-full">{children}</div>
+      <div className="h-full min-w-0 overflow-hidden">{children}</div>
     </ResizablePanel>
   );
 }
 
 function SidebarPane({
   children,
-  defaultSize,
+  size,
 }: {
   children: ReactNode;
-  defaultSize: number;
+  size: StudioWorkspacePaneSize;
 }): ReactElement {
   return (
     <ResizablePanel
       className="border-border bg-sidebar min-w-0 border-r"
-      defaultSize={`${defaultSize}%`}
+      defaultSize={percentage(size.defaultSize)}
       id="sidebar"
-      maxSize="30%"
-      minSize="16%"
+      maxSize={
+        size.maxSize === undefined ? undefined : percentage(size.maxSize)
+      }
+      minSize={percentage(size.minSize)}
     >
-      <div className="h-full">{children}</div>
+      <div className="h-full min-w-0 overflow-hidden">{children}</div>
     </ResizablePanel>
   );
 }
 
 function WorkPane({
   children,
-  defaultSize,
+  size,
 }: {
   children: ReactNode;
-  defaultSize: number;
+  size: StudioWorkspacePaneSize;
 }): ReactElement {
   return (
     <ResizablePanel
-      className="bg-panel min-w-[26rem] overflow-auto"
+      className="bg-panel min-w-0"
       data-testid="work"
-      defaultSize={`${defaultSize}%`}
+      defaultSize={percentage(size.defaultSize)}
       id="work"
-      minSize="34%"
+      minSize={percentage(size.minSize)}
     >
-      {children}
+      <div className="h-full min-w-0 overflow-auto">{children}</div>
     </ResizablePanel>
   );
+}
+
+function percentage(size: number): string {
+  return `${size}%`;
 }
 
 function paneVisibility(state: StudioAppState): StudioWorkspacePaneVisibility {

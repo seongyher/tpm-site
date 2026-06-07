@@ -112,11 +112,18 @@ Uses shadcn Resizable for:
 
 Responsibilities:
 
-- panel min/max sizes;
+- one explicit panel sizing policy for default, minimum, and maximum pane
+  sizes;
 - collapsed state;
 - resize persistence hooks;
 - reduced-motion behavior;
 - keyboard-accessible collapse controls.
+
+Visible panes must be adjacent and bounded. A pane may scroll internally or
+collapse through the layout model, but it must never paint its content across a
+neighboring pane. Do not combine percentage-based resizable panes with
+independent fixed-width child constraints unless those constraints are encoded
+in the same pane sizing policy.
 
 Must not own screen content.
 

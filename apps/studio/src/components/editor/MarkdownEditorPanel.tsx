@@ -131,7 +131,7 @@ export function MarkdownEditorPanel({
       EditorView.theme({
         "&": {
           backgroundColor: "transparent",
-          fontSize: "13px",
+          fontSize: "0.8125rem",
         },
         ".cm-content": {
           fontFamily: "var(--font-mono)",

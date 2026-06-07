@@ -113,15 +113,18 @@ Engineering goals:
 1. Make invalid UI state unrepresentable where practical.
 2. Keep one canonical active location.
 3. Keep pane visibility in the layout model, not as CSS afterthoughts.
-4. Keep source data, draft form state, layout state, overlays, and command
+4. Keep pane sizing in one layout policy. Resizable panes, child minimums, and
+   overflow behavior must agree so sidebar, work, and preview content cannot
+   overlap.
+5. Keep source data, draft form state, layout state, overlays, and command
    state separate.
-5. Use commands as the only cross-surface transition surface.
-6. Keep reducers and selectors pure and testable.
-7. Keep impure work at the edge: DOM measurement, local storage, browser
+6. Use commands as the only cross-surface transition surface.
+7. Keep reducers and selectors pure and testable.
+8. Keep impure work at the edge: DOM measurement, local storage, browser
    APIs, Tauri APIs, future filesystem, and provider calls.
-8. Use component props that express the domain, not a pile of booleans.
-9. Let tests follow real seams without adding test-only exports.
-10. Encode recurring product rules in helpers, view models, policies, and
+9. Use component props that express the domain, not a pile of booleans.
+10. Let tests follow real seams without adding test-only exports.
+11. Encode recurring product rules in helpers, view models, policies, and
     tests so future components do not have to remember them.
 
 ### State Shape

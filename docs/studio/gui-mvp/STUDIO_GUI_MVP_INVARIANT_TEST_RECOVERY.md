@@ -18,9 +18,12 @@ the product model, not freeze incidental pixels.
    command-backed state on the first interaction.
 5. Prove compact chrome and browsing surfaces keep stable geometry without
    horizontal overflow.
-6. Prove screen-specific controls have labels, disabled reasons, keyboard
+6. Prove visible workspace panes remain adjacent after resize and pane content
+   stays bounded inside its own pane instead of painting over neighboring
+   panes.
+7. Prove screen-specific controls have labels, disabled reasons, keyboard
    access, and non-color-only feedback.
-7. Keep tests tied to public product seams: commands, reducers, selectors,
+8. Keep tests tied to public product seams: commands, reducers, selectors,
    visible roles, semantic labels, and stable `data-testid` anchors.
 
 ## What Belongs In Unit Tests
@@ -53,6 +56,10 @@ Browser tests should guard rendered product behavior:
   restores them;
 - editor live preview disappears when navigating to directory, media, settings,
   project home, publish, restore, or startup screens;
+- sidebar, work, and preview pane boxes stay non-overlapping after compact
+  viewport resize interactions;
+- pane roots do not have wider immediate content that can visibly leak across
+  neighboring pane boundaries;
 - article-directory thumbnails use a uniform social-preview aspect ratio;
 - settings section navigation keeps intrinsic height instead of stretching to
   match taller forms;
@@ -71,6 +78,7 @@ The following invariants are enforceable now:
 - one visible sidebar selection;
 - preview scoped to article editor screens;
 - compact toolbar and sidebar sizing;
+- compact resized workspace panes remain adjacent and content-bounded;
 - settings navigation height stability;
 - article-directory thumbnail geometry;
 - article-directory row geometry;
@@ -89,7 +97,7 @@ recovery issues and should receive same-patch tests there:
 ## Definition Of Done For IRK-302
 
 - The tests would have caught the known pane, selection, preview-scope,
-  thumbnail, and settings-layout regressions.
+  thumbnail, settings-layout, and pane-overlap regressions.
 - No test-only exports are introduced.
 - Stable semantic anchors added for tests are also useful product semantics or
   accessibility anchors.
