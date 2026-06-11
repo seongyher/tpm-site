@@ -34,7 +34,7 @@ Automated reasoning has developed to the point of surpassing human researchers a
 
 For all the tradition of methodological naturalism and the availability of digital technologies that philosophers already make use of in everyday life, philosophers outside of logic are peculiarly neglectful about the concept of digital methods in philosophical research. This is probably due to a different kind of scepticism than those of mathematicians regarding automated reasoning. The most obvious formulation of this criticism is that philosophers love the armchair too much, favouring a priori knowledge over a posteriori knowledge. This disregard for a posteriori knowledge, the criticism suggests, is the cause of their "metametaphilosophical" reluctance to take on an impure or eclectic methodology that takes advantage of both reason and technology. "And why do philosophers think they have to start from scratch?"[^cite-matson-1984-metametaphilosophy]
 
-I disagree with this sweeping accusation of an antiexperimentalist attitude or the charge that philosophers start from scratch in ways that scientists do not. The majority of philosophers are scientific realists; half of them are metaphilosophical naturalists; a substantial minority of them do not even believe in a priori knowledge or the analytic-synthetic distinction. Philosophers frequently make use of very old thinkers in ways that scientists virtually never do, since old science is almost invariably outdated in some way. Yet, philosophers are much more likely to opt for commentating and explaining digital technology than taking advantage of its philosophical potential. The basic ingredients are already available in the form of comprehensive and up-to-date resources such as the Stanford Encyclopedia of Philosophy and PhilPapers, as well as digital methods and tools developed by the digital humanists.
+I disagree with this sweeping accusation of an antiexperimentalist attitude or the charge that philosophers start from scratch in ways that scientists do not. The majority of philosophers are scientific realists; half of them are metaphilosophical naturalists; a substantial minority of them do not even believe in a priori knowledge or the analytic-synthetic distinction[^cite-bourget-chalmers-2014-survey][^cite-philpapers-2020]. Philosophers frequently make use of very old thinkers in ways that scientists virtually never do, since old science is almost invariably outdated in some way. Yet, philosophers are much more likely to opt for commentating and explaining digital technology than taking advantage of its philosophical potential. The basic ingredients are already available in the form of comprehensive and up-to-date resources such as the Stanford Encyclopedia of Philosophy and PhilPapers, as well as digital methods and tools developed by the digital humanists.
 
 One possibility is that philosophy is fundamentally incompatible with digital methods, and that the metaphilosophical naturalists are mistaken in their assumption that naturalistic methodologies are compatible with philosophy. Even though there is an apparent critical mass of philosophers with both the correct basic metaphilosophical assumptions and access to the necessary technology required for a new paradigm, if philosophy is, say, a pursuit of knowledge about an immaterial realm of truths accessible only via philosophical intuition, digital methods might not do us any good. It is also possible that digital methods simply failed to take hold in philosophical research because philosophers have an incomplete or incorrect picture of what philosophy is, what philosophers do, and therefore what tools philosophers can use.
 
@@ -466,4 +466,23 @@ The following is a list of some important works in modern and contemporary philo
   year = {2012},
   doi = {10.1007/978-3-642-30870-3_35}
 }
+
+@article{bourget-chalmers-2014-survey,
+  author = {Bourget, David & Chalmers, David J.},
+  title = {What do philosophers believe?},
+  journal = {Philosophical Studies},
+  volume = {3},
+  number = {170},
+  pages = {465-500},
+  year = {2014},
+  doi = {10.2307/202202}
+}
+
+@online{philpapers-2020,
+  title = {The 2020 PhilPapers Survey},
+  editor = {Bourget, David & Chalmers, David},
+  publisher = {Philpeople},
+  location = {Western University, New York University},
+  year = {2020},
+  url = {survey2020.philpeople.org}}
 ```
