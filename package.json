@@ -148,7 +148,7 @@
     "eslint-plugin-astro": "^1.7.0",
     "eslint-plugin-better-tailwindcss": "^4.5.0",
     "eslint-plugin-decorator-position": "^6.1.0",
-    "eslint-plugin-jsdoc": "^62.9.0",
+    "eslint-plugin-jsdoc": "^63.0.10",
     "eslint-plugin-jsonc": "^3.1.2",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-mdx": "^3.7.0",
