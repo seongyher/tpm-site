@@ -181,7 +181,7 @@
     "ignore": "^7.0.5",
     "knip": "^6.13.1",
     "lightningcss": "^1.32.0",
-    "markdownlint-cli2": "^0.22.1",
+    "markdownlint-cli2": "^0.23.0",
     "oxc-minify": "^0.132.0",
     "pagefind": "^1.5.2",
     "pdf-lib": "^1.17.1",
