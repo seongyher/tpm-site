@@ -92,8 +92,7 @@ interface ArticleReferencesNormalizeFailure {
 
 /** Pure-normalization result. Invalid states never carry renderable data. */
 export type ArticleReferencesNormalizeResult =
-  | ArticleReferencesNormalizeFailure
-  | ArticleReferencesNormalizeSuccess;
+  ArticleReferencesNormalizeFailure | ArticleReferencesNormalizeSuccess;
 
 /** Blocking diagnostic emitted by pure reference normalization. */
 export type ArticleReferenceDiagnostic =

@@ -132,8 +132,8 @@ describe("ArticleLayout", () => {
     const proseIndex = view.indexOf("data-article-prose");
     const supportIndex = view.indexOf("Support The Philosopher&#39;s Meme");
     const moreInCategoryIndex = view.indexOf("More in");
-    const notesIndex = view.indexOf(">Notes<");
-    const bibliographyIndex = view.indexOf(">Bibliography<");
+    const notesIndex = view.search(/>\s*Notes\s*</);
+    const bibliographyIndex = view.search(/>\s*Bibliography\s*</);
     const tagsIndex = view.indexOf("data-article-tags-placement");
 
     expect(proseIndex).toBeGreaterThan(-1);

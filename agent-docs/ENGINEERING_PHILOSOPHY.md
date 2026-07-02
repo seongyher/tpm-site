@@ -842,8 +842,7 @@ Do:
 
 ```ts
 type ParseResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; diagnostics: Diagnostic[] };
+  { ok: true; value: T } | { ok: false; diagnostics: Diagnostic[] };
 ```
 
 Do not:

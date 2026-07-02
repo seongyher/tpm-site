@@ -11,8 +11,8 @@ describe("ArticleReferences", () => {
       props: { references: articleReferenceFixture },
     });
 
-    expect(view.indexOf(">Notes<")).toBeLessThan(
-      view.indexOf(">Bibliography<"),
+    expect(view.search(/>\s*Notes\s*</)).toBeLessThan(
+      view.search(/>\s*Bibliography\s*</),
     );
     expect(view).toContain("data-article-references");
     expect(view).toContain("data-article-reference-preview");
@@ -39,10 +39,10 @@ describe("ArticleReferences", () => {
       },
     });
 
-    expect(notesOnly).toContain(">Notes<");
-    expect(notesOnly).not.toContain(">Bibliography<");
-    expect(citationsOnly).not.toContain(">Notes<");
-    expect(citationsOnly).toContain(">Bibliography<");
+    expect(notesOnly).toMatch(/>\s*Notes\s*</);
+    expect(notesOnly).not.toMatch(/>\s*Bibliography\s*</);
+    expect(citationsOnly).not.toMatch(/>\s*Notes\s*</);
+    expect(citationsOnly).toMatch(/>\s*Bibliography\s*</);
   });
 
   test("renders nothing when no references exist", async () => {

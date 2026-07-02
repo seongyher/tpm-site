@@ -1,3 +1,7 @@
+import {
+  unified,
+  type UnifiedProcessorOptions,
+} from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
@@ -20,6 +24,16 @@ function sitemapPagePathname(page: string): string {
   );
 }
 
+export const markdownProcessorOptions = {
+  rehypePlugins: [
+    [rehypeArticleImages, { policyCacheKey: articleImagePolicyCacheKey }],
+  ],
+  remarkPlugins: [
+    [remarkArticleImageMarkers, { policyCacheKey: articleImagePolicyCacheKey }],
+    [remarkArticleReferences, { validateLegacyFootnotes: true }],
+  ],
+} satisfies UnifiedProcessorOptions;
+
 export default defineConfig({
   compressHTML: true,
   image: {
@@ -35,16 +49,7 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    rehypePlugins: [
-      [rehypeArticleImages, { policyCacheKey: articleImagePolicyCacheKey }],
-    ],
-    remarkPlugins: [
-      [
-        remarkArticleImageMarkers,
-        { policyCacheKey: articleImagePolicyCacheKey },
-      ],
-      [remarkArticleReferences, { validateLegacyFootnotes: true }],
-    ],
+    processor: unified(markdownProcessorOptions),
   },
   outDir: siteInstance.output.dist,
   publicDir: projectRelativePath(siteInstance.public),

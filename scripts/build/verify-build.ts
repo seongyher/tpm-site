@@ -32,7 +32,7 @@ const articleReferencePreviewScriptPattern =
   /^\/_astro\/ArticleReferences\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u;
 const astroPrefetchPageScriptPattern = /^\/_astro\/page\.[\w-]+\.js$/u;
 const astroPrefetchChunkImportPattern =
-  /from\s*["'`]\.\/(_astro_prefetch\.[\w-]+\.js)["'`]/u;
+  /from\s*["'`]\.\/((?:_astro_)?prefetch\.[\w-]+\.js)["'`]/u;
 const pdfHeader = "%PDF-";
 const maxArticlePdfBytes = 5 * 1024 * 1024;
 

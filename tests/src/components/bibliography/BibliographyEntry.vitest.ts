@@ -16,7 +16,7 @@ describe("BibliographyEntry", () => {
     expect(view).toContain(
       'href="https://example.com/source-with-a-very-long-path-that-wraps"',
     );
-    expect(view).toContain(">Source</a>");
+    expect(view).toMatch(/>\s*Source\s*<\/a>/);
     expect(view).toContain("https://example.com/source-with-a-very-long-path");
     expect(view).toContain("Cited by articles");
     expect(view).not.toContain("<h3");

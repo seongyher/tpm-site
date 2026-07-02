@@ -32,9 +32,7 @@ export interface ViteBuildGateResult {
 
 /** Relative production-safety policy for a build experiment. */
 export type ViteBuildScenarioPolicy =
-  | "candidate"
-  | "measurement-only"
-  | "unsupported";
+  "candidate" | "measurement-only" | "unsupported";
 
 /** JSON-serializable fragment merged into the base Astro Vite config. */
 export interface ViteConfigExperimentFragment {

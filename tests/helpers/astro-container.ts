@@ -1,4 +1,4 @@
-import { getContainerRenderer as getMdxContainerRenderer } from "@astrojs/mdx";
+import { getContainerRenderer as getMdxContainerRenderer } from "@astrojs/mdx/container-renderer";
 import { experimental_AstroContainer as AstroContainer } from "astro/container";
 import { loadRenderers } from "astro:container";
 
@@ -6,8 +6,7 @@ import { loadRenderers } from "astro:container";
 export const testSiteUrl = "https://thephilosophersmeme.com";
 
 let renderersPromise:
-  | Promise<Awaited<ReturnType<typeof loadRenderers>>>
-  | undefined;
+  Promise<Awaited<ReturnType<typeof loadRenderers>>> | undefined;
 
 /**
  * Creates an Astro component-test container with the project's static-site

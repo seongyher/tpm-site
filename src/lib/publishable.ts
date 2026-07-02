@@ -16,10 +16,7 @@ export type PublishableKind = "announcement" | "article";
 
 /** Public surfaces a publishable entry may opt out of. */
 export type PublishableVisibilitySurface =
-  | "directory"
-  | "feed"
-  | "homepage"
-  | "search";
+  "directory" | "feed" | "homepage" | "search";
 
 /** Normalized publishable visibility with permissive defaults. */
 export type PublishableVisibility = Record<

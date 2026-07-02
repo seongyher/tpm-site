@@ -15,10 +15,7 @@ import { collectPayloadReport, type PayloadReport } from "./report-payload";
 
 /** Supported minify-html experiment names. */
 export type MinifyHtmlExperimentName =
-  | "conservative"
-  | "inline-js"
-  | "noncompliant-measurement"
-  | "optional-tags";
+  "conservative" | "inline-js" | "noncompliant-measurement" | "optional-tags";
 
 /** Explicit minify-html configuration used by experiment runs. */
 export interface MinifyHtmlConfig {

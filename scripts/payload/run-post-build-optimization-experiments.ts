@@ -35,8 +35,7 @@ export interface PostBuildOptimizationGateResult {
 
 /** Policy for how an optimization scenario may affect production adoption. */
 export type PostBuildOptimizationScenarioPolicy =
-  | "candidate"
-  | "measurement-only";
+  "candidate" | "measurement-only";
 
 /** Supported standalone post-build transform. */
 export type PostBuildTransformName = BuildOutputTransformName;

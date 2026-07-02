@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import config from "../../astro.config";
+import config, { markdownProcessorOptions } from "../../astro.config";
 import { articleImagePolicyCacheKey } from "../../src/lib/article-image-policy";
 import { siteInstance } from "../../src/lib/site-instance";
 import {
@@ -39,21 +39,22 @@ describe("Astro config", () => {
   });
 
   test("runs article references through the Markdown pipeline with strict legacy validation", () => {
-    expect(config.markdown?.remarkPlugins).not.toContain(
+    expect(config.markdown?.processor?.name).toBe("unified");
+    expect(markdownProcessorOptions.remarkPlugins).not.toContain(
       remarkArticleReferences,
     );
-    expect(config.markdown?.remarkPlugins).toContainEqual([
+    expect(markdownProcessorOptions.remarkPlugins).toContainEqual([
       remarkArticleReferences,
       { validateLegacyFootnotes: true },
     ]);
   });
 
   test("runs editorial article image handling before Astro optimizes Markdown images", () => {
-    expect(config.markdown?.remarkPlugins).toContainEqual([
+    expect(markdownProcessorOptions.remarkPlugins).toContainEqual([
       remarkArticleImageMarkers,
       { policyCacheKey: articleImagePolicyCacheKey },
     ]);
-    expect(config.markdown?.rehypePlugins).toContainEqual([
+    expect(markdownProcessorOptions.rehypePlugins).toContainEqual([
       rehypeArticleImages,
       { policyCacheKey: articleImagePolicyCacheKey },
     ]);

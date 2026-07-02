@@ -17,6 +17,35 @@ deferred work keeps its exact original wording and checkbox state.
 - [ ] Rerun `bun run payload:vite:experiments`, browser tests, accessibility
       tests, and release checks before adopting the config.
 
+## Sätteri Markdown Processor Migration Evaluation
+
+Reason deferred: Astro 7 made Sätteri the default Markdown processor, but this
+project intentionally keeps the unified/remark/rehype pipeline during the
+dependency upgrade so article references, editorial image handling, and MDX
+output stay stable. Porting those plugins is a semantic content-compiler
+migration, not a dependency-maintenance task.
+
+Resume trigger: resume if unified support becomes a maintenance or compatibility
+blocker, if Sätteri offers a measurable build or authoring benefit, or if
+Markdown rendering is being revisited after the article reference and image
+pipelines are stable.
+
+- [ ] Inventory the current unified-only behavior, including
+      `remarkArticleReferences`, `remarkArticleImageMarkers`,
+      `rehypeArticleImages`, GFM, SmartyPants, MDX renderer behavior, generated
+      heading IDs, and reference/backlink markup.
+- [ ] Build a rendered-output comparison harness for representative articles:
+      plain Markdown, citation-heavy, image-heavy, legacy footnotes, and MDX
+      with custom components.
+- [ ] Prototype equivalent Sätteri MDAST/HAST plugins and compare generated
+      HTML, table of contents data, search output, RSS output, PDFs, and global
+      bibliography aggregation against the unified pipeline.
+- [ ] Measure build performance and dependency simplification separately from
+      output fidelity so the migration has a clear reason beyond following a
+      default.
+- [ ] Migrate only after fixture tests, release checks, and representative
+      visual spot checks show the article compiler output remains acceptable.
+
 ## Citation Occurrence Metadata And Locators
 
 Reason deferred: page/chapter/range locators are a real gap in the citation

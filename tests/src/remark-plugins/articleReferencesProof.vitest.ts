@@ -92,8 +92,8 @@ describe("article reference proof fixtures", () => {
 
       expect(view).toContain("data-article-reference-marker");
       expect(view).toContain("data-article-references");
-      expect(view).toContain(">Notes<");
-      expect(view).toContain(">Bibliography<");
+      expect(view).toMatch(/>\s*Notes\s*</);
+      expect(view).toMatch(/>\s*Bibliography\s*</);
       expect(view).not.toContain('data-footnotes="true"');
       expect(view).not.toContain("[@");
     }

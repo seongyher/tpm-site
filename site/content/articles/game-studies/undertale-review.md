@@ -82,7 +82,7 @@ I'd heard hearsay that playing the genocide run provides some unique story conte
 
 There's no such thing as 'consequence-free'. Even though my 'main' save-file would be unaffected by my actions, Undertale made it clear that what I was doing could only be construed as selfish cruelty for my own indulgence. It's something of a trope that in games with save systems, there's always scope to abuse that reality-bending power. Just before turning the game off, we decide to see how many NPCs we can hit with a single fireball, or whether we can kill the entire town with just a pistol because we know that those events aren't canonical... they won't follow us.
 
-"That's not *really* who I am..."
+"That's not _really_ who I am..."
 
 "It's just a _game..._"
 
