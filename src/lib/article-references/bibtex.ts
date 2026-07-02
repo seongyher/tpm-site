@@ -29,8 +29,7 @@ type ParseValueResult =
   | { ok: true; value: string };
 
 type SkipIgnoredEntryResult =
-  | { diagnostic: BibtexParseDiagnostic; ok: false }
-  | { ok: true };
+  { diagnostic: BibtexParseDiagnostic; ok: false } | { ok: true };
 
 /**
  * Parses BibTeX data blocks into serializable entries.

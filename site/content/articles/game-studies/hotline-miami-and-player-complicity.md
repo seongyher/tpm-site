@@ -63,4 +63,4 @@ The most obvious theme is turning a critical eye towards violence in popular med
 
 "Well, I'd like to not have to kill, but I don't have a choice: there's only one way to play the game! Is the violence not the intention of the game developer and thus ultimately not my responsibility?" You might protest, and miss the point.
 
-You're right that _the game_ forces you to kill, but *nobody* forced you to play the game.
+You're right that _the game_ forces you to kill, but _nobody_ forced you to play the game.

@@ -1,8 +1,6 @@
 /** How a failure probe keeps bad data isolated from production content. */
 export type QaFailureFixtureStrategy =
-  | "generated-output"
-  | "static-fixture"
-  | "temporary-fixture";
+  "generated-output" | "static-fixture" | "temporary-fixture";
 
 /** Metadata for one representative QA failure probe. */
 export interface QaFailureProbe {

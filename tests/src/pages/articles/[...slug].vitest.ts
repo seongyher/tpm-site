@@ -75,8 +75,8 @@ describe("article page", () => {
       expect(view).toContain("data-article-toc");
       expect(view).toContain('href="#article-references-notes-heading"');
       expect(view).toContain('href="#article-references-bibliography-heading"');
-      expect(view).toContain(">Notes<");
-      expect(view).toContain(">Bibliography<");
+      expect(view).toMatch(/>\s*Notes\s*</);
+      expect(view).toMatch(/>\s*Bibliography\s*</);
       expect(view).not.toContain('data-footnotes="true"');
       expect(view).not.toContain("[@");
     }

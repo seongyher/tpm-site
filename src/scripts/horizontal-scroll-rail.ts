@@ -1,6 +1,10 @@
 const boundAttribute = "data-scroll-rail-bound";
 const disabledThresholdPx = 2;
 
+type ResizeObserverConstructor = new (
+  callback: ResizeObserverCallback,
+) => ResizeObserver;
+
 /**
  * Installs progressive scroll controls for horizontal rail components.
  *
@@ -130,20 +134,23 @@ function reducedMotion(rootWindow: Window): boolean {
   return rootWindow.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
+function isResizeObserverConstructor(
+  value: unknown,
+): value is ResizeObserverConstructor {
+  return typeof value === "function";
+}
+
 function resizeObserver(
   rootWindow: Window,
   update: () => void,
 ): ResizeObserver | undefined {
   const Observer: unknown = Reflect.get(rootWindow, "ResizeObserver");
 
-  if (typeof Observer !== "function") {
+  if (!isResizeObserverConstructor(Observer)) {
     return undefined;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Browser ResizeObserver is newable when present; Reflect access keeps tests with partial Window mocks safe.
-  return new (Observer as new (
-    callback: ResizeObserverCallback,
-  ) => ResizeObserver)(update);
+  return new Observer(update);
 }
 
 if (typeof document !== "undefined") {

@@ -14,9 +14,7 @@ type AnchorAlignment = "center" | "end" | "start";
 
 /** Placement preference for an anchored surface. */
 export type AnchorPlacement =
-  | "viewport-fill"
-  | `${AnchorSide}-${AnchorAlignment}`
-  | AnchorSide;
+  "viewport-fill" | `${AnchorSide}-${AnchorAlignment}` | AnchorSide;
 
 /** Ordered collision strategy used after preferred placement is computed. */
 type AnchorFallback =

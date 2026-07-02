@@ -23,6 +23,10 @@ function secretExpression(name: string): string {
   return ["$", "{{ secrets.", name, " }}"].join("");
 }
 
+function envExpression(name: string): string {
+  return ["$", "{{ env.", name, " }}"].join("");
+}
+
 describe("CI workflow", () => {
   test("uploads one verified build artifact for downstream checks", async () => {
     const workflow = await readCiWorkflow();
@@ -75,10 +79,11 @@ describe("CI workflow", () => {
     const workflow = await readCiWorkflow();
     const deploy = jobBlock(workflow, "deploy-cloudflare");
 
+    expect(workflow).toContain('NODE_VERSION: "22.22.3"');
     expect(deploy).toContain("needs:");
     expect(deploy).toContain("- build");
     expect(deploy).toContain("actions/setup-node@v4");
-    expect(deploy).toContain("node-version: 22.12.0");
+    expect(deploy).toContain(`node-version: ${envExpression("NODE_VERSION")}`);
     expect(deploy).toContain("actions/download-artifact@v4");
     expect(deploy).toContain("name: verified-dist");
     expect(deploy).toContain("path: dist");

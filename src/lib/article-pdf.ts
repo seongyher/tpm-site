@@ -41,8 +41,7 @@ interface ArticlePdfViewModelInput {
   articleReferences?: ArticleReferenceData | undefined;
   authors?: readonly AuthorSummary[];
   config?:
-    | Pick<SiteConfig, "contentDefaults" | "features" | "identity">
-    | undefined;
+    Pick<SiteConfig, "contentDefaults" | "features" | "identity"> | undefined;
   site?: string | undefined | URL;
 }
 

@@ -11,7 +11,7 @@ describe("ArticleFootnotes", () => {
       props: { notes: articleReferenceFixture.notes },
     });
 
-    expect(view).toContain(">Notes<");
+    expect(view).toMatch(/>\s*Notes\s*</);
     expect(view).toContain('id="note-context"');
     expect(view).toContain("<ol");
     expect(view).toContain("Context with");
