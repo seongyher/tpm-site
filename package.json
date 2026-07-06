@@ -174,7 +174,7 @@
     "eslint-plugin-testing-library": "^7.16.2",
     "eslint-plugin-toml": "^1.4.0",
     "eslint-plugin-total-functions": "^7.1.0",
-    "eslint-plugin-unicorn": "^70.0.0",
+    "eslint-plugin-unicorn": "^71.0.0",
     "eslint-plugin-validate-jsx-nesting": "^0.1.1",
     "eslint-plugin-yml": "^3.5.0",
     "globals": "^17.7.0",
