@@ -198,7 +198,7 @@
     "remark-rehype": "^11.1.2",
     "sort-package-json": "^4.0.0",
     "svgo": "^4.0.1",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.62.1",
     "unist-util-visit": "^5.1.0",
     "vitest": "^4.1.9",
