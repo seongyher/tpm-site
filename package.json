@@ -148,7 +148,7 @@
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-array-func": "^5.1.1",
-    "eslint-plugin-astro": "^2.1.1",
+    "eslint-plugin-astro": "^3.1.0",
     "eslint-plugin-better-tailwindcss": "^4.6.0",
     "eslint-plugin-decorator-position": "^6.1.1",
     "eslint-plugin-jsdoc": "^63.0.10",
