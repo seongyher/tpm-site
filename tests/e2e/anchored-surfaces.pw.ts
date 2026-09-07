@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import {
@@ -7,8 +9,6 @@ import {
   expectViewportContained,
   visibleBoundingBox,
 } from "./helpers/layout";
-
-const previewBaseUrl = "http://127.0.0.1:4322";
 
 /**
  * Opens the visible category dropdown at an index.
@@ -170,10 +170,16 @@ test.describe("anchored header surfaces", () => {
   });
 
   test("touch users can open category previews without losing direct category navigation", async ({
+    baseURL,
     browser,
   }) => {
+    assert(
+      baseURL !== undefined,
+      "Expected the preview server base URL to be configured.",
+    );
+
     const context = await browser.newContext({
-      baseURL: previewBaseUrl,
+      baseURL,
       hasTouch: true,
       viewport: { height: 768, width: 1024 },
     });
@@ -201,7 +207,7 @@ test.describe("anchored header surfaces", () => {
       await button.tap();
       await expect(panel).toBeVisible();
       await categoryLink.tap();
-      await expect(page).toHaveURL(`${previewBaseUrl}${categoryHref}`);
+      await expect(page).toHaveURL(`${baseURL}${categoryHref}`);
     } finally {
       await context.close();
     }

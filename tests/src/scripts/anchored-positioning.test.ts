@@ -376,21 +376,16 @@ function resizeObserverConstructor(): {
   let disconnectCount = 0;
 
   class TestResizeObserver implements ResizeObserver {
-    constructor(callback: ResizeObserverCallback) {
-      void callback;
-    }
-
     disconnect(): void {
       disconnectCount += 1;
     }
 
-    observe(element: Element, options?: ResizeObserverOptions): void {
-      void options;
+    observe(element: Element, _options?: ResizeObserverOptions): void {
       observedSelectors.push(selectorFor(element));
     }
 
-    unobserve(element: Element): void {
-      void element;
+    unobserve(_element: Element): void {
+      // Per-element cleanup is outside this fixture's observation contract.
     }
   }
 

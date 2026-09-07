@@ -1,8 +1,32 @@
 version: 2
 updates:
+  # Native Bun updates await lockfile v2 and alias support; see DEFERRED.md.
+  # Keep manifest proposals until then. Before merging each PR, regenerate
+  # bun.lock with the Bun version pinned in package.json:
+  # bun install --lockfile-only, then bun install --frozen-lockfile.
   - package-ecosystem: npm
     directory: "/"
     schedule:
       interval: daily
       time: "10:00"
     open-pull-requests-limit: 10
+    groups:
+      astro:
+        patterns:
+          - astro
+          - "@astrojs/*"
+      playwright:
+        patterns:
+          - "@playwright/*"
+          - playwright
+          - playwright-core
+      tailwind:
+        patterns:
+          - tailwindcss
+          - "@tailwindcss/*"
+      typescript-eslint:
+        patterns:
+          - typescript
+          - typescript-eslint
+          - "@typescript/*"
+          - "@typescript-eslint/*"

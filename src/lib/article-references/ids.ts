@@ -57,19 +57,16 @@ export function articleReferenceBacklinkId(
  * inline citation markers default to numeric display so author-written prose
  * citations such as "Knobe (2015)" do not duplicate themselves in the body.
  *
- * @param kind Reference kind.
+ * @param _kind Reference kind.
  * @param entryOrder One-based entry order within that reference kind.
- * @param displayLabel Optional author-provided display label.
+ * @param _displayLabel Optional author-provided display label.
  * @returns Marker display text.
  */
 export function articleReferenceMarkerDisplayText(
-  kind: ArticleReferenceKind,
+  _kind: ArticleReferenceKind,
   entryOrder: number,
-  displayLabel: string | undefined,
+  _displayLabel: string | undefined,
 ): string {
-  void kind;
-  void displayLabel;
-
   return String(entryOrder);
 }
 

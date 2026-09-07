@@ -3,6 +3,33 @@
 The milestone blocks below were copied from the previous `CHECKLIST.md` so
 deferred work keeps its exact original wording and checkbox state.
 
+## Native Dependabot Bun Lockfile Updates
+
+Reason deferred: as of September 7, 2026, Dependabot's Bun updater bundles Bun
+1.3.14 and rejects lockfile versions above 1. This project requires Bun 1.4.2
+for correct TypeScript package alias resolution and now tracks `bun.lock`
+version 2. [Upstream PR #16071](https://github.com/dependabot/dependabot-core/pull/16071)
+adds lockfile v2/v3 support but remains open and proposes Bun 1.4.0, which still
+has the alias bug. Native Bun updates cannot yet preserve this dependency
+graph reliably.
+
+Temporary workflow: retain `package-ecosystem: npm` for grouped manifest update
+proposals. Before merging a dependency PR, regenerate `bun.lock` using the Bun
+version pinned in `package.json` with `bun install --lockfile-only`, then run
+`bun install --frozen-lockfile` and the relevant repository checks. Keep the
+frozen-lockfile CI gate enabled.
+
+Resume trigger: resume when GitHub's deployed Bun updater supports lockfile
+version 2 and bundles Bun 1.4.2 or later with the TypeScript alias fix. An
+upstream merge or parser-only version bump is insufficient.
+
+- [ ] Verify both prerequisites in the deployed Dependabot updater image.
+- [ ] Switch the root updater to `package-ecosystem: bun` and update the
+      dependency automation invariant test.
+- [ ] Verify a generated update preserves both TypeScript compiler aliases,
+      includes the matching `bun.lock` changes, and passes frozen installation
+      and repository checks before removing the manual regeneration guidance.
+
 ## Milestone 70: Asset Inlining Delivery Strategy Follow-Up
 
 - [ ] Design whether `assetsInlineLimit: 0` is desirable despite changing

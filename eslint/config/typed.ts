@@ -152,6 +152,14 @@ export function createTypedRuleConfigs(): readonly ConfigWithExtends[] {
         "@typescript-eslint/no-unnecessary-type-assertion": "error",
         "@typescript-eslint/no-unnecessary-type-conversion": "error",
         "@typescript-eslint/no-unsafe-type-assertion": "error",
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            args: "all",
+            argsIgnorePattern: "^_",
+            reportUsedIgnorePattern: true,
+          },
+        ],
         "@typescript-eslint/no-wrapper-object-types": "error",
         "@typescript-eslint/only-throw-error": "error",
         "@typescript-eslint/prefer-enum-initializers": "error",

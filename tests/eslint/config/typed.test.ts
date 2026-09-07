@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { Linter } from "eslint";
+import tseslint from "typescript-eslint";
 
 import {
   createTypedPresetConfigs,
@@ -26,5 +28,52 @@ describe("typed ESLint config", () => {
     expect(config?.rules?.["@typescript-eslint/no-non-null-assertion"]).toBe(
       "error",
     );
+  });
+
+  test.each([
+    [
+      "rejects ordinary unused parameters before used parameters",
+      "export function keep(unused: number, used: number) { return used; }",
+      "unusedVar",
+    ],
+    [
+      "accepts explicitly unused parameters",
+      "export function keep(_unused: number, used: number) { return used; }",
+      null,
+    ],
+    [
+      "rejects used parameters marked as unused",
+      "export function keep(_used: number) { return _used; }",
+      "usedIgnoredVar",
+    ],
+    [
+      "continues rejecting unused local variables",
+      "export function keep(used: number) { const unused = used; return 1; }",
+      "unusedVar",
+    ],
+  ])("%s", (_description, source, expectedMessageId) => {
+    const [config] = createTypedRuleConfigs();
+    const ruleName = "@typescript-eslint/no-unused-vars";
+    const rule = config?.rules?.["@typescript-eslint/no-unused-vars"];
+
+    if (rule === undefined) {
+      throw new Error("Expected the unused-variable policy to be configured.");
+    }
+
+    const messages = new Linter().verify(
+      source,
+      {
+        files: ["**/*.ts"],
+        languageOptions: { parser: tseslint.parser },
+        plugins: { "@typescript-eslint": tseslint.plugin },
+        rules: { [ruleName]: rule },
+      },
+      { filename: "fixture.ts" },
+    );
+
+    expect(messages.map((message) => message.messageId)).toEqual(
+      expectedMessageId === null ? [] : [expectedMessageId],
+    );
+    expect(messages.every((message) => message.ruleId === ruleName)).toBe(true);
   });
 });

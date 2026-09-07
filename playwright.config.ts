@@ -1,6 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 4322;
+const configuredPort = process.env["PLAYWRIGHT_TEST_PORT"];
+const port = configuredPort === undefined ? 4322 : Number(configuredPort);
+
+if (
+  (configuredPort !== undefined && !/^\d+$/u.test(configuredPort)) ||
+  !Number.isInteger(port) ||
+  port < 1 ||
+  port > 65_535
+) {
+  throw new Error("PLAYWRIGHT_TEST_PORT must be an integer from 1 to 65535.");
+}
+
+const baseURL = `http://127.0.0.1:${port}`;
 
 if (process.env["NO_COLOR"] !== undefined) {
   delete process.env["NO_COLOR"];
@@ -25,13 +37,15 @@ export default defineConfig({
   testMatch: "**/*.pw.ts",
   timeout: 30_000,
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL,
     trace: "retain-on-failure",
   },
   webServer: {
-    command: `bun run preview --host 127.0.0.1 --port ${port}`,
-    reuseExistingServer: process.env["CI"] !== "true",
+    command: `bun run preview --ignore-lock --host 127.0.0.1 --port ${port}`,
+    // Playwright must own the process even when Astro detects an AI agent.
+    env: { ASTRO_PREVIEW_BACKGROUND: "0" },
+    reuseExistingServer: false,
     timeout: 15_000,
-    url: `http://127.0.0.1:${port}`,
+    url: baseURL,
   },
 });

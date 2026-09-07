@@ -4,6 +4,29 @@ This file tracks implementation milestones. It may keep completed items when
 they are useful context. Explicitly deferred work belongs in
 [DEFERRED.md](./DEFERRED.md).
 
+## Dependency And Security Refresh — September 2026
+
+- [x] Inspect all ten open dependency PRs and capture the vulnerability baseline:
+      43 advisories (29 high, 12 moderate, two low). Every PR changes only
+      `package.json` and fails CI's frozen-lockfile installation.
+- [x] Update direct dependencies and coordinated Astro, TypeScript/ESLint,
+      Playwright, and Tailwind families; regenerate `bun.lock` with Bun.
+- [x] Resolve compatibility failures while preserving the unified Markdown
+      pipeline, article content, static output, and existing QA strictness.
+- [x] Audit the refreshed dependency tree, resolve all reported vulnerabilities,
+      and document any required transitive overrides with their rationale.
+- [x] Group related dependency proposals and share the Bun pin with CI.
+      Native Bun Dependabot updates remain upstream-blocked; explicit resume
+      criteria and the manifest-proposal workflow are documented in
+      `DEFERRED.md` and `agent-docs/DEPENDENCY_MAINTENANCE.md`.
+- [x] Verify frozen installation, repository checks, release build/output,
+      browser behavior, and all-severity dependency audit before completion.
+      `check:release` passes, including 177 production and 16 catalog browser
+      tests. Accessibility passes all 13 tests. Lighthouse passes required
+      assertions on six URLs, with one homepage performance advisory (88/95).
+      Frozen installation succeeds, no direct updates remain, and the audit
+      reports zero vulnerabilities across 1,307 packages.
+
 ## Working Rules
 
 - Move postponed work to `DEFERRED.md` with a resume trigger instead of leaving
