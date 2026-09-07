@@ -1,3 +1,5 @@
+import assert from "node:assert/strict";
+
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 import {
@@ -9,7 +11,6 @@ import {
 } from "./helpers/layout";
 
 const articleWithHoverImages = "/articles/social-media-freedom/";
-const previewBaseUrl = "http://127.0.0.1:4322";
 
 /**
  * Opens the hover-image preview at the provided index.
@@ -204,10 +205,16 @@ test.describe("native Astro hover-image previews", () => {
   });
 
   test("open on touch tap, dismiss outside, and keep a full-image path", async ({
+    baseURL,
     browser,
   }) => {
+    assert(
+      baseURL !== undefined,
+      "Expected the preview server base URL to be configured.",
+    );
+
     const context = await browser.newContext({
-      baseURL: previewBaseUrl,
+      baseURL,
       hasTouch: true,
       viewport: { height: 720, width: 390 },
     });

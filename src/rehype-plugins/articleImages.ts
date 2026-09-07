@@ -104,14 +104,12 @@ export function articleImagesFromFrontmatter(
 /**
  * Remark plugin that marks only standalone Markdown images for figure output.
  *
- * @param options Serializable build policy options passed through Astro config.
+ * @param _options Serializable build policy options used by Astro's cache key.
  * @returns A Markdown AST transformer used before Astro converts images to HTML.
  */
 export function remarkArticleImageMarkers(
-  options: RemarkArticleImageMarkersOptions = {},
+  _options: RemarkArticleImageMarkersOptions = {},
 ): (tree: Root) => void {
-  void options.policyCacheKey;
-
   return function markArticleImages(tree: Root) {
     transformRawIframeHtml(tree);
     markStandaloneImages(tree);
@@ -121,14 +119,12 @@ export function remarkArticleImageMarkers(
 /**
  * Rehype plugin that gives plain Markdown article images editorial anatomy.
  *
- * @param options Serializable build policy options passed through Astro config.
+ * @param _options Serializable build policy options used by Astro's cache key.
  * @returns An HTML AST transformer that wraps standalone images in figures.
  */
 export function rehypeArticleImages(
-  options: RehypeArticleImagesOptions = {},
+  _options: RehypeArticleImagesOptions = {},
 ): (tree: HastParent, file: VFileLike) => void {
-  void options.policyCacheKey;
-
   return function transformArticleImages(tree: HastParent, file: VFileLike) {
     transformChildren(tree, [], file, { renderedImageCount: 0 });
   };
@@ -865,19 +861,24 @@ function standaloneMdastImage(parent: {
 }
 
 function markMdastImage(image: Image): void {
+  const data = image.data ?? {};
+  const properties = "hProperties" in data ? data.hProperties : undefined;
   const hProperties =
-    typeof image.data?.hProperties === "object" &&
-    !Array.isArray(image.data.hProperties)
-      ? image.data.hProperties
+    typeof properties === "object" &&
+    properties !== null &&
+    !Array.isArray(properties)
+      ? properties
       : {};
 
-  image.data = {
-    ...image.data,
+  const markedData = {
+    ...data,
     hProperties: {
       ...hProperties,
       [standaloneImageProperty]: "true",
     },
   };
+
+  image.data = markedData;
 }
 
 function isMdastParent(node: Nodes): node is MdastParentNode {

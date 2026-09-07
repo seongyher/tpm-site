@@ -274,7 +274,7 @@ function dispatchFocusEvent(
 }
 
 function dispatchKeyboardEvent(
-  element: HTMLElement,
+  _element: HTMLElement,
   window: Window,
   eventName: string,
   key: string,
@@ -286,8 +286,6 @@ function dispatchKeyboardEvent(
   Object.defineProperty(event, "key", {
     value: key,
   });
-
-  void element;
 
   return window.document.dispatchEvent(event);
 }

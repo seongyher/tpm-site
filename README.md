@@ -6,14 +6,17 @@ Astro static site for The Philosopher's Meme.
 
 ## Requirements
 
-- Bun
-- Node.js `>=22.12.0`
+- Bun `1.4.2` (the exact version in `package.json`)
+- Node.js `^22.22.3 || ^24.16.0 || >=26.3.0` (`.node-version` pins CI's Node 22 release)
 
 Install dependencies:
 
 ```sh
 bun install
 ```
+
+See [dependency maintenance](agent-docs/DEPENDENCY_MAINTENANCE.md) for the
+TypeScript compiler/API setup, security overrides, and dependency-update checks.
 
 ## Common Commands
 

@@ -87,6 +87,37 @@ describe("rehypeArticleImages", () => {
     expect(html).not.toContain("data-article-image-figure");
   });
 
+  test("preserves existing image metadata and HTML properties when marking standalone images", () => {
+    const tree = remark().parse("![Caption](../assets/image.png)");
+    const [paragraph] = tree.children;
+
+    if (paragraph?.type !== "paragraph") {
+      throw new Error("Expected a Markdown image paragraph.");
+    }
+
+    const [image] = paragraph.children;
+
+    if (image?.type !== "image") {
+      throw new Error("Expected a standalone Markdown image.");
+    }
+
+    const originalData = {
+      editorialSource: "original",
+      hProperties: { className: ["existing-image"], title: "Image title" },
+    };
+    image.data = originalData;
+
+    remarkArticleImageMarkers({ policyCacheKey: "test-policy" })(tree);
+
+    expect(image.data).toEqual({
+      ...originalData,
+      hProperties: {
+        ...originalData.hProperties,
+        [standaloneMarkerForTests]: "true",
+      },
+    });
+  });
+
   test("accepts Astro MDX camel-cased standalone image markers", () => {
     const image = {
       children: [],

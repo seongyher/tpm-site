@@ -28,6 +28,38 @@ function envExpression(name: string): string {
 }
 
 describe("CI workflow", () => {
+  test("uses the pinned package manager version for every Bun job", async () => {
+    const [workflow, manifestSource] = await Promise.all([
+      readCiWorkflow(),
+      readFile("package.json", "utf8"),
+    ]);
+    const manifest: unknown = JSON.parse(manifestSource);
+    const bunSetups = workflow
+      .split("      - uses: oven-sh/setup-bun@v2\n")
+      .slice(1);
+
+    if (
+      typeof manifest !== "object" ||
+      manifest === null ||
+      !("packageManager" in manifest) ||
+      typeof manifest.packageManager !== "string"
+    ) {
+      throw new TypeError("package.json must declare its package manager.");
+    }
+
+    expect(manifest.packageManager).toMatch(/^bun@\d+\.\d+\.\d+$/u);
+    expect(bunSetups.length).toBeGreaterThan(0);
+    expect(workflow).not.toContain("bun-version:");
+
+    for (const setup of bunSetups) {
+      expect(
+        setup.startsWith(
+          "        with:\n          bun-version-file: package.json\n",
+        ),
+      ).toBe(true);
+    }
+  });
+
   test("uploads one verified build artifact for downstream checks", async () => {
     const workflow = await readCiWorkflow();
     const build = jobBlock(workflow, "build");
