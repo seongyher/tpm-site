@@ -22,11 +22,9 @@ const { items, title = "Most Recent" } = Astro.props;
     {title}
   </h2>
   {
-    (
-      <CompactEntryList
-        items={items}
-        emptyText="Recent articles will appear here."
-      />
-    )
+    <CompactEntryList
+      items={items}
+      emptyText="Recent articles will appear here."
+    />
   }
 </section>

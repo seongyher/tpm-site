@@ -6,7 +6,7 @@ description: 'I think there''s a school of ‘Internet philosophy’ like there 
   of demographics, dominant areas of interest (both within and without strict philosophy)
   and conventions and canons unique to the school.
 
-'
+  '
 date: 2017-03-27 03:16:00 +13:00
 author: "Seong-Young Her"
 tags:

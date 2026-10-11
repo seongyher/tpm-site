@@ -47,24 +47,22 @@ const columnClasses = {
     size={headingLevel === 1 ? "page" : "section"}
     title={title}
   />
-  {
-    items.length > 0 ? (
-      <ul class:list={["grid gap-3", columnClasses[columns]]}>
-        {items.map((item) => (
-          <TermCard
-            count={item.count}
-            description={item.description}
-            href={item.href}
-            itemNoun={itemNoun}
-            itemNounPlural={itemNounPlural}
-            title={item.title}
-          />
-        ))}
-      </ul>
-    ) : (
-      <p class="text-muted-foreground text-sm" data-term-overview-empty>
-        {emptyLabel}
-      </p>
-    )
-  }
+  {items.length > 0 ? (
+    <ul class:list={["grid gap-3", columnClasses[columns]]}>
+      {items.map((item) => (
+        <TermCard
+          count={item.count}
+          description={item.description}
+          href={item.href}
+          itemNoun={itemNoun}
+          itemNounPlural={itemNounPlural}
+          title={item.title}
+        />
+      ))}
+    </ul>
+  ) : (
+    <p class="text-muted-foreground text-sm" data-term-overview-empty>
+      {emptyLabel}
+    </p>
+  )}
 </section>

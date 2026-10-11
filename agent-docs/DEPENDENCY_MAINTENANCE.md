@@ -1,114 +1,109 @@
 # Dependency Maintenance
 
 Use the exact Bun version in `package.json`. GitHub Actions reads that same
-`packageManager` field through `bun-version-file: package.json`. Dependabot
-temporarily uses the `npm` ecosystem for manifest update proposals. Complete
-each proposal by regenerating `bun.lock` with the pinned Bun version and running
-the checks below. Keep frozen-lockfile installation enabled: a manifest-only
-dependency bump is not reproducible and must fail CI.
+`packageManager` field through `bun-version-file: package.json`. CI and
+`.node-version` use Node 22.23.3; the package engine range remains authoritative
+for other supported Node releases.
 
-As of September 7, 2026, Dependabot's native Bun updater still bundles Bun
-1.3.14 and supports only lockfile version 1; this project now needs Bun 1.4.2
-and its generated version 2 lockfile. Native support is tracked by
-[Dependabot PR 16071](https://github.com/dependabot/dependabot-core/pull/16071),
-but its proposed Bun 1.4.0 also predates the TypeScript alias fix below. Switch
-ecosystems only after both fixes are deployed; the resume criteria are recorded
-in `DEFERRED.md`. Do not downgrade the lockfile or remove frozen installation
-to make manifest-only proposals pass.
+Dependabot temporarily uses the `npm` ecosystem for manifest update proposals.
+Complete each proposal by regenerating `bun.lock` with the pinned Bun version.
+Keep frozen-lockfile installation enabled: a manifest-only dependency bump is
+not reproducible and must fail CI. Native Bun support remains blocked on
+[Dependabot PR 16071](https://github.com/dependabot/dependabot-core/pull/16071).
+Switch only after its deployed updater supports this lockfile and Bun's nested
+TypeScript alias fix; resume criteria are recorded in `DEFERRED.md`.
 
-## Coordinated Updates
+## Smaller QA Toolchain
 
-Dependabot groups Astro integrations, Playwright packages, Tailwind packages,
-and TypeScript/ESLint packages. Update related packages together and regenerate
-the lockfile with Bun. Updating only direct dependencies can retain vulnerable
-transitive resolutions; inspect the all-severity audit after each refresh.
+The October 2026 simplification removes ESLint and its plugin/config stack,
+Markdownlint, Lighthouse CI/Puppeteer, and `gray-matter`. Oxlint runs native
+JavaScript/TypeScript correctness rules with no JavaScript plugins or separate
+typechecking engine. Prettier owns formatting. Astro/TypeScript checks,
+content/schema validation, Knip, HTML/output verification, unit/component tests,
+Playwright, axe, dependency audits, and secrets checks remain.
 
-Astro 7.3 and MDX 8 continue using the configured
-`@astrojs/markdown-remark` unified processor. MDX 8 requires Markdown Remark
-7.3 or newer. Preserve the article-reference and image plugins; the Sätteri
-migration remains separate work in `DEFERRED.md`.
+This intentionally retires custom ESLint style/purity/complexity and type-aware
+lint rules, Astro template lint, Markdown prose lint, and automated Lighthouse
+scores. Compiler and browser checks provide different coverage; they are not
+rule-for-rule substitutes. Use browser Lighthouse manually when investigating
+performance. Astro's generated triple-slash type reference remains permitted.
 
-## TypeScript Compiler And API
+Tooling frontmatter parsing now reuses `@astrojs/markdown-remark`, already part
+of the site compiler. The small adapter preserves the prior body boundary for
+source-line diagnostics. All 115 source content records were compared before
+and after: parsed metadata and body text match exactly. Focused tests cover
+line endings, body offsets, YAML dates/aliases, BOMs, empty metadata, and invalid
+YAML. The site's Markdown rendering plugins are unchanged.
 
-TypeScript 7 provides the native `tsc` command through
-`@typescript/native: npm:typescript@^7.0.2`. Astro, Volar, and typed ESLint still
-need TypeScript 6's JavaScript API, supplied by
-`typescript: npm:@typescript/typescript6@^6.0.2`. Its `@typescript/old` dependency
-resolves to TypeScript 6.0.3 and `tsc6` remains available for compatibility checks.
-The existing `typecheck:tools` script therefore uses TypeScript 7 while Astro
-and ESLint retain their supported compiler API.
+The change removes 42 direct dependencies and adds one (`oxlint`), reducing the
+direct dependency count from 84 to 43 and lockfile package entries from 1,652
+to 795. Both
+unpatched packages, `braces` and `sprintf-js`, are absent from the lockfile.
+There are no advisory dismissals or weakened audit thresholds. Overrides
+specific to the removed stacks have also been removed, including the risky
+Puppeteer browsers override. This reduces maintenance surface; future audit
+findings are still possible.
 
+## Coordinated Updates And Overrides
+
+Dependabot groups Astro integrations, Playwright, Tailwind, and TypeScript
+packages, with a separate weekly GitHub Actions updater. Update related packages
+together and inspect the all-severity audit after refreshing transitive
+resolutions. GitHub's Dependabot alerts API reported alerts disabled for this
+repository during the October refresh; use the registry audit as well.
+
+Keep the unified Markdown processor and article-reference/image plugins. The
+Sätteri migration remains separate work in `DEFERRED.md`.
+
+TypeScript 7 provides native `tsc` through
+`@typescript/native: npm:typescript@^7.0.2`. Astro and Volar still need TypeScript
+6's JavaScript API through `typescript: npm:@typescript/typescript6@^6.0.2`.
 This follows [Microsoft's coexistence guidance](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/).
-Bun 1.3.12 incorrectly resolves the nested alias into a circular wrapper and
-returns an empty compiler API. Bun 1.4.2 includes the
-[resolver fix](https://github.com/oven-sh/bun/pull/33835); regenerate old lockfiles
-with the supported Bun version rather than preserving that bad resolution.
-Remove the compatibility alias only when Astro and typed ESLint support the
-TypeScript 7 API.
+Bun 1.4.2 includes the required [nested alias resolver fix](https://github.com/oven-sh/bun/pull/33835).
+Remove the compatibility alias only when Astro supports the replacement API.
 
-## Security Overrides
-
-The September 2026 refresh preserves existing compatibility/security overrides
-and raises the `fast-uri`, `postcss`, and `qs` floors to the audited releases
-3.1.7, 8.5.28, and 6.16.0 respectively.
-
-`@puppeteer/browsers` is temporarily pinned to **3.2.2**. Lighthouse CI 0.15.1
-uses Lighthouse 12.6.1 and Puppeteer 24, whose browsers 2.x dependency includes
-`extract-zip`. That package has an
-[unpatched symlink traversal advisory](https://github.com/advisories/GHSA-jmr9-qjv8-65gv).
-Browsers 3.x removes it, retaining the synchronous launch/path APIs consumed by
-Puppeteer 24. The exact override deliberately crosses Puppeteer's declared
-version range, so verify actual Lighthouse collection whenever changing it.
-Its Node requirement is compatible with the repository's existing minimum.
-Remove this override when a normal Lighthouse CI dependency update resolves
-browsers 3.x or newer without it. Do not upgrade Puppeteer independently to 25:
-its asynchronous executable-path API requires coordinated Lighthouse changes.
-
-The current graph retains Lighthouse CI's CommonJS `proxy-agent` 6.5.0, which
-also serves browsers 3.2.2 despite that package's optional `>=8.0.1` peer range.
-The browsers HTTP helper was verified through a local HTTP proxy, in addition
-to CommonJS/ESM module loading and a real Chrome launch. Recheck proxy behavior
-when changing this override; a global proxy-agent major override would affect
-Lighthouse CI's own CommonJS imports.
+Remaining security override floors are in `package.json`. In particular,
+Tailwind Typography pins an older CSS selector parser, so
+`postcss-selector-parser` is overridden to 7.1.6. Selector parsing and production
+builds were checked against the override. Remove each override when normal
+parent ranges resolve a patched version without it; do not preserve overrides
+for packages no longer in the graph.
 
 ## Verification
 
-Run `bun install --frozen-lockfile`, `bun run check:release`, and
-`bun run audit:all`. When changing lint plugins also run `bun run lint:mdx`,
-because normal lint excludes authored MDX. For browser tooling overrides run
-`bun run test:perf:built` against the verified release build. Browser and
-accessibility checks must use the browser binaries for the installed Playwright
-version.
+Run `bun install --frozen-lockfile`, `bun run check:release`,
+`bun run test:a11y:built`, and `bun run audit:all`. Browser tests must use the
+binaries for the installed Playwright version. The release gate still blocks
+on high/critical advisories, while the all-severity command reports everything.
 
-Playwright starts its own preview server and refuses to reuse an existing one,
-so catalog and production checks cannot accidentally inspect another site.
-Astro 7.3 backgrounds previews automatically in agent environments; the test
-server sets `ASTRO_PREVIEW_BACKGROUND=0` and uses `--ignore-lock` so Playwright
-owns a foreground process without changing unrelated preview-daemon state.
-If the default port 4322 is occupied, select a free port explicitly, for example
-`PLAYWRIGHT_TEST_PORT=4397 bun run check:release`. The override must be an integer
-between 1 and 65535.
+Playwright owns its preview server (`ASTRO_PREVIEW_BACKGROUND=0`, `--ignore-lock`)
+and refuses to reuse an existing one. If port 4322 is occupied, select a free
+port, for example `PLAYWRIGHT_TEST_PORT=4397 bun run check:release`.
 
-The baseline audit reported 43 vulnerabilities (29 high, 12 moderate, two low).
-Fresh direct/transitive resolution removed 42; the browsers override removed
-the remaining `extract-zip` finding. The all-severity audit then reported no
-vulnerabilities across 1,307 packages. Audit results are a dated snapshot;
-rerun the registry audit before merging subsequent dependency changes.
+The October refresh incorporates the four open Dependabot proposals (#163,
+#165, #166, #168), updates all 33 then-outdated direct dependencies, and pins
+Bun 1.4.3. Prettier's Astro plugin 1.x mechanically reformats 89 Astro files;
+`astroCompressHTML: "html"` matches the existing Astro HTML compression policy.
+Three legacy YAML closing quotes require indentation with the updated parser;
+parsed metadata and article bodies match HEAD, including trailing newlines.
 
-The September 7 refresh was verified with Bun 1.4.2 and Node 24.19.0:
+The initial dependency refresh reduced 43 audit findings to two unpatched
+advisories. Removing the toolchains now resolves those final two findings.
+Lint diagnostic comparison preserves debugger and duplicate-branch errors;
+two JSDoc diagnostics and a redundant Sonar condition diagnostic are intentionally
+retired. See `QA_PREFLIGHT.md` for the scope and diagnostic comparison method.
 
-- Frozen installation succeeded and `bun outdated` returned no direct updates.
-- `check:release` passed, including type/lint/unit/component checks, 16 catalog
-  browser tests, 177 production browser tests, generated-output validation,
-  the dependency audit, and the secrets scan.
-- Authored MDX lint and all 13 accessibility tests passed.
-- Lighthouse passed required assertions on all six URLs. Accessibility,
-  best-practices, and SEO scored 100 everywhere. Five pages scored 99–100 for
-  performance; the homepage scored 88 against the advisory target of 95,
-  with a 12.9-second Speed Index, 2.3-second LCP, zero blocking time, and no
-  layout shift. The performance warning remains an observation from this run;
-  these checks do not establish whether it predates the dependency refresh.
+Local evidence is in ignored `tmp/dependency-refresh-october/` and
+`tmp/qa-simplification/`. Hosted GitHub Actions and Dependency Review run on the
+pull request; check their results before merging.
 
-Local verification logs are in ignored `tmp/dependency-refresh/`, and Lighthouse
-reports are in ignored `.lighthouseci/`. The Lighthouse run used Chromium from
-the installed Playwright release through `CHROME_PATH`.
+Verified after simplification with Bun 1.4.3 and Node 22.23.3:
+
+- Frozen installation and the complete `check:release` gate pass, including
+  typechecking, lint/format/Knip checks, unit/Astro tests, all 16 catalog and 177
+  production browser tests, output/HTML validation, audit, and secrets scanning.
+- All 13 separate axe accessibility tests pass.
+- All-severity audit returns no findings; the two previously unpatched
+  dependencies are absent from the graph.
+- Parser tests pass with 100% line/function coverage, and retained lint
+  diagnostics match after the documented cross-engine normalization.

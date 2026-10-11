@@ -40,7 +40,7 @@ export function parseSiteRedirects(value: unknown): SiteRedirects {
 }
 
 function readSiteRedirectsJson(): unknown {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Build-time redirect config is resolved through the site-instance path adapter.
+  // Build-time redirect config is resolved through the site-instance path adapter.
   return JSON.parse(readFileSync(siteInstance.config.redirects, "utf8"));
 }
 

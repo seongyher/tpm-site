@@ -4,7 +4,7 @@ description: 'It''s a great example of how shaky the definition of ''Internet me
   ''a funny image or video clip'' really is. Are these photos each a meme, or do they
   compose a single meme through being viewed together?
 
-'
+  '
 date: 2017-12-15 15:06:00 +13:00
 author: "Seong-Young Her"
 image: "../../../assets/articles/platform-content-design/25289626_10213166218221965_5340695023336171185_n.jpg"

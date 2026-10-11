@@ -66,16 +66,12 @@ const showSectionLabel = placement === "inline" && sectionLabel !== undefined;
   data-toc-link-placement={placement}
   href={heading.href}
 >
-  {
-    showSectionLabel && (
-      <span
-        aria-hidden="true"
-        class="text-muted-foreground tabular-nums"
-        data-toc-section-label-text
-      >
-        {sectionLabel}
-      </span>
-    )
-  }
+  {showSectionLabel && <span
+    aria-hidden="true"
+    class="text-muted-foreground tabular-nums"
+    data-toc-section-label-text
+  >
+    {sectionLabel}
+  </span>}
   <span>{heading.text}</span>
 </a>

@@ -195,14 +195,14 @@ function browserWindow(
 function runtimeFor(window: Window): AnchoredDisclosureRuntime {
   return {
     classes: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the script.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the script.
       Element: window.Element as unknown as typeof Element,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the script.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the script.
       Node: window.Node as unknown as typeof Node,
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this script test.
+    // Happy DOM provides the browser runtime shape used by this script test.
     document: window.document as unknown as Document,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this script test.
+    // Happy DOM provides the browser runtime shape used by this script test.
     window: window as unknown as globalThis.Window,
   };
 }
@@ -214,7 +214,7 @@ function requiredElement(window: Window, selector: string): HTMLElement {
     throw new Error(`Expected fixture element for selector ${selector}.`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM elements satisfy the browser HTMLElement shape used by the script.
+  // Happy DOM elements satisfy the browser HTMLElement shape used by the script.
   return element as unknown as HTMLElement;
 }
 
@@ -236,7 +236,7 @@ function dispatchMouseEvent(
   eventName: string,
 ): boolean {
   return element.dispatchEvent(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+    // Happy DOM events satisfy DOM Event at runtime for dispatch.
     new window.MouseEvent(eventName, {
       bubbles: true,
       cancelable: true,
@@ -256,7 +256,7 @@ function dispatchPointerEvent(
   });
   Reflect.set(event, "pointerType", pointerType);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+  // Happy DOM events satisfy DOM Event at runtime for dispatch.
   return element.dispatchEvent(event as unknown as Event);
 }
 
@@ -266,7 +266,7 @@ function dispatchFocusEvent(
   eventName: string,
 ): boolean {
   return element.dispatchEvent(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+    // Happy DOM events satisfy DOM Event at runtime for dispatch.
     new window.FocusEvent(eventName, {
       bubbles: true,
     }) as unknown as Event,

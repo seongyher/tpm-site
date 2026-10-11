@@ -22,9 +22,11 @@ const { title = "Explore the Archive" } = Astro.props;
     {title}
   </h2>
   <p class="text-muted-foreground">
-    Browse the full <TextLink href={articlesArchiveUrl()} prefetch="hover"
+    Browse the full
+    <TextLink href={articlesArchiveUrl()} prefetch="hover"
       >article archive</TextLink
-    >, explore <TextLink href={articlesIndexUrl()} prefetch="hover"
+    >, explore
+    <TextLink href={articlesIndexUrl()} prefetch="hover"
       >articles by category</TextLink
     >, or subscribe to the <TextLink href={feedUrl()}>RSS feed</TextLink>.
   </p>

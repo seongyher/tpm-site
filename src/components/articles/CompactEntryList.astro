@@ -31,27 +31,23 @@ const itemClasses = dividers
   : "min-w-0";
 ---
 
-{
-  items.length > 0 ? (
-    <ListTag
-      {...attrs}
-      class:list={["grid min-w-0", !dividers && "gap-3", className]}
-      data-compact-entry-list
-    >
-      {items.map((item) => (
-        <li class:list={[itemClasses]}>
-          <CompactEntryRow
-            item={item}
-            showDescription={showDescription}
-            descriptionLines={descriptionLines}
-            titleLevel={rowTitleLevel}
-          />
-        </li>
-      ))}
-    </ListTag>
-  ) : (
-    <p class="text-muted-foreground m-0 text-sm" data-compact-entry-empty>
-      {emptyText}
-    </p>
-  )
-}
+{items.length > 0 ? (
+  <ListTag
+    {...attrs}
+    class:list={["grid min-w-0", !dividers && "gap-3", className]}
+    data-compact-entry-list
+  >
+    {items.map((item) => <li class:list={[itemClasses]}>
+      <CompactEntryRow
+        item={item}
+        showDescription={showDescription}
+        descriptionLines={descriptionLines}
+        titleLevel={rowTitleLevel}
+      />
+    </li>)}
+  </ListTag>
+) : (
+  <p class="text-muted-foreground m-0 text-sm" data-compact-entry-empty>
+    {emptyText}
+  </p>
+)}

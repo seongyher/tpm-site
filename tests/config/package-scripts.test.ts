@@ -91,16 +91,12 @@ describe("package scripts", () => {
 
     expect(scripts.get("test:e2e:built")).toBe("playwright test tests/e2e");
     expect(scripts.get("test:a11y:built")).toBe("playwright test tests/a11y");
-    expect(scripts.get("test:perf:built")).toBe("lhci autorun");
 
     expect(scripts.get("test:e2e")).toBe(
       "bun --silent run build && bun --silent run test:e2e:built",
     );
     expect(scripts.get("test:a11y")).toBe(
       "bun --silent run build && bun --silent run test:a11y:built",
-    );
-    expect(scripts.get("test:perf")).toBe(
-      "bun --silent run build && bun --silent run test:perf:built",
     );
   });
 

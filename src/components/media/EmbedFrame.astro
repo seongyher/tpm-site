@@ -42,30 +42,24 @@ const frameClass =
       frameClass,
     ]}
   >
-    {
-      Astro.slots.has("default") ? (
-        <slot />
-      ) : fallbackHref ? (
-        <a
-          class="text-primary flex size-full items-center justify-center p-4 text-center"
-          href={fallbackHref}
-        >
-          Open {title}
-        </a>
-      ) : null
-    }
+    {Astro.slots.has("default") ? (
+      <slot />
+    ) : fallbackHref ? (
+      <a
+        class="text-primary flex size-full items-center justify-center p-4 text-center"
+        href={fallbackHref}
+      >
+        Open {title}
+      </a>
+    ) : null}
   </div>
-  {
-    description || fallbackHref ? (
-      <figcaption class="text-muted-foreground text-sm">
-        {description}
-        {description && fallbackHref ? " " : ""}
-        {fallbackHref ? (
-          <a class="text-primary" href={fallbackHref}>
-            Open embed source.
-          </a>
-        ) : null}
-      </figcaption>
-    ) : null
-  }
+  {description || fallbackHref ? (
+    <figcaption class="text-muted-foreground text-sm">
+      {description}
+      {description && fallbackHref ? " " : ""}
+      {fallbackHref ? (
+        <a class="text-primary" href={fallbackHref}> Open embed source. </a>
+      ) : null}
+    </figcaption>
+  ) : null}
 </figure>

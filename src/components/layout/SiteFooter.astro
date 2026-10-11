@@ -27,39 +27,27 @@ const footerLinks = siteConfig.navigation.footer;
       </div>
       <nav aria-label="Footer navigation">
         <ul class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-          {
-            footerLinks.map((link) => (
-              <li>
-                <TextLink href={link.href} variant="subtle" tone="muted">
-                  {link.label}
-                </TextLink>
-              </li>
-            ))
-          }
+          {footerLinks.map((link) => <li>
+            <TextLink href={link.href} variant="subtle" tone="muted">
+              {link.label}
+            </TextLink>
+          </li>)}
         </ul>
       </nav>
-      {
-        footerCategories.length > 0 && (
-          <nav aria-label="Footer category navigation">
-            <ul class="flex flex-wrap gap-x-3 gap-y-2 text-xs">
-              {footerCategories.map((category) => (
-                <li>
-                  <TextLink href={category.href} variant="subtle" tone="muted">
-                    {category.title}
-                  </TextLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )
-      }
+      {footerCategories.length > 0 && <nav
+        aria-label="Footer category navigation"
+      >
+        <ul class="flex flex-wrap gap-x-3 gap-y-2 text-xs">
+          {footerCategories.map((category) => <li>
+            <TextLink href={category.href} variant="subtle" tone="muted">
+              {category.title}
+            </TextLink>
+          </li>)}
+        </ul>
+      </nav>}
     </div>
-    {
-      siteConfig.features.support && (
-        <div class="self-start">
-          <SupportLink label="Support Our Research" />
-        </div>
-      )
-    }
+    {siteConfig.features.support && <div class="self-start">
+      <SupportLink label="Support Our Research" />
+    </div>}
   </div>
 </footer>

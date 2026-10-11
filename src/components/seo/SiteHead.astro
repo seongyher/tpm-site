@@ -51,22 +51,18 @@ const metadataJsonLd =
   content={siteConfig.identity.shortTitle ?? SITE_TITLE}
 />
 <meta name="color-scheme" content="light dark" />
-{
-  siteConfig.identity.themeColor && (
-    <meta name="theme-color" content={siteConfig.identity.themeColor} />
-  )
-}
+{siteConfig.identity.themeColor && (
+  <meta name="theme-color" content={siteConfig.identity.themeColor} />
+)}
 <link rel="canonical" href={canonicalUrl} />
-{
-  siteConfig.features.feed && (
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={`${SITE_TITLE} RSS`}
-      href={feedUrl()}
-    />
-  )
-}
+{siteConfig.features.feed && (
+  <link
+    rel="alternate"
+    type="application/rss+xml"
+    title={`${SITE_TITLE} RSS`}
+    href={feedUrl()}
+  />
+)}
 <meta property="og:site_name" content={SITE_TITLE} />
 <meta property="og:locale" content={siteConfig.identity.locale} />
 <meta property="og:type" content={type} />
@@ -88,8 +84,6 @@ const metadataJsonLd =
 {absoluteImageUrl && <meta name="twitter:image" content={absoluteImageUrl} />}
 {image?.alt && <meta name="twitter:image:alt" content={image.alt} />}
 <title>{metadata.title}</title>
-{
-  metadataJsonLd && (
-    <script is:inline type="application/ld+json" set:html={metadataJsonLd} />
-  )
-}
+{metadataJsonLd && (
+  <script is:inline type="application/ld+json" set:html={metadataJsonLd} />
+)}

@@ -66,25 +66,23 @@ const imageRenderAttrs = {
   data-publishable-media-frame
   data-publishable-media-has-image={image === undefined ? "false" : "true"}
 >
-  {
-    image ? (
-      <Image
-        src={image.src}
-        alt={image.alt}
-        width={renderWidth}
-        height={renderHeight}
-        {...imageRenderAttrs}
-        loading={loading}
-        class:list={[imageClass]}
-      />
-    ) : (
-      <span
-        class="flex h-full w-full items-center justify-center p-4 text-center text-4xl leading-none font-bold tracking-normal uppercase"
-        data-publishable-media-fallback
-        aria-hidden="true"
-      >
-        <span class="line-clamp-2 break-words">{fallbackLabel ?? label}</span>
-      </span>
-    )
-  }
+  {image ? (
+    <Image
+      src={image.src}
+      alt={image.alt}
+      width={renderWidth}
+      height={renderHeight}
+      {...imageRenderAttrs}
+      loading={loading}
+      class:list={[imageClass]}
+    />
+  ) : (
+    <span
+      class="flex h-full w-full items-center justify-center p-4 text-center text-4xl leading-none font-bold tracking-normal uppercase"
+      data-publishable-media-fallback
+      aria-hidden="true"
+    >
+      <span class="line-clamp-2 break-words">{fallbackLabel ?? label}</span>
+    </span>
+  )}
 </a>

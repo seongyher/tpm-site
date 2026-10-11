@@ -341,7 +341,7 @@ function angleReferences(
 ): AssetReference[] {
   const references: AssetReference[] = [];
   const anglePathPattern =
-    // eslint-disable-next-line security/detect-unsafe-regex -- This bounded asset-reference matcher scans source files, not untrusted runtime input.
+    // This bounded asset-reference matcher scans source files, not untrusted runtime input.
     /<((?:(?:\.\.?\/)+assets|\/?(?:src|site)\/assets|@site\/assets)\/[^>\r\n]+)>/g;
 
   for (const match of text.matchAll(anglePathPattern)) {
@@ -513,7 +513,7 @@ function quotedReferences(
 ): AssetReference[] {
   const references: AssetReference[] = [];
   const quotedPathPattern =
-    // eslint-disable-next-line security/detect-unsafe-regex -- This bounded asset-reference matcher scans source files, not untrusted runtime input.
+    // This bounded asset-reference matcher scans source files, not untrusted runtime input.
     /(["'`])((?:(?:\.\.?\/)+assets|\/?(?:src|site)\/assets|@site\/assets)\/[^"'`\r\n]+)\1/g;
 
   for (const match of text.matchAll(quotedPathPattern)) {

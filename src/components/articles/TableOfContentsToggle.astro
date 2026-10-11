@@ -29,30 +29,28 @@ const placementClasses = {
     className,
   ]}
 >
-  {
-    placement === "inline" ? (
-      <>
-        <span
-          class="text-foreground hidden text-2xl leading-tight font-semibold tracking-normal group-open:inline"
-          data-toc-inline-heading
-        >
-          Contents
-        </span>
-        <span class="group-open:hidden" data-toc-inline-closed-label>
-          {closedLabel}
-        </span>
-        <span
-          class="text-muted-foreground hover:text-primary hidden text-sm font-medium group-open:inline"
-          data-toc-inline-action
-        >
-          {openLabel}
-        </span>
-      </>
-    ) : (
-      <>
-        <span class="hidden group-open:inline">{openLabel}</span>
-        <span class="group-open:hidden">{closedLabel}</span>
-      </>
-    )
-  }
+  {placement === "inline" ? (
+    <>
+      <span
+        class="text-foreground hidden text-2xl leading-tight font-semibold tracking-normal group-open:inline"
+        data-toc-inline-heading
+      >
+        Contents
+      </span>
+      <span class="group-open:hidden" data-toc-inline-closed-label>
+        {closedLabel}
+      </span>
+      <span
+        class="text-muted-foreground hover:text-primary hidden text-sm font-medium group-open:inline"
+        data-toc-inline-action
+      >
+        {openLabel}
+      </span>
+    </>
+  ) : (
+    <>
+      <span class="hidden group-open:inline">{openLabel}</span>
+      <span class="group-open:hidden">{closedLabel}</span>
+    </>
+  )}
 </summary>

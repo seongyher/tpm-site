@@ -9,22 +9,21 @@ interface Props {
 const { articles } = Astro.props;
 ---
 
-{
-  articles.length > 0 && (
-    <div class="grid min-w-0 gap-2" data-bibliography-source-articles>
-      <p class="text-muted-foreground m-0 text-sm font-semibold">
-        Cited by {articles.length === 1 ? "article" : "articles"}
-      </p>
-      <ul class="grid min-w-0 gap-1 text-sm">
-        {articles.map((article) => (
-          <li class="text-muted-foreground flex min-w-0 flex-wrap gap-x-2 gap-y-1">
-            <TextLink href={article.href} prefetch="hover">
-              {article.title}
-            </TextLink>
-            {article.date !== "" && <span>{article.date}</span>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
+{articles.length > 0 && <div
+  class="grid min-w-0 gap-2"
+  data-bibliography-source-articles
+>
+  <p class="text-muted-foreground m-0 text-sm font-semibold">
+    Cited by {articles.length === 1 ? "article" : "articles"}
+  </p>
+  <ul class="grid min-w-0 gap-1 text-sm">
+    {articles.map((article) => <li
+      class="text-muted-foreground flex min-w-0 flex-wrap gap-x-2 gap-y-1"
+    >
+      <TextLink href={article.href} prefetch="hover">
+        {article.title}
+      </TextLink>
+      {article.date !== "" && <span>{article.date}</span>}
+    </li>)}
+  </ul>
+</div>}

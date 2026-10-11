@@ -2,7 +2,6 @@ import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import matter from "gray-matter";
 import { PDFDocument } from "pdf-lib";
 
 import {
@@ -20,6 +19,7 @@ import {
   socialPreviewImageSpec,
 } from "../../src/lib/social-images";
 import { normalizeTag } from "../../src/lib/tags";
+import { parseContentSource } from "../content/parse-content-source";
 
 const allowedStaticClientScriptPatterns = [
   /^\/_astro\/AnchoredRoot\.astro_astro_type_script_index_0_lang\.[\w-]+\.js$/u,
@@ -106,7 +106,7 @@ export async function announcementPublicationStats(
   const publishedSlugs: string[] = [];
 
   for (const file of sourceFiles) {
-    const { data } = matter(await readFile(file, "utf8"));
+    const { data } = parseContentSource(await readFile(file, "utf8"));
     if (isDraft(data, siteConfig.contentDefaults.announcements.draft)) {
       draftSlugs.push(filenameStem(file));
     } else {
@@ -142,7 +142,7 @@ export async function collectionPublicationStats(
   const publishedSlugs: string[] = [];
 
   for (const file of sourceFiles) {
-    const { data } = matter(await readFile(file, "utf8"));
+    const { data } = parseContentSource(await readFile(file, "utf8"));
     if (isDraft(data, false)) {
       draftSlugs.push(filenameStem(file));
     } else {
@@ -193,7 +193,7 @@ export async function articlePublicationStats(
   const publishedTagSegments = new Set<string>();
 
   for (const file of articleSourceFiles) {
-    const { data } = matter(await readFile(file, "utf8"));
+    const { data } = parseContentSource(await readFile(file, "utf8"));
     if (isDraft(data, siteConfig.contentDefaults.articles.draft)) {
       draftSlugs.push(filenameStem(file));
     } else {
@@ -286,7 +286,7 @@ export function formatBuildVerificationReport(
  * @returns True for protocol-relative, absolute, mail, or telephone URLs.
  */
 export function isExternal(url: string): boolean {
-  // eslint-disable-next-line security/detect-unsafe-regex -- URL scheme detection is bounded to the target string.
+  // URL scheme detection is bounded to the target string.
   return /^(?:[a-z]+:)?\/\//i.test(url) || /^(?:mailto|tel):/i.test(url);
 }
 
@@ -708,7 +708,7 @@ async function configuredRedirects(
   // Coverage note: this dynamic import is the boundary to Astro's user config.
   // Build-verifier behavior is tested with injected redirect maps; this guard
   // remains defensive for malformed local config modules.
-  // eslint-disable-next-line no-unsanitized/method -- Fixed local config path, not user-controlled input.
+  // Fixed local config path, not user-controlled input.
   const configModule: unknown = await import(
     pathToFileURL(path.resolve(rootDir, "astro.config.ts")).href
   );

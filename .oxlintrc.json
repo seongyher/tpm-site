@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error"
+  },
+  "plugins": ["typescript", "oxc"],
+  "rules": {
+    "no-debugger": "error",
+    "typescript/triple-slash-reference": "off"
+  },
+  "ignorePatterns": [
+    ".agents/**",
+    ".astro/**",
+    ".lighthouseci/**",
+    ".unlighthouse/**",
+    ".wrangler/**",
+    "coverage/**",
+    "dist/**",
+    "dist-catalog/**",
+    "node_modules/**",
+    "playwright-report/**",
+    "test-results/**",
+    "tmp/**",
+    "**/*.astro",
+    "**/*.md",
+    "**/*.mdx"
+  ]
+}

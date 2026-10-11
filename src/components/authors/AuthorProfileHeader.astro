@@ -30,17 +30,13 @@ const profileLinks: AuthorSocialLink[] =
     {profile.displayName}
   </h1>
   <p class="text-muted-foreground text-sm">{articleCountLabel}</p>
-  {
-    profile.shortBio && (
-      <p class="text-muted-foreground max-w-3xl text-lg">{profile.shortBio}</p>
-    )
-  }
-  {
-    profileLinks.length > 0 && (
-      <AuthorSocialLinks
-        links={profileLinks}
-        label={`${profile.displayName} profile links`}
-      />
-    )
-  }
+  {profile.shortBio && <p class="text-muted-foreground max-w-3xl text-lg">
+    {profile.shortBio}
+  </p>}
+  {profileLinks.length > 0 && (
+    <AuthorSocialLinks
+      links={profileLinks}
+      label={`${profile.displayName} profile links`}
+    />
+  )}
 </header>

@@ -13,11 +13,9 @@ const { title, description, class: className, ...attrs } = Astro.props;
 <section {...attrs} class:list={["grid gap-5", className]}>
   <header class="max-w-3xl">
     <h2 class="text-foreground text-2xl font-semibold">{title}</h2>
-    {
-      description ? (
-        <p class="text-muted-foreground mt-2">{description}</p>
-      ) : null
-    }
+    {description ? (
+      <p class="text-muted-foreground mt-2">{description}</p>
+    ) : null}
   </header>
   <div class="grid gap-4 lg:grid-cols-2">
     <slot />

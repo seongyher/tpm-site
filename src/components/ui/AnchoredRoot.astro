@@ -18,35 +18,31 @@ const {
 } = Astro.props;
 ---
 
-{
-  as === "details" ? (
-    <details
-      {...attrs}
-      data-anchor-root
-      data-anchor-preset={preset}
-      data-disclosure-root={disclosure === undefined ? undefined : ""}
-      data-disclosure-mode={disclosure}
-      class:list={[className]}
-    >
-      <slot />
-    </details>
-  ) : (
-    <div
-      {...attrs}
-      data-anchor-root
-      data-anchor-preset={preset}
-      data-disclosure-root={disclosure === undefined ? undefined : ""}
-      data-disclosure-mode={disclosure}
-      class:list={[className]}
-    >
-      <slot />
-    </div>
-  )
-}
+{as === "details" ? (
+  <details
+    {...attrs}
+    data-anchor-root
+    data-anchor-preset={preset}
+    data-disclosure-root={disclosure === undefined ? undefined : ""}
+    data-disclosure-mode={disclosure}
+    class:list={[className]}
+  >
+    <slot />
+  </details>
+) : (
+  <div
+    {...attrs}
+    data-anchor-root
+    data-anchor-preset={preset}
+    data-disclosure-root={disclosure === undefined ? undefined : ""}
+    data-disclosure-mode={disclosure}
+    class:list={[className]}
+  >
+    <slot />
+  </div>
+)}
 
 <script src="../../scripts/anchored-positioning-loader.ts"></script>
-{
-  disclosure === undefined ? null : (
-    <script src="../../scripts/anchored-disclosure.ts" />
-  )
-}
+{disclosure === undefined ? null : (
+  <script src="../../scripts/anchored-disclosure.ts" />
+)}

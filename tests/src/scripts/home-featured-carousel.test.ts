@@ -156,11 +156,11 @@ function requiredHtmlElement(element: unknown): HTMLElement {
     throw new Error("Expected carousel fixture element.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser elements at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser elements at runtime but exposes package-local DOM types.
   return element as HTMLElement;
 }
 
 function browserDocument(document: unknown): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser documents at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser documents at runtime but exposes package-local DOM types.
   return document as Document;
 }

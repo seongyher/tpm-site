@@ -10,7 +10,7 @@ describe("article reference preview browser script", () => {
   test("opens citation definition previews from inline markers", () => {
     const window = browserWindow();
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const marker = requiredElement(window, "#cite-ref-source");
@@ -47,7 +47,7 @@ describe("article reference preview browser script", () => {
   test("opens backlink context previews from source prose blocks", () => {
     const window = browserWindow();
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const backlink = requiredElement(window, "#cite-backref-source");
@@ -75,7 +75,7 @@ describe("article reference preview browser script", () => {
   test("does not keep stale previews for missing or empty targets", () => {
     const window = browserWindow();
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const marker = requiredElement(window, "#cite-ref-source");
@@ -97,7 +97,7 @@ describe("article reference preview browser script", () => {
   test("keeps touch hover quiet but opens the first coarse-pointer tap as a preview", () => {
     const window = browserWindow({ coarsePointer: true });
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const marker = requiredElement(window, "#cite-ref-source");
@@ -121,7 +121,7 @@ describe("article reference preview browser script", () => {
   test("closes active previews when users click outside", () => {
     const window = browserWindow();
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const marker = requiredElement(window, "#cite-ref-source");
@@ -147,7 +147,7 @@ describe("article reference preview browser script", () => {
   test("repositions an active preview when the viewport changes", () => {
     const window = browserWindow();
     const document = window.document;
-    // eslint-disable-next-line no-unsanitized/property -- Static test fixture for browser behavior.
+    // Static test fixture for browser behavior.
     document.body.innerHTML = referencePreviewFixture();
 
     const marker = requiredElement(window, "#cite-ref-source");
@@ -255,14 +255,14 @@ function browserWindow(
 function runtimeFor(window: Window): ArticleReferencePreviewRuntime {
   return {
     classes: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the script.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the script.
       Element: window.Element as unknown as typeof Element,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the script.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the script.
       Node: window.Node as unknown as typeof Node,
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this script test.
+    // Happy DOM provides the browser runtime shape used by this script test.
     document: window.document as unknown as Document,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this script test.
+    // Happy DOM provides the browser runtime shape used by this script test.
     window: window as unknown as globalThis.Window,
   };
 }
@@ -274,7 +274,7 @@ function requiredElement(window: Window, selector: string): HTMLElement {
     throw new Error(`Expected fixture element for selector ${selector}.`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM elements satisfy the browser HTMLElement shape used by the script.
+  // Happy DOM elements satisfy the browser HTMLElement shape used by the script.
   return element as unknown as HTMLElement;
 }
 
@@ -298,7 +298,7 @@ function dispatchWindowEvent(
 
   const event = new window.Event(eventName, { bubbles: true, ...options });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+  // Happy DOM events satisfy DOM Event at runtime for dispatch.
   element.dispatchEvent(event as unknown as Event);
 
   return { defaultPrevented: event.defaultPrevented };
@@ -316,7 +316,7 @@ function dispatchPointerEvent(
 
   const event = new window.Event(eventName, { bubbles: true });
   Reflect.set(event, "pointerType", pointerType);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+  // Happy DOM events satisfy DOM Event at runtime for dispatch.
   element.dispatchEvent(event as unknown as Event);
 }
 

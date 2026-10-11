@@ -1,5 +1,61 @@
 # QA Preflight
 
+## October 2026: smaller QA toolchain
+
+User-authorized scope: remove the dependency-heavy lint stack and the tooling
+paths retaining `braces` and `sprintf-js`. Keep the publication compiler,
+content contracts, and behavioral checks intact.
+
+Implementation sequence:
+
+1. Capture old lint diagnostics for representative correctness and style
+   failures and the current dependency graph.
+2. Replace ESLint and its plugins with Oxlint's native correctness rules;
+   keep one small configuration, without JavaScript plugins or a second
+   typechecking engine. TypeScript/Astro remain the typechecking authority.
+3. Remove Markdown style lint and Lighthouse CI (including its Puppeteer
+   overrides). Keep Prettier, content/schema checks, HTML validation, Playwright,
+   axe, and the existing build/output checks. Lighthouse becomes an optional
+   manual browser audit, not an installed project tool.
+4. Replace `gray-matter` with the already installed Astro Markdown frontmatter
+   parser behind a small tooling adapter. Compare all source metadata/body
+   values and preserve source-line diagnostics with regression tests.
+5. Update scripts, CI, QA registry, docs, and their contract tests together.
+   Compare retained diagnostics using `diagnostics:diff`, and record the
+   intentionally retired style/template/type-aware lint coverage separately.
+6. Regenerate the lockfile, confirm both vulnerable packages are absent, then
+   run frozen installation, release checks, and accessibility checks. Keep
+   audit thresholds unchanged.
+
+Expected tradeoffs: lose custom ESLint purity/style/complexity, type-aware
+lint, Astro template lint, prose style lint, and automated Lighthouse scoring.
+Compiler checks and browser/HTML tests overlap some of this coverage but are
+not equivalent replacements. No article text, route, UI, hydration, or public
+artifact contract is intentionally changed. The frontmatter adapter has the
+highest content-fidelity risk; metadata/body equivalence is required.
+
+The earlier inventory below is historical where it names retired tools; the
+package scripts and QA registry describe the current executable contract.
+
+### Diagnostic comparison evidence
+
+The same temporary TypeScript probe was run through the old ESLint config and
+the new Oxlint config. Both report debugger and unreachable duplicate-branch
+errors at the same source lines. The all-diagnostics diff explicitly reports
+the intentional loss of two `jsdoc/require-jsdoc` diagnostics and one redundant
+`sonarjs/no-identical-conditions` diagnostic. The retained-diagnostics diff
+passes with matching codes, severities, source lines, messages, and counts.
+Only the wording of the two equivalent core errors and the disposable filename
+were normalized between engines; raw reports are preserved alongside the diff
+in `tmp/qa-simplification/`. This demonstrates those two retained signals, not
+equivalence across the entire former ruleset.
+
+`tests/config/oxlint.test.ts` keeps the correctness probe executable. The
+frontmatter adapter has separate boundary tests, existing content/build tests
+pass, and a full comparison of 115 source records preserves metadata and body
+text. The dependency graph no longer contains `braces` or `sprintf-js`, and the
+all-severity audit returns no findings.
+
 This document is the working design and audit artifact for the roadmap
 preflight milestone:
 
@@ -240,7 +296,7 @@ spine and several review-only jobs.
 | `audit`             | yes                              | `bun run audit`                                                                                            | High-severity dependency audit.                                |
 | `audit-review`      | no                               | `bun run audit:all`                                                                                        | All-severity maintenance signal.                               |
 | `coverage-review`   | no                               | `bun run coverage`                                                                                         | Review-only LCOV and coverage inventory.                       |
-| `deploy-cloudflare` | yes on `main` after dependencies | `bun run deploy:cloudflare` is closest, but CI uses `cloudflare/wrangler-action@v3` with `command: deploy` | Deploys the verified artifact, not a rebuilt output.           |
+| `deploy-cloudflare` | yes on `main` after dependencies | `bun run deploy:cloudflare` is closest, but CI uses `cloudflare/wrangler-action@v4` with `command: deploy` | Deploys the verified artifact, not a rebuilt output.           |
 
 `.github/workflows/security.yml` adds:
 

@@ -5,7 +5,6 @@ import config from "../../knip";
 describe("Knip config", () => {
   test("tracks app, tooling, scripts, and tests as project entrypoints", () => {
     expect(config.entry).toContain("astro.config.ts");
-    expect(config.entry).toContain("eslint/**/*.ts");
     expect(config.entry).toContain("scripts/**/*.ts");
     expect(config.entry).toContain("tests/**/*.ts");
   });

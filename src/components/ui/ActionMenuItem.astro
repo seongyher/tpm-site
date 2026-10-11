@@ -36,20 +36,18 @@ function normalizeItem(props: Props): ActionMenuItem {
 }
 ---
 
-{
-  item.as === "a" ? (
-    <a {...item.attrs} class:list={[itemClass, item.className]}>
-      <slot name="icon" />
-      <span class="min-w-0">
-        <slot />
-      </span>
-    </a>
-  ) : (
-    <button {...item.attrs} class:list={[itemClass, item.className]}>
-      <slot name="icon" />
-      <span class="min-w-0">
-        <slot />
-      </span>
-    </button>
-  )
-}
+{item.as === "a" ? (
+  <a {...item.attrs} class:list={[itemClass, item.className]}>
+    <slot name="icon" />
+    <span class="min-w-0">
+      <slot />
+    </span>
+  </a>
+) : (
+  <button {...item.attrs} class:list={[itemClass, item.className]}>
+    <slot name="icon" />
+    <span class="min-w-0">
+      <slot />
+    </span>
+  </button>
+)}

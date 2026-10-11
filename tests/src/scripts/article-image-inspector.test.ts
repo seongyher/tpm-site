@@ -93,12 +93,12 @@ function testWindow(): TestWindow {
 }
 
 function browserDocument(window: TestWindow): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser Document at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser Document at runtime but exposes package-local DOM types.
   return window.document as unknown as Document;
 }
 
 function browserEvent(event: unknown): Event {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser Event at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser Event at runtime but exposes package-local DOM types.
   return event as Event;
 }
 

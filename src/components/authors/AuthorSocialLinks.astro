@@ -10,16 +10,10 @@ interface Props {
 const { label = "Author links", links } = Astro.props;
 ---
 
-{
-  links.length > 0 && (
-    <nav aria-label={label} data-author-social-links>
-      <ul class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-        {links.map((link) => (
-          <li>
-            <TextLink href={link.href}>{link.label}</TextLink>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  )
-}
+{links.length > 0 && <nav aria-label={label} data-author-social-links>
+  <ul class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+    {links.map((link) => <li>
+      <TextLink href={link.href}>{link.label}</TextLink>
+    </li>)}
+  </ul>
+</nav>}

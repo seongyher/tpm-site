@@ -37,7 +37,6 @@ describe("tsconfig.tools", () => {
       throw new Error("Expected tsconfig.tools.json to define include paths.");
     }
 
-    expect(config.include).toContain("eslint/**/*.ts");
     expect(config.include).toContain("scripts/**/*.ts");
     expect(config.include).toContain("tests/**/*.ts");
     expect(config.include).toContain("vitest.config.ts");

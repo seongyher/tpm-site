@@ -89,39 +89,35 @@ const page = await articlePageViewModel({
     updatedAt={article.data.updated}
   />
   <ReadingBody>
-    {
-      page.showTableOfContents && (
-        <ContentRail
-          slot="toc"
-          label="Article table of contents"
-          position="left"
-          sticky="below-header"
-        >
-          <ArticleTableOfContents headings={tableOfContentsHeadings} />
-        </ContentRail>
-      )
-    }
+    {page.showTableOfContents && <ContentRail
+      slot="toc"
+      label="Article table of contents"
+      position="left"
+      sticky="below-header"
+    >
+      <ArticleTableOfContents headings={tableOfContentsHeadings} />
+    </ContentRail>}
     <article
       class="grid w-full min-w-0 gap-6"
       data-pagefind-body={page.searchable ? true : undefined}
       data-pagefind-ignore={page.searchable ? undefined : true}
     >
-      {
-        page.readingNavigationLinks.length > 0 && (
-          <ReadingNavigationLinks
-            aria-label="Article reading navigation"
-            data-article-reading-navigation
-            links={page.readingNavigationLinks}
-            showTitle={false}
-          />
-        )
-      }
+      {page.readingNavigationLinks.length > 0 && (
+        <ReadingNavigationLinks
+          aria-label="Article reading navigation"
+          data-article-reading-navigation
+          links={page.readingNavigationLinks}
+          showTitle={false}
+        />
+      )}
       <ArticleHeader
         author={page.article.author}
         authors={page.authors}
-        category={page.category && page.categoryHref
-          ? { href: page.categoryHref, title: page.category.title }
-          : undefined}
+        category={
+          page.category && page.categoryHref
+            ? { href: page.categoryHref, title: page.category.title }
+            : undefined
+        }
         citation={page.citation}
         date={page.article.date}
         description={page.article.description}
@@ -133,14 +129,12 @@ const page = await articlePageViewModel({
         title={page.article.title}
       />
       <div class="grid min-w-0 gap-1" data-article-body-flow>
-        {
-          page.showTableOfContents && (
-            <ArticleTableOfContents
-              headings={tableOfContentsHeadings}
-              placement="inline"
-            />
-          )
-        }
+        {page.showTableOfContents && (
+          <ArticleTableOfContents
+            headings={tableOfContentsHeadings}
+            placement="inline"
+          />
+        )}
         <ArticleProse
           data-article-prose
           enableImageInspector={enableImageInspector}
@@ -149,13 +143,9 @@ const page = await articlePageViewModel({
         </ArticleProse>
       </div>
       <EndcapStack spacing="relaxed">
-        {
-          page.authorProfilesWithBio.map((profile) => (
-            <div data-pdf-exclude>
-              <AuthorBioBlock profile={profile} context="article" />
-            </div>
-          ))
-        }
+        {page.authorProfilesWithBio.map((profile) => <div data-pdf-exclude>
+          <AuthorBioBlock profile={profile} context="article" />
+        </div>)}
         <div data-pdf-exclude>
           <ArticleEndcap
             categoryHref={page.categoryHref}
@@ -170,17 +160,13 @@ const page = await articlePageViewModel({
           siteBibliographyHref={page.bibliographyAction?.href}
           siteBibliographyLabel={page.bibliographyAction?.label}
         />
-        {
-          page.tagsVisible && (
-            <div
-              class="border-border border-t pt-6"
-              data-article-tags-placement
-              data-pdf-exclude
-            >
-              <ArticleTags tags={article.data.tags} />
-            </div>
-          )
-        }
+        {page.tagsVisible && <div
+          class="border-border border-t pt-6"
+          data-article-tags-placement
+          data-pdf-exclude
+        >
+          <ArticleTags tags={article.data.tags} />
+        </div>}
       </EndcapStack>
     </article>
   </ReadingBody>

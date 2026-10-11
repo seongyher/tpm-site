@@ -1,11 +1,10 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
-
 import { parseBibtexEntries } from "../../src/lib/article-references/bibtex";
 import type { ParsedBibtexEntry } from "../../src/lib/article-references/model";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { parseContentSource } from "./parse-content-source";
 
 /** Options for the complete BibTeX citation audit. */
 export interface BibtexCitationAuditOptions {
@@ -355,7 +354,7 @@ function auditArticle(
   file: string,
   source: string,
 ): BibtexCitationAuditArticle {
-  const content = matter(source).content;
+  const content = parseContentSource(source).content;
   const filePath = toPosix(path.relative(rootDir, file));
   const markers = citationMarkers(content);
   const markerCounts = countBy(markers, (marker) => marker.key);

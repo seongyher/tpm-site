@@ -3,9 +3,6 @@ import type { KnipConfig } from "knip";
 const config = {
   entry: [
     "astro.config.ts",
-    "eslint/**/*.ts",
-    "eslint.config.ts",
-    "lighthouserc.json",
     "playwright.config.ts",
     "scripts/**/*.ts",
     "src/content.config.ts",
@@ -27,10 +24,8 @@ const config = {
   ],
   ignoreBinaries: ["gitleaks"],
   ignoreDependencies: [
-    "@typescript-eslint/parser",
     "@tailwindcss/typography",
     "html-validate",
-    "markdownlint-cli2",
     "pagefind",
     "sort-package-json",
     "tailwindcss",
@@ -38,8 +33,6 @@ const config = {
   ],
   project: [
     "astro.config.ts",
-    "eslint/**/*.ts",
-    "eslint.config.ts",
     "playwright.config.ts",
     "scripts/**/*.ts",
     "src/**/*.{astro,ts,tsx}",

@@ -11,11 +11,10 @@ interface Props {
 const { headingId = "related-articles-heading", items = [] } = Astro.props;
 ---
 
-{
-  items.length > 0 && (
-    <section class="grid min-w-0 gap-4" aria-labelledby={headingId}>
-      <SectionHeader headingId={headingId} title="Related Articles" />
-      <ArticleList items={items} />
-    </section>
-  )
-}
+{items.length > 0 && <section
+  class="grid min-w-0 gap-4"
+  aria-labelledby={headingId}
+>
+  <SectionHeader headingId={headingId} title="Related Articles" />
+  <ArticleList items={items} />
+</section>}

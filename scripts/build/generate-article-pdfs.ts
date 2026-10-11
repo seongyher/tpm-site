@@ -2,7 +2,6 @@ import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { chromium, type Page } from "@playwright/test";
-import matter from "gray-matter";
 import { PDFDocument } from "pdf-lib";
 
 import {
@@ -15,6 +14,7 @@ import {
   resolveSiteInstancePaths,
   siteInstance,
 } from "../../src/lib/site-instance";
+import { parseContentSource } from "../content/parse-content-source";
 
 const pdfHeader = "%PDF-";
 const pdfCreator = `${siteConfig.identity.title} Astro PDF pipeline`;
@@ -209,7 +209,7 @@ export async function articlePdfTargets({
   const targets: ArticlePdfTarget[] = [];
 
   for (const file of files) {
-    const { data } = matter(await readFile(file, "utf8"));
+    const { data } = parseContentSource(await readFile(file, "utf8"));
     if (isDraft(data) || articlePdfDisabled(data)) {
       continue;
     }

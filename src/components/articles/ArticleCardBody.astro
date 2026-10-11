@@ -50,28 +50,22 @@ const descriptionFitVariant =
 ---
 
 <div class="grid min-w-0 content-center gap-2 md:gap-3">
-  {
-    hasKicker && (
-      <div
-        class="text-muted-foreground flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold uppercase"
-        data-article-card-kicker
-      >
-        {category && (
-          <a
-            href={category.href}
-            data-astro-prefetch="hover"
-            class="text-primary hover:text-primary/80 focus-visible:outline-ring rounded-xs no-underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            {category.title}
-          </a>
-        )}
-        {category && hasDate && (
-          <span class="border-border h-4 border-l" aria-hidden="true" />
-        )}
-        {hasDate && <time>{date}</time>}
-      </div>
-    )
-  }
+  {hasKicker && <div
+    class="text-muted-foreground flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold uppercase"
+    data-article-card-kicker
+  >
+    {category && <a
+      href={category.href}
+      data-astro-prefetch="hover"
+      class="text-primary hover:text-primary/80 focus-visible:outline-ring rounded-xs no-underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
+    >
+      {category.title}
+    </a>}
+    {category && hasDate && (
+      <span class="border-border h-4 border-l" aria-hidden="true" />
+    )}
+    {hasDate && <time>{date}</time>}
+  </div>}
   <h2
     class:list={[
       "text-foreground m-0 line-clamp-2 min-w-0 leading-tight font-semibold tracking-normal break-words",
@@ -84,19 +78,15 @@ const descriptionFitVariant =
       {title}
     </TextLink>
   </h2>
-  {
-    description && (
-      <p
-        class:list={[
-          "text-muted-foreground m-0 line-clamp-3 min-w-0 break-words",
-          descriptionFitClass,
-        ]}
-        data-article-card-description
-        data-article-card-description-fit={descriptionFitVariant}
-      >
-        {description}
-      </p>
-    )
-  }
+  {description && <p
+    class:list={[
+      "text-muted-foreground m-0 line-clamp-3 min-w-0 break-words",
+      descriptionFitClass,
+    ]}
+    data-article-card-description
+    data-article-card-description-fit={descriptionFitVariant}
+  >
+    {description}
+  </p>}
   <ArticleMeta author={author} authors={authors} />
 </div>

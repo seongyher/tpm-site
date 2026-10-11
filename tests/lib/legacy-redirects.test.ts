@@ -3,13 +3,13 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { describe, expect, test } from "bun:test";
-import matter from "gray-matter";
 
 import {
   collectCloudflareRedirectRules,
   collectLegacyRedirectRules,
   defaultLegacyRedirectSources,
 } from "../../scripts/build/generate-cloudflare-redirects";
+import { parseContentSource } from "../../scripts/content/parse-content-source";
 
 const publishableSources = [
   {
@@ -35,7 +35,7 @@ const rootCategoryRedirects = {
 } as const;
 
 async function configRedirects() {
-  // eslint-disable-next-line no-unsanitized/method -- Fixed local config path, not user-controlled input.
+  // Fixed local config path, not user-controlled input.
   const configModule: unknown = await import(
     pathToFileURL(path.resolve("astro.config.ts")).href
   );
@@ -106,7 +106,8 @@ function filenameStem(file: string) {
 }
 
 function frontmatterData(markdown: string) {
-  return (matter(markdown) as { data: Record<string, unknown> }).data;
+  return (parseContentSource(markdown) as { data: Record<string, unknown> })
+    .data;
 }
 
 function isAstroConfigModule(

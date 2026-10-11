@@ -35,7 +35,7 @@ describe("anchored disclosure controller", () => {
 
     installAnchoredDisclosure(runtimeFor(window));
     trigger.dispatchEvent(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events satisfy DOM Event at runtime for dispatch.
+      // Happy DOM events satisfy DOM Event at runtime for dispatch.
       new window.MouseEvent("click", {
         bubbles: true,
         cancelable: true,
@@ -50,14 +50,14 @@ describe("anchored disclosure controller", () => {
 function runtimeFor(window: Window): AnchoredDisclosureRuntime {
   return {
     classes: {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the controller.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the controller.
       Element: window.Element as unknown as typeof Element,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM exposes browser constructors with the runtime shape needed by the controller.
+      // Happy DOM exposes browser constructors with the runtime shape needed by the controller.
       Node: window.Node as unknown as typeof Node,
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this controller test.
+    // Happy DOM provides the browser runtime shape used by this controller test.
     document: window.document as unknown as Document,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM provides the browser runtime shape used by this controller test.
+    // Happy DOM provides the browser runtime shape used by this controller test.
     window: window as unknown as globalThis.Window,
   };
 }
@@ -69,6 +69,6 @@ function requiredElement(window: Window, selector: string): HTMLElement {
     throw new Error(`Expected fixture element for selector ${selector}.`);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM elements satisfy the browser HTMLElement shape used by the controller.
+  // Happy DOM elements satisfy the browser HTMLElement shape used by the controller.
   return element as unknown as HTMLElement;
 }

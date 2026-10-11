@@ -91,7 +91,7 @@ function browserElement(element: unknown): HTMLElement | null {
     return null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser elements at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser elements at runtime but exposes package-local DOM types.
   return element as HTMLElement;
 }
 

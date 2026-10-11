@@ -17,20 +17,16 @@ const {
 } = Astro.props;
 ---
 
-{
-  item !== undefined && (
-    <section
-      class="grid min-w-0 gap-4"
-      aria-labelledby={headingId}
-      data-article-continuity
-    >
-      <SectionHeader
-        headingId={headingId}
-        title={label}
-        actionHref={articlesArchiveUrl()}
-        actionLabel="View more"
-      />
-      <ArticleList items={[item]} />
-    </section>
-  )
-}
+{item !== undefined && <section
+  class="grid min-w-0 gap-4"
+  aria-labelledby={headingId}
+  data-article-continuity
+>
+  <SectionHeader
+    headingId={headingId}
+    title={label}
+    actionHref={articlesArchiveUrl()}
+    actionLabel="View more"
+  />
+  <ArticleList items={[item]} />
+</section>}

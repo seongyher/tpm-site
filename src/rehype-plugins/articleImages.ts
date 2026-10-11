@@ -1,4 +1,4 @@
-/* eslint-disable security/detect-object-injection -- Markdown and HAST plugins normalize dynamic property bags from parsed article nodes. */
+/* Markdown and HAST plugins normalize dynamic property bags from parsed article nodes. */
 import type { Html, Image, Link, Nodes, Root, Text } from "mdast";
 
 import { articleImagePresentation } from "../lib/article-image-policy";
@@ -904,5 +904,3 @@ function isMdastLink(node: Nodes): node is Link {
 function isMdastWhitespaceText(node: Nodes): node is Text {
   return node.type === "text" && "value" in node && node.value.trim() === "";
 }
-
-/* eslint-enable security/detect-object-injection */

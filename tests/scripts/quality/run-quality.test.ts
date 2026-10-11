@@ -227,9 +227,7 @@ describe("quality runner", () => {
 
     expect(commandLines).toContain("--silent run check:release");
     expect(commandLines).toContain("--silent run test:a11y:built");
-    expect(commandLines).toContain("--silent run test:perf:built");
     expect(commandLines).not.toContain("--silent run test:a11y");
-    expect(commandLines).not.toContain("--silent run test:perf");
   });
 
   test.serial(

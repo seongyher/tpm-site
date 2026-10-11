@@ -128,6 +128,9 @@ public/**
   });
 
   test("maps special project files to their conventional accountability tests", () => {
+    expect(accountabilityMirrorTests(".oxlintrc.json")).toEqual([
+      "tests/config/oxlint.test.ts",
+    ]);
     expect(accountabilityMirrorTests("astro.config.ts")).toEqual([
       "tests/config/astro.config.test.ts",
     ]);

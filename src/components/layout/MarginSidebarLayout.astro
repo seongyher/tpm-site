@@ -35,35 +35,27 @@ const railVisibilityClasses = {
     className,
   ]}
 >
-  {
-    hasAnyRail && (
-      <div
-        data-margin-sidebar-left
-        class:list={[
-          "min-w-0",
-          hasLeft ? railVisibilityClasses[leftVisibility] : "hidden xl:block",
-        ]}
-      >
-        {hasLeft && <slot name="left" />}
-      </div>
-    )
-  }
+  {hasAnyRail && <div
+    data-margin-sidebar-left
+    class:list={[
+      "min-w-0",
+      hasLeft ? railVisibilityClasses[leftVisibility] : "hidden xl:block",
+    ]}
+  >
+    {hasLeft && <slot name="left" />}
+  </div>}
 
   <div class="w-full max-w-3xl min-w-0" data-margin-sidebar-content>
     <slot />
   </div>
 
-  {
-    hasAnyRail && (
-      <div
-        data-margin-sidebar-right
-        class:list={[
-          "min-w-0",
-          hasRight ? railVisibilityClasses[rightVisibility] : "hidden xl:block",
-        ]}
-      >
-        {hasRight && <slot name="right" />}
-      </div>
-    )
-  }
+  {hasAnyRail && <div
+    data-margin-sidebar-right
+    class:list={[
+      "min-w-0",
+      hasRight ? railVisibilityClasses[rightVisibility] : "hidden xl:block",
+    ]}
+  >
+    {hasRight && <slot name="right" />}
+  </div>}
 </div>

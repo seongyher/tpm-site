@@ -3,6 +3,20 @@
 The milestone blocks below were copied from the previous `CHECKLIST.md` so
 deferred work keeps its exact original wording and checkbox state.
 
+## Remove Generated Article PDFs
+
+Reason deferred: keep the dependency/security PR focused on unblocking the
+article release. PDF generation, metadata, configuration, and the download
+button remain enabled in that change.
+
+Resume trigger: after the dependency refresh and pending article release,
+implement [GitHub issue #169](https://github.com/seongyher/tpm-site/issues/169)
+as a separate change. Move this item into `CHECKLIST.md` before implementation.
+
+- [ ] Remove generated article PDFs and the download action, then update their
+      config, dependency, documentation, and test contracts while preserving
+      HTML citation metadata, article text, external citations, and printing.
+
 ## Native Dependabot Bun Lockfile Updates
 
 Reason deferred: as of September 7, 2026, Dependabot's Bun updater bundles Bun
@@ -12,6 +26,9 @@ version 2. [Upstream PR #16071](https://github.com/dependabot/dependabot-core/pu
 adds lockfile v2/v3 support but remains open and proposes Bun 1.4.0, which still
 has the alias bug. Native Bun updates cannot yet preserve this dependency
 graph reliably.
+
+Rechecked October 10, 2026: upstream PR #16071 remains open. The project now
+pins Bun 1.4.3; the same minimum-updater and lockfile requirements still apply.
 
 Temporary workflow: retain `package-ecosystem: npm` for grouped manifest update
 proposals. Before merging a dependency PR, regenerate `bun.lock` using the Bun

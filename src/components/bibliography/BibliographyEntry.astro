@@ -18,20 +18,18 @@ const { entry } = Astro.props;
     >
       <ArticleReferenceDefinitionContent blocks={entry.sourceContent} />
     </div>
-    {
-      entry.sourceUrl !== undefined && (
-        <p class="max-w-full min-w-0 text-sm break-words">
-          <TextLink
-            href={entry.sourceUrl}
-            variant="subtle"
-            tone="muted"
-            class="break-all"
-          >
-            {entry.sourceUrl}
-          </TextLink>
-        </p>
-      )
-    }
+    {entry.sourceUrl !== undefined && <p
+      class="max-w-full min-w-0 text-sm break-words"
+    >
+      <TextLink
+        href={entry.sourceUrl}
+        variant="subtle"
+        tone="muted"
+        class="break-all"
+      >
+        {entry.sourceUrl}
+      </TextLink>
+    </p>}
   </div>
   <BibliographySourceArticles articles={entry.sourceArticles} />
 </article>

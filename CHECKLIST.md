@@ -4,6 +4,40 @@ This file tracks implementation milestones. It may keep completed items when
 they are useful context. Explicitly deferred work belongs in
 [DEFERRED.md](./DEFERRED.md).
 
+## Dependency And Security Refresh — October 2026
+
+### QA simplification and dependency removal
+
+- [x] Replace the ESLint plugin stack with native correctness linting and
+      retire Markdown style lint and Lighthouse CI.
+- [x] Reuse Astro's frontmatter parser in repository tooling; prove metadata,
+      content, and diagnostic locations remain compatible.
+- [x] Remove obsolete configuration, tests, CI jobs, and security overrides;
+      update QA contracts and document intentionally retired diagnostics.
+- [x] Verify dependency removal, diagnostic changes, frozen installation,
+      release checks, accessibility, and the all-severity audit. The full release
+      gate passes, along with 16 catalog, 177 production, and 13 accessibility
+      browser tests; the audit reports zero findings.
+
+The unpatched advisory follow-up from `DEFERRED.md` is active here. The user
+has chosen toolchain simplification instead of an audit exception or fork.
+
+### Initial refresh
+
+- [x] Inspect open Dependabot PRs, registry updates, runtime requirements, and
+      the all-severity vulnerability baseline.
+- [x] Update compatible dependency families and available security resolutions
+      with the pinned Bun version, including the four open Dependabot proposals.
+      Two advisories had no published fix; the active simplification above
+      removes the affected dependencies.
+- [x] Resolve compatibility failures without weakening repository checks or
+      changing article content and Markdown rendering behavior.
+- [x] Verify frozen installation, the release gate, authored MDX lint,
+      accessibility, and the final all-severity audit; document the results.
+      All functional checks and Lighthouse passed. The initial release gate
+      was blocked by `braces`; the active simplification above resolves the
+      dependency path without changing audit policy.
+
 ## Dependency And Security Refresh — September 2026
 
 - [x] Inspect all ten open dependency PRs and capture the vulnerability baseline:

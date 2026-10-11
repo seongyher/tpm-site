@@ -8,8 +8,6 @@ const defaultCoverageFile = "coverage/lcov.info";
 const defaultExceptionFile = "scripts/coverage-exceptions.json";
 const defaultRoots = [
   "astro.config.ts",
-  "eslint",
-  "eslint.config.ts",
   "knip.ts",
   "playwright.config.ts",
   "prettier.config.mjs",
@@ -189,7 +187,7 @@ function globToRegExp(pattern: string): RegExp {
     }
   }
 
-  // eslint-disable-next-line security/detect-non-literal-regexp -- Approved exception patterns are repository-owned glob strings parsed above.
+  // Approved exception patterns are repository-owned glob strings parsed above.
   return new RegExp(`${regex}$`);
 }
 

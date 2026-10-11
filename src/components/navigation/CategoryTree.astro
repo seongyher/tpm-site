@@ -12,6 +12,8 @@ const { items, label = "Categories" } = Astro.props;
 
 <nav aria-label={label}>
   <ol class="grid gap-3">
-    {items.map((item) => <CategoryGroup item={item} />)}
+    {items.map((item) => (
+      <CategoryGroup item={item} />
+    ))}
   </ol>
 </nav>

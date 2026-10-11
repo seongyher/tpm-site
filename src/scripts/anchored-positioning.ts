@@ -286,7 +286,7 @@ function inlineAnchorRect(
 function viewportRect(runtime: AnchoredPositioningRuntime): AnchorRect {
   const visualViewport = runtime.window.visualViewport;
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Happy DOM and some browser-like runtimes can omit visualViewport even though DOM types model it as nullable.
+  // Happy DOM and some browser-like runtimes can omit visualViewport even though DOM types model it as nullable.
   if (visualViewport !== null && visualViewport !== undefined) {
     return {
       height: visualViewport.height,

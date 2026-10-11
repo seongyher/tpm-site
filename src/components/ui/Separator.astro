@@ -18,20 +18,18 @@ const horizontalClasses = "h-px w-full border-0 bg-border";
 const verticalClasses = "h-full min-h-4 w-px bg-border";
 ---
 
-{
-  orientation === "horizontal" ? (
-    <hr
-      {...attrs}
-      aria-hidden={decorative ? "true" : undefined}
-      class:list={[horizontalClasses, className]}
-    />
-  ) : (
-    <div
-      {...attrs}
-      aria-hidden={decorative ? "true" : undefined}
-      aria-orientation={decorative ? undefined : "vertical"}
-      role={decorative ? undefined : "separator"}
-      class:list={[verticalClasses, className]}
-    />
-  )
-}
+{orientation === "horizontal" ? (
+  <hr
+    {...attrs}
+    aria-hidden={decorative ? "true" : undefined}
+    class:list={[horizontalClasses, className]}
+  />
+) : (
+  <div
+    {...attrs}
+    aria-hidden={decorative ? "true" : undefined}
+    aria-orientation={decorative ? undefined : "vertical"}
+    role={decorative ? undefined : "separator"}
+    class:list={[verticalClasses, className]}
+  />
+)}

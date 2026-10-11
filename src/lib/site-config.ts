@@ -310,7 +310,7 @@ export function titleWithSite(title: string): string {
 }
 
 function readSiteConfigJson(): unknown {
-  // eslint-disable-next-line security/detect-non-literal-fs-filename -- Build-time site config is resolved through the site-instance path adapter.
+  // Build-time site config is resolved through the site-instance path adapter.
   return JSON.parse(readFileSync(siteInstance.config.site, "utf8"));
 }
 

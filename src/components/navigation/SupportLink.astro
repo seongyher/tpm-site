@@ -19,30 +19,23 @@ const {
 } = Astro.props;
 ---
 
-{
-  siteConfig.features.support && (
-    <LinkButton
-      {...attrs}
-      href={href}
-      size="md"
-      class:list={[className]}
-      data-support-link
-    >
-      {compactLabel === undefined ? (
-        label
-      ) : (
-        <>
-          <span data-support-label-full class="max-[22.5625rem]:hidden">
-            {label}
-          </span>
-          <span
-            data-support-label-compact
-            class="hidden max-[22.5625rem]:inline"
-          >
-            {compactLabel}
-          </span>
-        </>
-      )}
-    </LinkButton>
-  )
-}
+{siteConfig.features.support && <LinkButton
+  {...attrs}
+  href={href}
+  size="md"
+  class:list={[className]}
+  data-support-link
+>
+  {compactLabel === undefined ? (
+    label
+  ) : (
+    <>
+      <span data-support-label-full class="max-[22.5625rem]:hidden">
+        {label}
+      </span>
+      <span data-support-label-compact class="hidden max-[22.5625rem]:inline">
+        {compactLabel}
+      </span>
+    </>
+  )}
+</LinkButton>}

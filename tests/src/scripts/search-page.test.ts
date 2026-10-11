@@ -533,11 +533,11 @@ describe("search page browser script", () => {
 });
 
 function browserDocument(window: Window): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser Document at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser Document at runtime but exposes package-local DOM types.
   return window.document as unknown as Document;
 }
 
 function browserElement(element: unknown): HTMLElement {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser HTMLElement at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser HTMLElement at runtime but exposes package-local DOM types.
   return element as HTMLElement;
 }

@@ -91,11 +91,6 @@ const releaseCommands: QualityCommand[] = [
     label: "Accessibility review",
   },
   {
-    args: ["--silent", "run", "test:perf:built"],
-    blocking: false,
-    label: "Lighthouse review",
-  },
-  {
     args: ["--silent", "run", "audit:all"],
     blocking: false,
     label: "All-severity dependency audit review",
@@ -382,7 +377,7 @@ Default mode runs the local PR-quality path: check, build, verify,
 validate:html, review:assets, review:markdown, and coverage review.
 
 Use --release to run check:release plus non-blocking Markdown, asset,
-accessibility, Lighthouse, all-severity audit, and coverage review checks.`;
+accessibility, all-severity audit, and coverage review checks.`;
 }
 
 // Coverage note: this wrapper only wires the exported CLI workflow to process

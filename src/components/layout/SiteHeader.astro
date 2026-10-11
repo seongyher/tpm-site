@@ -32,14 +32,14 @@ const headerSupportCompactProps =
   <div class="grid gap-2 px-2 py-3 sm:px-4 lg:px-8" data-site-header-inner>
     <PriorityInlineRow data-site-header-primary-row gap="responsive">
       <div slot="start" class="hidden min-w-0 md:block">
-        {
-          (siteConfig.features.search || siteConfig.features.themeToggle) && (
-            <ActionCluster align="start" gap="xs">
-              {siteConfig.features.search && <SearchReveal />}
-              {siteConfig.features.themeToggle && <ThemeToggle />}
-            </ActionCluster>
-          )
-        }
+        {(siteConfig.features.search ||
+          siteConfig.features.themeToggle) && <ActionCluster
+          align="start"
+          gap="xs"
+        >
+          {siteConfig.features.search && <SearchReveal />}
+          {siteConfig.features.themeToggle && <ThemeToggle />}
+        </ActionCluster>}
       </div>
       <div slot="start" class="min-w-0 md:hidden">
         <ActionCluster align="start" gap="none">
@@ -60,30 +60,21 @@ const headerSupportCompactProps =
         <div class="hidden min-w-0 items-center md:flex">
           <PrimaryNav currentPath={currentPath} items={primaryItems} gap="md" />
         </div>
-        {
-          siteConfig.features.support && (
-            <SupportLink
-              {...headerSupportCompactProps}
-              class="max-sm:min-h-8 max-sm:px-1 max-sm:py-1.5 max-sm:text-xs md:max-lg:min-h-9 md:max-lg:px-3 md:max-lg:py-2"
-            />
-          )
-        }
+        {siteConfig.features.support && (
+          <SupportLink
+            {...headerSupportCompactProps}
+            class="max-sm:min-h-8 max-sm:px-1 max-sm:py-1.5 max-sm:text-xs md:max-lg:min-h-9 md:max-lg:px-3 md:max-lg:py-2"
+          />
+        )}
       </ActionCluster>
     </PriorityInlineRow>
 
-    {
-      siteConfig.features.categories && (
-        <div
-          class="hidden h-7 min-w-0 items-center justify-center md:flex"
-          data-site-header-category-row
-        >
-          <DiscoveryMenu
-            currentPath={currentPath}
-            items={headerCategoryItems}
-          />
-        </div>
-      )
-    }
+    {siteConfig.features.categories && <div
+      class="hidden h-7 min-w-0 items-center justify-center md:flex"
+      data-site-header-category-row
+    >
+      <DiscoveryMenu currentPath={currentPath} items={headerCategoryItems} />
+    </div>}
   </div>
   <script src="../../scripts/site-header-offset.ts"></script>
 </header>

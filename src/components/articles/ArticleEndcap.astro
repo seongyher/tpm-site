@@ -37,23 +37,16 @@ const {
   aria-label="Article support and discovery"
   data-pagefind-ignore
 >
-  {
-    continuity !== undefined ? (
-      <NextArticleBlock
-        headingId={`${idPrefix}-continuity-heading`}
-        item={continuity.item}
-        label={continuity.label}
-      />
-    ) : null
-  }
-  {
-    support !== undefined && (
-      <SupportBlock
-        headingId={`${idPrefix}-support-heading`}
-        support={support}
-      />
-    )
-  }
+  {continuity !== undefined ? (
+    <NextArticleBlock
+      headingId={`${idPrefix}-continuity-heading`}
+      item={continuity.item}
+      label={continuity.label}
+    />
+  ) : null}
+  {support !== undefined && (
+    <SupportBlock headingId={`${idPrefix}-support-heading`} support={support} />
+  )}
   <MoreInCategoryBlock
     categoryHref={categoryHref}
     categoryTitle={categoryTitle}

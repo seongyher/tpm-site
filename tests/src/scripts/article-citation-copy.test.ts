@@ -251,17 +251,17 @@ describe("article citation copy browser script", () => {
 });
 
 function browserDocument(document: unknown): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements the browser Document shape used by the script.
+  // Happy DOM implements the browser Document shape used by the script.
   return document as Document;
 }
 
 function browserNavigator(navigator: unknown): Navigator {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Tests provide the clipboard subset required by the script.
+  // Tests provide the clipboard subset required by the script.
   return navigator as Navigator;
 }
 
 function browserEvent(event: unknown): Event {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events implement the browser event shape used by dispatchEvent.
+  // Happy DOM events implement the browser event shape used by dispatchEvent.
   return event as Event;
 }
 

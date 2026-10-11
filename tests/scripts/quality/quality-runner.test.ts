@@ -32,7 +32,7 @@ describe("quiet quality runner", () => {
     expect(outputHasWarningOrError("warnings: 0")).toBe(false);
     expect(
       outputHasWarningOrError(
-        "$ eslint . --max-warnings=0 --report-unused-disable-directives-severity error",
+        "$ oxlint --config .oxlintrc.json --deny-warnings .",
       ),
     ).toBe(false);
   });

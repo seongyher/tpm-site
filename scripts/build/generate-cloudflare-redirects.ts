@@ -1,10 +1,9 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
-
 import { siteInstance } from "../../src/lib/site-instance";
 import { siteRedirects as currentSiteRedirects } from "../../src/lib/site-redirects";
+import { parseContentSource } from "../content/parse-content-source";
 
 const CLOUDFLARE_STATIC_REDIRECT_LIMIT = 2_000;
 const CLOUDFLARE_REDIRECT_LINE_LIMIT = 1_000;
@@ -258,7 +257,8 @@ function filenameStem(file: string): string {
 }
 
 function frontmatterData(markdown: string): Record<string, unknown> {
-  return (matter(markdown) as { data: Record<string, unknown> }).data;
+  return (parseContentSource(markdown) as { data: Record<string, unknown> })
+    .data;
 }
 
 async function listFiles(dir: string, pattern: RegExp): Promise<string[]> {
