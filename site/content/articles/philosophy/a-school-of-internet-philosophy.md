@@ -1,12 +1,13 @@
 ---
 title: A School of Internet Philosophy
-description: 'I think there''s a school of ‘Internet philosophy’ like there is continental
+description:
+  "I think there's a school of ‘Internet philosophy’ like there is continental
   philosophy or Anglo-American philosophy, with its own dominant interests and a unique
-  style of discourse. I''m trying to figure out what this consists of. It''s a combination
+  style of discourse. I'm trying to figure out what this consists of. It's a combination
   of demographics, dominant areas of interest (both within and without strict philosophy)
   and conventions and canons unique to the school.
 
-  '
+  "
 date: 2017-03-27 03:16:00 +13:00
 author: "Seong-Young Her"
 tags:

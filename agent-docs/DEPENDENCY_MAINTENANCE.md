@@ -84,8 +84,9 @@ The October refresh incorporates the four open Dependabot proposals (#163,
 #165, #166, #168), updates all 33 then-outdated direct dependencies, and pins
 Bun 1.4.3. Prettier's Astro plugin 1.x mechanically reformats 89 Astro files;
 `astroCompressHTML: "html"` matches the existing Astro HTML compression policy.
-Three legacy YAML closing quotes require indentation with the updated parser;
-parsed metadata and article bodies match HEAD, including trailing newlines.
+Three legacy YAML descriptions use formatter-stable quoting with the updated
+parser; parsed metadata and article bodies match HEAD, including trailing
+newlines.
 
 The initial dependency refresh reduced 43 audit findings to two unpatched
 advisories. Removing the toolchains now resolves those final two findings.
