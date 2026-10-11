@@ -13,7 +13,7 @@ tags:
 legacyPermalink: 2024/05/17/metamemetics/
 ---
 
-This article was originally published in *Critical Meme Reader III: Breaking the Meme* (Chloë Arkenbout and İdil Galip, eds., 2024. https://doi.org/10.25969/MEDIAREP/23529). You can download the anthology or order a physical copy at https://networkcultures.org/blog/publication/critical-meme-reader-iii-breaking-the-meme/
+This article is reproduced here with minor fixes for typographical errors. It was originally published in *Critical Meme Reader III: Breaking the Meme* (Chloë Arkenbout and İdil Galip, eds., 2024. https://doi.org/10.25969/MEDIAREP/23529). You can download the anthology or order a physical copy free of charge at https://networkcultures.org/blog/publication/critical-meme-reader-iii-breaking-the-meme/
 
 > The genic perspective is insufficient not only as a metaphor for thinking about and modelling cultural evolution, but also for understanding biological evolution. The simple rules of Darwinian ‘evolutionary selection game’ mask the complexity of the process underlying it, because evolution is a game that evolves its own rules.
 
