@@ -13,7 +13,7 @@ describe("ArticleHeaderActionRow", () => {
     });
 
     expect(view).toContain("data-article-header-actions");
-    expect(view).toContain("data-pdf-exclude");
+    expect(view).toContain("data-print-exclude");
     expect(view).toContain("print:hidden");
     expect(view).toContain("Actions");
   });

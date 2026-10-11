@@ -99,13 +99,11 @@ export const qaCommandGroups = [
     domain: "build",
     mutation: "generated-output",
     runtime: "slow",
-    scope:
-      "Production static build, PDF generation, optimization, and deploy metadata.",
+    scope: "Production static build, optimization, and deploy metadata.",
     scripts: [
       "build",
       "build:cloudflare",
       "build:optimize",
-      "build:pdf",
       "build:raw",
       "build:release",
     ],
@@ -421,7 +419,7 @@ export const qaCommandGroups = [
     domain: "generated-output",
     mutation: "none",
     runtime: "medium",
-    scope: "Built output link, metadata, script, PDF, and HTML validation.",
+    scope: "Built output link, metadata, script, and HTML validation.",
     scripts: ["validate:html", "verify"],
   },
 ] as const satisfies readonly QaCommandGroup[];

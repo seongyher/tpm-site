@@ -14,7 +14,6 @@ const expectedScriptEntrypoints = [
   ["assets:unused", "scripts/assets/find-unused-images.ts"],
   ["build:cloudflare", "scripts/build/generate-cloudflare-redirects.ts"],
   ["build:optimize", "scripts/build/optimize-build-output.ts"],
-  ["build:pdf", "scripts/build/generate-article-pdfs.ts"],
   ["build:raw", "scripts/build/build-raw.ts"],
   ["catalog:check", "scripts/quality/verify-component-catalog.ts"],
   ["coverage:verify", "scripts/testing/verify-test-coverage.ts"],
@@ -75,6 +74,14 @@ async function readPackageJson(): Promise<PackageJson> {
 }
 
 describe("package scripts", () => {
+  test("builds static HTML without a PDF generator", async () => {
+    const { scripts } = await readPackageJson();
+    expect(scripts["build"]).toBe(
+      "bun --silent run build:raw && bun --silent run build:optimize",
+    );
+    expect(scripts["build:pdf"]).toBeUndefined();
+    expect(scripts["test:site-instance"]).not.toContain("build:pdf");
+  });
   test("retains manual Markdown formatting without an automatic review alias", async () => {
     const { scripts } = await readPackageJson();
 

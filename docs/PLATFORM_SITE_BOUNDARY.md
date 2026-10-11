@@ -29,11 +29,11 @@ and editorial content, not like framework internals.
 
 The TPM Platform serves site owners, authors, and developers who need a robust
 blogging engine. It should absorb technical complexity: routing, validation,
-SEO, PDFs, feeds, search, images, citations, sharing, accessibility,
+SEO, feeds, search, images, citations, sharing, accessibility,
 performance, and testing.
 
 The platform succeeds when ordinary site owners do not need to understand Astro
-routes, Tailwind class composition, Markdown plugin internals, PDF generation,
+routes, Tailwind class composition, Markdown plugin internals,
 or social metadata to manage a site.
 
 ## Target Repo Shape
@@ -172,18 +172,13 @@ interface SiteConfig {
     categories: boolean;
     collections: boolean;
     feed: boolean;
-    pdf: boolean;
     search: boolean;
     support: boolean;
     tags: boolean;
     themeToggle: boolean;
   };
   contentDefaults: {
-    articles: PublishableContentDefaults & {
-      pdf: {
-        enabled: boolean;
-      };
-    };
+    articles: PublishableContentDefaults;
     announcements: PublishableContentDefaults;
   };
   homepage: {
@@ -231,7 +226,7 @@ These values now live behind config or the site-instance resolver:
 - homepage hero assets in site page frontmatter;
 - built-in vendor CTA assets owned by reusable platform UI;
 - a complete external fixture site instance build proof;
-- resolver-backed content, asset, PDF, build verification, Pagefind, HTML
+- resolver-backed content, asset, build verification, Pagefind, HTML
   validation, and accountability paths.
 
 ## Remaining Platform Work
@@ -240,10 +235,10 @@ The controllable-defaults tranche is now implemented:
 
 - `features` gives the platform one webmaster-owned source of truth for
   optional high-level surfaces;
-- `contentDefaults` gives frontmatter fields such as `draft`, `visibility`, and
-  PDF generation site-owned defaults;
-- content schemas, publishable normalization, feed/search exposure, PDF
-  eligibility, and high-value support/navigation UI seams read those settings;
+- `contentDefaults` gives frontmatter fields such as `draft` and `visibility`
+  site-owned defaults;
+- content schemas, publishable normalization, feed/search exposure,
+  and high-value support/navigation UI seams read those settings;
 - the non-TPM fixture site proves a site instance can customize defaults without
   editing platform modules.
 
@@ -321,8 +316,8 @@ props for reusable blocks.
 
 The fourth risk is treating feature flags as route support before the rest of
 the platform can honor that contract. This tranche may hide optional UI surfaces
-and suppress generated PDF metadata, but route pruning must wait for sitemap,
-Pagefind, verification, and navigation checks to share one feature model.
+but route pruning must wait for sitemap, Pagefind, verification, and navigation
+checks to share one feature model.
 
 The fifth risk is making homepage composition arbitrary too early. The homepage
 should remain a small typed recipe: configured collection IDs and limits,
@@ -338,7 +333,7 @@ Completed in the config-defaults tranche:
    live site default.
 3. Split reusable defaults into `src/lib/site-config-defaults.ts` while keeping
    `src/lib/site-config.ts` as the single parser/export boundary.
-4. Wired content schemas, publishable normalization, PDF eligibility,
+4. Wired content schemas, publishable normalization,
    feed/search exposure, and the highest-value UI seams through those defaults.
 5. Proved non-TPM fixtures can customize defaults without editing platform code.
 6. Kept remaining feature-gated route pruning as an explicit later milestone.

@@ -22,7 +22,6 @@ interface PublishableVisibilityDefaults {
 /** Content-type defaults supplied by the platform or site config. */
 interface PublishableContentDefaults {
   draft: boolean;
-  pdf?: undefined | { enabled: boolean };
   visibility: PublishableVisibilityDefaults;
 }
 
@@ -43,7 +42,7 @@ export function articleSchema(
   context: ImageSchemaContext,
   defaults?: PublishableContentDefaults,
 ): ReturnType<typeof createArticleSchema> {
-  return createArticleSchema(context, { defaults, includePdf: true });
+  return createArticleSchema(context, defaults);
 }
 
 /**
@@ -58,7 +57,7 @@ export function announcementSchema(
   context: ImageSchemaContext,
   defaults?: PublishableContentDefaults,
 ): ReturnType<typeof createArticleSchema> {
-  return createArticleSchema(context, { defaults, includePdf: false });
+  return createArticleSchema(context, defaults);
 }
 
 /**
@@ -127,14 +126,10 @@ export function pageSchema(
 
 function createArticleSchema(
   { image }: ImageSchemaContext,
-  {
-    defaults = {
-      draft: false,
-      pdf: { enabled: true },
-      visibility: publishableVisibilityDefaults,
-    },
-    includePdf,
-  }: { defaults: PublishableContentDefaults | undefined; includePdf: boolean },
+  defaults: PublishableContentDefaults = {
+    draft: false,
+    visibility: publishableVisibilityDefaults,
+  },
 ) {
   const publishableSchemaFields = {
     author: z.string().min(1),
@@ -152,16 +147,7 @@ function createArticleSchema(
     visibility: publishableVisibilitySchema(defaults.visibility),
   };
 
-  return z
-    .object(
-      includePdf
-        ? {
-            ...publishableSchemaFields,
-            pdf: z.boolean().default(defaults.pdf?.enabled ?? true),
-          }
-        : publishableSchemaFields,
-    )
-    .strict();
+  return z.object(publishableSchemaFields).strict();
 }
 
 function tagListSchema() {

@@ -1,55 +1,29 @@
 ---
-title: PDFs And Scholarship
-description: Generate lightweight academic-style PDFs for articles.
+title: Scholarship And Printing
+description: Cite articles and use the browser's print-friendly view.
 date: 2026-05-08
 author: Platform Team
 tags:
   - authoring
-  - pdfs
   - scholarship
 ---
 
-The platform can generate simplified article PDFs for reading, citation, and
-scholarly indexing. PDFs remove site chrome and promotional blocks so the
-article reads like a plain academic document.
+Articles publish HTML citation metadata derived from their title, authors,
+publication date, description, tags, and structured bibliography. The Cite
+control provides citation formats, and Share uses the canonical article URL.
 
-## Default Behavior
+## Browser Printing
 
-Article PDF generation is controlled by site defaults:
+Use your browser's Print command for a print-friendly article view. Navigation,
+sharing controls, and hover previews are hidden; article text, images, notes,
+and bibliography remain. Interactive embeds fall back to source links.
 
-```json
-{
-  "contentDefaults": {
-    "articles": {
-      "pdf": {
-        "enabled": true
-      }
-    }
-  }
-}
-```
+## Authoring
 
-## Per-Article Override
-
-Disable a PDF for an article only when the article cannot be represented well:
-
-```yaml
----
-pdf: false
----
-```
-
-## Generate PDFs
-
-```sh
-bun run build:pdf
-```
-
-## Common Reasons To Disable
-
-- The article relies on interactive MDX that has no useful static fallback.
-- The article contains third-party media that cannot be represented in print.
-- The generated PDF would be misleading without a manual editorial pass.
+The platform does not generate downloadable article PDFs. There is no PDF
+feature switch, per-article setting, or build command. Remove any old `pdf`
+frontmatter or configuration fields when migrating an existing site instance.
+Links and citations to external PDF sources remain ordinary article content.
 
 ## Next
 

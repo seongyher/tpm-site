@@ -28,17 +28,7 @@ describe("ArticleHeader", () => {
         date: new Date("2022-04-06T23:58:10.000Z"),
         description: "Article description.",
         formattedDate: "April 6, 2022",
-        pdf: {
-          articleUrl: "https://thephilosophersmeme.com/articles/article-title/",
-          authors: ["Seong-Young Her"],
-          citationPdfUrl:
-            "https://thephilosophersmeme.com/articles/article-title/article-title.pdf",
-          pdfHref: "/articles/article-title/article-title.pdf",
-          pdfOutputPath: "articles/article-title/article-title.pdf",
-          publicationDate: new Date("2022-04-06T23:58:10.000Z"),
-          publicationDateForScholar: "2022/04/06",
-          title: "Article Title",
-        },
+
         semanticDetails: {
           heading: "Review details",
           items: [{ label: "Reviewed", value: "Example Book" }],
@@ -75,19 +65,21 @@ describe("ArticleHeader", () => {
     expect(view).toContain('aria-label="Share this article"');
     expect(view).toContain(">Share</span>");
     expect(view).toContain('data-anchor-preset="article-action-menu"');
-    expect(view).toContain('aria-label="Save PDF"');
-    expect(view).toContain(">PDF</span>");
-    expect(view).toContain('data-article-pdf-link="true"');
-    expect(view).toContain('href="/articles/article-title/article-title.pdf"');
-    expect(view).toContain("download");
+    expect(view).not.toContain('aria-label="Save PDF"');
+    expect(view).not.toContain(">PDF</span>");
+    expect(view).not.toContain('data-article-pdf-link="true"');
+    expect(view).not.toContain(
+      'href="/articles/article-title/article-title.pdf"',
+    );
+    expect(view).not.toContain("download");
     expect(view).toContain("print:hidden");
-    expect(view).toContain("data-pdf-exclude");
-    expect(view).toContain("data-article-pdf-canonical");
-    expect(view).toContain("data-article-pdf-disclaimer");
+    expect(view).toContain("data-print-exclude");
+    expect(view).not.toContain("data-article-pdf-canonical");
+    expect(view).not.toContain("data-article-pdf-disclaimer");
     expect(view).toContain(
       "https://thephilosophersmeme.com/articles/article-title/",
     );
-    expect(view).toContain("static export of the canonical web article");
+    expect(view).not.toContain("static export of the canonical web article");
     expect(view).toContain("Article description.");
     expect(view).toContain("data-semantic-details");
     expect(view).toContain("Review details");
@@ -95,7 +87,7 @@ describe("ArticleHeader", () => {
     expect(view).not.toContain("Article tags");
   });
 
-  test("omits the PDF action and print canonical line when PDF data is unavailable", async () => {
+  test("renders citation-only actions without download controls", async () => {
     const container = await createAstroTestContainer();
     const view = await container.renderToString(ArticleHeader, {
       props: {

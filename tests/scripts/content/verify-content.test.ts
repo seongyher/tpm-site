@@ -228,7 +228,7 @@ describe("content verifier", () => {
       );
     }));
 
-  test("requires article MDX component imports to declare PDF compatibility", async () =>
+  test("accepts article MDX component imports without a PDF compatibility registry", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
       await writeText(
@@ -273,11 +273,6 @@ describe("content verifier", () => {
         rootDir: root,
       });
 
-      expect(result.issues).toContain(
-        'src/content/articles/history/unsupported.mdx: article MDX import "../../../components/articles/InteractiveWidget.astro" needs an explicit PDF fallback in src/lib/article-pdf-compatibility.ts',
-      );
-      expect(
-        result.issues.some((issue) => issue.includes("compatible.mdx")),
-      ).toBe(false);
+      expect(result.issues).toEqual([]);
     }));
 });

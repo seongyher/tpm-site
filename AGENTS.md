@@ -119,7 +119,7 @@ in `DEFERRED.md`; completion belongs in the active checklist after verification.
 The repo should behave like a typed static publishing compiler: authors and
 site owners express publication intent through content, assets, redirects,
 theme, and typed config; platform code validates and normalizes that intent,
-then emits static routes, HTML, metadata, feeds, search data, PDFs, assets, and
+then emits static routes, HTML, metadata, feeds, search data, assets, and
 diagnostics.
 
 Use `agent-docs/ENGINEERING_PHILOSOPHY.md` as the decision aid for substantial
@@ -1295,7 +1295,7 @@ Core principles:
 - Use type-driven design by default. Make invalid states unrepresentable
   wherever practical.
 - Normalize inputs once into strict internal models before passing data to UI,
-  metadata, feed, search, PDF, route, or generated-output code.
+  metadata, feed, search, route, or generated-output code.
 - Model platform concepts with named domain types, literal registries,
   discriminated unions, and narrow view models rather than loose objects,
   duplicated strings, or scattered boolean flags.
@@ -1434,7 +1434,7 @@ content helpers, quality/verification scripts, and custom content transforms.
 
 Generated output is a platform contract. When changing public output, add or
 update tests for the relevant HTML semantics, metadata, redirects, RSS, sitemap,
-search data, PDF eligibility/output, citation output, bibliography output,
+search data, HTML Scholar metadata, citation output, bibliography output,
 asset policy, cache headers, diagnostics, or verifier behavior.
 
 For UI work, prefer tests that assert user-visible behavior. Use happy-dom for

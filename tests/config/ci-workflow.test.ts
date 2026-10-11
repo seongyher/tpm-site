@@ -77,6 +77,7 @@ describe("CI workflow", () => {
     expect(build).toContain("bun run build:cloudflare");
     expect(build).toContain("bun run verify");
     expect(build).toContain("bun run validate:html");
+    expect(build).not.toContain("playwright install");
     expect(build).toContain("actions/upload-artifact@v7");
     expect(build).toContain("name: verified-dist");
     expect(build).toContain("path: dist");

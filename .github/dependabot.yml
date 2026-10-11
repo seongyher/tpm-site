@@ -23,7 +23,6 @@ updates:
         patterns:
           - "@playwright/*"
           - playwright
-          - playwright-core
       tailwind:
         patterns:
           - tailwindcss

@@ -43,16 +43,16 @@ describe("site config defaults", () => {
     ]);
   });
 
-  test("keeps visibility, feature, and PDF defaults explicit", () => {
+  test("keeps visibility and feature defaults explicit", () => {
     expect(defaultFeatureConfig.support).toBe(true);
-    expect(defaultFeatureConfig.pdf).toBe(true);
+    expect(defaultFeatureConfig).not.toHaveProperty("pdf");
     expect(defaultPublishableVisibilityConfig).toEqual({
       directory: true,
       feed: true,
       homepage: true,
       search: true,
     });
-    expect(defaultContentDefaultsConfig.articles.pdf.enabled).toBe(true);
+    expect(defaultContentDefaultsConfig.articles).not.toHaveProperty("pdf");
     expect(defaultContentDefaultsConfig.announcements.visibility).toEqual(
       defaultPublishableVisibilityConfig,
     );

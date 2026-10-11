@@ -17,7 +17,7 @@ describe("build verifier", () => {
             {
               authors: [],
               isMdx: false,
-              pdfEnabled: true,
+
               slug: "post",
               title: "Post",
             },
@@ -37,7 +37,7 @@ describe("build verifier", () => {
             {
               authors: [],
               isMdx: false,
-              pdfEnabled: true,
+
               slug: "post",
               title: "Post",
             },
@@ -58,7 +58,7 @@ describe("build verifier", () => {
             {
               authors: [],
               isMdx: false,
-              pdfEnabled: true,
+
               slug: "post",
               title: "Post",
             },
@@ -77,7 +77,7 @@ describe("build verifier", () => {
             {
               authors: [],
               isMdx: false,
-              pdfEnabled: true,
+
               slug: "post",
               title: "Post",
             },
@@ -87,7 +87,7 @@ describe("build verifier", () => {
         },
         ["history"],
       ),
-    ).toContain("articles/post/post.pdf");
+    ).not.toContain("articles/post/post.pdf");
     expect(
       requiredPathsForSource(
         {
@@ -96,7 +96,7 @@ describe("build verifier", () => {
             {
               authors: [],
               isMdx: false,
-              pdfEnabled: false,
+
               slug: "web-only",
               title: "Web Only",
             },
@@ -120,7 +120,7 @@ describe("build verifier", () => {
         articlePageCount: 1,
         astroClientScriptCount: 0,
         issues: {
-          articlePdfIssues: [],
+          articleScholarIssues: [],
           articleCountIssues: [],
           brokenLinks: [],
           catalogLeaks: [],

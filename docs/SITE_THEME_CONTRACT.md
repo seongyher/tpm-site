@@ -28,7 +28,7 @@ chosen by `SITE_INSTANCE_ROOT`; the default instance is `site/`.
 
 The order is intentional. Platform base styles define the token API, the site
 theme overrides normal screen branding, and print styles override both for
-academic PDF/print output.
+browser print output.
 
 ## Site-Owned Tokens
 
@@ -59,7 +59,7 @@ The platform keeps:
 - Tailwind imports and `@theme inline` token wiring;
 - semantic base styles for document, links, focus, images, and reference
   markers;
-- print/PDF behavior;
+- browser print behavior;
 - responsive component layout and interaction styles.
 
 Do not put publication-specific selectors or TPM-specific palette decisions in

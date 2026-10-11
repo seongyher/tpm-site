@@ -80,12 +80,6 @@ export const componentCatalogIgnoreList = [
   },
   {
     lifecycle: "route-only",
-    path: "src/components/articles/ArticleHeaderActionLink.astro",
-    reason:
-      "Internal article-header action primitive covered by ArticleHeader component tests.",
-  },
-  {
-    lifecycle: "route-only",
     path: "src/components/articles/ArticleHeaderActionRow.astro",
     reason:
       "Internal article-header action primitive covered by ArticleHeader component tests.",
@@ -169,7 +163,7 @@ export const componentCatalogIgnoreList = [
     lifecycle: "route-only",
     path: "src/components/seo/ArticleScholarMeta.astro",
     reason:
-      "Non-visual Scholar metadata component covered by PDF SEO and article render tests.",
+      "Non-visual Scholar metadata component covered by Scholar metadata and article render tests.",
   },
   {
     lifecycle: "route-only",

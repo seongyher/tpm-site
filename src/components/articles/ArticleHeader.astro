@@ -1,15 +1,11 @@
 ---
-import { Download } from "lucide-astro";
-
 import ArticleCitationMenu from "./ArticleCitationMenu.astro";
-import ArticleHeaderActionLink from "./ArticleHeaderActionLink.astro";
 import ArticleHeaderActionRow from "./ArticleHeaderActionRow.astro";
 import ArticleMeta from "./ArticleMeta.astro";
 import ArticleShareMenu from "./ArticleShareMenu.astro";
 import SemanticDetails from "./SemanticDetails.astro";
 import TextLink from "../ui/TextLink.astro";
 import type { AuthorSummary } from "../../lib/authors";
-import type { ArticlePdfViewModel } from "../../lib/article-pdf";
 import type { ArticleCitationMenuViewModel } from "../../lib/citations/article-citation";
 import type { SemanticDetailsViewModel } from "../../lib/semantic-metadata";
 import type { ArticleShareMenuViewModel } from "../../lib/share-targets";
@@ -27,7 +23,6 @@ interface Props {
   date?: Date | undefined;
   description?: string | undefined;
   formattedDate?: string | undefined;
-  pdf?: ArticlePdfViewModel | undefined;
   profileLinksEnabled?: boolean | undefined;
   semanticDetails?: SemanticDetailsViewModel | undefined;
   share?: ArticleShareMenuViewModel | undefined;
@@ -42,14 +37,12 @@ const {
   date,
   description,
   formattedDate,
-  pdf,
   profileLinksEnabled = true,
   semanticDetails,
   share,
   title,
 } = Astro.props;
-const hasHeaderActions =
-  citation !== undefined || share !== undefined || pdf !== undefined;
+const hasHeaderActions = citation !== undefined || share !== undefined;
 const hasKickerRow = category !== undefined || hasHeaderActions;
 ---
 
@@ -68,22 +61,13 @@ const hasKickerRow = category !== undefined || hasHeaderActions;
       prefetch="hover"
       class="text-sm font-semibold uppercase"
       data-article-category-link
-      data-pdf-exclude
+      data-print-exclude
     >
       {category.title}
     </TextLink>}
     {hasHeaderActions && <ArticleHeaderActionRow>
       {citation && <ArticleCitationMenu citation={citation} />}
       {share && <ArticleShareMenu share={share} />}
-      {pdf && <ArticleHeaderActionLink
-        href={pdf.pdfHref}
-        label="Save PDF"
-        data-article-pdf-link
-        download
-      >
-        <Download class="size-3.5" aria-hidden="true" />
-        <span aria-hidden="true">PDF</span>
-      </ArticleHeaderActionLink>}
     </ArticleHeaderActionRow>}
   </div>}
   <h1
@@ -109,23 +93,4 @@ const hasKickerRow = category !== undefined || hasHeaderActions;
     {description}
   </p>}
   <SemanticDetails details={semanticDetails} />
-  {pdf && (
-    <>
-      <p
-        class="hidden text-sm leading-6 print:block"
-        data-article-pdf-canonical
-      >
-        Published {formattedDate ?? pdf.publicationDateForScholar}. Available at
-        <a href={pdf.articleUrl}>{pdf.articleUrl}</a>.
-      </p>
-      <p
-        class="hidden text-sm leading-6 print:block"
-        data-article-pdf-disclaimer
-      >
-        This PDF is a static export of the canonical web article. Interactive
-        media and embeds may be represented as source links; visit the canonical
-        article for the full web version.
-      </p>
-    </>
-  )}
 </header>

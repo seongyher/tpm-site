@@ -42,6 +42,7 @@ syntax is designed. Do not invent one-off citation syntax in article prose.
 
 ## Next
 
-Use [PDFs And Scholarship](/articles/pdfs-and-scholarship/) for scholarly PDF
-exports and [Frontmatter Reference](/articles/frontmatter-reference/) for
-article metadata fields.
+Use [Scholarship And Printing](/articles/pdfs-and-scholarship/) for citation
+metadata and browser printing, and
+[Frontmatter Reference](/articles/frontmatter-reference/) for article metadata
+fields.

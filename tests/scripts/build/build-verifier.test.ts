@@ -1,9 +1,8 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { describe, expect, spyOn, test } from "bun:test";
-import { PDFDocument } from "pdf-lib";
 
 import {
   announcementPublicationStats,
@@ -28,7 +27,7 @@ function publication(): ArticlePublication {
       {
         authors: ["Test Author"],
         isMdx: false,
-        pdfEnabled: true,
+
         publicationDate: new Date("2024-01-02T00:00:00.000Z"),
         slug: "markdown-post",
         title: "Markdown Post",
@@ -36,7 +35,7 @@ function publication(): ArticlePublication {
       {
         authors: ["Test Author"],
         isMdx: true,
-        pdfEnabled: true,
+
         publicationDate: new Date("2024-01-03T00:00:00.000Z"),
         slug: "interactive-post",
         title: "Interactive Post",
@@ -61,39 +60,6 @@ async function writeText(root: string, relativePath: string, text: string) {
   const fullPath = path.join(root, relativePath);
   await mkdir(path.dirname(fullPath), { recursive: true });
   await writeFile(fullPath, text);
-}
-
-async function writeArticlePdf(
-  root: string,
-  slug: string,
-  {
-    authors = [],
-    oversized = false,
-    title = "Published",
-  }: {
-    authors?: readonly string[];
-    oversized?: boolean;
-    title?: string;
-  } = {},
-) {
-  const fullPath = path.join(root, `dist/articles/${slug}/${slug}.pdf`);
-  const pdf = await PDFDocument.create();
-
-  pdf.addPage([72, 72]);
-  pdf.setTitle(title);
-  pdf.setAuthor(authors.join(", "));
-  await mkdir(path.dirname(fullPath), { recursive: true });
-  await writeFile(fullPath, await pdf.save());
-
-  if (oversized) {
-    // File padding exercises the byte limit without expensive, irrelevant
-    // multi-megabyte metadata encoding that can stall concurrent CI tests.
-    const data = await readFile(fullPath);
-    await writeFile(
-      fullPath,
-      Buffer.concat([data, Buffer.alloc(5 * 1024 * 1024)]),
-    );
-  }
 }
 
 function pageHtmlFixture(
@@ -215,12 +181,10 @@ function articleHtmlFixture(
   {
     authors = [],
     date,
-    includePdf = true,
     title = "Published",
   }: {
     authors?: readonly string[];
     date?: string;
-    includePdf?: boolean;
     title?: string;
   } = {},
 ) {
@@ -252,12 +216,6 @@ function articleHtmlFixture(
       date === undefined
         ? ""
         : `<meta name="citation_publication_date" content="${date}">`,
-      includePdf
-        ? `<meta name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/${slug}/${slug}.pdf">`
-        : "",
-      includePdf
-        ? `<a href="/articles/${slug}/${slug}.pdf" data-article-pdf-link>Save PDF</a>`
-        : "",
     ].join(""),
     { includeShareMeta: false, title },
   );
@@ -279,7 +237,7 @@ describe("build verifier helpers", () => {
     expect(requiredPathsForSource(publication(), ["history"])).toContain(
       "articles/markdown-post/index.html",
     );
-    expect(requiredPathsForSource(publication(), ["history"])).toContain(
+    expect(requiredPathsForSource(publication(), ["history"])).not.toContain(
       "articles/markdown-post/markdown-post.pdf",
     );
     expect(requiredPathsForSource(publication(), ["history"])).toContain(
@@ -386,7 +344,7 @@ describe("build verifier helpers", () => {
       await writeText(
         root,
         "src/content/articles/history/web-only.md",
-        "---\ntitle: Web Only\npdf: false\n---\n",
+        "---\ntitle: Web Only\n---\n",
       );
 
       const result = await articlePublicationStats(
@@ -398,14 +356,6 @@ describe("build verifier helpers", () => {
         "web-only",
         "z-post",
       ]);
-      expect(
-        result.publishedArticles.find((article) => article.slug === "a-post")
-          ?.pdfEnabled,
-      ).toBe(true);
-      expect(
-        result.publishedArticles.find((article) => article.slug === "web-only")
-          ?.pdfEnabled,
-      ).toBe(false);
       expect(Array.from(result.publishedTagSegments)).toEqual(["meme history"]);
     }));
 
@@ -573,7 +523,7 @@ describe("build verifier helpers", () => {
         articlePageCount: 0,
         astroClientScriptCount: 0,
         issues: {
-          articlePdfIssues: [],
+          articleScholarIssues: [],
           articleCountIssues: ["expected 1 article page, found 0"],
           brokenLinks: [],
           catalogLeaks: [],
@@ -599,8 +549,8 @@ describe("build verifier helpers", () => {
       articlePageCount: 2,
       astroClientScriptCount: 1,
       issues: {
-        articlePdfIssues: [
-          "articles/post/post.pdf: missing PDF title metadata",
+        articleScholarIssues: [
+          "articles/post/index.html: missing citation_title metadata",
         ],
         articleCountIssues: ["expected 1 article page, found 2"],
         brokenLinks: ["index.html -> /missing/"],
@@ -623,7 +573,7 @@ describe("build verifier helpers", () => {
     });
 
     expect(report).toContain("Missing:");
-    expect(report).toContain("Article PDF issues:");
+    expect(report).toContain("Article Scholar issues:");
     expect(report).toContain("Missing legacy redirects:");
     expect(report).toContain("Invalid legacy redirects:");
     expect(report).toContain("Metadata issues:");
@@ -757,7 +707,7 @@ describe("build verifier helpers", () => {
         "dist/_astro/social-preview.jpg",
         "small social jpg",
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(
         root,
         "dist/categories/index.html",
@@ -802,7 +752,7 @@ describe("build verifier helpers", () => {
       );
     }));
 
-  test("reports article PDF Scholar metadata and file-shape regressions", async () =>
+  test("reports missing HTML Scholar metadata", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
       await writeText(
@@ -814,37 +764,73 @@ describe("build verifier helpers", () => {
       await writeText(
         root,
         "dist/articles/published/index.html",
-        [
-          '{"@type":"BlogPosting"}',
+        articleHtmlFixture().replace(
           '<meta name="citation_title" content="Published">',
-          '<meta name="citation_author" content="Test Author">',
-          '<meta name="citation_publication_date" content="2024/01/02">',
-          '<meta name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/wrong/wrong.pdf">',
-          '<a href="/articles/wrong/wrong.pdf">Wrong PDF</a>',
-        ].join(""),
+          "",
+        ),
       );
-      await writeText(root, "dist/articles/published/published.pdf", "nope");
 
       const result = await verifyBuild({
         articleDir: path.join(root, "src/content/articles"),
         categoryDir: path.join(root, "src/content/categories"),
         distDir: path.join(root, "dist"),
       });
-
-      expect(result.issues.articlePdfIssues).toEqual([
-        "articles/published/index.html: missing Save PDF link to /articles/published/published.pdf",
-        "articles/published/index.html: citation_pdf_url does not point to /articles/published/published.pdf",
-        "articles/published/published.pdf: generated file is not a PDF",
+      expect(result.issues.articleScholarIssues).toEqual([
+        "articles/published/index.html: missing citation_title metadata",
+        "articles/published/index.html: missing citation_author metadata for Test Author",
+        "articles/published/index.html: missing citation_publication_date metadata",
       ]);
     }));
 
-  test("rejects stale PDF surfaces when an article disables generated PDFs", async () =>
+  test("rejects retired generated PDF surfaces while allowing external PDF citations", async () =>
+    withTempRoot(async (root) => {
+      await writeText(root, "src/content/categories/history.json", "{}");
+      await writeText(
+        root,
+        "src/content/articles/history/published.md",
+        "---\ntitle: Published\n---\n",
+      );
+      await writeRequiredDistShell(root);
+      const html =
+        articleHtmlFixture() +
+        '<a href="https://example.com/source.pdf">External source</a>' +
+        "<code>&lt;a data-article-pdf-link&gt;</code>";
+      await writeText(root, "dist/articles/published/index.html", html);
+      const options = {
+        articleDir: path.join(root, "src/content/articles"),
+        categoryDir: path.join(root, "src/content/categories"),
+        distDir: path.join(root, "dist"),
+      };
+      const clean = await verifyBuild(options);
+      expect(clean.issues.articleScholarIssues).toEqual([]);
+      expect(clean.issues.brokenLinks).toEqual([]);
+
+      await writeText(
+        root,
+        "dist/articles/published/index.html",
+        html +
+          '<meta name="citation_pdf_url" content="https://example.com/articles/published/published.pdf"><a href="/articles/published/published.pdf" data-article-pdf-link>Save PDF</a>',
+      );
+      await writeText(
+        root,
+        "dist/articles/published/published.pdf",
+        "stale artifact",
+      );
+      const stale = await verifyBuild(options);
+      expect(stale.issues.articleScholarIssues).toEqual([
+        "articles/published/index.html: retired article PDF download control is present",
+        "articles/published/index.html: retired citation_pdf_url metadata is present",
+        "articles/published/published.pdf: retired generated article PDF is present; rebuild from clean output",
+      ]);
+    }));
+
+  test("accepts HTML articles with Scholar metadata and no generated PDF", async () =>
     withTempRoot(async (root) => {
       await writeText(root, "src/content/categories/history.json", "{}");
       await writeText(
         root,
         "src/content/articles/history/web-only.md",
-        "---\ntitle: Web Only\nauthor: Test Author\npdf: false\n---\n",
+        "---\ntitle: Web Only\nauthor: Test Author\n---\n",
       );
       await writeRequiredDistShell(root);
       await writeText(
@@ -852,45 +838,6 @@ describe("build verifier helpers", () => {
         "dist/articles/web-only/index.html",
         articleHtmlFixture("web-only", {
           authors: ["Test Author"],
-          includePdf: true,
-        }),
-      );
-      await writeArticlePdf(root, "web-only", {
-        authors: ["Test Author"],
-        title: "Web Only",
-      });
-
-      const result = await verifyBuild({
-        articleDir: path.join(root, "src/content/articles"),
-        categoryDir: path.join(root, "src/content/categories"),
-        distDir: path.join(root, "dist"),
-      });
-
-      expect(result.issues.articlePdfIssues).toEqual([
-        "articles/web-only/index.html: PDF disabled but Save PDF link is present for /articles/web-only/web-only.pdf",
-        "articles/web-only/index.html: PDF disabled but citation_pdf_url metadata is present",
-        "articles/web-only/web-only.pdf: PDF disabled but generated PDF exists",
-      ]);
-      expect(result.issues.missingRequired).not.toContain(
-        "articles/web-only/web-only.pdf",
-      );
-    }));
-
-  test("allows PDF-disabled articles with base Scholar metadata", async () =>
-    withTempRoot(async (root) => {
-      await writeText(root, "src/content/categories/history.json", "{}");
-      await writeText(
-        root,
-        "src/content/articles/history/web-only.md",
-        "---\ntitle: Web Only\nauthor: Test Author\npdf: false\n---\n",
-      );
-      await writeRequiredDistShell(root);
-      await writeText(
-        root,
-        "dist/articles/web-only/index.html",
-        articleHtmlFixture("web-only", {
-          authors: ["Test Author"],
-          includePdf: false,
           title: "Web Only",
         }),
       );
@@ -901,40 +848,9 @@ describe("build verifier helpers", () => {
         distDir: path.join(root, "dist"),
       });
 
-      expect(result.issues.articlePdfIssues).toEqual([]);
+      expect(result.issues.articleScholarIssues).toEqual([]);
       expect(result.issues.missingRequired).not.toContain(
         "articles/web-only/web-only.pdf",
-      );
-    }));
-
-  test("reports generated article PDFs over the size budget", async () =>
-    withTempRoot(async (root) => {
-      await writeText(root, "src/content/categories/history.json", "{}");
-      await writeText(
-        root,
-        "src/content/articles/history/published.md",
-        "---\ntitle: Published\nauthor: Test Author\n---\n",
-      );
-      await writeRequiredDistShell(root);
-      await writeText(
-        root,
-        "dist/articles/published/index.html",
-        articleHtmlFixture("published", { authors: ["Test Author"] }),
-      );
-      await writeArticlePdf(root, "published", {
-        authors: ["Test Author"],
-        oversized: true,
-      });
-
-      const result = await verifyBuild({
-        articleDir: path.join(root, "src/content/articles"),
-        categoryDir: path.join(root, "src/content/categories"),
-        distDir: path.join(root, "dist"),
-      });
-
-      expect(result.issues.articlePdfIssues).toHaveLength(1);
-      expect(result.issues.articlePdfIssues[0]).toContain(
-        "above the 5242880 byte limit",
       );
     }));
 
@@ -959,13 +875,8 @@ describe("build verifier helpers", () => {
           '<meta name="twitter:image" content="https://thephilosophersmeme.com/_astro/twitter.jpg">',
           '<meta name="citation_title" content="Published">',
           '<meta name="citation_author" content="Test Author">',
-          '<meta name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/published/published.pdf">',
-          '<a href="/articles/published/published.pdf" data-article-pdf-link>Save PDF</a>',
         ].join(""),
       );
-      await writeArticlePdf(root, "published", {
-        authors: ["Test Author"],
-      });
 
       const result = await verifyBuild({
         articleDir: path.join(root, "src/content/articles"),
@@ -1003,9 +914,6 @@ describe("build verifier helpers", () => {
           `<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BlogPosting","image":"${socialImage}"},{"@type":"Review","name":"Extra semantic node"}]}</script>`,
         ),
       );
-      await writeArticlePdf(root, "published", {
-        authors: ["Test Author"],
-      });
 
       const result = await verifyBuild({
         articleDir: path.join(root, "src/content/articles"),
@@ -1035,9 +943,6 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published", { authors: ["Test Author"] }),
       );
-      await writeArticlePdf(root, "published", {
-        authors: ["Test Author"],
-      });
 
       const result = await verifyBuild({
         articleDir: path.join(root, "src/content/articles"),
@@ -1069,9 +974,6 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published", { authors: ["Test Author"] }),
       );
-      await writeArticlePdf(root, "published", {
-        authors: ["Test Author"],
-      });
 
       const result = await verifyBuild({
         articleDir: path.join(root, "src/content/articles"),
@@ -1106,7 +1008,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1152,7 +1054,6 @@ describe("build verifier helpers", () => {
             "dist/articles/published/index.html",
             articleHtmlFixture("published"),
           );
-          await writeArticlePdf(root, "published");
 
           const exitCode = await runBuildVerificationCli(["--quiet"], root);
 
@@ -1284,9 +1185,6 @@ describe("build verifier helpers", () => {
       expect(result.issues.missingRequired).toContain(
         "categories/history/index.html",
       );
-      expect(result.issues.missingRequired).toContain(
-        "articles/published/published.pdf",
-      );
       expect(result.issues.sourceMaps).toEqual(["_astro/index.js.map"]);
       expect(result.issues.unexpectedHydrationBoundaries).toEqual([
         "index.html",
@@ -1379,7 +1277,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1437,7 +1335,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1492,7 +1390,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1552,7 +1450,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1605,7 +1503,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");
@@ -1661,7 +1559,7 @@ describe("build verifier helpers", () => {
         "dist/articles/published/index.html",
         articleHtmlFixture("published"),
       );
-      await writeArticlePdf(root, "published");
+
       await writeText(root, "dist/categories/index.html", "");
       await writeText(root, "dist/collections/index.html", "");
       await writeText(root, "dist/tags/index.html", "");

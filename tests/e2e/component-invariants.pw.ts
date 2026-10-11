@@ -799,7 +799,7 @@ test.describe("component layout invariants", () => {
 
       await expect(citationTrigger).toBeVisible();
       await expect(shareTrigger).toBeVisible();
-      await expect(pdfLink).toBeVisible();
+      await expect(pdfLink).toHaveCount(0);
       await expect(categoryLink).toBeVisible();
       await expectVerticallyBefore(kickerRow, title, {
         after: "article title",

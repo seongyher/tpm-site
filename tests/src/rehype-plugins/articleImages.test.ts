@@ -69,7 +69,7 @@ describe("rehypeArticleImages", () => {
     expect(html).toContain('data-article-image-remote="true"');
     expect(html).toContain('data-article-image-inspectable="true"');
     expect(html).toContain("data-article-image-inspect-trigger");
-    expect(html).toContain("data-pdf-exclude");
+    expect(html).toContain("data-print-exclude");
     expect(html).toContain("data-article-image-fallback");
     expect(html).toContain('href="https://example.com/image.png"');
     expect(html).toContain(
@@ -244,7 +244,7 @@ Introductory paragraph.
 
     expect(figure?.tagName).toBe("figure");
     expect(figureProperties?.["data-article-embed"]).toBe("true");
-    expect(iframeProperties["data-pdf-exclude"]).toBe("true");
+    expect(iframeProperties["data-print-exclude"]).toBe("true");
     expect(JSON.stringify(figure)).toContain(
       'data-article-embed-provider":"youtube"',
     );
@@ -365,7 +365,7 @@ Introductory paragraph.
 
     expect(html.value).toContain("data-article-embed");
     expect(html.value).toContain("data-article-embed-fallback");
-    expect(html.value).toContain("data-pdf-exclude");
+    expect(html.value).toContain("data-print-exclude");
     expect(html.value).toContain("https://www.youtube.com/embed/multiline");
     expect(html.value).toContain("Multiline video");
   });

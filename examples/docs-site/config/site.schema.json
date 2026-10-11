@@ -15,9 +15,6 @@
         },
         "articles": {
           "draft": false,
-          "pdf": {
-            "enabled": true
-          },
           "visibility": {
             "directory": true,
             "feed": true,
@@ -78,9 +75,6 @@
         "articles": {
           "default": {
             "draft": false,
-            "pdf": {
-              "enabled": true
-            },
             "visibility": {
               "directory": true,
               "feed": true,
@@ -121,19 +115,6 @@
                 }
               },
               "additionalProperties": false
-            },
-            "pdf": {
-              "default": {
-                "enabled": true
-              },
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "default": true,
-                  "type": "boolean"
-                }
-              },
-              "additionalProperties": false
             }
           },
           "additionalProperties": false
@@ -149,7 +130,6 @@
         "categories": true,
         "collections": true,
         "feed": true,
-        "pdf": true,
         "search": true,
         "support": true,
         "tags": true,
@@ -178,10 +158,6 @@
           "type": "boolean"
         },
         "feed": {
-          "default": true,
-          "type": "boolean"
-        },
-        "pdf": {
           "default": true,
           "type": "boolean"
         },

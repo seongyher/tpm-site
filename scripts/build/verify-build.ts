@@ -2,13 +2,7 @@ import { access, readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { PDFDocument } from "pdf-lib";
-
-import {
-  articlePdfHref,
-  articlePdfOutputPath,
-  scholarPublicationDate,
-} from "../../src/lib/article-pdf";
+import { scholarPublicationDate } from "../../src/lib/article-scholar-meta";
 import { optionalFeatureRouteEntries } from "../../src/lib/feature-routes";
 import { sitemapIncludesPath } from "../../src/lib/metadata";
 import { type SiteConfig, siteConfig } from "../../src/lib/site-config";
@@ -33,8 +27,6 @@ const articleReferencePreviewScriptPattern =
 const astroPrefetchPageScriptPattern = /^\/_astro\/page\.[\w-]+\.js$/u;
 const astroPrefetchChunkImportPattern =
   /from\s*["'`]\.\/((?:_astro_)?prefetch\.[\w-]+\.js)["'`]/u;
-const pdfHeader = "%PDF-";
-const maxArticlePdfBytes = 5 * 1024 * 1024;
 
 /** Source-content publication state used to verify generated output. */
 export interface ArticlePublication {
@@ -59,7 +51,7 @@ export interface CollectionPublication {
 /** Categorized build verification failures. */
 export interface BuildVerificationIssues {
   articleCountIssues: string[];
-  articlePdfIssues: string[];
+  articleScholarIssues: string[];
   brokenLinks: string[];
   catalogLeaks: string[];
   draftLeaks: string[];
@@ -169,7 +161,6 @@ export interface BuildVerificationResult {
 export interface PublishedArticle {
   authors: string[];
   isMdx: boolean;
-  pdfEnabled: boolean;
   publicationDate?: Date | undefined;
   slug: string;
   title: string;
@@ -201,7 +192,6 @@ export async function articlePublicationStats(
       publishedArticles.push({
         authors: authorNames(data["author"]),
         isMdx: /\.mdx$/i.test(file),
-        pdfEnabled: articlePdfEnabledFromFrontmatter(data),
         publicationDate: dateValue(data["date"]),
         slug,
         title: stringValue(data["title"]) ?? slug,
@@ -243,7 +233,7 @@ export function formatBuildVerificationReport(
 
   const lines = ["Build verification failed."];
   const sections: Array<[string, readonly string[], number?]> = [
-    ["Article PDF issues", result.issues.articlePdfIssues, 50],
+    ["Article Scholar issues", result.issues.articleScholarIssues, 50],
     ["Missing", result.issues.missingRequired],
     ["Missing legacy redirects", result.issues.missingLegacyRedirects, 50],
     ["Invalid legacy redirects", result.issues.invalidLegacyRedirects, 50],
@@ -338,9 +328,6 @@ export function requiredPathsForSource(
     ...articlePublication.publishedArticles.map(
       (article) => `articles/${article.slug}/index.html`,
     ),
-    ...articlePublication.publishedArticles
-      .filter((article) => article.pdfEnabled)
-      .map((article) => articlePdfOutputPath(article.slug)),
     ...(config.features.categories
       ? categorySlugs.map((slug) =>
           routeChildIndexOutputPath(config.routes.categories, slug),
@@ -628,11 +615,14 @@ export async function verifyBuild({
     await inspectDraftLeaks(distDir, file, draftSlugs, issues);
   }
 
-  await inspectArticlePdfs(
-    distDir,
-    articlePublication.publishedArticles,
-    issues,
-  );
+  for (const article of articlePublication.publishedArticles) {
+    const retiredPath = `articles/${article.slug}/${article.slug}.pdf`;
+    if (files.includes(path.join(distDir, retiredPath))) {
+      issues.articleScholarIssues.push(
+        `${retiredPath}: retired generated article PDF is present; rebuild from clean output`,
+      );
+    }
+  }
 
   const articleStats = await stat(path.join(distDir, "articles"));
   if (!articleStats.isDirectory()) {
@@ -737,7 +727,7 @@ async function configuredRedirects(
 
 function emptyIssues(): BuildVerificationIssues {
   return {
-    articlePdfIssues: [],
+    articleScholarIssues: [],
     articleCountIssues: [],
     brokenLinks: [],
     catalogLeaks: [],
@@ -792,7 +782,7 @@ function firstSortedTagSegment(
 
 function hasIssues(issues: BuildVerificationIssues): boolean {
   return (
-    issues.articlePdfIssues.length > 0 ||
+    issues.articleScholarIssues.length > 0 ||
     issues.articleCountIssues.length > 0 ||
     issues.brokenLinks.length > 0 ||
     issues.catalogLeaks.length > 0 ||
@@ -1110,29 +1100,6 @@ function decodeHtmlAttributeValue(value: string): string {
     .replaceAll("&gt;", ">");
 }
 
-function scholarPdfMetaMatches(value: string, pdfHref: string): boolean {
-  let withoutProtocol: string | undefined;
-  if (value.startsWith("https://")) {
-    withoutProtocol = value.slice("https://".length);
-  } else if (value.startsWith("http://")) {
-    withoutProtocol = value.slice("http://".length);
-  }
-
-  if (withoutProtocol === undefined) {
-    return false;
-  }
-
-  const pathStart = withoutProtocol.indexOf("/");
-  if (pathStart === -1) {
-    return false;
-  }
-
-  const pathAndQuery = withoutProtocol.slice(pathStart);
-  const pathname = pathAndQuery.split("?")[0]?.split("#")[0] ?? "";
-
-  return pathname === pdfHref;
-}
-
 function inspectHtmlMetadata(
   html: string,
   relativeHtmlPath: string,
@@ -1347,7 +1314,7 @@ async function inspectHtmlFile(
 
   const article = publishedArticleByHtmlPath.get(relativeHtmlPath);
   if (article !== undefined) {
-    inspectArticlePdfHtml(text, relativeHtmlPath, article, issues);
+    inspectArticleScholarHtml(text, relativeHtmlPath, article, issues);
     await inspectArticleSocialImageHtml(
       text,
       relativeHtmlPath,
@@ -1371,14 +1338,12 @@ async function inspectHtmlFile(
   }
 }
 
-function inspectArticlePdfHtml(
+function inspectArticleScholarHtml(
   html: string,
   relativeHtmlPath: string,
   article: PublishedArticle,
   issues: BuildVerificationIssues,
 ): void {
-  const pdfHref = articlePdfHref(article.slug);
-  const pdfMetaValues = metaContentValues(html, "citation_pdf_url");
   const titleMetaValues = metaContentValues(html, "citation_title");
   const authorMetaValues = metaContentValues(html, "citation_author").map(
     decodeHtmlAttributeValue,
@@ -1388,47 +1353,26 @@ function inspectArticlePdfHtml(
     "citation_publication_date",
   );
 
-  if (!article.pdfEnabled) {
-    if (linkTargets(html).includes(pdfHref)) {
-      issues.articlePdfIssues.push(
-        `${relativeHtmlPath}: PDF disabled but Save PDF link is present for ${pdfHref}`,
-      );
-    }
-
-    if (pdfMetaValues.length > 0) {
-      issues.articlePdfIssues.push(
-        `${relativeHtmlPath}: PDF disabled but citation_pdf_url metadata is present`,
-      );
-    }
-  } else if (!linkTargets(html).includes(pdfHref)) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing Save PDF link to ${pdfHref}`,
+  if (/<a\b[^>]*\sdata-article-pdf-link(?:\s|=|>)/iu.test(html)) {
+    issues.articleScholarIssues.push(
+      `${relativeHtmlPath}: retired article PDF download control is present`,
     );
   }
-
-  if (!article.pdfEnabled) {
-    // Base Scholar metadata is still verified below for PDF-disabled articles.
-  } else if (pdfMetaValues.length === 0) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: missing citation_pdf_url metadata`,
-    );
-  } else if (
-    !pdfMetaValues.some((value) => scholarPdfMetaMatches(value, pdfHref))
-  ) {
-    issues.articlePdfIssues.push(
-      `${relativeHtmlPath}: citation_pdf_url does not point to ${pdfHref}`,
+  if (metaContentValues(html, "citation_pdf_url").length > 0) {
+    issues.articleScholarIssues.push(
+      `${relativeHtmlPath}: retired citation_pdf_url metadata is present`,
     );
   }
 
   if (titleMetaValues.length === 0 || titleMetaValues[0]?.trim() === "") {
-    issues.articlePdfIssues.push(
+    issues.articleScholarIssues.push(
       `${relativeHtmlPath}: missing citation_title metadata`,
     );
   }
 
   for (const author of article.authors) {
     if (!authorMetaValues.includes(author)) {
-      issues.articlePdfIssues.push(
+      issues.articleScholarIssues.push(
         `${relativeHtmlPath}: missing citation_author metadata for ${author}`,
       );
     }
@@ -1440,7 +1384,7 @@ function inspectArticlePdfHtml(
       scholarPublicationDate(article.publicationDate),
     )
   ) {
-    issues.articlePdfIssues.push(
+    issues.articleScholarIssues.push(
       `${relativeHtmlPath}: missing citation_publication_date metadata`,
     );
   }
@@ -1530,81 +1474,6 @@ async function inspectArticleSocialImageHtml(
   } catch {
     issues.socialImageIssues.push(
       `${relativeHtmlPath}: social preview image file is missing for ${ogImage}`,
-    );
-  }
-}
-
-async function inspectArticlePdfs(
-  distDir: string,
-  articles: readonly PublishedArticle[],
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  for (const article of articles) {
-    const relativePdfPath = articlePdfOutputPath(article.slug);
-    const pdfExists = await exists(distDir, relativePdfPath);
-
-    if (!article.pdfEnabled) {
-      if (pdfExists) {
-        issues.articlePdfIssues.push(
-          `${relativePdfPath}: PDF disabled but generated PDF exists`,
-        );
-      }
-      continue;
-    }
-
-    if (!pdfExists) {
-      continue;
-    }
-
-    const data = await readFile(path.join(distDir, relativePdfPath));
-    const header = new TextDecoder().decode(data.subarray(0, pdfHeader.length));
-
-    if (header !== pdfHeader) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: generated file is not a PDF`,
-      );
-      continue;
-    }
-
-    if (data.byteLength > maxArticlePdfBytes) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: generated PDF is ${data.byteLength} bytes, above the ${maxArticlePdfBytes} byte limit`,
-      );
-    }
-
-    await inspectArticlePdfDocumentMetadata(
-      relativePdfPath,
-      data,
-      article,
-      issues,
-    );
-  }
-}
-
-async function inspectArticlePdfDocumentMetadata(
-  relativePdfPath: string,
-  data: Uint8Array,
-  article: PublishedArticle,
-  issues: BuildVerificationIssues,
-): Promise<void> {
-  try {
-    const pdf = await PDFDocument.load(data);
-    const expectedAuthor = article.authors.join(", ");
-
-    if (pdf.getTitle() !== article.title) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: missing PDF title metadata`,
-      );
-    }
-
-    if (expectedAuthor !== "" && pdf.getAuthor() !== expectedAuthor) {
-      issues.articlePdfIssues.push(
-        `${relativePdfPath}: missing PDF author metadata`,
-      );
-    }
-  } catch (error) {
-    issues.articlePdfIssues.push(
-      `${relativePdfPath}: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -1813,18 +1682,6 @@ function isDraft(
   defaultDraft: boolean,
 ): boolean {
   return typeof data["draft"] === "boolean" ? data["draft"] : defaultDraft;
-}
-
-function articlePdfEnabledFromFrontmatter(
-  data: Record<string, unknown>,
-): boolean {
-  if (!siteConfig.features.pdf) {
-    return false;
-  }
-
-  return typeof data["pdf"] === "boolean"
-    ? data["pdf"]
-    : siteConfig.contentDefaults.articles.pdf.enabled;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

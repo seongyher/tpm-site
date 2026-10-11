@@ -1,5 +1,20 @@
 # QA Preflight
 
+## October 2026: retire generated article PDFs
+
+The PDF generator, build step, download action, policy settings, compatibility
+registry, and PDF-only dependencies are removed in issue #169. HTML Scholar
+metadata validation remains, now reported as `articleScholarIssues`. The
+verifier rejects stale PDF controls, `citation_pdf_url`, and retired
+same-directory article PDF artifacts. External PDF citations remain valid.
+
+The disposable MDX/content probe in `tmp/pdf-removal/` compares diagnostics
+before and after: the PDF-fallback requirement is intentionally removed while
+the remote-image violation is retained unchanged. Scholar verifier tests retain
+missing-title, missing-author, and missing-date failures. Component/browser
+tests preserve Cite/Share behavior and ordinary browser print fallbacks.
+The build-only CI job no longer provisions Chromium; browser jobs still do.
+
 ## October 2026: smaller QA toolchain
 
 User-authorized scope: remove the dependency-heavy lint stack and the tooling

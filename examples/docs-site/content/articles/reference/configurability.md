@@ -26,7 +26,7 @@ Use site config for stable site-wide choices a webmaster expects to manage:
 ## Content And Frontmatter
 
 Use content for editorial choices tied to one entry: title, description, date,
-author, image, tags, visibility overrides, and PDF eligibility.
+author, image, tags, and visibility overrides.
 
 ```yaml
 ---
@@ -45,7 +45,7 @@ to the component unless they become a site-wide convention.
 
 ## Platform Defaults
 
-Keep layout mechanics, share endpoint builders, PDF export structure, and
+Keep layout mechanics, share endpoint builders, and
 article-card fitting behavior in the platform until there is clear evidence
 that site owners need safe customization.
 

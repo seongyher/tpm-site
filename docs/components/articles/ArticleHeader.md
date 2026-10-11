@@ -6,8 +6,8 @@ Source: `src/components/articles/ArticleHeader.astro`
 
 `ArticleHeader` renders the uncluttered article opening: category context,
 title, description, date/author metadata, and quiet article utilities such as
-the visible `Cite`, `Share`, and `PDF` actions. Their accessible names remain
-`Cite this article`, `Share this article`, and `Save PDF`.
+the visible `Cite` and `Share` actions. Their accessible names remain
+`Cite this article` and `Share this article`.
 
 When article-like frontmatter includes validated `semantic` metadata, the header
 also renders a compact visible details surface so structured metadata is
@@ -23,7 +23,6 @@ represented in reader-visible page content.
 - `formattedDate?: string | undefined`
 - `title: string`
 - `citation?: ArticleCitationMenuViewModel | undefined`
-- `pdf?: ArticlePdfViewModel | undefined`
 - `semanticDetails?: SemanticDetailsViewModel | undefined`
 - `share?: ArticleShareMenuViewModel | undefined`
 
@@ -42,7 +41,6 @@ ArticleLayout
     ArticleCitationMenu
     ArticleShareMenu
     SemanticDetails
-    PDF TextLink
 ```
 
 `ArticleHeader` owns the page H1 and visible article opening. It should receive
@@ -56,11 +54,11 @@ subordinate to the article title/body, and allow long titles and author names to
 wrap without layout collision. It should not reserve space for hero media; hero
 or article media spacing belongs to an explicit media component.
 
-`ArticleCitationMenu`, `ArticleShareMenu`, and the `PDF` action should sit in
+`ArticleCitationMenu` and `ArticleShareMenu` should sit in
 the category/action row above the article title as secondary muted utilities.
 They may wrap within that row on narrow screens, but they must not push the
 title, description, or byline into overlap. The action cluster is aligned to the
-inline end of the article width, while popovers and generated PDF output must
+inline end of the article width, while popovers must
 not reserve article space. The header should remain readable when any utility is
 absent.
 
@@ -106,9 +104,8 @@ visible, and CTAs distinguishable from neutral actions.
 - keeps the visible `Share` trigger subordinate in the category/action row,
   accessible as `Share this article`, and absent without layout shift when
   omitted.
-- keeps the visible `PDF` action subordinate in the category/action row,
-  accessible as `Save PDF`, pointed at the generated same-directory PDF, and
-  excluded from print/PDF output when PDF metadata is available.
+- omits generated PDF download controls and excludes interactive actions from
+  browser printing.
 - renders semantic details only when normalized semantic metadata has visible
   facts, and keeps those facts in a real description list.
 - opens the citation popover without increasing article header height or

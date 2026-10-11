@@ -88,10 +88,7 @@ const libDomainFiles = {
     "anchored-disclosure.ts",
     "anchored-positioning.ts",
   ],
-  "pdf-and-scholarly-output": [
-    "article-pdf-compatibility.ts",
-    "article-pdf.ts",
-  ],
+  "scholarly-output": ["article-scholar-meta.ts"],
   "references-and-bibliography": [
     "article-references/bibtex.ts",
     "article-references/display-label.ts",

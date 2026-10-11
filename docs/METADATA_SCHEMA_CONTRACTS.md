@@ -252,12 +252,11 @@ Article pages emit Highwire-style Scholar tags:
 - one `citation_author` per visible author;
 - `citation_keywords` when tags exist;
 - `citation_publication_date`;
-- `citation_reference` for structured references;
-- `citation_pdf_url` only when the generated PDF is enabled.
+- `citation_reference` for structured references.
 
-PDF-disabled articles keep base Scholar tags but omit `citation_pdf_url`.
-Generated-output verification checks title, author, date, PDF link, and PDF
-document metadata for article pages and generated PDFs.
+Generated article PDFs are retired, so all articles omit `citation_pdf_url`.
+Generated-output verification checks HTML Scholar title, author, and date tags,
+and rejects stale generated PDF controls, metadata, and article artifacts.
 
 ## RSS
 

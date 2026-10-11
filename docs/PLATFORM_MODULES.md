@@ -27,9 +27,9 @@ incidental TPM implementation details.
   policy, title fitting, and table-of-contents data. Current modules:
   `article-image-policy`, `article-list-title-fit`, `article-toc`, and
   `embed-media`.
-- PDF and scholarly output
-  Owns article PDF compatibility, PDF output metadata, and PDF generation
-  inputs. Current modules: `article-pdf` and `article-pdf-compatibility`.
+- Scholarly metadata
+  Owns normalized HTML citation metadata. Current module:
+  `article-scholar-meta`.
 - References and bibliography
   Owns canonical note/citation parsing, BibTeX parsing, generated article
   citations, and global bibliography data. Current modules:

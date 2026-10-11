@@ -25,7 +25,6 @@ imageAlt: Useful alt text.
 tags:
   - example
 draft: false
-pdf: true
 visibility:
   directory: true
   feed: true
@@ -48,7 +47,7 @@ Many other fields have site defaults.
 
 ## Announcements
 
-Announcements use the same core fields but do not have per-entry PDF output.
+Announcements use the same core fields.
 
 ## Pages
 

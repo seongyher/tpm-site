@@ -304,7 +304,7 @@ function articleEmbed(iframe: HastElement): HastElement {
   const classification = classifyEmbedMedia(src);
   const fallbackChildren: HastNode[] =
     src === undefined || src.trim() === ""
-      ? [{ type: "text", value: "Embedded media is unavailable in PDF." }]
+      ? [{ type: "text", value: "Embedded media is unavailable in print." }]
       : [
           { type: "text", value: "Embedded media: " },
           {
@@ -326,7 +326,7 @@ function articleEmbed(iframe: HastElement): HastElement {
       iframe.properties?.["className"],
       embedIframeClassName(classification.layout),
     ),
-    "data-pdf-exclude": "true",
+    "data-print-exclude": "true",
   };
 
   return {
@@ -340,7 +340,7 @@ function articleEmbed(iframe: HastElement): HastElement {
           ),
           "data-article-embed-frame": "true",
           "data-article-embed-provider": classification.provider,
-          "data-pdf-exclude": "true",
+          "data-print-exclude": "true",
         },
         tagName: "div",
         type: "element",
@@ -443,10 +443,10 @@ function articleFigure(
           alt,
           presentation.frameClass,
           presentation.inspectionClass,
-          { excludeFromPdf: isRemoteImage },
+          { excludeFromPrint: isRemoteImage },
         )
       : frameNode(image, presentation.frameClass, link, {
-          excludeFromPdf: isRemoteImage,
+          excludeFromPrint: isRemoteImage,
         }),
   ];
 
@@ -497,15 +497,15 @@ function frameNode(
   image: HastElement,
   frameClass: string,
   link: HastElement | undefined,
-  options: { excludeFromPdf?: boolean } = {},
+  options: { excludeFromPrint?: boolean } = {},
 ): HastElement {
   if (link === undefined) {
     return {
       children: [image],
       properties: {
         className: frameClass,
-        ...(options.excludeFromPdf === true
-          ? { "data-pdf-exclude": "true" }
+        ...(options.excludeFromPrint === true
+          ? { "data-print-exclude": "true" }
           : {}),
       },
       tagName: "div",
@@ -525,8 +525,8 @@ function frameNode(
     children: [link],
     properties: {
       className: frameClass,
-      ...(options.excludeFromPdf === true
-        ? { "data-pdf-exclude": "true" }
+      ...(options.excludeFromPrint === true
+        ? { "data-print-exclude": "true" }
         : {}),
     },
     tagName: "div",
@@ -539,7 +539,7 @@ function inspectableFrame(
   alt: string,
   frameClass: string,
   inspectionClass: string,
-  options: { excludeFromPdf?: boolean } = {},
+  options: { excludeFromPrint?: boolean } = {},
 ): HastElement {
   return {
     children: [image, inspectAffordance(inspectionClass)],
@@ -548,8 +548,8 @@ function inspectableFrame(
       "aria-label": inspectLabel(alt),
       className: frameClass,
       "data-article-image-inspect-trigger": "true",
-      ...(options.excludeFromPdf === true
-        ? { "data-pdf-exclude": "true" }
+      ...(options.excludeFromPrint === true
+        ? { "data-print-exclude": "true" }
         : {}),
       type: "button",
     },
@@ -799,12 +799,12 @@ function articleEmbedHtml(html: Html): Html | undefined {
       : "Embedded media";
   const fallback =
     src.trim() === ""
-      ? "Embedded media is unavailable in PDF."
+      ? "Embedded media is unavailable in print."
       : `Embedded media: <a href="${escapeHtmlAttribute(src)}">${escapeHtmlText(title)}</a>`;
 
   return {
     type: "html",
-    value: `<figure class="my-8 grid gap-2" data-article-embed="true"><div class="${embedFrameClassName(classification.layout)} overflow-hidden rounded-sm" data-article-embed-frame="true" data-article-embed-provider="${classification.provider}" data-pdf-exclude="true">${raw}</div><figcaption class="hidden text-sm text-muted-foreground print:block" data-article-embed-fallback="true">${fallback}</figcaption></figure>`,
+    value: `<figure class="my-8 grid gap-2" data-article-embed="true"><div class="${embedFrameClassName(classification.layout)} overflow-hidden rounded-sm" data-article-embed-frame="true" data-article-embed-provider="${classification.provider}" data-print-exclude="true">${raw}</div><figcaption class="hidden text-sm text-muted-foreground print:block" data-article-embed-fallback="true">${fallback}</figcaption></figure>`,
   };
 }
 

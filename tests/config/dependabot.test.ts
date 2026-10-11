@@ -25,7 +25,7 @@ const dependabotSchema = z.object({
 
 const dependencyFamilies = [
   ["astro", ["astro", "@astrojs/mdx", "@astrojs/markdown-remark"]],
-  ["playwright", ["@playwright/test", "playwright-core"]],
+  ["playwright", ["@playwright/test"]],
   ["tailwind", ["tailwindcss", "@tailwindcss/vite"]],
   ["typescript", ["typescript", "@typescript/native"]],
 ] as const;

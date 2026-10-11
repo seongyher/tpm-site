@@ -45,7 +45,7 @@ ArticleLayout
 ```
 
 `ArticleLayout` owns canonical URL and generated social preview image data.
-`ArticleHeader` owns placement beside `Cite` and `PDF` in the category/action
+`ArticleHeader` owns placement beside `Cite` in the category/action
 row above the article title. `ArticleShareMenu` owns popover markup, action
 rendering, and the copy-status region.
 
@@ -89,7 +89,7 @@ behavior.
   pure unit tests.
 - The component renders no third-party share SDK references.
 - Social targets render as buttons, not direct anchors to social share domains.
-- Article pages expose `Cite`, `Share`, and `PDF` as quiet header utilities.
+- Article pages expose `Cite` and `Share` as quiet header utilities.
 - The share panel remains viewport-contained at mobile, tablet, and desktop
   widths.
 - X includes `via=philo_meme`.
