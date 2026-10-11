@@ -230,6 +230,19 @@ describe("quality runner", () => {
     expect(commandLines).not.toContain("--silent run test:a11y");
   });
 
+  test("keeps optional Markdown formatting out of both quality workflows", () => {
+    for (const args of [[], ["--release"]]) {
+      const commands = selectQualityCommands(args);
+
+      expect(commands.length).toBeGreaterThan(0);
+      expect(
+        commands.some((qualityCommand) =>
+          qualityCommand.args.some((arg) => arg.endsWith(":markdown")),
+        ),
+      ).toBe(false);
+    }
+  });
+
   test.serial(
     "uses default console writers for visible workflow output",
     async () => {

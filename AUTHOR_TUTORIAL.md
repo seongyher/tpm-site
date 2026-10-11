@@ -517,7 +517,6 @@ bun run author:check
 Helpful review checks:
 
 ```sh
-bun run review:markdown
 bun run review:assets
 ```
 
@@ -533,9 +532,11 @@ tag normalization. Maintainers may ask you to run broader checks such as
 `bun run check`, `bun run build`, and `bun run verify` when a change touches
 code, config, or generated-output behavior.
 
-If Markdown review asks for mechanical Markdown formatting, use this separately:
+Markdown formatting is optional. It does not run in CI or the normal checks.
+To check or apply it manually:
 
 ```sh
+bun run format:markdown
 bun run fix:markdown
 ```
 
@@ -563,9 +564,6 @@ URL-safe, rename it so it uses only lowercase letters, numbers, and hyphens.
 
 If the check says an image is outside `site/assets/`, move it into
 `site/assets/articles/<article-slug>/` or `site/assets/shared/`.
-
-If Markdown review complains about multiple `H1` headings, change body headings
-from `#` to `##`, `##` to `###`, and so on.
 
 If the check says an article reference label is invalid, use `note-*` for
 explanatory notes or `cite-*` for bibliography citations. Plain numbered

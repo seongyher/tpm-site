@@ -58,11 +58,6 @@ const localCommands: QualityCommand[] = [
     label: "Asset review",
   },
   {
-    args: ["--silent", "run", "review:markdown"],
-    blocking: false,
-    label: "Markdown review",
-  },
-  {
     args: ["--silent", "run", "coverage"],
     blocking: false,
     label: "Coverage review",
@@ -79,11 +74,6 @@ const releaseCommands: QualityCommand[] = [
     args: ["--silent", "run", "review:assets"],
     blocking: false,
     label: "Asset review",
-  },
-  {
-    args: ["--silent", "run", "review:markdown"],
-    blocking: false,
-    label: "Markdown review",
   },
   {
     args: ["--silent", "run", "test:a11y:built"],
@@ -374,9 +364,9 @@ blocking failure because later checks often depend on earlier generated output.
 After all blocking checks pass, trailing review-only commands run in parallel.
 
 Default mode runs the local PR-quality path: check, build, verify,
-validate:html, review:assets, review:markdown, and coverage review.
+validate:html, review:assets, and coverage review.
 
-Use --release to run check:release plus non-blocking Markdown, asset,
+Use --release to run check:release plus non-blocking asset,
 accessibility, all-severity audit, and coverage review checks.`;
 }
 

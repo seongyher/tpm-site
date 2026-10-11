@@ -277,7 +277,6 @@ bun run verify
 Review-only checks:
 
 ```sh
-bun run review:markdown
 bun run review:assets
 ```
 
@@ -294,7 +293,8 @@ If blocking checks fail with formatting or linting issues, the tool may offer:
 bun run fix
 ```
 
-If Markdown review reports formatting issues, the tool may offer:
+Markdown formatting is optional and must not run automatically during
+submission. If an author requests it, the tool may offer:
 
 ```sh
 bun run fix:markdown
@@ -414,4 +414,3 @@ source file.
 - Should new articles default to `draft: true`, or should the tool ask?
 - Should the tool ever rewrite Markdown image references automatically?
 - Should the branch name always be generated from the slug?
-- Should `review:markdown` warnings be shown before or after PR creation?

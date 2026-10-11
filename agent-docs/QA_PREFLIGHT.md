@@ -34,6 +34,27 @@ not equivalent replacements. No article text, route, UI, hydration, or public
 artifact contract is intentionally changed. The frontmatter adapter has the
 highest content-fidelity risk; metadata/body equivalence is required.
 
+### Optional Markdown formatting
+
+The user also authorized removing the automatic Markdown style review from CI
+and both local quality workflows. The retired `review:markdown` alias only ran
+Prettier's formatting check; `format:markdown`, `format:markdown:write`, and
+`fix:markdown` remain available for explicit manual use. This removes no
+additional dependency because code formatting still uses Prettier.
+
+Disposable probes confirmed that valid alternative list markers fail the
+formatter, while malformed YAML, invalid article metadata, unclosed MDX tags,
+and invalid MDX expressions can pass it. The existing Astro frontmatter parser,
+content schema, and MDX compiler reject those invalid sources. Broken local
+links also pass the formatter and remain the built-output verifier's concern.
+Formatting consistency is the intentionally retired automatic signal; content,
+schema, build, and HTML validation remain in the release path.
+
+The before/after diagnostic comparison for these probes is recorded in ignored
+`tmp/qa-simplification/markdown-review/`. It reports the intended formatting
+warning removal, while retained compiler/schema diagnostics match. Contract
+tests keep the optional commands out of CI and both quality workflows.
+
 The earlier inventory below is historical where it names retired tools; the
 package scripts and QA registry describe the current executable contract.
 

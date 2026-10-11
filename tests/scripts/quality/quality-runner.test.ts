@@ -69,7 +69,7 @@ describe("quiet quality runner", () => {
       resultIsBlockingFailure({
         command: reviewCommand,
         exitCode: 1,
-        output: "Markdown style issues found.",
+        output: "Unused image review warning.",
       }),
     ).toBe(false);
   });

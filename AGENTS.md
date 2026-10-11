@@ -1264,7 +1264,7 @@ Current baseline scripts:
 - `bun run quality:release`: run the heavy pre-release gate quietly, printing
   only failures and review warnings.
 - `bun run fix`: run safe automatic fixes for code and config.
-- `bun run review:markdown`: run non-blocking Markdown/MDX style feedback.
+- `bun run format:markdown`: optionally check Markdown/MDX formatting manually.
 - `bun run review:assets`: run non-blocking duplicate/unused image review
   feedback.
 - `bun run audit:all`: run dependency audit review across all severities.
@@ -1279,8 +1279,9 @@ bun run check
 ```
 
 This keeps mechanical formatting, import ordering, and safe lint autofixes out
-of the reasoning path. Markdown/MDX style is review-only; do not block author
-publishing on prose formatting if the content is valid and builds.
+of the reasoning path. Markdown/MDX formatting is manual and optional; do not
+run it automatically in CI or quality workflows, or block author publishing on
+prose formatting if the content is valid and builds.
 
 If a check cannot be run, say so in the final handoff with the reason.
 

@@ -66,10 +66,11 @@ Run safe automatic fixes before checking code and config:
 bun run fix
 ```
 
-Markdown and MDX style checks are review-only, not release blockers:
+Markdown and MDX formatting is optional and runs only when requested. It is
+excluded from CI and the local quality workflows:
 
 ```sh
-bun run review:markdown
+bun run format:markdown
 bun run fix:markdown
 ```
 

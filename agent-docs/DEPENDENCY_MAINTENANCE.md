@@ -22,6 +22,11 @@ typechecking engine. Prettier owns formatting. Astro/TypeScript checks,
 content/schema validation, Knip, HTML/output verification, unit/component tests,
 Playwright, axe, dependency audits, and secrets checks remain.
 
+Markdown/MDX formatting is manual and optional. The automatic Markdown style
+review job and quality-run invocations are removed; use `format:markdown` to
+check formatting or `fix:markdown` to apply it when explicitly wanted. Compiler,
+schema, and built-output checks continue to validate published content.
+
 This intentionally retires custom ESLint style/purity/complexity and type-aware
 lint rules, Astro template lint, Markdown prose lint, and automated Lighthouse
 scores. Compiler and browser checks provide different coverage; they are not

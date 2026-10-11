@@ -69,7 +69,6 @@
     "references:catalog": "bun scripts/content/catalog-article-references.ts",
     "references:migrate:mechanical": "bun scripts/content/migrate-mechanical-article-references.ts",
     "review:assets": "bun --silent run assets:duplicates -- --review --quiet && bun --silent run assets:unused -- --review --quiet",
-    "review:markdown": "bun --silent run format:markdown",
     "secrets": "gitleaks git --redact --no-banner",
     "site:doctor": "bun scripts/site/site-doctor.ts",
     "site:schema": "bun scripts/site/generate-site-config-schema.ts",

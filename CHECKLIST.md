@@ -14,6 +14,8 @@ they are useful context. Explicitly deferred work belongs in
       content, and diagnostic locations remain compatible.
 - [x] Remove obsolete configuration, tests, CI jobs, and security overrides;
       update QA contracts and document intentionally retired diagnostics.
+- [x] Remove automatic Markdown formatting review from CI and local quality
+      runs; retain the manual formatter and verify content/compiler coverage.
 - [x] Verify dependency removal, diagnostic changes, frozen installation,
       release checks, accessibility, and the all-severity audit. The full release
       gate passes, along with 16 catalog, 177 production, and 13 accessibility

@@ -28,6 +28,15 @@ function envExpression(name: string): string {
 }
 
 describe("CI workflow", () => {
+  test("does not automatically review Markdown formatting", async () => {
+    const workflow = await readCiWorkflow();
+
+    expect(workflow).not.toContain("markdown-review:");
+    expect(workflow).not.toContain("run review:markdown");
+    expect(workflow).not.toContain("run format:markdown");
+    expect(workflow).not.toContain("run fix:markdown");
+  });
+
   test("uses the pinned package manager version for every Bun job", async () => {
     const [workflow, manifestSource] = await Promise.all([
       readCiWorkflow(),
