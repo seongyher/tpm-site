@@ -3,6 +3,7 @@ title: "Frog After Frog: Prompt Engineering With Alternate Translations"
 description: "I report the results of a prompt engineering experiment on DALL-E 2 involving different Japanese-to-English translations of the Frog Haiku by Matsuo Bashō (松尾 芭蕉, 1644 – November 28, 1694)."
 date: 2023-09-21
 author: "Seong-Young Her"
+image: "../../../assets/articles/frog-after-frog/frog-019.webp"
 tags:
   - artificial intelligence
   - art
