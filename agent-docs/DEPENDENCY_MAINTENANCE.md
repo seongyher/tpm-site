@@ -88,6 +88,11 @@ Three legacy YAML descriptions use formatter-stable quoting with the updated
 parser; parsed metadata and article bodies match HEAD, including trailing
 newlines.
 
+The oversized-PDF test fixture uses file padding to exceed the existing byte
+limit. Redundant multi-megabyte subject metadata was removed after its encoding
+stalled concurrent tests on a GitHub runner. PDF assertions, runtime behavior,
+and test timeouts are unchanged.
+
 The initial dependency refresh reduced 43 audit findings to two unpatched
 advisories. Removing the toolchains now resolves those final two findings.
 Lint diagnostic comparison preserves debugger and duplicate-branch errors;

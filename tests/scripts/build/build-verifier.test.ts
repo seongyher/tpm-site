@@ -82,13 +82,12 @@ async function writeArticlePdf(
   pdf.addPage([72, 72]);
   pdf.setTitle(title);
   pdf.setAuthor(authors.join(", "));
-  if (oversized) {
-    pdf.setSubject("x".repeat(5 * 1024 * 1024));
-  }
   await mkdir(path.dirname(fullPath), { recursive: true });
   await writeFile(fullPath, await pdf.save());
 
   if (oversized) {
+    // File padding exercises the byte limit without expensive, irrelevant
+    // multi-megabyte metadata encoding that can stall concurrent CI tests.
     const data = await readFile(fullPath);
     await writeFile(
       fullPath,
