@@ -11,7 +11,7 @@ tags:
   - haiku
 ---
 
-*Originally published in [Artificial Intelligence Art](https://doi.org/10.21428/f13786d0.a8196ff9) under the [Creative Commons Attribution-ShareAlike 4.0 International license](https://creativecommons.org/licenses/by-sa/4.0/). Formatting adapted for this site.*
+*Originally published in *Artificial Intelligence Art*, 2023. https://doi.org/10.21428/f13786d0.a8196ff9 
 
 ## I. Introduction
 
