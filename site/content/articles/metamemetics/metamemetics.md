@@ -4,12 +4,12 @@ description: The new philosophy of memetics. Originally published in Critical Me
 date: 2024-05-17 17:00:00 +2:00
 author: "Seong-Young Her"
 tags:
-[]- memetics
-[]- meme studies
-[]- philosophy
-[]- digital humanities
-[]- metamemetics
-[]- metaphilosophy
+  - memetics
+  - meme studies
+  - philosophy
+  - digital humanities
+  - metamemetics
+  - metaphilosophy
 legacyPermalink: 2024/05/17/metamemetics/
 ---
 
