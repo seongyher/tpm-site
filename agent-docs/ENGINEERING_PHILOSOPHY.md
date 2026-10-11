@@ -122,7 +122,7 @@ bypass platform abstractions to move quickly, the abstractions need work.
 The platform should feel like a typed domain language for static editorial
 publishing. Developers should express publication intent through well-designed
 abstractions, and the platform should safely compile that intent into routes,
-HTML, metadata, assets, feeds, PDFs, search data, and deployable output.
+HTML, metadata, assets, feeds, search data, and deployable output.
 
 The goal:
 

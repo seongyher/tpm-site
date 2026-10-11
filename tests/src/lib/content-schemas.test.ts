@@ -58,7 +58,7 @@ describe("content schemas", () => {
 
     expect(parsed.success).toBe(true);
     if (parsed.success) {
-      expect("pdf" in parsed.data && parsed.data.pdf).toBe(true);
+      expect(parsed.data).not.toHaveProperty("pdf");
       expect(parsed.data.updated).toEqual(new Date("2022-05-01"));
     }
     expect(
@@ -69,7 +69,7 @@ describe("content schemas", () => {
         pdf: false,
         title: "Article Title",
       }).success,
-    ).toBe(true);
+    ).toBe(false);
     expect(
       schema.safeParse({
         author: "Author",
@@ -233,7 +233,6 @@ describe("content schemas", () => {
   test("honors site-owned content-type defaults while preserving frontmatter overrides", () => {
     const articleDefaults = {
       draft: true,
-      pdf: { enabled: false },
       visibility: {
         directory: true,
         feed: false,
@@ -263,7 +262,6 @@ describe("content schemas", () => {
       }),
     ).toMatchObject({
       draft: true,
-      pdf: false,
       visibility: {
         directory: true,
         feed: false,

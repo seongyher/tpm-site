@@ -105,7 +105,6 @@ export function articleEntry({
       date,
       description: "Description",
       draft: false,
-      pdf: true,
       tags: [],
       title: "Sample Article",
       visibility: defaultPublishableVisibility,

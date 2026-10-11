@@ -1,32 +1,19 @@
 import { describe, expect, test } from "bun:test";
 
 import {
-  articlePdfEnabled,
-  articlePdfHref,
-  articlePdfOutputPath,
-  articlePdfViewModel,
   articleScholarMetaViewModel,
   scholarPublicationDate,
-} from "../../../src/lib/article-pdf";
+} from "../../../src/lib/article-scholar-meta";
 import { articleEntry } from "../../helpers/content";
 
-describe("article PDF helpers", () => {
-  test("build same-directory public and output paths from article slugs", () => {
-    expect(articlePdfHref("what-is-a-meme")).toBe(
-      "/articles/what-is-a-meme/what-is-a-meme.pdf",
-    );
-    expect(articlePdfOutputPath("what-is-a-meme")).toBe(
-      "articles/what-is-a-meme/what-is-a-meme.pdf",
-    );
-  });
-
+describe("article Scholar metadata", () => {
   test("formats Scholar publication dates with UTC calendar fields", () => {
     expect(scholarPublicationDate(new Date("2021-11-30T23:58:10.000Z"))).toBe(
       "2021/11/30",
     );
   });
 
-  test("builds Scholar metadata and PDF data from structured authors when available", () => {
+  test("builds Scholar metadata from structured authors when available", () => {
     const article = articleEntry({
       data: {
         author: "Legacy Author",
@@ -49,24 +36,12 @@ describe("article PDF helpers", () => {
             type: "person",
           },
         ],
-        site: "https://thephilosophersmeme.com",
       }),
     ).toEqual({
       abstract: "A cluster definition.",
       authors: ["Claudia Vulliamy"],
       keywords: ["memes", "definition"],
       language: "en",
-      pdf: {
-        articleUrl: "https://thephilosophersmeme.com/articles/what-is-a-meme/",
-        authors: ["Claudia Vulliamy"],
-        citationPdfUrl:
-          "https://thephilosophersmeme.com/articles/what-is-a-meme/what-is-a-meme.pdf",
-        pdfHref: "/articles/what-is-a-meme/what-is-a-meme.pdf",
-        pdfOutputPath: "articles/what-is-a-meme/what-is-a-meme.pdf",
-        publicationDate: new Date("2021-11-30T23:58:10.000Z"),
-        publicationDateForScholar: "2021/11/30",
-        title: "What Is A Meme?",
-      },
       publicationDate: new Date("2021-11-30T23:58:10.000Z"),
       publicationDateForScholar: "2021/11/30",
       references: [],
@@ -121,26 +96,8 @@ describe("article PDF helpers", () => {
       id: "legacy-byline",
     });
 
-    expect(articlePdfViewModel({ article })?.authors).toEqual([
+    expect(articleScholarMetaViewModel({ article }).authors).toEqual([
       "Legacy Author",
     ]);
-  });
-
-  test("omits PDF data when an article explicitly disables generated PDFs", () => {
-    const article = articleEntry({
-      data: {
-        author: "Legacy Author",
-        pdf: false,
-      },
-      id: "web-only",
-    });
-
-    expect(articlePdfEnabled(article)).toBe(false);
-    expect(articlePdfViewModel({ article })).toBeUndefined();
-    expect(articleScholarMetaViewModel({ article })).toMatchObject({
-      authors: ["Legacy Author"],
-      pdf: undefined,
-      title: "Sample Article",
-    });
   });
 });

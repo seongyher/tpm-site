@@ -131,7 +131,6 @@ folder becomes the category.
 | `image`       | Optional preview image for article lists and social previews.          |
 | `imageAlt`    | Description of the preview image for readers who cannot see it.        |
 | `draft`       | Set `draft: true` to keep an entry unpublished.                        |
-| `pdf`         | Articles default to PDF export. Set `pdf: false` only for exceptions.  |
 | `visibility`  | Optional controls for where a published entry appears. See below.      |
 | `semantic`    | Optional special metadata for reviews, events, media, datasets, etc.   |
 
@@ -400,7 +399,6 @@ visibility:
   feed: false
 ```
 
-Announcements do not use the article PDF setting.
 
 ## Edit Featured Articles And Start Here
 
@@ -565,7 +563,7 @@ Common things a webmaster might change there:
 - support links;
 - share-menu targets and social handles;
 - feature switches;
-- default visibility and PDF behavior.
+- default visibility behavior.
 
 The `identity.sameAs` list should contain only official public profiles for
 the site or publication. These links are used for machine-readable publisher
@@ -573,8 +571,8 @@ metadata and social/SEO context, not as ordinary footer links.
 
 Most omitted optional fields have safe defaults. For example, articles and
 announcements are visible in directories, search, RSS, and homepage surfaces by
-default unless their frontmatter or the site defaults say otherwise. PDFs are
-enabled by default for articles that can be rendered as PDFs.
+default unless their frontmatter or the site defaults say otherwise. HTML citation metadata is emitted for articles; readers can use
+their browser's Print command for a print-friendly view.
 
 After changing `site/config/site.json`, run:
 

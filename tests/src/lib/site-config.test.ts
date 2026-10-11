@@ -98,9 +98,9 @@ describe("site config", () => {
       recentLimit: 8,
       startHereCollection: "start-here",
     });
-    expect(siteConfig.features.pdf).toBe(true);
+    expect(siteConfig.features).not.toHaveProperty("pdf");
     expect(siteConfig.features.support).toBe(true);
-    expect(siteConfig.contentDefaults.articles.pdf.enabled).toBe(true);
+    expect(siteConfig.contentDefaults.articles).not.toHaveProperty("pdf");
     expect(siteConfig.contentDefaults.announcements.visibility.search).toBe(
       true,
     );
@@ -126,7 +126,6 @@ describe("site config", () => {
     ]);
     expect(parsed.contentDefaults.articles).toEqual({
       draft: false,
-      pdf: { enabled: true },
       visibility: {
         directory: true,
         feed: true,
@@ -201,22 +200,17 @@ describe("site config", () => {
           },
         },
         articles: {
-          pdf: {
-            enabled: false,
-          },
           visibility: {
             feed: false,
           },
         },
       },
       features: {
-        pdf: false,
         support: false,
       },
     });
 
     expect(parsed.features).toMatchObject({
-      pdf: false,
       search: true,
       support: false,
     });
@@ -231,7 +225,6 @@ describe("site config", () => {
     });
     expect(parsed.contentDefaults.articles).toEqual({
       draft: false,
-      pdf: { enabled: false },
       visibility: {
         directory: true,
         feed: false,
@@ -239,6 +232,18 @@ describe("site config", () => {
         search: true,
       },
     });
+  });
+
+  test("rejects retired PDF feature and article-default settings", () => {
+    expect(() =>
+      parseSiteConfig({ ...validConfig, features: { pdf: true } }),
+    ).toThrow();
+    expect(() =>
+      parseSiteConfig({
+        ...validConfig,
+        contentDefaults: { articles: { pdf: { enabled: true } } },
+      }),
+    ).toThrow();
   });
 
   test("rejects malformed links with path-aware errors", () => {

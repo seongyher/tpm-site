@@ -40,7 +40,7 @@
   [data-content-rail],
   [data-margin-sidebar-left],
   [data-margin-sidebar-right],
-  [data-pdf-exclude],
+  [data-print-exclude],
   [data-hover-image-panel],
   [data-floating-panel],
   [data-article-image-inspect-affordance] {
@@ -104,16 +104,6 @@
     margin-block-end: 0.2in !important;
   }
 
-  [data-article-pdf-canonical],
-  [data-article-pdf-disclaimer] {
-    margin: 0.15in 0 0 !important;
-    color: #333333 !important;
-    font-family: var(--font-serif) !important;
-    font-size: 9.5pt !important;
-  }
-
-  [data-article-pdf-canonical] a,
-  [data-article-pdf-disclaimer] a,
   [data-article-prose] a,
   [data-article-references] a,
   [data-article-toc] a {

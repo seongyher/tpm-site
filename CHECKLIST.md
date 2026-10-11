@@ -4,6 +4,38 @@ This file tracks implementation milestones. It may keep completed items when
 they are useful context. Explicitly deferred work belongs in
 [DEFERRED.md](./DEFERRED.md).
 
+## Remove Generated Article PDFs — October 2026
+
+Active follow-up: [#169](https://github.com/seongyher/tpm-site/issues/169).
+
+- [x] Remove the PDF generator, build step, download action, PDF-only library,
+      feature/default settings, per-article setting, and MDX PDF restrictions.
+- [x] Preserve HTML Scholar/citation metadata, article content, sharing and
+      citation controls, external PDF citations, and normal browser printing.
+- [x] Update output contracts, generated config schemas, examples, author docs,
+      and tests; compare retained validation diagnostics.
+- [x] Verify clean production/example builds have no generated PDFs, release
+      and accessibility checks pass, and the dependency audit remains clean.
+
+Implementation plan: extract the existing Scholar metadata model into
+`article-scholar-meta.ts`; remove PDF properties from the article view model
+and strict content/config schemas; remove generation and PDF compatibility
+code. Keep print fallbacks under print-specific hooks. Replace PDF verifier
+requirements with HTML Scholar metadata verification and tests against stale
+generated download surfaces. Rebuild schemas with `site:schema`, then run
+focused tests, production/example builds, the release gate, and accessibility.
+Historical article text and external PDF assets are outside this removal.
+The deferred PDF document-pipeline replacement is superseded by this removal;
+it is no longer an active or deferred product direction.
+
+Verified with frozen Bun installation, `test:docs-site`, `check:release`, and
+`test:a11y:built`: 16 catalog, 177 production, and 13 accessibility browser tests
+pass. Production emits 308 HTML pages and the example emits 84; neither has
+generated PDFs, PDF controls, or `citation_pdf_url`. All-severity audit is clean,
+Scholar helper line/function coverage is 100%, and historical article source
+files are unchanged. The example required its missing touch icon, derived from
+its existing favicon, to pass link verification.
+
 ## Dependency And Security Refresh — October 2026
 
 ### QA simplification and dependency removal

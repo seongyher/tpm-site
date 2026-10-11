@@ -71,7 +71,6 @@ export const defaultFeatureConfig = {
   categories: true,
   collections: true,
   feed: true,
-  pdf: true,
   search: true,
   support: true,
   tags: true,
@@ -94,9 +93,6 @@ export const defaultContentDefaultsConfig = {
   },
   articles: {
     draft: false,
-    pdf: {
-      enabled: true,
-    },
     visibility: defaultPublishableVisibilityConfig,
   },
 } as const;

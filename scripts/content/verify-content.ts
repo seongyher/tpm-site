@@ -4,7 +4,6 @@ import path from "node:path";
 import type { Image, Nodes, Paragraph, Root } from "mdast";
 import { remark } from "remark";
 
-import { isArticleMdxPdfCompatibleImport } from "../../src/lib/article-pdf-compatibility";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import { tagDiagnostics } from "../../src/lib/tags";
 import { parseContentSource } from "./parse-content-source";
@@ -107,7 +106,6 @@ export async function verifyContent({
     );
     validateArticleTags(rootDir, file, data, issues);
     validateArticleImageParagraphs(rootDir, file, text, issues);
-    validateArticleMdxPdfImports(rootDir, file, text, issues);
   }
 
   return {
@@ -412,68 +410,6 @@ function remoteHtmlImages(text: string): Array<{ line: number; url: string }> {
 
 function lineNumberAt(text: string, index: number): number {
   return text.slice(0, index).split("\n").length;
-}
-
-function validateArticleMdxPdfImports(
-  rootDir: string,
-  file: string,
-  text: string,
-  issues: string[],
-): void {
-  if (!file.toLowerCase().endsWith(".mdx")) {
-    return;
-  }
-
-  articleMdxImportSources(text)
-    .filter((importSource) => !isArticleMdxPdfCompatibleImport(importSource))
-    .forEach((importSource) => {
-      issues.push(
-        `${toPosix(path.relative(rootDir, file))}: article MDX import "${importSource}" needs an explicit PDF fallback in src/lib/article-pdf-compatibility.ts`,
-      );
-    });
-}
-
-function articleMdxImportSources(text: string): string[] {
-  const sources: string[] = [];
-  let index = 0;
-
-  while (index < text.length) {
-    const importIndex = text.indexOf("import", index);
-    if (importIndex === -1) {
-      break;
-    }
-
-    const fromIndex = text.indexOf("from", importIndex + "import".length);
-    if (fromIndex === -1) {
-      break;
-    }
-
-    const importSource = quotedValueAfterKeyword(
-      text.slice(fromIndex + "from".length),
-    );
-    if (importSource !== undefined) {
-      sources.push(importSource);
-    }
-
-    index = fromIndex + "from".length;
-  }
-
-  return sources;
-}
-
-function quotedValueAfterKeyword(text: string): string | undefined {
-  const trimmed = text.trimStart();
-  const quote = trimmed.at(0);
-  if (quote !== '"' && quote !== "'") {
-    return undefined;
-  }
-
-  const closingIndex = trimmed.indexOf(quote, 1);
-  if (closingIndex === -1) {
-    return undefined;
-  }
-
-  return trimmed.slice(1, closingIndex);
 }
 
 function localImagesInMixedParagraphs(

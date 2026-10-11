@@ -142,7 +142,6 @@ const featureConfigSchema = z
     categories: z.boolean().default(defaultFeatureConfig.categories),
     collections: z.boolean().default(defaultFeatureConfig.collections),
     feed: z.boolean().default(defaultFeatureConfig.feed),
-    pdf: z.boolean().default(defaultFeatureConfig.pdf),
     search: z.boolean().default(defaultFeatureConfig.search),
     support: z.boolean().default(defaultFeatureConfig.support),
     tags: z.boolean().default(defaultFeatureConfig.tags),
@@ -171,16 +170,6 @@ const contentDefaultsConfigSchema = z
       .strict()
       .default(defaultContentDefaultsConfig.announcements),
     articles: baseContentDefaultsConfigSchema
-      .extend({
-        pdf: z
-          .object({
-            enabled: z
-              .boolean()
-              .default(defaultContentDefaultsConfig.articles.pdf.enabled),
-          })
-          .strict()
-          .default(defaultContentDefaultsConfig.articles.pdf),
-      })
       .strict()
       .default(defaultContentDefaultsConfig.articles),
   })

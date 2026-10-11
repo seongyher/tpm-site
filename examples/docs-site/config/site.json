@@ -11,9 +11,6 @@
     },
     "articles": {
       "draft": false,
-      "pdf": {
-        "enabled": true
-      },
       "visibility": {
         "directory": true,
         "feed": true,
@@ -29,7 +26,6 @@
     "categories": true,
     "collections": true,
     "feed": true,
-    "pdf": true,
     "search": true,
     "support": false,
     "tags": true,

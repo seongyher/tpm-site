@@ -3,6 +3,12 @@
 This is the authoritative long-term roadmap for the TPM Astro publishing
 platform.
 
+October 2026 scope update: generated article PDF support is retired in
+[issue #169](https://github.com/seongyher/tpm-site/issues/169). PDF-specific
+generation, eligibility, adapter, and replacement proposals in the earlier
+planning evidence below are superseded, not active roadmap work. HTML Scholar
+metadata, citations, external PDF sources, and native browser printing remain.
+
 It should guide future design packets, implementation milestones, refactors,
 tests, docs, and product decisions. It is intentionally standalone: engineers
 should be able to understand the target architecture, sequencing, risks, and
@@ -847,41 +853,39 @@ Verification:
 - Golden bibliography aggregation snapshots.
 - DOI lookup fixtures where external data is used for validation.
 
-### 9. Media, Image, Embed, And PDF Policy Engine
+### 9. Media, Image, And Embed Policy Engine
 
 **Goal:** make media behavior policy-driven across HTML, lists, social previews,
-RSS/search, PDFs, and future editors.
+RSS/search, browser printing, and future editors.
 
 Current evidence:
 
-- Article images, social images, hover images, embeds, PDF fallbacks, and asset
+- Article images, social images, hover images, embeds, print fallbacks, and asset
   optimization have each been improved, but they remain a high-risk domain.
-- Generated PDFs and public dist assets exposed size and fallback issues.
+- Public dist assets exposed size and fallback issues.
 
 Mature contract:
 
 - Every media item has source identity, alt/caption policy, display frame,
-  optimization plan, social preview role, PDF/search compatibility, external
+  optimization plan, social preview role, print/search compatibility, external
   origin trust boundary, and fallback behavior.
 - Embeds use provider policies and fall back to static links or snapshots where
   needed.
-- PDFs are generated only when size, compatibility, metadata, and fallback
-  policy are acceptable.
+- Native browser printing keeps article content and source links readable.
 
 Work:
 
 - Create media policy records for article images, list thumbnails, social
-  images, hover images, embeds, downloads, and PDFs.
+  images, hover images, embeds, and downloads.
 - Add provider adapters for generic embeds, SoundCloud, YouTube, and future
   providers.
-- Add PDF eligibility diagnostics, image downscaling policy, unsupported media
-  disclosures, and PDF size budgets.
+- Add image downscaling policy and unsupported-media disclosures.
 - Feed media decisions through Astro image optimization where practical.
 
 Verification:
 
 - Unit tests for media policy and fallback selection.
-- PDF smoke tests for text, links, metadata, image inclusion, and size.
+- Browser print tests for text, links, images, and embed fallbacks.
 - Asset verifier checks raw/unoptimized output and social-image constraints.
 - E2E tests for image inspector, embeds, and layout containment.
 

@@ -3,8 +3,7 @@
 ## Purpose
 
 The article share menu gives readers a broad, lightweight set of public sharing
-actions from the article header. It should feel like the existing `Cite` and
-`PDF` utilities: compact, secondary, static-first, and available without
+actions from the article header. It should feel like the existing `Cite` utility: compact, secondary, static-first, and available without
 shipping third-party share SDKs.
 
 The menu is not a social-follow block and not a generated share-image feature.
@@ -108,7 +107,6 @@ ArticleLayout
     ArticleMeta
     ArticleCitationMenu
     ArticleShareMenu
-    PDF action
 ```
 
 `ArticleLayout` owns canonical URL and social image data. `ArticleHeader` owns
@@ -127,7 +125,7 @@ The trigger:
 - visible label `Share`;
 - accessible name `Share this article`;
 - secondary muted styling matching `Cite`;
-- hides from PDF/print output.
+- hides from browser print output.
 
 Copy link:
 
@@ -191,7 +189,7 @@ Component tests:
   expected platform actions from a view model;
 - social share targets are buttons, not direct anchors to social domains;
 - it does not contain third-party scripts or SDK markup;
-- `ArticleHeader` includes `Share` beside `Cite` and `PDF` in the
+- `ArticleHeader` includes `Share` beside `Cite` in the
   category/action row when a share model is provided.
 
 Browser/script tests:
@@ -203,7 +201,7 @@ Browser/script tests:
 
 E2E tests:
 
-- representative article pages expose `Cite`, `Share`, and `PDF` header
+- representative article pages expose `Cite` and `Share` header
   actions without horizontal overflow;
 - opening the share menu keeps the panel within the viewport at mobile, tablet,
   and desktop widths;

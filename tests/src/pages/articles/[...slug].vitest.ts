@@ -26,11 +26,8 @@ describe("article page", () => {
     expect(view).toContain(article.data.title);
     expect(view).toContain("Article tags");
     expect(view).toContain("Support The Philosopher&#39;s Meme");
-    expect(view).toContain("Save PDF");
-    expect(view).toContain('name="citation_pdf_url"');
-    expect(view).toContain(
-      `href="/articles/${articleSlug(article)}/${articleSlug(article)}.pdf"`,
-    );
+    expect(view).not.toContain("Save PDF");
+    expect(view).not.toContain('name="citation_pdf_url"');
   });
 
   test("uses Astro rendered headings for the article table of contents", async () => {

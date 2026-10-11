@@ -27,7 +27,7 @@ platform:
 6. Validate the site.
 
 Authors need pages for content files, frontmatter, images, citations,
-collections, PDFs, and visibility.
+collections, scholarly metadata, and visibility.
 
 Webmasters need pages for site config, homepage config, navigation, feature
 flags, support/social/share, redirects, local previews, checks, and external

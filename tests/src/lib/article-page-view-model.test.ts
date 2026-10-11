@@ -144,9 +144,7 @@ describe("articlePageViewModel", () => {
     expect(socialTransform?.src).toBe(articleImage);
     expect(page.citation.formats.length).toBeGreaterThan(0);
     expect(page.share.actions.map((action) => action.id)).toContain("x");
-    expect(page.pdf?.pdfHref).toBe(
-      "/articles/current-article/current-article.pdf",
-    );
+    expect(page.scholarMeta.title).toBe("Current Article");
   });
 
   test("honors disabled feature policy from the injected config", async () => {
@@ -157,7 +155,6 @@ describe("articlePageViewModel", () => {
         authors: false,
         bibliography: false,
         categories: false,
-        pdf: false,
         search: false,
         support: false,
         tags: false,
@@ -189,7 +186,6 @@ describe("articlePageViewModel", () => {
     expect(page.category).toBeDefined();
     expect(page.categoryHref).toBeUndefined();
     expect(page.bibliographyAction).toBeUndefined();
-    expect(page.pdf).toBeUndefined();
     expect(page.profileLinksEnabled).toBe(false);
     expect(page.searchable).toBe(false);
     expect(page.support.enabled).toBe(false);

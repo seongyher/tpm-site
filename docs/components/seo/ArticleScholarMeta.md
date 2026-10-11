@@ -12,12 +12,12 @@ article page.
 - `metadata: ArticleScholarMetaViewModel`
 
 The view model must already contain normalized title, author names,
-publication date, and optional PDF URL.
+publication date, language, abstract, keywords, and citation references.
 
 ## Composition Relationships
 
-Used by `ArticleLayout` inside the document head. Article layouts and PDF
-helpers derive the metadata; this component only serializes it as `<meta>`
+Used by `ArticleLayout` inside the document head. `article-scholar-meta.ts`
+derives the metadata; this component only serializes it as `<meta>`
 tags.
 
 ## Layout And Responsiveness
@@ -39,7 +39,7 @@ visible content.
 
 ## Content Edge Cases
 
-Handle multiple authors, PDF-disabled articles, punctuation-heavy titles, and
+Handle multiple authors, empty optional metadata, punctuation-heavy titles, and
 dates that must remain stable for citation crawlers.
 
 ## Theme Behavior
@@ -50,9 +50,7 @@ No theme behavior.
 
 - Every article emits `citation_title`, at least one `citation_author`, and
   `citation_publication_date`.
-- PDF-eligible articles emit `citation_pdf_url`.
-- PDF-disabled articles omit `citation_pdf_url` without omitting base citation
-  metadata.
+- Articles omit `citation_pdf_url` because the site does not generate PDFs.
 
 ## Follow-Up Notes
 

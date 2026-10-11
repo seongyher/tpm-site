@@ -543,7 +543,7 @@ Article components own article display and metadata presentation.
 
 - `ArticleLayout`: page shell for an article entry.
 - `ArticleHeader`: title, category, description, meta composition, and quiet
-  article utilities such as `Cite`, `Share`, and `PDF`.
+  article utilities such as `Cite` and `Share`.
 - `ArticleShareMenu`: article-header share utility built from the centralized
   `src/lib/share-targets.ts` endpoint model; it must not hard-code platform
   URLs or load third-party share SDKs.

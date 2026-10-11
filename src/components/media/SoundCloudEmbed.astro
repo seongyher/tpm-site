@@ -45,7 +45,7 @@ const displayTitle = title.trim() === "" ? playerSrc : title;
     class:list={[embedFrameClassName("audio"), "overflow-hidden rounded-sm"]}
     data-article-embed-frame="true"
     data-article-embed-provider="soundcloud"
-    data-pdf-exclude="true"
+    data-print-exclude="true"
   >
     <iframe
       {...attrs}
@@ -55,7 +55,7 @@ const displayTitle = title.trim() === "" ? playerSrc : title;
       scrolling="no"
       allow="autoplay"
       allowfullscreen={false}
-      data-pdf-exclude="true"
+      data-print-exclude="true"
       class:list={[embedIframeClassName("audio"), iframeClass]}
     ></iframe>
   </div>

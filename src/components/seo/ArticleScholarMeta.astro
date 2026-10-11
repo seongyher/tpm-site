@@ -1,5 +1,5 @@
 ---
-import type { ArticleScholarMetaViewModel } from "../../lib/article-pdf";
+import type { ArticleScholarMetaViewModel } from "../../lib/article-scholar-meta";
 
 interface Props {
   metadata: ArticleScholarMetaViewModel;
@@ -24,6 +24,3 @@ const { metadata } = Astro.props;
 {metadata.references.map((reference) => (
   <meta name="citation_reference" content={reference} />
 ))}
-{metadata.pdf && (
-  <meta name="citation_pdf_url" content={metadata.pdf.citationPdfUrl} />
-)}

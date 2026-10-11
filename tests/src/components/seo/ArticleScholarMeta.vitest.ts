@@ -13,18 +13,7 @@ describe("ArticleScholarMeta", () => {
           authors: ["First Author", "Second Author"],
           keywords: ["memes", "philosophy"],
           language: "en",
-          pdf: {
-            articleUrl:
-              "https://thephilosophersmeme.com/articles/article-title/",
-            authors: ["First Author", "Second Author"],
-            citationPdfUrl:
-              "https://thephilosophersmeme.com/articles/article-title/article-title.pdf",
-            pdfHref: "/articles/article-title/article-title.pdf",
-            pdfOutputPath: "articles/article-title/article-title.pdf",
-            publicationDate: new Date("2022-04-06T23:58:10.000Z"),
-            publicationDateForScholar: "2022/04/06",
-            title: "Article Title",
-          },
+
           publicationDate: new Date("2022-04-06T23:58:10.000Z"),
           publicationDateForScholar: "2022/04/06",
           references: ["Author. Source title."],
@@ -46,7 +35,7 @@ describe("ArticleScholarMeta", () => {
     expect(view).toContain(
       'name="citation_publication_date" content="2022/04/06"',
     );
-    expect(view).toContain(
+    expect(view).not.toContain(
       'name="citation_pdf_url" content="https://thephilosophersmeme.com/articles/article-title/article-title.pdf"',
     );
     expect(view).toContain(
@@ -54,7 +43,7 @@ describe("ArticleScholarMeta", () => {
     );
   });
 
-  test("keeps base Scholar metadata when PDF output is disabled", async () => {
+  test("omits empty optional Scholar metadata", async () => {
     const container = await createAstroTestContainer();
     const view = await container.renderToString(ArticleScholarMeta, {
       props: {
@@ -63,7 +52,6 @@ describe("ArticleScholarMeta", () => {
           authors: ["First Author"],
           keywords: [],
           language: "en",
-          pdf: undefined,
           publicationDate: new Date("2022-04-06T23:58:10.000Z"),
           publicationDateForScholar: "2022/04/06",
           references: [],

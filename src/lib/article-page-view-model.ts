@@ -11,10 +11,9 @@ import {
   articleListItemsFromArchive,
 } from "./article-list";
 import {
-  type ArticlePdfViewModel,
   type ArticleScholarMetaViewModel,
   articleScholarMetaViewModel,
-} from "./article-pdf";
+} from "./article-scholar-meta";
 import type { ArticleReferenceData } from "./article-references/model";
 import {
   type ArticleTableOfContentsHeading,
@@ -78,7 +77,6 @@ export interface ArticlePageViewModel {
   continuity?: ArticleContinuityItem | undefined;
   documentTitle: string;
   moreInCategory: ArticleListItem[];
-  pdf?: ArticlePdfViewModel | undefined;
   profileLinksEnabled: boolean;
   readingNavigationLinks: Array<{ href: string; label: string }>;
   scholarMeta: ArticleScholarMetaViewModel;
@@ -161,7 +159,6 @@ export async function articlePageViewModel({
     articleReferences,
     authors,
     config,
-    site,
   });
 
   return {
@@ -202,7 +199,6 @@ export async function articlePageViewModel({
       categories,
       authorEntries,
     ),
-    pdf: scholarMeta.pdf,
     profileLinksEnabled: config.features.authors,
     readingNavigationLinks: homepageDiscoveryLinks(config),
     scholarMeta,

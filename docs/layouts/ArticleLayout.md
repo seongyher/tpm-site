@@ -53,12 +53,10 @@ by responsive constraints, the inline TOC placement appears near the top of the
 article body so heading navigation is still available without changing the
 reading column geometry.
 
-`ArticleLayout` derives the article Scholar metadata once and passes it to:
-
-- `ArticleScholarMeta`, which emits `citation_title`, `citation_author`,
-  `citation_publication_date`, and, for PDF-eligible articles,
-  `citation_pdf_url`.
-- `ArticleHeader`, which renders the visible `Share` and `PDF` actions.
+`ArticleLayout` derives Scholar metadata once for `ArticleScholarMeta`, which
+emits title, author, date, language, abstract, keyword, and reference tags. It
+also supplies separate citation and sharing view models to `ArticleHeader`.
+There is no generated PDF download or `citation_pdf_url` metadata.
 
 It also derives the article social preview image once through the shared social
 preview image pipeline and passes that generated asset to `BaseLayout`,

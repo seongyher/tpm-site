@@ -3,7 +3,6 @@ import { describe, expect, test } from "vitest";
 import ArticleLayout from "../../../src/layouts/ArticleLayout.astro";
 import { articleTableOfContentsHeadings } from "../../../src/lib/article-toc";
 import { getArticles } from "../../../src/lib/content";
-import { articleSlug } from "../../../src/lib/routes";
 import {
   createAstroTestContainer,
   testSiteUrl,
@@ -40,25 +39,18 @@ describe("ArticleLayout", () => {
     expect(view).toContain('name="citation_title"');
     expect(view).toContain('name="citation_author"');
     expect(view).toContain('name="citation_publication_date"');
-    expect(view).toContain('name="citation_pdf_url"');
-    expect(view).toContain(
-      `content="${testSiteUrl}/articles/${articleSlug(article)}/${articleSlug(article)}.pdf"`,
-    );
-    expect(view).toContain("Save PDF");
+    expect(view).not.toContain('name="citation_pdf_url"');
+    expect(view).not.toContain("Save PDF");
     expect(view).toContain('aria-label="Share this article"');
     expect(view).toContain("data-article-share-menu");
     expect(view).toContain("https://twitter.com/intent/tweet");
     expect(view).toContain("via=philo_meme");
-    expect(view).toContain(
-      `href="/articles/${articleSlug(article)}/${articleSlug(article)}.pdf"`,
-    );
   });
 
-  test("keeps base Scholar metadata and omits PDF surfaces when disabled", async () => {
+  test("keeps Scholar metadata without generated PDF surfaces", async () => {
     const article = articleEntry({
       data: {
-        author: "PDF Disabled Author",
-        pdf: false,
+        author: "Example Author",
         title: "Web Only Article",
       },
       id: "web-only-article",

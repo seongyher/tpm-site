@@ -32,7 +32,7 @@ tags:
 ```
 
 The site config supplies defaults for draft state, visibility, feed inclusion,
-search inclusion, and PDF eligibility. Authors only write exceptions.
+and search inclusion. Authors only write exceptions.
 
 ## Collections
 

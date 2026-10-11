@@ -22,7 +22,6 @@ authors delete route files or edit components.
     "categories": true,
     "collections": true,
     "feed": true,
-    "pdf": true,
     "search": true,
     "support": false,
     "tags": true,

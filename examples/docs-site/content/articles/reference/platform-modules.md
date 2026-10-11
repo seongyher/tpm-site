@@ -20,7 +20,7 @@ The main reusable domains are:
 - content and publishable entries;
 - routes and optional feature behavior;
 - navigation and homepage composition;
-- article rendering, images, PDFs, and scholarly metadata;
+- article rendering, images and scholarly metadata;
 - references and bibliography;
 - search, feeds, sitemap, and build verification;
 - theme and branding contracts;

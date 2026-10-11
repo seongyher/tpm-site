@@ -122,7 +122,6 @@ const page = await articlePageViewModel({
         date={page.article.date}
         description={page.article.description}
         formattedDate={page.article.formattedDate}
-        pdf={page.pdf}
         profileLinksEnabled={page.profileLinksEnabled}
         semanticDetails={page.semanticDetails}
         share={page.share}
@@ -143,10 +142,10 @@ const page = await articlePageViewModel({
         </ArticleProse>
       </div>
       <EndcapStack spacing="relaxed">
-        {page.authorProfilesWithBio.map((profile) => <div data-pdf-exclude>
+        {page.authorProfilesWithBio.map((profile) => <div data-print-exclude>
           <AuthorBioBlock profile={profile} context="article" />
         </div>)}
-        <div data-pdf-exclude>
+        <div data-print-exclude>
           <ArticleEndcap
             categoryHref={page.categoryHref}
             categoryTitle={page.category?.title}
@@ -163,7 +162,7 @@ const page = await articlePageViewModel({
         {page.tagsVisible && <div
           class="border-border border-t pt-6"
           data-article-tags-placement
-          data-pdf-exclude
+          data-print-exclude
         >
           <ArticleTags tags={article.data.tags} />
         </div>}

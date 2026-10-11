@@ -9,7 +9,7 @@ tags:
 ---
 
 Articles are the main publishable content type. They appear in article indexes,
-categories, tags, feeds, search, collections, related content, and PDFs unless
+categories, tags, feeds, search, collections, and related content unless
 frontmatter or site defaults say otherwise.
 
 ## File Location

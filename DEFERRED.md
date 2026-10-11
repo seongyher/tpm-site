@@ -3,20 +3,6 @@
 The milestone blocks below were copied from the previous `CHECKLIST.md` so
 deferred work keeps its exact original wording and checkbox state.
 
-## Remove Generated Article PDFs
-
-Reason deferred: keep the dependency/security PR focused on unblocking the
-article release. PDF generation, metadata, configuration, and the download
-button remain enabled in that change.
-
-Resume trigger: after the dependency refresh and pending article release,
-implement [GitHub issue #169](https://github.com/seongyher/tpm-site/issues/169)
-as a separate change. Move this item into `CHECKLIST.md` before implementation.
-
-- [ ] Remove generated article PDFs and the download action, then update their
-      config, dependency, documentation, and test contracts while preserving
-      HTML citation metadata, article text, external citations, and printing.
-
 ## Native Dependabot Bun Lockfile Updates
 
 Reason deferred: as of September 7, 2026, Dependabot's Bun updater bundles Bun
@@ -134,34 +120,6 @@ visible structure.
       source lists.
 - [ ] Add parser, rendering, bibliography aggregation, and regression tests
       before migrating article appendices into this model.
-
-## Article PDF Document Pipeline Replacement
-
-Reason deferred: the current Chrome/Playwright PDF generator is acceptable as a
-temporary release path, but it is not the ideal long-term foundation for clean,
-scholarly article PDFs. Replacing it needs a separate design and experiment
-phase so PDF generation can become document-first instead of browser-print
-first.
-
-Resume trigger: resume after the current release path is stable, or sooner if
-PDF brittleness, CI browser provisioning, PDF size, image handling, or Scholar
-compatibility becomes a repeated blocker.
-
-- [ ] Design a normalized `ArticleDocument` model that can feed PDF output
-      without depending on rendered website HTML as the source of truth.
-- [ ] Evaluate Pandoc/LaTeX, Typst, and any other credible document-first
-      renderer against representative articles: plain Markdown, citation-heavy,
-      image-heavy, and MDX with fallback components.
-- [ ] Define how article images, footnotes, bibliography, table of contents,
-      canonical URLs, Scholar metadata, and unsupported interactive media map
-      into the PDF document model.
-- [ ] Design an MDX fallback contract so article-specific components can render
-      clean PDF-safe output or explicitly opt out.
-- [ ] Compare generated PDF quality, file size, CI complexity, dependency
-      footprint, and maintenance cost against the current Playwright pipeline.
-- [ ] Replace the Chrome-based generator only after the new pipeline passes the
-      release gates and produces better scholarly PDFs for the representative
-      article set.
 
 ## AI-Friendly Content Surfaces
 
