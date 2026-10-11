@@ -1,13 +1,13 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
 import type { Image, Nodes, Paragraph, Root } from "mdast";
 import { remark } from "remark";
 
 import { isArticleMdxPdfCompatibleImport } from "../../src/lib/article-pdf-compatibility";
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import { tagDiagnostics } from "../../src/lib/tags";
+import { parseContentSource } from "./parse-content-source";
 
 /** Inputs needed to verify source content conventions. */
 export interface ContentVerificationOptions {
@@ -141,7 +141,7 @@ function isDraft(data: Record<string, unknown>) {
 }
 
 function frontmatterData(text: string): Record<string, unknown> {
-  const rawData: unknown = matter(text).data;
+  const rawData: unknown = parseContentSource(text).data;
 
   return isRecord(rawData) ? rawData : {};
 }
@@ -341,7 +341,7 @@ function validateArticleImageParagraphs(
   text: string,
   issues: string[],
 ): void {
-  const parsed = matter(text);
+  const parsed = parseContentSource(text);
   const tree = remark().parse(parsed.content);
   const lineOffset = contentLineOffset(text, parsed.content);
   const articlePath = toPosix(path.relative(rootDir, file));

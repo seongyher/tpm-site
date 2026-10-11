@@ -95,7 +95,7 @@ export function globToRegExp(pattern: string): RegExp {
     }
   }
 
-  // eslint-disable-next-line security/detect-non-literal-regexp -- Glob input is escaped before constructing the matcher.
+  // Glob input is escaped before constructing the matcher.
   return new RegExp(`${source}$`);
 }
 

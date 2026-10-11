@@ -18,38 +18,34 @@ const {
 } = Astro.props;
 ---
 
-{
-  support.enabled && (
-    <section
-      {...attrs}
-      data-support-block
-      class:list={[
-        "border-border bg-muted/40 grid w-full min-w-0 gap-4 rounded-sm border p-5",
-        className,
-      ]}
-      aria-labelledby={headingId}
+{support.enabled && <section
+  {...attrs}
+  data-support-block
+  class:list={[
+    "border-border bg-muted/40 grid w-full min-w-0 gap-4 rounded-sm border p-5",
+    className,
+  ]}
+  aria-labelledby={headingId}
+>
+  <div class="grid min-w-0 gap-1">
+    <h2
+      id={headingId}
+      class="text-foreground m-0 min-w-0 text-xl font-semibold tracking-normal break-words"
     >
-      <div class="grid min-w-0 gap-1">
-        <h2
-          id={headingId}
-          class="text-foreground m-0 min-w-0 text-xl font-semibold tracking-normal break-words"
-        >
-          {support.title}
-        </h2>
-        <p class="text-muted-foreground min-w-0 text-sm break-words">
-          {support.body}
-        </p>
-      </div>
-      <div class="flex min-w-0 flex-wrap items-center gap-3">
-        <PatreonButton
-          href={support.patreon.href}
-          aria-label={support.patreon.ariaLabel}
-        />
-        <DiscordButton
-          href={support.discord.href}
-          aria-label={support.discord.ariaLabel}
-        />
-      </div>
-    </section>
-  )
-}
+      {support.title}
+    </h2>
+    <p class="text-muted-foreground min-w-0 text-sm break-words">
+      {support.body}
+    </p>
+  </div>
+  <div class="flex min-w-0 flex-wrap items-center gap-3">
+    <PatreonButton
+      href={support.patreon.href}
+      aria-label={support.patreon.ariaLabel}
+    />
+    <DiscordButton
+      href={support.discord.href}
+      aria-label={support.discord.ariaLabel}
+    />
+  </div>
+</section>}

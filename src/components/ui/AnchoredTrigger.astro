@@ -69,43 +69,31 @@ function normalizeTrigger(props: Props): NormalizedTrigger {
 }
 ---
 
-{
-  trigger.as === "a" ? (
-    <a {...trigger.attrs} data-anchor-trigger class:list={[trigger.className]}>
-      <slot />
-    </a>
-  ) : null
-}
-{
-  trigger.as === "button" ? (
-    <button
-      {...trigger.attrs}
-      data-anchor-trigger
-      class:list={[trigger.className]}
-    >
-      <slot />
-    </button>
-  ) : null
-}
-{
-  trigger.as === "summary" ? (
-    <summary
-      {...trigger.attrs}
-      data-anchor-trigger
-      class:list={[trigger.className]}
-    >
-      <slot />
-    </summary>
-  ) : null
-}
-{
-  trigger.as === "span" ? (
-    <span
-      {...trigger.attrs}
-      data-anchor-trigger
-      class:list={[trigger.className]}
-    >
-      <slot />
-    </span>
-  ) : null
-}
+{trigger.as === "a" ? (
+  <a {...trigger.attrs} data-anchor-trigger class:list={[trigger.className]}>
+    <slot />
+  </a>
+) : null}
+{trigger.as === "button" ? (
+  <button
+    {...trigger.attrs}
+    data-anchor-trigger
+    class:list={[trigger.className]}
+  >
+    <slot />
+  </button>
+) : null}
+{trigger.as === "summary" ? (
+  <summary
+    {...trigger.attrs}
+    data-anchor-trigger
+    class:list={[trigger.className]}
+  >
+    <slot />
+  </summary>
+) : null}
+{trigger.as === "span" ? (
+  <span {...trigger.attrs} data-anchor-trigger class:list={[trigger.className]}>
+    <slot />
+  </span>
+) : null}

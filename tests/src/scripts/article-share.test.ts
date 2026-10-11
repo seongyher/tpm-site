@@ -228,12 +228,12 @@ describe("article share browser script", () => {
 });
 
 function browserDocument(document: unknown): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements the browser Document shape used by the script.
+  // Happy DOM implements the browser Document shape used by the script.
   return document as Document;
 }
 
 function browserNavigator(input: unknown): Navigator {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Tests provide the clipboard subset required by the script.
+  // Tests provide the clipboard subset required by the script.
   return input as Navigator;
 }
 

@@ -301,8 +301,8 @@ function expectedMirrorTests(file: string): string[] {
   if (file === "astro.config.ts") {
     return ["tests/config/astro.config.test.ts"];
   }
-  if (file === "eslint.config.ts") {
-    return ["tests/config/eslint.config.test.ts"];
+  if (file === ".oxlintrc.json") {
+    return ["tests/config/oxlint.test.ts"];
   }
   if (file === "knip.ts") {
     return ["tests/config/knip.test.ts"];
@@ -313,11 +313,7 @@ function expectedMirrorTests(file: string): string[] {
   if (file === "prettier.config.mjs") {
     return ["tests/config/prettier.config.test.ts"];
   }
-  if (
-    file === "eslint/tsconfig.json" ||
-    file === "scripts/tsconfig.json" ||
-    file === "tests/tsconfig.json"
-  ) {
+  if (file === "scripts/tsconfig.json" || file === "tests/tsconfig.json") {
     return ["tests/config/tooling-tsconfigs.test.ts"];
   }
   if (file === "tsconfig.json") {

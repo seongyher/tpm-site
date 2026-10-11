@@ -1,5 +1,9 @@
 version: 2
 updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
   # Native Bun updates await lockfile v2 and alias support; see DEFERRED.md.
   # Keep manifest proposals until then. Before merging each PR, regenerate
   # bun.lock with the Bun version pinned in package.json:
@@ -24,9 +28,7 @@ updates:
         patterns:
           - tailwindcss
           - "@tailwindcss/*"
-      typescript-eslint:
+      typescript:
         patterns:
           - typescript
-          - typescript-eslint
           - "@typescript/*"
-          - "@typescript-eslint/*"

@@ -33,24 +33,20 @@ const gapClasses = {
       gapClasses[gap],
     ]}
   >
-    {
-      items.map((item) => {
-        const isCurrent = currentPath.startsWith(item.href);
+    {items.map((item) => {
+      const isCurrent = currentPath.startsWith(item.href);
 
-        return (
-          <li>
-            <TextLink
-              href={item.href}
-              variant="nav"
-              tone={isCurrent ? "primary" : "muted"}
-              prefetch="hover"
-              aria-current={isCurrent ? "page" : undefined}
-            >
-              {item.label}
-            </TextLink>
-          </li>
-        );
-      })
-    }
+      return <li>
+        <TextLink
+          href={item.href}
+          variant="nav"
+          tone={isCurrent ? "primary" : "muted"}
+          prefetch="hover"
+          aria-current={isCurrent ? "page" : undefined}
+        >
+          {item.label}
+        </TextLink>
+      </li>;
+    })}
   </ul>
 </nav>

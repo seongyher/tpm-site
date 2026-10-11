@@ -1192,7 +1192,7 @@ SEO and metadata:
 - Do not accidentally expose drafts or unpublished content through article
   pages, indexes, RSS, sitemap, search, or JSON-LD.
 
-Lighthouse strategy:
+Manual Lighthouse strategy:
 
 - Aim for 100 across performance, accessibility, best practices, and SEO.
 - Treat Lighthouse as a release feedback tool, not a replacement for code
@@ -1219,13 +1219,19 @@ Use `scripts/quality/diagnostic-diff.ts` through `bun run diagnostics:diff`
 when replacing or narrowing a risky QA command. Compare diagnostic codes, files,
 severities, messages, and counts rather than trusting exit-code parity alone.
 
+Oxlint runs native correctness rules for JavaScript and TypeScript, without
+JavaScript plugins or a second typechecking engine. Astro templates and authored
+Markdown/MDX rely on the compiler, generated HTML validation, and behavioral
+tests; these do not replace all of the retired ESLint rules. Prettier owns
+formatting. Keep new QA dependencies small and justified by concrete gaps.
+
 Current baseline scripts:
 
 - `bun run dev`: start Astro dev server.
 - `bun run check:fast`: run cheap high-signal invariants for early feedback,
   including command/config contract tests.
 - `bun run check`: run content validation, Astro and tooling typechecking,
-  ESLint, asset validation, package ordering, code/config Prettier check, Knip,
+  native correctness lint, asset validation, package ordering, code/config Prettier check, Knip,
   test-accountability verification, Bun unit tests, and Astro component tests.
 - `bun run test`: run test-accountability verification, Bun unit tests, and
   Astro component tests.
@@ -1252,14 +1258,13 @@ Current baseline scripts:
 - `bun run validate:html`: validate built HTML output.
 - `bun run test:e2e`: run Playwright smoke/responsive/search tests.
 - `bun run test:a11y`: run axe accessibility review tests.
-- `bun run test:perf`: run Lighthouse CI review.
 - `bun run diagnostics:diff`: compare normalized diagnostic snapshots for QA
   scope-change reviews.
 - `bun run check:release`: run the blocking pre-release validation gate.
 - `bun run quality:release`: run the heavy pre-release gate quietly, printing
   only failures and review warnings.
 - `bun run fix`: run safe automatic fixes for code and config.
-- `bun run review:markdown`: run non-blocking Markdown/MDX style feedback.
+- `bun run format:markdown`: optionally check Markdown/MDX formatting manually.
 - `bun run review:assets`: run non-blocking duplicate/unused image review
   feedback.
 - `bun run audit:all`: run dependency audit review across all severities.
@@ -1274,8 +1279,9 @@ bun run check
 ```
 
 This keeps mechanical formatting, import ordering, and safe lint autofixes out
-of the reasoning path. Markdown/MDX style is review-only; do not block author
-publishing on prose formatting if the content is valid and builds.
+of the reasoning path. Markdown/MDX formatting is manual and optional; do not
+run it automatically in CI or quality workflows, or block author publishing on
+prose formatting if the content is valid and builds.
 
 If a check cannot be run, say so in the final handoff with the reason.
 
@@ -1440,8 +1446,9 @@ mobile navigation, theme toggle, search, no horizontal overflow, and
 representative responsive viewports. Use Playwright for full authoring flows
 once a local server and editor workflow exist.
 
-Use axe accessibility checks for representative pages. Use Lighthouse CI for
-performance, accessibility, best practices, and SEO review checks.
+Use axe accessibility checks for representative pages. Use the browser Lighthouse
+panel for optional manual performance, accessibility, best practices, and SEO
+review checks. Lighthouse CI is no longer installed.
 
 ## Planning Workflow
 

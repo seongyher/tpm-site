@@ -1,11 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
+import { parseContentSource } from "./parse-content-source";
 
 /** Options for the article-reference corpus audit. */
 export interface ArticleReferenceAuditOptions {
@@ -406,7 +406,7 @@ function addCounts<T extends ArticleReferenceAuditCounts>(
 }
 
 function markdownBody(source: string): string {
-  return matter(source).content;
+  return parseContentSource(source).content;
 }
 
 function textFromAst(node: AuditAstNode): string {

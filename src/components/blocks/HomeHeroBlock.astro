@@ -35,28 +35,20 @@ const { darkImage, headingTitle, imageAlt, lightImage, support, tagline } =
     sizes="(min-width: 80rem) 48rem, (min-width: 64rem) 64vw, calc(100vw - 2rem)"
     class="mx-auto h-auto w-full max-w-3xl object-contain"
   />
-  {
-    tagline && (
-      <p class="text-muted-foreground max-w-xl text-base leading-7">
-        {tagline}
-      </p>
-    )
-  }
-  {
-    support?.enabled === true && (
-      <div
-        class="flex w-full max-w-[17rem] min-w-0 flex-nowrap justify-center gap-3"
-        data-home-hero-cta-row
-      >
-        <PatreonButton
-          href={support.patreon.href}
-          aria-label={support.patreon.ariaLabel}
-        />
-        <DiscordButton
-          href={support.discord.href}
-          aria-label={support.discord.ariaLabel}
-        />
-      </div>
-    )
-  }
+  {tagline && <p class="text-muted-foreground max-w-xl text-base leading-7">
+    {tagline}
+  </p>}
+  {support?.enabled === true && <div
+    class="flex w-full max-w-[17rem] min-w-0 flex-nowrap justify-center gap-3"
+    data-home-hero-cta-row
+  >
+    <PatreonButton
+      href={support.patreon.href}
+      aria-label={support.patreon.ariaLabel}
+    />
+    <DiscordButton
+      href={support.discord.href}
+      aria-label={support.discord.ariaLabel}
+    />
+  </div>}
 </section>

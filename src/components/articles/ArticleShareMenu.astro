@@ -39,23 +39,20 @@ const copyText = JSON.stringify(share.copyText);
     <span aria-hidden="true">Share</span>
   </ArticleHeaderActionTrigger>
   <div class="grid min-w-0 gap-1">
-    {
-      share.actions.map((action) => (
-        <ArticleShareActionRow
-          action={action}
-          copyText={copyText}
-          statusId={statusId}
-        />
-      ))
-    }
+    {share.actions.map((action) => (
+      <ArticleShareActionRow
+        action={action}
+        copyText={copyText}
+        statusId={statusId}
+      />
+    ))}
   </div>
   <p
     id={statusId}
     class="text-muted-foreground min-w-0 px-2 text-xs empty:hidden"
     aria-live="polite"
     data-article-share-copy-status
-  >
-  </p>
+  ></p>
 </ActionPopover>
 
 <script src="../../scripts/article-share.ts"></script>

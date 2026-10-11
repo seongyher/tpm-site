@@ -87,15 +87,13 @@ const homeView = homePageRouteViewModel({
             title={homeView.featured.title}
             emptyText={homeView.featured.emptyText}
           >
-            {
-              homeView.featured.items.map((item, index) => (
-                <HomeFeaturedSlide
-                  fallbackLabel={homeView.featured.fallbackLabel}
-                  index={index}
-                  item={item}
-                />
-              ))
-            }
+            {homeView.featured.items.map((item, index) => (
+              <HomeFeaturedSlide
+                fallbackLabel={homeView.featured.fallbackLabel}
+                index={index}
+                item={item}
+              />
+            ))}
           </HomeFeaturedCarousel>
         </div>
         <div class="min-w-0 lg:col-start-2 lg:row-start-1" data-home-lead-start>
@@ -119,15 +117,13 @@ const homeView = homePageRouteViewModel({
         </div>
       </div>
     </div>
-    {
-      homeView.categories && (
-        <HomeCategoryOverviewBlock
-          items={homeView.categories.items}
-          title={homeView.categories.title}
-          emptyText={homeView.categories.emptyText}
-        />
-      )
-    }
+    {homeView.categories && (
+      <HomeCategoryOverviewBlock
+        items={homeView.categories.items}
+        title={homeView.categories.title}
+        emptyText={homeView.categories.emptyText}
+      />
+    )}
     <section
       class="grid min-w-0 gap-4"
       aria-label={homeView.recent.ariaLabel}

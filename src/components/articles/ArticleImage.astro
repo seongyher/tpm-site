@@ -37,13 +37,9 @@ const inspectLabel =
     inspectLabel={inspectLabel}
     previewSizes={presentation.previewSizes}
   />
-  {
-    caption && (
-      <figcaption class:list={[presentation.captionClass]}>
-        {caption}
-      </figcaption>
-    )
-  }
+  {caption && <figcaption class:list={[presentation.captionClass]}>
+    {caption}
+  </figcaption>}
 </figure>
 
 {presentation.isInspectable && <ArticleImageInspectorScript />}

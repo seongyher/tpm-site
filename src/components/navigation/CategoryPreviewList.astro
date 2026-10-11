@@ -13,26 +13,22 @@ const { articles, categoryHref, categoryTitle, maxItems = 3 } = Astro.props;
 const previewArticles = articles.slice(0, maxItems);
 ---
 
-{
-  previewArticles.length > 0 ? (
-    <ol class="grid gap-2" data-category-preview-list>
-      {previewArticles.map((article) => (
-        <li>
-          <TextLink href={article.href} tone="neutral" prefetch="hover">
-            {article.title}
-          </TextLink>
-          <p class="text-muted-foreground mt-1 line-clamp-2 text-xs">
-            {article.description}
-          </p>
-        </li>
-      ))}
-    </ol>
-  ) : (
-    <p class="text-muted-foreground text-sm" data-category-preview-empty>
-      No article previews are available. View all {categoryTitle} articles.
-    </p>
-  )
-}
+{previewArticles.length > 0 ? (
+  <ol class="grid gap-2" data-category-preview-list>
+    {previewArticles.map((article) => <li>
+      <TextLink href={article.href} tone="neutral" prefetch="hover">
+        {article.title}
+      </TextLink>
+      <p class="text-muted-foreground mt-1 line-clamp-2 text-xs">
+        {article.description}
+      </p>
+    </li>)}
+  </ol>
+) : (
+  <p class="text-muted-foreground text-sm" data-category-preview-empty>
+    No article previews are available. View all {categoryTitle} articles.
+  </p>
+)}
 
 <TextLink href={categoryHref} tone="primary" variant="subtle" prefetch="hover">
   View all {categoryTitle}

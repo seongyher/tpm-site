@@ -17,11 +17,9 @@ const { items, title = "Start Here" } = Astro.props;
   >
     {title}
   </h2>
-  {
-    items.length > 0 ? (
-      <ArticleList items={items} />
-    ) : (
-      <p class="text-muted-foreground">Featured articles will appear here.</p>
-    )
-  }
+  {items.length > 0 ? (
+    <ArticleList items={items} />
+  ) : (
+    <p class="text-muted-foreground">Featured articles will appear here.</p>
+  )}
 </section>

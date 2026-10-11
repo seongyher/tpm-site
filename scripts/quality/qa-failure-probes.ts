@@ -16,6 +16,17 @@ export interface QaFailureProbe {
 
 export const qaFailureProbes = [
   {
+    bugClass: "lint-correctness",
+    expectedSignal:
+      "debugger statements and unreachable duplicate branches fail native lint",
+    fixturePaths: [],
+    fixtureStrategy: "temporary-fixture",
+    id: "native-lint-correctness",
+    intendedScripts: ["lint"],
+    leakPrevention: "temporary TypeScript files under the OS temp directory",
+    testPaths: ["tests/config/oxlint.test.ts"],
+  },
+  {
     bugClass: "content",
     expectedSignal:
       "unsafe category names, duplicate slugs, unknown authors, or noncanonical tags",

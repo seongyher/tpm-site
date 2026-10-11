@@ -11,8 +11,6 @@
     ".astro/content.d.ts",
     ".astro/types.d.ts",
     "astro.config.ts",
-    "eslint/**/*.ts",
-    "eslint.config.ts",
     "knip.ts",
     "playwright.config.ts",
     "scripts/**/*.ts",

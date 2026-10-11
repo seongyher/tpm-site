@@ -44,33 +44,29 @@ const normalizedItems = items
 const shouldRender = normalizedItems.length > 0 || !hideWhenEmpty;
 ---
 
-{
-  shouldRender && (
-    <MetaTag
-      {...attrs}
-      class:list={[
-        "text-muted-foreground flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-xs",
-        className,
-      ]}
-      aria-hidden={normalizedItems.length === 0 ? "true" : undefined}
-    >
-      {normalizedItems.map((item, index) => (
-        <>
-          {index > 0 && <span aria-hidden="true">{separator}</span>}
-          {item.href ? (
-            <TextLink
-              href={item.href}
-              variant="subtle"
-              tone="muted"
-              {...item.prefetchAttrs}
-            >
-              {item.label}
-            </TextLink>
-          ) : (
-            <span>{item.label}</span>
-          )}
-        </>
-      ))}
-    </MetaTag>
-  )
-}
+{shouldRender && <MetaTag
+  {...attrs}
+  class:list={[
+    "text-muted-foreground flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-xs",
+    className,
+  ]}
+  aria-hidden={normalizedItems.length === 0 ? "true" : undefined}
+>
+  {normalizedItems.map((item, index) => (
+    <>
+      {index > 0 && <span aria-hidden="true">{separator}</span>}
+      {item.href ? (
+        <TextLink
+          href={item.href}
+          variant="subtle"
+          tone="muted"
+          {...item.prefetchAttrs}
+        >
+          {item.label}
+        </TextLink>
+      ) : (
+        <span>{item.label}</span>
+      )}
+    </>
+  ))}
+</MetaTag>}

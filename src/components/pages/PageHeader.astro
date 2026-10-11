@@ -33,11 +33,9 @@ const hasDescriptionSlot = Astro.slots.has("description");
     size={headingLevel === 1 ? "page" : "section"}
     title={title}
   />
-  {
-    hasDescriptionSlot && (
-      <p class="text-muted-foreground m-0 max-w-3xl text-lg leading-7">
-        <slot name="description" />
-      </p>
-    )
-  }
+  {hasDescriptionSlot && <p
+    class="text-muted-foreground m-0 max-w-3xl text-lg leading-7"
+  >
+    <slot name="description" />
+  </p>}
 </header>

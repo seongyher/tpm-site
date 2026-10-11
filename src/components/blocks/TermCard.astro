@@ -48,17 +48,13 @@ const alignClasses = {
   >
     {title}
   </TextLink>
-  {
-    description && (
-      <p
-        class:list={[
-          "text-muted-foreground text-sm",
-          align === "center" && "line-clamp-2",
-        ]}
-      >
-        {description}
-      </p>
-    )
-  }
+  {description && <p
+    class:list={[
+      "text-muted-foreground text-sm",
+      align === "center" && "line-clamp-2",
+    ]}
+  >
+    {description}
+  </p>}
   <p class="text-muted-foreground text-xs">{countLabel}</p>
 </Card>

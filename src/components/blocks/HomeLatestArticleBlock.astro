@@ -22,19 +22,17 @@ const { image, imageAlt, item, title = "Most Recent Post" } = Astro.props;
   >
     {title}
   </h2>
-  {
-    item ? (
-      <>
-        <Image
-          src={image}
-          alt={imageAlt}
-          layout="full-width"
-          class="block h-auto w-full rounded-sm"
-        />
-        <ArticleCard {...item} />
-      </>
-    ) : (
-      <p class="text-muted-foreground">No published articles yet.</p>
-    )
-  }
+  {item ? (
+    <>
+      <Image
+        src={image}
+        alt={imageAlt}
+        layout="full-width"
+        class="block h-auto w-full rounded-sm"
+      />
+      <ArticleCard {...item} />
+    </>
+  ) : (
+    <p class="text-muted-foreground">No published articles yet.</p>
+  )}
 </section>

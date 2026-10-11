@@ -24,29 +24,25 @@ const heading =
     : `About ${profile.displayName}`;
 ---
 
-{
-  hasUsefulContent && (
-    <section
-      class="border-border grid gap-3 border-t pt-6"
-      data-author-bio-block
-    >
-      <h2 class="text-foreground m-0 text-2xl font-bold tracking-normal">
-        {heading}
-      </h2>
-      {profile.shortBio && (
-        <p class="text-muted-foreground max-w-prose text-base leading-7">
-          {profile.shortBio}
-        </p>
-      )}
-      {hasProfileBody && (
-        <div class="prose prose-neutral dark:prose-invert max-w-none">
-          <slot />
-        </div>
-      )}
-      <AuthorSocialLinks
-        links={links}
-        label={`${profile.displayName} profile links`}
-      />
-    </section>
-  )
-}
+{hasUsefulContent && <section
+  class="border-border grid gap-3 border-t pt-6"
+  data-author-bio-block
+>
+  <h2 class="text-foreground m-0 text-2xl font-bold tracking-normal">
+    {heading}
+  </h2>
+  {profile.shortBio && <p
+    class="text-muted-foreground max-w-prose text-base leading-7"
+  >
+    {profile.shortBio}
+  </p>}
+  {hasProfileBody && <div
+    class="prose prose-neutral dark:prose-invert max-w-none"
+  >
+    <slot />
+  </div>}
+  <AuthorSocialLinks
+    links={links}
+    label={`${profile.displayName} profile links`}
+  />
+</section>}

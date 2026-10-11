@@ -51,25 +51,21 @@ const citationTextClass =
     aria-label="Citation style"
     data-article-citation-style-selector
   >
-    {
-      citation.formats.map((format, index) => {
-        const copyText = JSON.stringify(format.text);
+    {citation.formats.map((format, index) => {
+      const copyText = JSON.stringify(format.text);
 
-        return (
-          <button
-            type="button"
-            aria-pressed={index === 0 ? "true" : "false"}
-            class="bg-popover text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground inline-flex min-h-8 min-w-0 items-center justify-center px-2 py-1 text-center text-xs font-medium tracking-normal transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-0"
-            data-article-citation-format-id={format.id}
-            data-article-citation-format-label={format.label}
-            data-article-citation-format-text={copyText}
-            data-article-citation-style-button
-          >
-            {format.label}
-          </button>
-        );
-      })
-    }
+      return <button
+        type="button"
+        aria-pressed={index === 0 ? "true" : "false"}
+        class="bg-popover text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-ring aria-pressed:bg-primary aria-pressed:text-primary-foreground inline-flex min-h-8 min-w-0 items-center justify-center px-2 py-1 text-center text-xs font-medium tracking-normal transition-colors focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-0"
+        data-article-citation-format-id={format.id}
+        data-article-citation-format-label={format.label}
+        data-article-citation-format-text={copyText}
+        data-article-citation-style-button
+      >
+        {format.label}
+      </button>;
+    })}
   </div>
   <div class="grid w-full min-w-0 gap-2">
     <div class:list={[citationTextClass]} data-article-citation-text-block>
@@ -79,13 +75,9 @@ const citationTextClass =
         data-article-citation-text
         class="block max-w-full min-w-0"
       >
-        {
-          initialLines.map((line) => (
-            <span class="block max-w-full min-w-0">
-              {line.length === 0 ? "\u00A0" : line}
-            </span>
-          ))
-        }
+        {initialLines.map((line) => <span class="block max-w-full min-w-0">
+          {line.length === 0 ? "\u00A0" : line}
+        </span>)}
       </code>
       <button
         type="button"
@@ -103,8 +95,7 @@ const citationTextClass =
       class="text-muted-foreground min-w-0 text-xs empty:hidden"
       aria-live="polite"
       data-article-citation-copy-status
-    >
-    </p>
+    ></p>
   </div>
 </ActionPopover>
 

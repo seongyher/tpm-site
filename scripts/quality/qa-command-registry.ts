@@ -254,13 +254,13 @@ export const qaCommandGroups = [
     scripts: ["format", "format:code"],
   },
   {
-    ciUsage: "review",
+    ciUsage: "none",
     class: "investigation",
     domain: "formatting",
     mutation: "none",
     runtime: "medium",
-    scope: "Markdown and MDX formatting review.",
-    scripts: ["format:markdown", "review:markdown"],
+    scope: "Optional Markdown and MDX formatting check, invoked manually.",
+    scripts: ["format:markdown"],
   },
   {
     ciUsage: "blocking",
@@ -268,17 +268,8 @@ export const qaCommandGroups = [
     domain: "lint",
     mutation: "none",
     runtime: "medium",
-    scope: "Strict ESLint and package ordering checks.",
+    scope: "Native correctness linting and package ordering checks.",
     scripts: ["lint", "lint:packages"],
-  },
-  {
-    ciUsage: "review",
-    class: "focused",
-    domain: "lint",
-    mutation: "none",
-    runtime: "medium",
-    scope: "Markdown style and MDX parser/code review.",
-    scripts: ["lint:markdown", "lint:mdx"],
   },
   {
     ciUsage: "none",
@@ -394,9 +385,8 @@ export const qaCommandGroups = [
     domain: "tests",
     mutation: "generated-output",
     runtime: "slow",
-    scope:
-      "Build-backed browser, accessibility, Lighthouse, and site-instance tests.",
-    scripts: ["test:a11y", "test:e2e", "test:perf", "test:site-instance"],
+    scope: "Build-backed browser, accessibility, and site-instance tests.",
+    scripts: ["test:a11y", "test:e2e", "test:site-instance"],
   },
   {
     ciUsage: "mixed",
@@ -404,8 +394,8 @@ export const qaCommandGroups = [
     domain: "tests",
     mutation: "none",
     runtime: "medium",
-    scope: "Built-output browser, accessibility, and Lighthouse tests.",
-    scripts: ["test:a11y:built", "test:e2e:built", "test:perf:built"],
+    scope: "Built-output browser and accessibility tests.",
+    scripts: ["test:a11y:built", "test:e2e:built"],
   },
   {
     ciUsage: "none",
@@ -450,15 +440,6 @@ export const qaCiJobRegistry = [
     job: "quality",
     localScripts: ["check"],
     notes: "Main pull request quality gate.",
-    parity: "exact",
-    workflow: ".github/workflows/ci.yml",
-  },
-  {
-    blocking: false,
-    ciCommandSnippets: ["bun run review:markdown"],
-    job: "markdown-review",
-    localScripts: ["review:markdown"],
-    notes: "Review-only Markdown and MDX style signal.",
     parity: "exact",
     workflow: ".github/workflows/ci.yml",
   },
@@ -516,16 +497,6 @@ export const qaCiJobRegistry = [
     workflow: ".github/workflows/ci.yml",
   },
   {
-    blocking: false,
-    ciCommandSnippets: ["bun run test:perf:built"],
-    job: "lighthouse",
-    localScripts: ["test:perf:built"],
-    notes:
-      "Review-only Lighthouse CI scan against downloaded verified build output.",
-    parity: "exact",
-    workflow: ".github/workflows/ci.yml",
-  },
-  {
     blocking: true,
     ciCommandSnippets: ["bun run audit"],
     job: "audit",
@@ -554,7 +525,7 @@ export const qaCiJobRegistry = [
   },
   {
     blocking: true,
-    ciCommandSnippets: ["cloudflare/wrangler-action@v3", "command: deploy"],
+    ciCommandSnippets: ["cloudflare/wrangler-action@v4", "command: deploy"],
     job: "deploy-cloudflare",
     localScripts: ["deploy:cloudflare"],
     notes: "CI deploys the verified artifact through the Cloudflare action.",
@@ -563,7 +534,7 @@ export const qaCiJobRegistry = [
   },
   {
     blocking: true,
-    ciCommandSnippets: ["actions/dependency-review-action@v4"],
+    ciCommandSnippets: ["actions/dependency-review-action@v5"],
     ciOnlyReason:
       "GitHub Dependency Review depends on pull request dependency metadata.",
     job: "dependency-review",
@@ -574,7 +545,7 @@ export const qaCiJobRegistry = [
   },
   {
     blocking: true,
-    ciCommandSnippets: ["gitleaks/gitleaks-action@v2"],
+    ciCommandSnippets: ["gitleaks/gitleaks-action@v3"],
     job: "secrets",
     localScripts: ["secrets"],
     notes:

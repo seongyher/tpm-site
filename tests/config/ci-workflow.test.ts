@@ -28,6 +28,15 @@ function envExpression(name: string): string {
 }
 
 describe("CI workflow", () => {
+  test("does not automatically review Markdown formatting", async () => {
+    const workflow = await readCiWorkflow();
+
+    expect(workflow).not.toContain("markdown-review:");
+    expect(workflow).not.toContain("run review:markdown");
+    expect(workflow).not.toContain("run format:markdown");
+    expect(workflow).not.toContain("run fix:markdown");
+  });
+
   test("uses the pinned package manager version for every Bun job", async () => {
     const [workflow, manifestSource] = await Promise.all([
       readCiWorkflow(),
@@ -68,22 +77,21 @@ describe("CI workflow", () => {
     expect(build).toContain("bun run build:cloudflare");
     expect(build).toContain("bun run verify");
     expect(build).toContain("bun run validate:html");
-    expect(build).toContain("actions/upload-artifact@v4");
+    expect(build).toContain("actions/upload-artifact@v7");
     expect(build).toContain("name: verified-dist");
     expect(build).toContain("path: dist");
     expect(build).toContain("retention-days: 2");
   });
 
-  test("runs browser, accessibility, and Lighthouse checks against the verified artifact", async () => {
+  test("runs browser and accessibility checks against the verified artifact", async () => {
     const workflow = await readCiWorkflow();
     const browser = jobBlock(workflow, "browser");
     const accessibility = jobBlock(workflow, "accessibility");
-    const lighthouse = jobBlock(workflow, "lighthouse");
 
-    for (const job of [browser, accessibility, lighthouse]) {
+    for (const job of [browser, accessibility]) {
       expect(job).toContain("needs:");
       expect(job).toContain("- build");
-      expect(job).toContain("actions/download-artifact@v4");
+      expect(job).toContain("actions/download-artifact@v8");
       expect(job).toContain("name: verified-dist");
       expect(job).toContain("path: dist");
       expect(job).not.toContain("bun run build");
@@ -91,7 +99,6 @@ describe("CI workflow", () => {
 
     expect(browser).toContain("bun run test:e2e:built");
     expect(accessibility).toContain("bun run test:a11y:built");
-    expect(lighthouse).toContain("bun run test:perf:built");
   });
 
   test("does not keep a GitHub Pages deploy job after Cloudflare cutover", async () => {
@@ -111,15 +118,15 @@ describe("CI workflow", () => {
     const workflow = await readCiWorkflow();
     const deploy = jobBlock(workflow, "deploy-cloudflare");
 
-    expect(workflow).toContain('NODE_VERSION: "22.22.3"');
+    expect(workflow).toContain('NODE_VERSION: "22.23.3"');
     expect(deploy).toContain("needs:");
     expect(deploy).toContain("- build");
-    expect(deploy).toContain("actions/setup-node@v4");
+    expect(deploy).toContain("actions/setup-node@v7");
     expect(deploy).toContain(`node-version: ${envExpression("NODE_VERSION")}`);
-    expect(deploy).toContain("actions/download-artifact@v4");
+    expect(deploy).toContain("actions/download-artifact@v8");
     expect(deploy).toContain("name: verified-dist");
     expect(deploy).toContain("path: dist");
-    expect(deploy).toContain("cloudflare/wrangler-action@v3");
+    expect(deploy).toContain("cloudflare/wrangler-action@v4");
     expect(deploy).toContain(
       `accountId: ${secretExpression("CLOUDFLARE_ACCOUNT_ID")}`,
     );

@@ -19,27 +19,20 @@ const hasStructuredAuthors = authors.length > 0;
 const separatorClass = mode === "stacked" ? "hidden" : "text-muted-foreground";
 ---
 
-{
-  hasStructuredAuthors ? (
-    <span
-      class:list={[
-        mode === "stacked" ? "grid gap-1" : "inline-flex flex-wrap gap-x-1",
-      ]}
-      data-author-byline
-    >
-      {authors.map((author, index) => (
-        <Fragment>
-          <AuthorLink
-            author={author}
-            profileLinksEnabled={profileLinksEnabled}
-          />
-          {index < authors.length - 1 && (
-            <span class:list={separatorClass}>&amp;</span>
-          )}
-        </Fragment>
-      ))}
-    </span>
-  ) : (
-    legacyAuthor && <span data-author-byline>{legacyAuthor}</span>
-  )
-}
+{hasStructuredAuthors ? (
+  <span
+    class:list={[
+      mode === "stacked" ? "grid gap-1" : "inline-flex flex-wrap gap-x-1",
+    ]}
+    data-author-byline
+  >
+    {authors.map((author, index) => <Fragment>
+      <AuthorLink author={author} profileLinksEnabled={profileLinksEnabled} />
+      {index < authors.length - 1 && <span class:list={separatorClass}
+        >&amp;</span
+      >}
+    </Fragment>)}
+  </span>
+) : (
+  legacyAuthor && <span data-author-byline>{legacyAuthor}</span>
+)}

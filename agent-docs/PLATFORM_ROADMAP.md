@@ -547,8 +547,8 @@ Verification:
   failures are still caught.
 - Before/after runtime and diagnostic diffs are recorded for scoped or split
   checks.
-- `bun --silent run review:markdown` and the final selected release command pass
-  after cleanup.
+- The final selected release command passes after cleanup. Markdown formatting
+  remains an optional manual command, outside CI and quality workflows.
 
 ## Phase 1: Source Contracts
 
@@ -1089,7 +1089,7 @@ Work:
 
 Verification:
 
-- Markdown review, broken-link checks, generated-doc drift checks, docs-site
+- Content validation, broken-link checks, generated-doc drift checks, docs-site
   build, and changed-domain doc accountability.
 
 ### 16. Test Matrix And Correctness Strategy

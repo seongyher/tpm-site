@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, test } from "bun:test";
 
 const toolingTsconfigPaths = [
-  "eslint/tsconfig.json",
   "scripts/tsconfig.json",
   "tests/tsconfig.json",
 ] as const;

@@ -189,7 +189,7 @@ function requiredButton(element: Element | null): HTMLButtonElement {
     throw new Error("Expected rail fixture button.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- The fixture creates a button element inside Happy DOM.
+  // The fixture creates a button element inside Happy DOM.
   return element as HTMLButtonElement;
 }
 
@@ -198,16 +198,16 @@ function requiredHtmlElement(element: Element | null): HTMLElement {
     throw new Error("Expected rail fixture element.");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser elements at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser elements at runtime but exposes package-local DOM types.
   return element as HTMLElement;
 }
 
 function browserDocument(document: unknown): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser documents at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser documents at runtime but exposes package-local DOM types.
   return document as Document;
 }
 
 function domEvent(event: unknown): Event {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM events are runtime-compatible with DOM dispatch in these tests.
+  // Happy DOM events are runtime-compatible with DOM dispatch in these tests.
   return event as Event;
 }

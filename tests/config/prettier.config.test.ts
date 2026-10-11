@@ -22,6 +22,7 @@ describe("Prettier config", () => {
       "prettier-plugin-tailwindcss",
     ]);
     expect(config.singleQuote).toBe(false);
+    expect(config).toMatchObject({ astroCompressHTML: "html" });
     expect(config.trailingComma).toBe("all");
   });
 

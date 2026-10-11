@@ -21,19 +21,15 @@ const stickyClasses =
     : "";
 ---
 
-{
-  Astro.slots.has("default") && (
-    <aside
-      {...attrs}
-      aria-label={label}
-      data-content-rail={position}
-      class:list={[
-        "text-muted-foreground min-w-0 text-sm",
-        stickyClasses,
-        className,
-      ]}
-    >
-      <slot />
-    </aside>
-  )
-}
+{Astro.slots.has("default") && <aside
+  {...attrs}
+  aria-label={label}
+  data-content-rail={position}
+  class:list={[
+    "text-muted-foreground min-w-0 text-sm",
+    stickyClasses,
+    className,
+  ]}
+>
+  <slot />
+</aside>}

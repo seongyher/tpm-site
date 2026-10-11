@@ -1,14 +1,13 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
-
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import {
   type ArticleReferenceAuditArticle,
   auditArticleReferences,
 } from "./audit-article-references";
 import { countConvertibleHtmlLinks } from "./migrate-mechanical-article-references";
+import { parseContentSource } from "./parse-content-source";
 
 /** Options for generating the article-reference migration catalog. */
 export interface ArticleReferenceCatalogOptions {
@@ -137,7 +136,7 @@ export async function articleReferenceCatalog({
       ): Promise<readonly [string, ArticleReferenceCatalogDetails]> => [
         toPosix(path.relative(rootDir, file)),
         articleReferenceCatalogDetails(
-          matter(await readFile(file, "utf8")).content,
+          parseContentSource(await readFile(file, "utf8")).content,
         ),
       ],
     ),

@@ -29,8 +29,9 @@ const categoryItems = articleListItemsFromArchive(
 
 <BaseLayout
   title={titleWithSite(category.title)}
-  description={category.description ??
-    `Articles filed under ${category.title}.`}
+  description={
+    category.description ?? `Articles filed under ${category.title}.`
+  }
   canonicalPath={categoryUrl(category.slug)}
   kind="category-detail"
   structuredData={[
@@ -50,8 +51,9 @@ const categoryItems = articleListItemsFromArchive(
     <ArchiveListBlock
       eyebrow="Category"
       title={category.title}
-      description={category.description ??
-        `Articles filed under ${category.title}.`}
+      description={
+        category.description ?? `Articles filed under ${category.title}.`
+      }
       items={categoryItems}
     />
   </BrowsingBody>

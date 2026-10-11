@@ -18,36 +18,32 @@ const { profiles } = Astro.props;
     headingId="authors-heading"
     title="Authors"
   />
-  {
-    profiles.length > 0 ? (
-      <ol class="grid gap-4 sm:grid-cols-2">
-        {profiles.map((profile) => (
-          <li>
-            <Card class="grid h-full gap-2">
-              <h2 class="text-foreground m-0 text-xl font-semibold tracking-normal">
-                <TextLink
-                  href={profile.href}
-                  variant="subtle"
-                  tone="neutral"
-                  prefetch="hover"
-                >
-                  {profile.displayName}
-                </TextLink>
-              </h2>
-              <p class="text-muted-foreground text-sm">
-                {profile.articles.length === 1
-                  ? "1 article"
-                  : `${profile.articles.length} articles`}
-              </p>
-              {profile.shortBio && (
-                <p class="text-muted-foreground text-sm">{profile.shortBio}</p>
-              )}
-            </Card>
-          </li>
-        ))}
-      </ol>
-    ) : (
-      <p class="text-muted-foreground">No author profiles are available yet.</p>
-    )
-  }
+  {profiles.length > 0 ? (
+    <ol class="grid gap-4 sm:grid-cols-2">
+      {profiles.map((profile) => <li>
+        <Card class="grid h-full gap-2">
+          <h2 class="text-foreground m-0 text-xl font-semibold tracking-normal">
+            <TextLink
+              href={profile.href}
+              variant="subtle"
+              tone="neutral"
+              prefetch="hover"
+            >
+              {profile.displayName}
+            </TextLink>
+          </h2>
+          <p class="text-muted-foreground text-sm">
+            {profile.articles.length === 1
+              ? "1 article"
+              : `${profile.articles.length} articles`}
+          </p>
+          {profile.shortBio && <p class="text-muted-foreground text-sm">
+            {profile.shortBio}
+          </p>}
+        </Card>
+      </li>)}
+    </ol>
+  ) : (
+    <p class="text-muted-foreground">No author profiles are available yet.</p>
+  )}
 </section>

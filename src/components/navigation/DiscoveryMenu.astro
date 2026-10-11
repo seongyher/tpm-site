@@ -11,27 +11,21 @@ interface Props {
 const { currentPath = "", items, label = "Category discovery" } = Astro.props;
 ---
 
-{
-  items.length > 0 && (
-    <nav
-      aria-label={label}
-      class="hidden h-full w-full min-w-0 items-center justify-center overflow-hidden md:flex"
-      data-discovery-menu
-    >
-      <ul
-        class="flex h-full w-max flex-nowrap items-center justify-center gap-x-1.5 overflow-visible lg:gap-x-2"
-        data-discovery-menu-list
-      >
-        {items.map((item) => (
-          <li class="shrink-0">
-            <CategoryDropdown
-              category={item}
-              currentPath={currentPath}
-              previewId={`category-discovery-${item.slug}`}
-            />
-          </li>
-        ))}
-      </ul>
-    </nav>
-  )
-}
+{items.length > 0 && <nav
+  aria-label={label}
+  class="hidden h-full w-full min-w-0 items-center justify-center overflow-hidden md:flex"
+  data-discovery-menu
+>
+  <ul
+    class="flex h-full w-max flex-nowrap items-center justify-center gap-x-1.5 overflow-visible lg:gap-x-2"
+    data-discovery-menu-list
+  >
+    {items.map((item) => <li class="shrink-0">
+      <CategoryDropdown
+        category={item}
+        currentPath={currentPath}
+        previewId={`category-discovery-${item.slug}`}
+      />
+    </li>)}
+  </ul>
+</nav>}

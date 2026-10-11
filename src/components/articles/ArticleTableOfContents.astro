@@ -69,29 +69,23 @@ const headingsWithSectionLabels = headings.reduce<{
 ).items;
 ---
 
-{
-  shouldRender && (
-    <nav
-      aria-label={label}
-      data-article-toc
-      data-article-toc-placement={placement}
-      class:list={[placementClasses[placement]]}
-    >
-      <details class:list={[detailsClasses[placement]]} open={initiallyOpen}>
-        <TableOfContentsToggle placement={placement} />
-        <ol class:list={[listClasses[placement]]} data-article-toc-list>
-          {headingsWithSectionLabels.map(({ heading, sectionLabel }) => (
-            <li>
-              <TableOfContentsItem
-                heading={heading}
-                placement={placement}
-                sectionLabel={sectionLabel}
-              />
-            </li>
-          ))}
-        </ol>
-      </details>
-      <script src="../../scripts/article-table-of-contents.ts" />
-    </nav>
-  )
-}
+{shouldRender && <nav
+  aria-label={label}
+  data-article-toc
+  data-article-toc-placement={placement}
+  class:list={[placementClasses[placement]]}
+>
+  <details class:list={[detailsClasses[placement]]} open={initiallyOpen}>
+    <TableOfContentsToggle placement={placement} />
+    <ol class:list={[listClasses[placement]]} data-article-toc-list>
+      {headingsWithSectionLabels.map(({ heading, sectionLabel }) => <li>
+        <TableOfContentsItem
+          heading={heading}
+          placement={placement}
+          sectionLabel={sectionLabel}
+        />
+      </li>)}
+    </ol>
+  </details>
+  <script src="../../scripts/article-table-of-contents.ts" />
+</nav>}

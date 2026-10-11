@@ -53,27 +53,21 @@ const mediaClasses = [
         {item.title}
       </TextLink>
     </h2>
-    {
-      item.description && (
-        <p class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6">
-          {item.description}
-        </p>
-      )
-    }
-    {
-      item.note && (
-        <p class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6">
-          {item.note}
-        </p>
-      )
-    }
-    {
-      hasBody && (
-        <div class="text-muted-foreground line-clamp-3 text-sm leading-6">
-          <slot />
-        </div>
-      )
-    }
+    {item.description && <p
+      class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6"
+    >
+      {item.description}
+    </p>}
+    {item.note && <p
+      class="text-muted-foreground m-0 line-clamp-3 text-sm leading-6"
+    >
+      {item.note}
+    </p>}
+    {hasBody && <div
+      class="text-muted-foreground line-clamp-3 text-sm leading-6"
+    >
+      <slot />
+    </div>}
   </div>
   <PublishableMediaFrame
     href={item.href}

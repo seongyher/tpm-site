@@ -10,17 +10,10 @@ interface Props {
 const { author, profileLinksEnabled = true } = Astro.props;
 ---
 
-{
-  profileLinksEnabled ? (
-    <TextLink
-      href={author.href}
-      variant="subtle"
-      tone="primary"
-      prefetch="hover"
-    >
-      {author.displayName}
-    </TextLink>
-  ) : (
-    <span>{author.displayName}</span>
-  )
-}
+{profileLinksEnabled ? (
+  <TextLink href={author.href} variant="subtle" tone="primary" prefetch="hover">
+    {author.displayName}
+  </TextLink>
+) : (
+  <span>{author.displayName}</span>
+)}

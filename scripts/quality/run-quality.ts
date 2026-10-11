@@ -58,11 +58,6 @@ const localCommands: QualityCommand[] = [
     label: "Asset review",
   },
   {
-    args: ["--silent", "run", "review:markdown"],
-    blocking: false,
-    label: "Markdown review",
-  },
-  {
     args: ["--silent", "run", "coverage"],
     blocking: false,
     label: "Coverage review",
@@ -81,19 +76,9 @@ const releaseCommands: QualityCommand[] = [
     label: "Asset review",
   },
   {
-    args: ["--silent", "run", "review:markdown"],
-    blocking: false,
-    label: "Markdown review",
-  },
-  {
     args: ["--silent", "run", "test:a11y:built"],
     blocking: false,
     label: "Accessibility review",
-  },
-  {
-    args: ["--silent", "run", "test:perf:built"],
-    blocking: false,
-    label: "Lighthouse review",
   },
   {
     args: ["--silent", "run", "audit:all"],
@@ -379,10 +364,10 @@ blocking failure because later checks often depend on earlier generated output.
 After all blocking checks pass, trailing review-only commands run in parallel.
 
 Default mode runs the local PR-quality path: check, build, verify,
-validate:html, review:assets, review:markdown, and coverage review.
+validate:html, review:assets, and coverage review.
 
-Use --release to run check:release plus non-blocking Markdown, asset,
-accessibility, Lighthouse, all-severity audit, and coverage review checks.`;
+Use --release to run check:release plus non-blocking asset,
+accessibility, all-severity audit, and coverage review checks.`;
 }
 
 // Coverage note: this wrapper only wires the exported CLI workflow to process

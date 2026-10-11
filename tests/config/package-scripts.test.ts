@@ -75,6 +75,19 @@ async function readPackageJson(): Promise<PackageJson> {
 }
 
 describe("package scripts", () => {
+  test("retains manual Markdown formatting without an automatic review alias", async () => {
+    const { scripts } = await readPackageJson();
+
+    expect(scripts["format:markdown"]).toContain(
+      'prettier --check "**/*.{md,mdx}"',
+    );
+    expect(scripts["fix:markdown"]).toBe(
+      "bun --silent run format:markdown:write",
+    );
+    expect(scripts["format:markdown:write"]).toContain("prettier --write");
+    expect(scripts["review:markdown"]).toBeUndefined();
+  });
+
   test("point script entrypoints at organized script directories", async () => {
     const packageJson = await readPackageJson();
     const scripts = new Map(Object.entries(packageJson.scripts));
@@ -91,16 +104,12 @@ describe("package scripts", () => {
 
     expect(scripts.get("test:e2e:built")).toBe("playwright test tests/e2e");
     expect(scripts.get("test:a11y:built")).toBe("playwright test tests/a11y");
-    expect(scripts.get("test:perf:built")).toBe("lhci autorun");
 
     expect(scripts.get("test:e2e")).toBe(
       "bun --silent run build && bun --silent run test:e2e:built",
     );
     expect(scripts.get("test:a11y")).toBe(
       "bun --silent run build && bun --silent run test:a11y:built",
-    );
-    expect(scripts.get("test:perf")).toBe(
-      "bun --silent run build && bun --silent run test:perf:built",
     );
   });
 

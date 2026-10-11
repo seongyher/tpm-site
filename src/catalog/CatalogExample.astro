@@ -46,20 +46,16 @@ const lifecycleLabel = componentCatalogLifecycleLabels[lifecycle];
         {lifecycleLabel}
       </span>
     </div>
-    {
-      description ? (
-        <p class="text-muted-foreground min-w-0 text-sm break-words">
-          {description}
-        </p>
-      ) : null
-    }
-    {
-      componentPath ? (
-        <code class="text-muted-foreground block min-w-0 text-xs break-all">
-          {componentPath}
-        </code>
-      ) : null
-    }
+    {description ? (
+      <p class="text-muted-foreground min-w-0 text-sm break-words">
+        {description}
+      </p>
+    ) : null}
+    {componentPath ? (
+      <code class="text-muted-foreground block min-w-0 text-xs break-all">
+        {componentPath}
+      </code>
+    ) : null}
   </header>
   <div
     class="border-border bg-background min-w-0 overflow-x-auto rounded-sm border p-4"

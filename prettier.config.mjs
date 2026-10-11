@@ -1,5 +1,6 @@
-/** @type {import("prettier").Config} */
+/** @type {import("prettier").Config & import("prettier-plugin-astro").PluginOptions} */
 const config = {
+  astroCompressHTML: "html",
   endOfLine: "lf",
   overrides: [
     {

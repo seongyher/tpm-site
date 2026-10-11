@@ -1,10 +1,9 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import matter from "gray-matter";
-
 import { resolveSiteInstancePaths } from "../../src/lib/site-instance";
 import { normalizeTagList } from "../../src/lib/tags";
+import { parseContentSource } from "./parse-content-source";
 
 /** Options for normalizing article tags in source frontmatter. */
 export interface NormalizeArticleTagsOptions {
@@ -138,7 +137,7 @@ function normalizeArticleFileTags(
   file: string,
   text: string,
 ): { changed: boolean; issues: string[]; text: string } {
-  const rawData: unknown = matter(text).data;
+  const rawData: unknown = parseContentSource(text).data;
   const data = isRecord(rawData) ? rawData : {};
   const tags = data["tags"];
   const articlePath = toPosix(path.relative(rootDir, file));

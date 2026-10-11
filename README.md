@@ -6,7 +6,7 @@ Astro static site for The Philosopher's Meme.
 
 ## Requirements
 
-- Bun `1.4.2` (the exact version in `package.json`)
+- Bun `1.4.3` (the exact version in `package.json`)
 - Node.js `^22.22.3 || ^24.16.0 || >=26.3.0` (`.node-version` pins CI's Node 22 release)
 
 Install dependencies:
@@ -66,10 +66,11 @@ Run safe automatic fixes before checking code and config:
 bun run fix
 ```
 
-Markdown and MDX style checks are review-only, not release blockers:
+Markdown and MDX formatting is optional and runs only when requested. It is
+excluded from CI and the local quality workflows:
 
 ```sh
-bun run review:markdown
+bun run format:markdown
 bun run fix:markdown
 ```
 
@@ -116,8 +117,8 @@ bun run quality:release
 `check:release` includes the blocking release gates: normal checks, production
 build verification, browser smoke/responsive/search tests, high-severity
 dependency audit, and secrets checks. `quality:release` also runs the
-non-blocking review signals: Markdown style, asset cleanup, accessibility,
-Lighthouse, coverage, and all-severity dependency audit. The secrets check
+non-blocking review signals: Markdown formatting, asset cleanup, accessibility,
+coverage, and all-severity dependency audit. The secrets check
 expects the `gitleaks` binary to be available locally.
 
 ## Content Model
@@ -342,8 +343,8 @@ configured in `wrangler.toml`; `bun run build:release` creates the deployable
 `.github/workflows/ci.yml` deploys on pushes to `main` after the blocking
 quality, build, browser, catalog, and audit jobs pass.
 
-GitHub review also runs non-blocking Markdown, asset cleanup, accessibility,
-Lighthouse, coverage, and all-severity audit jobs. Treat those as review
+GitHub review also runs non-blocking Markdown formatting, asset cleanup,
+accessibility, coverage, and all-severity audit jobs. Treat those as review
 signals rather than publish blockers.
 
 Manual deployment hosts should:

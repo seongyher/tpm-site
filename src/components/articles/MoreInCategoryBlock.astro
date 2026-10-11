@@ -18,21 +18,15 @@ const {
 } = Astro.props;
 ---
 
-{
-  items.length > 0 && (
-    <section
-      class="grid w-full max-w-full min-w-0 gap-4"
-      aria-labelledby={headingId}
-    >
-      <SectionHeader
-        headingId={headingId}
-        title={`More${categoryTitle ? ` in ${categoryTitle}` : ""}`}
-        actionHref={categoryHref && categoryTitle ? categoryHref : undefined}
-        actionLabel={
-          categoryHref && categoryTitle ? "View category" : undefined
-        }
-      />
-      <ArticleList items={items} />
-    </section>
-  )
-}
+{items.length > 0 && <section
+  class="grid w-full max-w-full min-w-0 gap-4"
+  aria-labelledby={headingId}
+>
+  <SectionHeader
+    headingId={headingId}
+    title={`More${categoryTitle ? ` in ${categoryTitle}` : ""}`}
+    actionHref={categoryHref && categoryTitle ? categoryHref : undefined}
+    actionLabel={categoryHref && categoryTitle ? "View category" : undefined}
+  />
+  <ArticleList items={items} />
+</section>}

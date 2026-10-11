@@ -63,39 +63,31 @@ const rootClasses =
 
 <div {...attrs} class:list={[rootClasses, className]}>
   <div class="grid min-w-0 gap-1">
-    {
-      eyebrow && (
-        <p class="text-primary m-0 text-sm font-semibold tracking-normal uppercase">
-          {eyebrow}
-        </p>
-      )
-    }
+    {eyebrow && <p
+      class="text-primary m-0 text-sm font-semibold tracking-normal uppercase"
+    >
+      {eyebrow}
+    </p>}
     <HeadingTag id={headingId} class:list={[headingClasses[size]]}>
       {title}
     </HeadingTag>
-    {
-      description && (
-        <p class:list={[descriptionClasses[size]]}>{description}</p>
-      )
-    }
+    {description && <p class:list={[descriptionClasses[size]]}>
+      {description}
+    </p>}
   </div>
-  {
-    hasAction && (
-      <div class="shrink-0">
-        {hasActionSlot ? (
-          <slot name="action" />
-        ) : (
-          <TextLink
-            href={actionHref as string}
-            variant="subtle"
-            tone="primary"
-            prefetch={prefetch}
-            aria-label={actionAriaLabel}
-          >
-            {actionLabel}
-          </TextLink>
-        )}
-      </div>
-    )
-  }
+  {hasAction && <div class="shrink-0">
+    {hasActionSlot ? (
+      <slot name="action" />
+    ) : (
+      <TextLink
+        href={actionHref as string}
+        variant="subtle"
+        tone="primary"
+        prefetch={prefetch}
+        aria-label={actionAriaLabel}
+      >
+        {actionLabel}
+      </TextLink>
+    )}
+  </div>}
 </div>

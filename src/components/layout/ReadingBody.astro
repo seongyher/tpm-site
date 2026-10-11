@@ -25,13 +25,9 @@ const hasToc = Astro.slots.has("toc");
   ]}
 >
   <MarginSidebarLayout leftVisibility={hasToc ? "auto" : "never"}>
-    {
-      hasToc && (
-        <Fragment slot="left">
-          <slot name="toc" />
-        </Fragment>
-      )
-    }
+    {hasToc && <Fragment slot="left">
+      <slot name="toc" />
+    </Fragment>}
     <slot />
   </MarginSidebarLayout>
 </div>

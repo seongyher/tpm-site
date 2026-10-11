@@ -208,11 +208,11 @@ function browserAnchor(element: unknown): HTMLAnchorElement | null {
     return null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser anchor elements at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser anchor elements at runtime but exposes package-local DOM types.
   return element as HTMLAnchorElement;
 }
 
 function browserDocument(document: unknown): Document {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Happy DOM implements browser documents at runtime but exposes package-local DOM types.
+  // Happy DOM implements browser documents at runtime but exposes package-local DOM types.
   return document as Document;
 }

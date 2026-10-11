@@ -39,22 +39,18 @@ const hasCurrentArticle = item.articles.some((article) => article.isCurrent);
           View all {item.title}
         </TextLink>
       </li>
-      {
-        item.articles.map((article) => (
-          <li>
-            <TextLink
-              href={article.href}
-              variant="subtle"
-              tone={article.isCurrent ? "primary" : "muted"}
-              prefetch="tap"
-              aria-current={article.isCurrent ? "page" : undefined}
-              class="line-clamp-2 text-xs"
-            >
-              {article.title}
-            </TextLink>
-          </li>
-        ))
-      }
+      {item.articles.map((article) => <li>
+        <TextLink
+          href={article.href}
+          variant="subtle"
+          tone={article.isCurrent ? "primary" : "muted"}
+          prefetch="tap"
+          aria-current={article.isCurrent ? "page" : undefined}
+          class="line-clamp-2 text-xs"
+        >
+          {article.title}
+        </TextLink>
+      </li>)}
     </ol>
   </details>
 </li>

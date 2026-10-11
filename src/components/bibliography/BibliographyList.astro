@@ -10,11 +10,7 @@ const { entries } = Astro.props;
 ---
 
 <ol class="border-border divide-border grid min-w-0 divide-y border-y">
-  {
-    entries.map((entry) => (
-      <li class="min-w-0 py-4">
-        <BibliographyEntry entry={entry} />
-      </li>
-    ))
-  }
+  {entries.map((entry) => <li class="min-w-0 py-4">
+    <BibliographyEntry entry={entry} />
+  </li>)}
 </ol>

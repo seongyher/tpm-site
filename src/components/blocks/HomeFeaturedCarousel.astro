@@ -21,24 +21,22 @@ const hasMultipleItems = itemCount > 1;
   aria-label={title}
   data-home-featured-carousel
 >
-  {
-    hasItems ? (
-      <>
-        <div
-          class="border-border grid min-h-80 min-w-0 content-start border-y py-4 lg:h-full lg:min-h-0"
-          data-home-featured-viewport
-          aria-live="off"
-        >
-          <slot />
-        </div>
-        {hasMultipleItems && (
-          <HomeFeaturedCarouselControls itemCount={itemCount} />
-        )}
-      </>
-    ) : (
-      <p class="text-muted-foreground m-0 text-sm">{emptyText}</p>
-    )
-  }
+  {hasItems ? (
+    <>
+      <div
+        class="border-border grid min-h-80 min-w-0 content-start border-y py-4 lg:h-full lg:min-h-0"
+        data-home-featured-viewport
+        aria-live="off"
+      >
+        <slot />
+      </div>
+      {hasMultipleItems && (
+        <HomeFeaturedCarouselControls itemCount={itemCount} />
+      )}
+    </>
+  ) : (
+    <p class="text-muted-foreground m-0 text-sm">{emptyText}</p>
+  )}
 </section>
 
 {hasMultipleItems && <script src="../../scripts/home-featured-carousel.ts" />}

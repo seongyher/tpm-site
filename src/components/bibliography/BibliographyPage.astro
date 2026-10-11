@@ -25,11 +25,9 @@ const entryCount = entries.length;
     </p>
   </div>
 
-  {
-    entryCount === 0 ? (
-      <BibliographyEmptyState auditHref={articlesArchiveUrl()} />
-    ) : (
-      <BibliographyList entries={entries} />
-    )
-  }
+  {entryCount === 0 ? (
+    <BibliographyEmptyState auditHref={articlesArchiveUrl()} />
+  ) : (
+    <BibliographyList entries={entries} />
+  )}
 </section>

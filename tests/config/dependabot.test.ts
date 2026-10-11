@@ -27,15 +27,7 @@ const dependencyFamilies = [
   ["astro", ["astro", "@astrojs/mdx", "@astrojs/markdown-remark"]],
   ["playwright", ["@playwright/test", "playwright-core"]],
   ["tailwind", ["tailwindcss", "@tailwindcss/vite"]],
-  [
-    "typescript-eslint",
-    [
-      "typescript",
-      "@typescript/native",
-      "typescript-eslint",
-      "@typescript-eslint/parser",
-    ],
-  ],
+  ["typescript", ["typescript", "@typescript/native"]],
 ] as const;
 
 /** Reads the dependency updater used for the root package manifest. */

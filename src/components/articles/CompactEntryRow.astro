@@ -53,17 +53,13 @@ const descriptionClamp = {
     </TextLink>
   </TitleTag>
   <EntryMetaLine items={metaItems} class="m-0" data-compact-entry-meta />
-  {
-    showDescription && item.description && (
-      <p
-        class:list={[
-          "text-muted-foreground m-0 min-w-0 text-xs leading-5",
-          descriptionClamp[descriptionLines],
-        ]}
-        data-compact-entry-description
-      >
-        {item.description}
-      </p>
-    )
-  }
+  {showDescription && item.description && <p
+    class:list={[
+      "text-muted-foreground m-0 min-w-0 text-xs leading-5",
+      descriptionClamp[descriptionLines],
+    ]}
+    data-compact-entry-description
+  >
+    {item.description}
+  </p>}
 </article>

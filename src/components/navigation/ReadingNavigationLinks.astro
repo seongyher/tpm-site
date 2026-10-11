@@ -32,31 +32,25 @@ const prefetchAttrsFor = (href: string) =>
     className,
   ]}
 >
-  {
-    showTitle && (
-      <>
-        <span class="text-foreground shrink-0 font-semibold whitespace-nowrap">
-          {title}
-        </span>
-        <span aria-hidden="true">/</span>
-      </>
-    )
-  }
+  {showTitle && (
+    <>
+      <span class="text-foreground shrink-0 font-semibold whitespace-nowrap">
+        {title}
+      </span>
+      <span aria-hidden="true">/</span>
+    </>
+  )}
   <ul class="flex min-w-0 flex-nowrap gap-x-2 overflow-hidden sm:gap-x-3">
-    {
-      links.map((link) => (
-        <li class="min-w-0 shrink">
-          <TextLink
-            href={link.href}
-            variant="subtle"
-            tone="muted"
-            class="block truncate whitespace-nowrap"
-            {...prefetchAttrsFor(link.href)}
-          >
-            {link.label}
-          </TextLink>
-        </li>
-      ))
-    }
+    {links.map((link) => <li class="min-w-0 shrink">
+      <TextLink
+        href={link.href}
+        variant="subtle"
+        tone="muted"
+        class="block truncate whitespace-nowrap"
+        {...prefetchAttrsFor(link.href)}
+      >
+        {link.label}
+      </TextLink>
+    </li>)}
   </ul>
 </nav>

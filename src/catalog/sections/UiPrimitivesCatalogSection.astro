@@ -139,25 +139,23 @@ const { anchoredPresetMatrix, catalogSupportUrl } = Astro.props;
     componentPath="src/components/ui/AnchoredRoot.astro"
   >
     <div class="grid gap-4 md:grid-cols-2">
-      {
-        anchoredPresetMatrix.map((preset) => (
-          <AnchoredRoot
-            preset={preset}
-            class="group relative inline-block justify-self-start"
-          >
-            <AnchoredTrigger
-              as="button"
-              type="button"
-              class="border-border bg-background text-foreground rounded-sm border px-3 py-2 text-sm"
-            >
-              {preset}
-            </AnchoredTrigger>
-            <AnchoredPanel class="border-border bg-popover text-popover-foreground z-30 hidden w-72 rounded-sm border p-3 text-sm shadow-md group-focus-within:block group-hover:block">
-              Preset example: <code>{preset}</code>
-            </AnchoredPanel>
-          </AnchoredRoot>
-        ))
-      }
+      {anchoredPresetMatrix.map((preset) => <AnchoredRoot
+        preset={preset}
+        class="group relative inline-block justify-self-start"
+      >
+        <AnchoredTrigger
+          as="button"
+          type="button"
+          class="border-border bg-background text-foreground rounded-sm border px-3 py-2 text-sm"
+        >
+          {preset}
+        </AnchoredTrigger>
+        <AnchoredPanel
+          class="border-border bg-popover text-popover-foreground z-30 hidden w-72 rounded-sm border p-3 text-sm shadow-md group-focus-within:block group-hover:block"
+        >
+          Preset example: <code>{preset}</code>
+        </AnchoredPanel>
+      </AnchoredRoot>)}
     </div>
   </CatalogExample>
 
@@ -203,7 +201,8 @@ const { anchoredPresetMatrix, catalogSupportUrl } = Astro.props;
     componentPath="src/components/ui/TextLink.astro"
   >
     <p>
-      Read the <TextLink href="/articles/all/">article archive</TextLink> or explore
+      Read the <TextLink href="/articles/all/">article archive</TextLink> or
+      explore
       <TextLink href="/articles/" tone="neutral">articles by category</TextLink
       >.
     </p>
