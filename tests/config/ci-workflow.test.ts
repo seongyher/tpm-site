@@ -116,10 +116,13 @@ describe("CI workflow", () => {
   });
 
   test("deploys the verified artifact to Cloudflare Workers on main", async () => {
-    const workflow = await readCiWorkflow();
+    const [workflow, nodeVersion] = await Promise.all([
+      readCiWorkflow(),
+      readFile(".node-version", "utf8"),
+    ]);
     const deploy = jobBlock(workflow, "deploy-cloudflare");
 
-    expect(workflow).toContain('NODE_VERSION: "22.23.3"');
+    expect(workflow).toContain(`NODE_VERSION: "${nodeVersion.trim()}"`);
     expect(deploy).toContain("needs:");
     expect(deploy).toContain("- build");
     expect(deploy).toContain("actions/setup-node@v7");
