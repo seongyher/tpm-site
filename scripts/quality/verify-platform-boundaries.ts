@@ -98,6 +98,7 @@ const libDomainFiles = {
     "article-references/validate.ts",
     "bibliography.ts",
     "citations/article-citation.ts",
+    "citations/citation-preview.ts",
   ],
   "routes-and-features": [
     "feature-routes.ts",

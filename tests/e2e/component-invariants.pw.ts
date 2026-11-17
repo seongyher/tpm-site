@@ -975,6 +975,11 @@ test.describe("component layout invariants", () => {
       await expect(citationText).toHaveCount(1);
       await expect(citationText).toBeVisible();
       await expect(citationText).toContainText("The Philosopher's Meme");
+      const italicTitle = citationText.locator("cite");
+      await expect(italicTitle).toHaveText(
+        "Wittgenstein's Most Beloved Quote Was Real, But It's Fake Now",
+      );
+      await expect(italicTitle).toHaveCSS("font-style", "italic");
       expectApproximatelyEqual(
         (await visibleBoundingBox(header, "article header")).height,
         headerHeightBefore,
@@ -1033,6 +1038,8 @@ test.describe("component layout invariants", () => {
 
       await expect(citationText).toBeVisible();
       await expect(chicagoNotesButton).toHaveAttribute("aria-pressed", "true");
+      await expect(italicTitle).toHaveText("The Philosopher's Meme");
+      await expect(italicTitle).toHaveCSS("font-style", "italic");
       await expect(
         citationPanel.getByRole("button", {
           name: "Copy Chicago Notes citation",
@@ -1069,6 +1076,7 @@ test.describe("component layout invariants", () => {
       await expect(citationText).toBeVisible();
       await expect(citationText).toContainText(/@online\{/u);
       await expect(bibtexButton).toHaveAttribute("aria-pressed", "true");
+      await expect(italicTitle).toHaveCount(0);
       await expect(
         citationPanel.getByRole("button", { name: "Copy BibTeX citation" }),
       ).toBeVisible();
