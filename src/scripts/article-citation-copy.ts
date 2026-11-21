@@ -1,3 +1,8 @@
+import {
+  type CitationTitleRange,
+  citationTitleParts,
+} from "../lib/citations/citation-preview";
+
 /** Browser dependencies used by the article citation copy enhancement. */
 export interface ArticleCitationCopyRuntime {
   document: Document;
@@ -72,7 +77,10 @@ function selectCitationStyle(button: HTMLButtonElement): void {
   }
 
   const label = button.dataset["articleCitationFormatLabel"] ?? "citation";
-  renderCitationText(text, citation);
+  renderCitationText(text, citation, {
+    start: Number(button.dataset["articleCitationItalicStart"]),
+    end: Number(button.dataset["articleCitationItalicEnd"]),
+  });
   text.dataset["articleCitationCopyText"] = JSON.stringify(citation);
   copyButton.setAttribute("aria-label", `Copy ${label} citation`);
   delete copyButton.dataset["articleCitationCopyState"];
@@ -93,8 +101,22 @@ function selectCitationStyle(button: HTMLButtonElement): void {
   }
 }
 
-function renderCitationText(target: HTMLElement, citation: string): void {
+function renderCitationText(
+  target: HTMLElement,
+  citation: string,
+  italicTitle: CitationTitleRange,
+): void {
   const document = target.ownerDocument;
+  const parts = citationTitleParts(citation, italicTitle);
+
+  if (parts !== undefined) {
+    const title = document.createElement("cite");
+    title.className = "italic";
+    title.textContent = parts.title;
+    target.replaceChildren(parts.before, title, parts.after);
+    return;
+  }
+
   const lines = citation.split("\n").map((line) => {
     const span = document.createElement("span");
     span.className = "block min-w-0 max-w-full";

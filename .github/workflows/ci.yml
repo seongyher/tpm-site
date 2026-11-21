@@ -12,7 +12,7 @@ concurrency:
 
 env:
   ASTRO_TELEMETRY_DISABLED: "1"
-  NODE_VERSION: "22.23.3"
+  NODE_VERSION: "22.23.4"
 
 permissions:
   contents: read

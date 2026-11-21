@@ -11,6 +11,7 @@ import {
   articleMlaCitation,
   articleRisCitation,
 } from "../../../../src/lib/citations/article-citation";
+import { citationTitleParts } from "../../../../src/lib/citations/citation-preview";
 
 const publishedAt = new Date("2022-04-06T23:58:10.000Z");
 
@@ -67,6 +68,45 @@ describe("article citation helpers", () => {
         "ER  -",
       ].join("\n"),
     );
+  });
+
+  test("marks the correct title when author, article, and publication names match", () => {
+    const title = "What is a meme? 🗞️";
+    const canonicalUrl = "https://example.com/articles/what-is-a-meme/";
+    const { formats } = articleCitationMenuViewModel({
+      articleId: "what-is-a-meme",
+      authors: [{ displayName: title, type: "organization" }],
+      canonicalUrl,
+      publishedAt,
+      siteTitle: title,
+      title,
+    });
+
+    expect(
+      Object.fromEntries(
+        formats.map(({ id, italicTitle, text }) => [
+          id,
+          citationTitleParts(text, italicTitle)?.before,
+        ]),
+      ),
+    ).toEqual({
+      apa: `${title} (2022, April 6). `,
+      mla: `${title}. "${title}." `,
+      "chicago-notes": `${title}. "${title}." `,
+      "chicago-author-date": `${title}. 2022. "${title}." `,
+      harvard: `${title} (2022) '${title}', `,
+      ieee: undefined,
+      bibtex: undefined,
+      ris: undefined,
+    });
+
+    expect(
+      formats.flatMap(({ italicTitle, text }) => {
+        const parts = citationTitleParts(text, italicTitle);
+
+        return parts === undefined ? [] : [parts.title];
+      }),
+    ).toEqual([title, title, title, title, title]);
   });
 
   test("escapes BibTeX fields and falls back to legacy bylines", () => {

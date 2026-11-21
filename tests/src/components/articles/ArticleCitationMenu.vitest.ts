@@ -14,6 +14,10 @@ describe("ArticleCitationMenu", () => {
           formats: [
             {
               id: "apa",
+              italicTitle: {
+                start: "Author. (2022). ".length,
+                end: "Author. (2022). Article Title".length,
+              },
               label: "APA",
               text: "Author. (2022). Article Title.",
             },
@@ -62,7 +66,9 @@ describe("ArticleCitationMenu", () => {
     expect(view).toContain('id="article-citation-article-title-selected"');
     expect(view).toContain("absolute top-1.5 right-1.5");
     expect(view).toContain("empty:hidden");
-    expect(view).toContain("Author. (2022). Article Title.");
+    expect(view).toContain(
+      'Author. (2022). <cite class="italic">Article Title</cite>.',
+    );
     expect(view).toContain("@online{article-title}");
     expect(view).not.toContain("<textarea");
     expect(view).not.toContain("<details");

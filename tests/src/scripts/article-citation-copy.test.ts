@@ -155,6 +155,9 @@ describe("article citation copy browser script", () => {
     const copiedText: string[] = [];
     const document = window.document;
     const bibtex = "@online{source,\n  title = {Source}\n}";
+    const mlaTitle = "A & <em>Title</em>";
+    const mlaPrefix = '"Article title." ';
+    const mla = `${mlaPrefix}${mlaTitle}, 6 Apr. 2022.`;
 
     document.body.innerHTML = `
       <div data-article-citation-menu>
@@ -165,6 +168,14 @@ describe("article citation copy browser script", () => {
           data-article-citation-format-text="&quot;Author. (2022). Article title.&quot;"
           data-article-citation-style-button
         >APA</button>
+        <button
+          type="button"
+          aria-pressed="false"
+          data-article-citation-format-label="MLA"
+          data-article-citation-italic-start="${mlaPrefix.length}"
+          data-article-citation-italic-end="${mlaPrefix.length + mlaTitle.length}"
+          data-article-citation-style-button
+        >MLA</button>
         <button
           type="button"
           aria-pressed="false"
@@ -212,15 +223,32 @@ describe("article citation copy browser script", () => {
     const copyButton = dom.querySelector<HTMLButtonElement>(
       "[data-article-citation-copy-button]",
     );
-    const bibtexStyleButton = styleButtons.at(1);
+    const mlaStyleButton = styleButtons.at(1);
+    const bibtexStyleButton = styleButtons.at(2);
 
     if (
+      mlaStyleButton === undefined ||
       bibtexStyleButton === undefined ||
       citationText === null ||
       copyButton === null
     ) {
       throw new Error("Citation menu test fixture is missing expected nodes.");
     }
+
+    mlaStyleButton.dataset["articleCitationFormatText"] = JSON.stringify(mla);
+    mlaStyleButton.dispatchEvent(
+      browserEvent(new window.MouseEvent("click", { bubbles: true })),
+    );
+
+    expect(citationText.querySelector("cite")?.textContent).toBe(mlaTitle);
+    expect(citationText.querySelector("em")).toBeNull();
+    expect(citationText.textContent).toBe(mla);
+    expect(copyButton.getAttribute("aria-label")).toBe("Copy MLA citation");
+
+    copyButton.dispatchEvent(
+      browserEvent(new window.MouseEvent("click", { bubbles: true })),
+    );
+    await settledPromises();
 
     bibtexStyleButton.dataset["articleCitationFormatText"] =
       JSON.stringify(bibtex);
@@ -230,11 +258,12 @@ describe("article citation copy browser script", () => {
 
     expect(
       styleButtons.map((button) => button.getAttribute("aria-pressed")),
-    ).toEqual(["false", "true"]);
+    ).toEqual(["false", "false", "true"]);
     expect(citationText.dataset["articleCitationCopyText"]).toBe(
       JSON.stringify(bibtex),
     );
     expect(citationText.textContent).toContain("@online{source,");
+    expect(citationText.querySelector("cite")).toBeNull();
     expect(copyButton.getAttribute("aria-label")).toBe("Copy BibTeX citation");
     expect(
       document.querySelector("[data-article-citation-copy-status]")
@@ -246,7 +275,7 @@ describe("article citation copy browser script", () => {
     );
     await settledPromises();
 
-    expect(copiedText).toEqual([bibtex]);
+    expect(copiedText).toEqual([mla, bibtex]);
   });
 });
 

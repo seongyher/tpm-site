@@ -2,7 +2,7 @@
 
 Use the exact Bun version in `package.json`. GitHub Actions reads that same
 `packageManager` field through `bun-version-file: package.json`. CI and
-`.node-version` use Node 22.23.3; the package engine range remains authoritative
+`.node-version` use Node 22.23.4; the package engine range remains authoritative
 for other supported Node releases.
 
 Dependabot temporarily uses the `npm` ecosystem for manifest update proposals.

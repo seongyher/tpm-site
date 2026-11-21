@@ -3,6 +3,7 @@ import { Copy, Quote } from "lucide-astro";
 
 import ArticleHeaderActionTrigger from "./ArticleHeaderActionTrigger.astro";
 import type { ArticleCitationMenuViewModel } from "../../lib/citations/article-citation";
+import { citationTitleParts } from "../../lib/citations/citation-preview";
 import ActionPopover from "../ui/ActionPopover.astro";
 
 interface Props {
@@ -13,6 +14,10 @@ const { citation } = Astro.props;
 const citationDomId = citation.articleId.replace(/[^\w-]/gu, "-");
 const [initialFormat] = citation.formats;
 const initialCopyText = JSON.stringify(initialFormat?.text ?? "");
+const initialTitle = citationTitleParts(
+  initialFormat?.text ?? "",
+  initialFormat?.italicTitle,
+);
 const initialLines = initialFormat?.text.split("\n") ?? [];
 const initialCopyLabel =
   initialFormat === undefined
@@ -61,6 +66,8 @@ const citationTextClass =
         data-article-citation-format-id={format.id}
         data-article-citation-format-label={format.label}
         data-article-citation-format-text={copyText}
+        data-article-citation-italic-start={format.italicTitle?.start}
+        data-article-citation-italic-end={format.italicTitle?.end}
         data-article-citation-style-button
       >
         {format.label}
@@ -69,16 +76,24 @@ const citationTextClass =
   </div>
   <div class="grid w-full min-w-0 gap-2">
     <div class:list={[citationTextClass]} data-article-citation-text-block>
-      <code
+      <div
         id={textId}
         data-article-citation-copy-text={initialCopyText}
         data-article-citation-text
         class="block max-w-full min-w-0"
       >
-        {initialLines.map((line) => <span class="block max-w-full min-w-0">
-          {line.length === 0 ? "\u00A0" : line}
-        </span>)}
-      </code>
+        {initialTitle === undefined ? (
+          initialLines.map((line) => <span class="block max-w-full min-w-0">
+            {line.length === 0 ? "\u00A0" : line}
+          </span>)
+        ) : (
+          <Fragment
+            >{initialTitle.before}<cite class="italic"
+              >{initialTitle.title}</cite
+            >{initialTitle.after}</Fragment
+          >
+        )}
+      </div>
       <button
         type="button"
         class="border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-ring data-[article-citation-copy-state=copied]:text-primary absolute top-1.5 right-1.5 inline-flex size-7 shrink-0 items-center justify-center rounded-sm border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"

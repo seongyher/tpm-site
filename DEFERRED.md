@@ -3,6 +3,16 @@
 The milestone blocks below were copied from the previous `CHECKLIST.md` so
 deferred work keeps its exact original wording and checkbox state.
 
+## Picomatch Dependency Audit
+
+Reason deferred: Bun reports [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
+against transitive Picomatch versions 2.3.2 and 4.0.7. Upstream has no patched
+release, and both dependency audits still report the finding.
+
+Resume trigger: update affected lockfile resolutions when upstream publishes a
+fix and rerun `bun run audit:all`. Rerun the audit if the registry withdraws the
+advisory.
+
 ## Native Dependabot Bun Lockfile Updates
 
 Reason deferred: as of September 7, 2026, Dependabot's Bun updater bundles Bun

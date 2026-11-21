@@ -1,4 +1,5 @@
 import { SITE_TITLE } from "../routes";
+import type { CitationTitleRange } from "./citation-preview";
 
 /** Author data needed to generate article citations. */
 interface ArticleCitationAuthor {
@@ -17,8 +18,13 @@ interface ArticleCitationInput {
   title: string;
 }
 
+interface ArticleCitationText {
+  italicTitle?: CitationTitleRange;
+  text: string;
+}
+
 /** Generated citation text for one supported format. */
-interface GeneratedArticleCitation {
+interface GeneratedArticleCitation extends ArticleCitationText {
   id:
     | "apa"
     | "bibtex"
@@ -37,7 +43,6 @@ interface GeneratedArticleCitation {
     | "IEEE"
     | "MLA"
     | "RIS";
-  text: string;
 }
 
 /** Display-ready view model consumed by ArticleCitationMenu. */
@@ -123,27 +128,27 @@ function generatedArticleCitations(
     {
       id: "apa",
       label: "APA",
-      text: articleApaCitation(input),
+      ...apaCitation(input),
     },
     {
       id: "mla",
       label: "MLA",
-      text: articleMlaCitation(input),
+      ...mlaCitation(input),
     },
     {
       id: "chicago-notes",
       label: "Chicago Notes",
-      text: articleChicagoNotesCitation(input),
+      ...chicagoNotesCitation(input),
     },
     {
       id: "chicago-author-date",
       label: "Chicago Author-Date",
-      text: articleChicagoAuthorDateCitation(input),
+      ...chicagoAuthorDateCitation(input),
     },
     {
       id: "harvard",
       label: "Harvard",
-      text: articleHarvardCitation(input),
+      ...harvardCitation(input),
     },
     {
       id: "ieee",
@@ -170,11 +175,21 @@ function generatedArticleCitations(
  * @returns APA-style citation text.
  */
 export function articleApaCitation(input: ArticleCitationInput): string {
+  return apaCitation(input).text;
+}
+
+function apaCitation(input: ArticleCitationInput): ArticleCitationText {
   const siteTitle = input.siteTitle ?? SITE_TITLE;
   const author = apaAuthor(input);
   const authorPrefix = author === undefined ? "" : `${author} `;
 
-  return `${authorPrefix}(${apaDate(input.publishedAt)}). ${sentenceTitle(input.title)} ${siteTitle}. ${input.canonicalUrl}`;
+  const titlePunctuation = sentenceTitle(input.title).slice(input.title.length);
+
+  return citationWithItalicTitle(
+    `${authorPrefix}(${apaDate(input.publishedAt)}). `,
+    input.title,
+    `${titlePunctuation} ${siteTitle}. ${input.canonicalUrl}`,
+  );
 }
 
 /**
@@ -207,12 +222,20 @@ export function articleBibtexCitation(input: ArticleCitationInput): string {
  * @returns MLA-style citation text.
  */
 export function articleMlaCitation(input: ArticleCitationInput): string {
+  return mlaCitation(input).text;
+}
+
+function mlaCitation(input: ArticleCitationInput): ArticleCitationText {
   const siteTitle = input.siteTitle ?? SITE_TITLE;
   const author = mlaAuthor(input);
   const authorPrefix = author === undefined ? "" : `${author}. `;
   const title = sentenceTitle(input.title);
 
-  return `${authorPrefix}"${title}" ${siteTitle}, ${mlaDate(input.publishedAt)}, ${input.canonicalUrl}.`;
+  return citationWithItalicTitle(
+    `${authorPrefix}"${title}" `,
+    siteTitle,
+    `, ${mlaDate(input.publishedAt)}, ${input.canonicalUrl}.`,
+  );
 }
 
 /**
@@ -224,12 +247,22 @@ export function articleMlaCitation(input: ArticleCitationInput): string {
 export function articleChicagoNotesCitation(
   input: ArticleCitationInput,
 ): string {
+  return chicagoNotesCitation(input).text;
+}
+
+function chicagoNotesCitation(
+  input: ArticleCitationInput,
+): ArticleCitationText {
   const siteTitle = input.siteTitle ?? SITE_TITLE;
   const author = chicagoAuthor(input);
   const authorPrefix = author === undefined ? "" : `${author}. `;
   const title = sentenceTitle(input.title);
 
-  return `${authorPrefix}"${title}" ${siteTitle}. ${longDate(input.publishedAt)}. ${input.canonicalUrl}.`;
+  return citationWithItalicTitle(
+    `${authorPrefix}"${title}" `,
+    siteTitle,
+    `. ${longDate(input.publishedAt)}. ${input.canonicalUrl}.`,
+  );
 }
 
 /**
@@ -241,13 +274,23 @@ export function articleChicagoNotesCitation(
 export function articleChicagoAuthorDateCitation(
   input: ArticleCitationInput,
 ): string {
+  return chicagoAuthorDateCitation(input).text;
+}
+
+function chicagoAuthorDateCitation(
+  input: ArticleCitationInput,
+): ArticleCitationText {
   const siteTitle = input.siteTitle ?? SITE_TITLE;
   const author = chicagoAuthor(input);
   const year = input.publishedAt.getUTCFullYear();
   const authorPrefix = author === undefined ? "" : `${author}. `;
   const title = sentenceTitle(input.title);
 
-  return `${authorPrefix}${year}. "${title}" ${siteTitle}. ${longDate(input.publishedAt)}. ${input.canonicalUrl}.`;
+  return citationWithItalicTitle(
+    `${authorPrefix}${year}. "${title}" `,
+    siteTitle,
+    `. ${longDate(input.publishedAt)}. ${input.canonicalUrl}.`,
+  );
 }
 
 /**
@@ -257,12 +300,20 @@ export function articleChicagoAuthorDateCitation(
  * @returns Harvard-style citation text.
  */
 export function articleHarvardCitation(input: ArticleCitationInput): string {
+  return harvardCitation(input).text;
+}
+
+function harvardCitation(input: ArticleCitationInput): ArticleCitationText {
   const siteTitle = input.siteTitle ?? SITE_TITLE;
   const author = apaAuthor(input);
   const year = input.publishedAt.getUTCFullYear();
   const authorPrefix = author === undefined ? "" : `${author} `;
 
-  return `${authorPrefix}(${year}) '${input.title}', ${siteTitle}, ${dayMonthYear(input.publishedAt)}. Available at: ${input.canonicalUrl}.`;
+  return citationWithItalicTitle(
+    `${authorPrefix}(${year}) '${input.title}', `,
+    siteTitle,
+    `, ${dayMonthYear(input.publishedAt)}. Available at: ${input.canonicalUrl}.`,
+  );
 }
 
 /**
@@ -300,6 +351,17 @@ export function articleRisCitation(input: ArticleCitationInput): string {
     `UR  - ${input.canonicalUrl}`,
     "ER  -",
   ].join("\n");
+}
+
+function citationWithItalicTitle(
+  before: string,
+  title: string,
+  after: string,
+): ArticleCitationText {
+  return {
+    italicTitle: { start: before.length, end: before.length + title.length },
+    text: before + title + after,
+  };
 }
 
 function field(name: string, value: string | undefined): string | undefined {
